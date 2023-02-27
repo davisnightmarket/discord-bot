@@ -1,5 +1,5 @@
-import { GoogleAuth } from 'google-auth-library';
-import { google } from 'googleapis';
+import { GoogleAuth } from 'npm:google-auth-library';
+import { google } from 'npm:googleapis';
 
 const auth = new GoogleAuth({
     keyFile: 'keys.json',

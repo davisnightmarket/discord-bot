@@ -1,6 +1,4 @@
-const { config } = require('dotenv');
+import { config } from 'https://deno.land/x/dotenv/mod.ts';
+import { EnvModel } from './model/mod.ts';
 
-config();
-
-export const DISCORD_TOKEN = process.env.DISCORD_TOKEN ?? '';
-export const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID ?? '';
+export default config() as EnvModel;

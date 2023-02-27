@@ -9,7 +9,9 @@
     "build": "tsc -p .",
     "watch": "tsc -w -p . & NODE_ENV=dev nodemon",
     "format": "prettier --config .prettierrc 'src/**/*.ts' --write",
-    "lint": "eslint . --ext .ts"
+    "lint": "eslint . --ext .ts",
+    "deno": "deno run --allow-env --allow-sys --allow-read  --allow-net src/main.ts",
+    "deno:test": "deno run --allow-env --allow-sys src/main.ts"
   },
   "husky": {
     "hooks": {
