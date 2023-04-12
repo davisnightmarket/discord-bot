@@ -17,9 +17,10 @@ const MsgReply = message_service_1.MessageService.createMap({
     PERSON_REQUEST_EMAIL: {
         username: ''
     },
-    PERSON_REQUEST_EMAIL_AGAIN: {
-        username: ''
-    },
+    // not sure why I made this
+    // PERSON_REQUEST_EMAIL_AGAIN: {
+    //     username: ''
+    // },
     PERSON_REQUEST_EMAIL_FAIL: {
         username: ''
     },

@@ -134,7 +134,7 @@ export const FoodCountInputEvent = async (message: Message) => {
         // we want to show them their errors, ask if they meant to do it
         return;
     }
-
+    console.log(parsedInputList);
     /* OK, loop over the food count input */
     // ? we can do two loops, one for successful input, one for unsuccessful
     for (const { lbs, org, note } of parsedInputList) {
@@ -166,7 +166,6 @@ export const FoodCountInputEvent = async (message: Message) => {
                         )
                 )) as TextChannel;
 
-                // todo: we want to use handlebars or some template engine and keep these texts in a markdown file
                 countChannel?.send(
                     MsgReply.FOODCOUNT_INSERT({
                         lbs: lbs + '',
@@ -201,10 +200,10 @@ export const FoodCountInputEvent = async (message: Message) => {
         // our success message
         const reply: MessageReplyOptions = {
             content: MsgReply.FOODCOUNT_INPUT_OK({
-                lbs: '',
-                note: '',
-                org: '',
-                date: '',
+                lbs: lbs + '',
+                note,
+                org,
+                date,
                 seconds: '' + TIME_UNTIL_UPDATE / 1000
             }),
             components: [

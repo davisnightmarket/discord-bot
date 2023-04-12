@@ -47,8 +47,24 @@ class MessageService {
         const messageMap = MessageService.loadAllMessage(Object.keys(map));
         // todo: parse with HBS
         return Object.keys(messageMap).reduce((a, b) => {
-            const d = handlebars_1.default.compile(messageMap[b]);
-            a[b] = (c) => d(Object.assign(Object.assign({}, map[b]), c));
+            // because we do not want a message compile error to break teh app
+            let d = handlebars_1.default.compile('');
+            try {
+                d = handlebars_1.default.compile(messageMap[b] || '');
+            }
+            catch (e) {
+                console.error(e);
+            }
+            a[b] = (c) => {
+                let msg = '';
+                try {
+                    msg = d(Object.assign(Object.assign({}, map[b]), c));
+                }
+                catch (e) {
+                    console.error(e);
+                }
+                return msg;
+            };
             return a;
         }, {});
     }

@@ -97,6 +97,7 @@ const FoodCountInputEvent = (message) => __awaiter(void 0, void 0, void 0, funct
         // we want to show them their errors, ask if they meant to do it
         return;
     }
+    console.log(parsedInputList);
     /* OK, loop over the food count input */
     // ? we can do two loops, one for successful input, one for unsuccessful
     for (const { lbs, org, note } of parsedInputList) {
@@ -120,7 +121,6 @@ const FoodCountInputEvent = (message) => __awaiter(void 0, void 0, void 0, funct
             });
             // we want to post to food-count, always, so folks know what's in the db
             const countChannel = (yield ((_a = message.guild) === null || _a === void 0 ? void 0 : _a.channels.cache.find((channel) => nm_service_1.NmFoodCountInputService.isFoodCountChannelName(channel.name))));
-            // todo: we want to use handlebars or some template engine and keep these texts in a markdown file
             countChannel === null || countChannel === void 0 ? void 0 : countChannel.send(MsgReply.FOODCOUNT_INSERT({
                 lbs: lbs + '',
                 note,
@@ -152,10 +152,10 @@ const FoodCountInputEvent = (message) => __awaiter(void 0, void 0, void 0, funct
         // our success message
         const reply = {
             content: MsgReply.FOODCOUNT_INPUT_OK({
-                lbs: '',
-                note: '',
-                org: '',
-                date: '',
+                lbs: lbs + '',
+                note,
+                org,
+                date,
                 seconds: '' + exports.TIME_UNTIL_UPDATE / 1000
             }),
             components: [

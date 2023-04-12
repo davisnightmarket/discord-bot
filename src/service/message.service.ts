@@ -63,8 +63,23 @@ export class MessageService {
         // todo: parse with HBS
         return Object.keys(messageMap).reduce(
             (a, b: keyof U) => {
-                const d = Handlebars.compile(messageMap[b]);
-                a[b] = (c: U[typeof b]) => d({ ...map[b], ...c });
+                // because we do not want a message compile error to break teh app
+                let d = Handlebars.compile('');
+                try {
+                    d = Handlebars.compile(messageMap[b] || '');
+                } catch (e) {
+                    console.error(e);
+                }
+
+                a[b] = (c: U[typeof b]) => {
+                    let msg = '';
+                    try {
+                        msg = d({ ...map[b], ...c });
+                    } catch (e) {
+                        console.error(e);
+                    }
+                    return msg;
+                };
                 return a;
             },
             {} as {

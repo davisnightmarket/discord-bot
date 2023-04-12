@@ -94,6 +94,11 @@ Example:
                 date = this.getDateFromNightChannelName(channelName);
                 dateStatus = 'DATE_CHANNEL';
             }
+            // here we need to adjust the date in case the person entered it past midnight
+            // because that will want the day before
+            if (dateStatus === 'DATE_TODAY' && channelStatus === 'COUNT_CHANNEL') {
+                date = this.getDateNightOf();
+            }
             //  if we DID get successful input, and we got NO errors
             if (parsedInputList.length > 0 && parsedInputErrorList.length === 0) {
                 inputStatus = 'OK';
@@ -118,6 +123,14 @@ Example:
     }
     static getDateFromNightChannelName(channelName) {
         return NmFoodCountInputService.getDateStringFromDay(NIGHT_CHANNEL_NAMES_MAP[channelName.toLowerCase()]);
+    }
+    static getDateNightOf() {
+        const a = new Date();
+        // if we are
+        if (a.getHours() < 4) {
+            a.setDate(a.getDate() - 1);
+        }
+        return service_1.ParseContentService.dateFormat(a);
     }
     static getOrgAndNodeFromString(s) {
         var _a, _b;
