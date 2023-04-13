@@ -51,11 +51,11 @@ const FoodCountResponseEvent = (interaction) => __awaiter(void 0, void 0, void 0
             });
             try {
                 yield msg.delete();
+                debug('deleted user input message!');
             }
             catch (e) {
                 console.log(e);
             }
-            debug('deleted user input message!');
         }));
         // if the bot response has not been deleted, delete it
         // (this is the cancel button)

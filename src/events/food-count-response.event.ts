@@ -50,10 +50,10 @@ export const FoodCountResponseEvent = async (interaction: Interaction) => {
             });
             try {
                 await msg.delete();
+                debug('deleted user input message!');
             } catch (e) {
                 console.log(e);
             }
-            debug('deleted user input message!');
         });
 
         // if the bot response has not been deleted, delete it
