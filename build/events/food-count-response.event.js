@@ -54,7 +54,7 @@ const FoodCountResponseEvent = (interaction) => __awaiter(void 0, void 0, void 0
                 debug('deleted user input message!');
             }
             catch (e) {
-                console.log(e);
+                console.error(e);
             }
         }));
         // if the bot response has not been deleted, delete it
@@ -69,7 +69,7 @@ const FoodCountResponseEvent = (interaction) => __awaiter(void 0, void 0, void 0
                     yield msg.delete();
                 }
                 catch (e) {
-                    console.log(e);
+                    console.error(e);
                 }
             }));
         }
@@ -85,7 +85,7 @@ const FoodCountResponseEvent = (interaction) => __awaiter(void 0, void 0, void 0
                     yield msg.delete();
                 }
                 catch (e) {
-                    console.log(e);
+                    console.error(e);
                 }
                 debug('deleted the count channel user message');
             }));

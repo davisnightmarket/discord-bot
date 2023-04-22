@@ -16,4 +16,4 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
 Object.defineProperty(exports, "__esModule", { value: true });
 __exportStar(require("./food-count-input.event"), exports);
 __exportStar(require("./food-count-response.event"), exports);
-__exportStar(require("./person-enter.event"), exports);
+__exportStar(require("./person-meta.event"), exports);

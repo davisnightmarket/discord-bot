@@ -29,7 +29,7 @@ export async function loadCommands() {
             const data: SlashCommandBuilder = await command.get_data();
             commands.set(data.name, { data, ...command });
         } else {
-            console.log(
+            console.error(
                 `WRN The command at ${file} is missing a required "get_data" or "execute" property.`
             );
         }
@@ -40,10 +40,8 @@ export async function loadCommands() {
 
 export async function publishCommands(commands: Collection<string, Command>) {
     // const rest = new REST({ version: '10' }).setToken(DISCORD_TOKEN);
-
     // await rest.put(Routes.applicationCommands(DISCORD_CLIENT_ID), {
     //     body: [...commands.values()].map(({ data }) => data.toJSON())
     // });
-
     // console.log(`Successfully reloaded (/) commands.`);
 }

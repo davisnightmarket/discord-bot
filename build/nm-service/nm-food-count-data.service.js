@@ -80,7 +80,7 @@ class NmFoodCountDataService {
             const range = (yield service_1.GoogleSpreadsheetsService.rangeGet(`'${sheetName}'!A:E`, GSPREAD_FOODCOUNT_ID)) || [];
             const lastRowIndex = range.length;
             if (lastRowIndex < 2) {
-                console.log('We cannot delete the header');
+                console.error('We cannot delete the header');
                 return;
             }
             yield service_1.GoogleSpreadsheetsService.rowsWrite([['', '', '', '', '']], `'${sheetName}'!A${lastRowIndex}:E${lastRowIndex}`, GSPREAD_FOODCOUNT_ID);

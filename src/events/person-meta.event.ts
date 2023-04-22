@@ -3,6 +3,9 @@ import { PersonModel } from '../model/night-market.model';
 import { NmPersonService } from '../nm-service/nm-person.service';
 import { MessageService } from '../service/message.service';
 import { ParseContentService } from '../service/parse-content.service';
+import { Dbg } from '../service';
+
+const dbg = Dbg('PersonMetaEvent');
 
 const MsgReply = MessageService.createMap({
     PERSON_REQUEST_EMAIL: {
@@ -25,7 +28,7 @@ const MsgReply = MessageService.createMap({
 
 const personEnterCache: { [k in string]: Partial<PersonModel> } = {};
 
-export const PersonEnterEvent = async (message: Message) => {
+export const PersonMetaEvent = async (message: Message) => {
     const { channel, author } = message as Message<true>;
 
     /* STAGE 1: skip the message entirely in some cases */
@@ -42,17 +45,29 @@ export const PersonEnterEvent = async (message: Message) => {
         return;
     }
 
+    // now we want to know if this person's meta data is stored in our db
+
     // OK, we are all clear, find out if this is a new person
 
     const personList = await NmPersonService.getPersonList();
 
     if (personList.findIndex((a) => a.discordId === message.author.id) >= 0) {
         // this person is in our db
-        // todo: find out if they have an email on file, or declined
+        // todo: find out if they have meta data on file, etc
+
+        // if the person has all the data required, return
         return;
     }
+
     // now we want to know who it is ...
     const { id, username } = message.author;
+
+    if ((channel.type as unknown as number) === 1) {
+        dbg('DM to bot');
+        // in this case this is a direct message to our bot
+        // we want to see if they are giving us metadata
+        return;
+    }
 
     // we check if they are in the cache
 

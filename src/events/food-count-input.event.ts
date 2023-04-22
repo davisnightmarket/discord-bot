@@ -59,9 +59,13 @@ export const FoodCountInputEvent = async (message: Message) => {
     const { channel, author } = message as Message<true>;
 
     /* STAGE 1: skip the message entirely in some cases */
-
     // if we are a bot, we do not want to process the message
-    if (author.bot) {
+    if (
+        author.bot ||
+        // this does not match the published api. there it is a string: "DM"
+        // in any case we do not want to continue if this is a direct message
+        (channel.type as unknown as number) === 1
+    ) {
         return;
     }
 
@@ -86,15 +90,6 @@ export const FoodCountInputEvent = async (message: Message) => {
         content
     );
 
-    console.log(
-        channelStatus,
-        inputStatus,
-        // did we get the date from the content, from the channel name, or just today by default?
-        dateStatus,
-        date,
-        parsedInputList,
-        parsedInputErrorList
-    );
     // if we are not in a night or count channel
     // we do not send a message, we simply get out
     if ('INVALID_CHANNEL' === channelStatus) {
@@ -134,7 +129,6 @@ export const FoodCountInputEvent = async (message: Message) => {
         // we want to show them their errors, ask if they meant to do it
         return;
     }
-    console.log(parsedInputList);
     /* OK, loop over the food count input */
     // ? we can do two loops, one for successful input, one for unsuccessful
     for (const { lbs, org, note } of parsedInputList) {

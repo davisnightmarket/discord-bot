@@ -29,7 +29,7 @@ function loadCommands() {
                 commands.set(data.name, Object.assign({ data }, command));
             }
             else {
-                console.log(`WRN The command at ${file} is missing a required "get_data" or "execute" property.`);
+                console.error(`WRN The command at ${file} is missing a required "get_data" or "execute" property.`);
             }
         }
         return commands;

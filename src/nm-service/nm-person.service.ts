@@ -42,20 +42,20 @@ export class NmPersonService {
     static createFromData(a: string[]): PersonModel {
         // todo: make a better mapping, maybe map header to column, make it easier to edit spreadhseet without fuckup script?
         return {
-            status: a[0].trim(),
-            name: a[1].trim(),
-            email: a[2].trim(),
-            phone: a[3].trim(),
-            location: a[4].trim(),
-            bike: a[5].trim(),
-            bikeCart: a[6].trim(),
-            bikeCartAtNight: a[7].trim(),
-            skills: a[8].trim(),
-            bio: a[9].trim(),
-            pronouns: a[10].trim(),
-            interest: a[11].trim(),
-            reference: a[12].trim(),
-            discordId: a[13].trim()
+            status: (a[0] || '').trim(),
+            name: (a[1] || '').trim(),
+            email: (a[2] || '').trim(),
+            phone: (a[3] || '').trim(),
+            location: (a[4] || '').trim(),
+            bike: (a[5] || '').trim(),
+            bikeCart: (a[6] || '').trim(),
+            bikeCartAtNight: (a[7] || '').trim(),
+            skills: (a[8] || '').trim(),
+            bio: (a[9] || '').trim(),
+            pronouns: (a[10] || '').trim(),
+            interest: (a[11] || '').trim(),
+            reference: (a[12] || '').trim(),
+            discordId: (a[13] || '').trim()
         };
     }
     static async getCleanNameList() {

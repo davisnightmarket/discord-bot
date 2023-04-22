@@ -1,7 +1,9 @@
 import { GoogleAuth } from 'google-auth-library';
 import { google, sheets_v4 } from 'googleapis';
 import { NmConfigService } from '../nm-service';
+import { Dbg } from '../service';
 
+const dbg = Dbg('GoogleSpreadsheetsService');
 // the alphabet indexed in array
 export const AlphaIndex = Array.from(Array(26)).map((e, i) => i + 65);
 // the alphabet in an array
@@ -96,7 +98,7 @@ export class GoogleSpreadsheetsService {
                 requestBody: { values }
             });
 
-            console.log('%d cells updated.', result.data.updatedCells);
+            dbg('%d cells updated.', result.data.updatedCells);
             return result.data.updatedRange;
         } catch (err) {
             // TODO (Developer) - Handle exception
@@ -248,7 +250,7 @@ export class GoogleSpreadsheetsService {
             await gspread.spreadsheets.batchUpdate(request);
             return true;
         } catch (error) {
-            console.log(error);
+            console.error(error);
             return false;
         }
     }

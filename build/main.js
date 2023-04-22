@@ -12,15 +12,16 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const events_1 = require("./events");
 const discord_js_1 = require("discord.js");
 const nm_service_1 = require("./nm-service");
-const config_1 = require("./config");
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
         const client = new discord_js_1.Client({
             intents: [
                 discord_js_1.GatewayIntentBits.Guilds,
                 discord_js_1.GatewayIntentBits.GuildMessages,
-                discord_js_1.GatewayIntentBits.MessageContent
-            ]
+                discord_js_1.GatewayIntentBits.MessageContent,
+                discord_js_1.GatewayIntentBits.DirectMessages
+            ],
+            partials: [discord_js_1.Partials.Message, discord_js_1.Partials.Channel]
         });
         // todo: do we want this on every connection?
         // const commands = await loadCommands();
@@ -33,8 +34,14 @@ function main() {
         }));
         // todo: this will file on every message sent. we probably
         // want a big switchboard and fire different stuff depending on
-        // parameters
-        client.on(discord_js_1.Events.MessageCreate, events_1.FoodCountInputEvent);
+        // parameters. The reason we create on one message create event
+        // is that I think this saves us data costs
+        client.on(discord_js_1.Events.MessageCreate, (client) => {
+            // here we want to know who people are, so we ask
+            (0, events_1.PersonMetaEvent)(client);
+            // when someone enters a foox count
+            (0, events_1.FoodCountInputEvent)(client);
+        });
         // todo: this will file on every interaction sent. we probably
         // want a big switchboard and fire different stuff depending on
         // parameters
@@ -43,7 +50,4 @@ function main() {
         client.login(appToken);
     });
 }
-console.log(new Date());
-console.log(process.env.NODE_ENV);
-console.log((0, config_1.Config)());
 main();

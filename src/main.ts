@@ -1,5 +1,9 @@
-import { FoodCountInputEvent, FoodCountResponseEvent } from './events';
-import { Client, Events, GatewayIntentBits } from 'discord.js';
+import {
+    FoodCountInputEvent,
+    FoodCountResponseEvent,
+    PersonMetaEvent
+} from './events';
+import { Client, Events, GatewayIntentBits, Partials } from 'discord.js';
 import { NmConfigService } from './nm-service';
 import { Config } from './config';
 
@@ -8,8 +12,10 @@ async function main() {
         intents: [
             GatewayIntentBits.Guilds,
             GatewayIntentBits.GuildMessages,
-            GatewayIntentBits.MessageContent
-        ]
+            GatewayIntentBits.MessageContent,
+            GatewayIntentBits.DirectMessages
+        ],
+        partials: [Partials.Message, Partials.Channel]
     });
     // todo: do we want this on every connection?
     // const commands = await loadCommands();
@@ -22,8 +28,15 @@ async function main() {
     });
     // todo: this will file on every message sent. we probably
     // want a big switchboard and fire different stuff depending on
-    // parameters
-    client.on(Events.MessageCreate, FoodCountInputEvent);
+    // parameters. The reason we create on one message create event
+    // is that I think this saves us data costs
+    client.on(Events.MessageCreate, (client) => {
+        // here we want to know who people are, so we ask
+        PersonMetaEvent(client);
+
+        // when someone enters a foox count
+        FoodCountInputEvent(client);
+    });
 
     // todo: this will file on every interaction sent. we probably
     // want a big switchboard and fire different stuff depending on
@@ -35,9 +48,5 @@ async function main() {
     } = await NmConfigService.getParsed();
     client.login(appToken);
 }
-
-console.log(new Date());
-console.log(process.env.NODE_ENV);
-console.log(Config());
 
 main();

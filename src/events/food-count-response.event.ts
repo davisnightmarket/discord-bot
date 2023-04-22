@@ -52,7 +52,7 @@ export const FoodCountResponseEvent = async (interaction: Interaction) => {
                 await msg.delete();
                 debug('deleted user input message!');
             } catch (e) {
-                console.log(e);
+                console.error(e);
             }
         });
 
@@ -67,7 +67,7 @@ export const FoodCountResponseEvent = async (interaction: Interaction) => {
                 try {
                     await msg.delete();
                 } catch (e) {
-                    console.log(e);
+                    console.error(e);
                 }
             });
         } else {
@@ -88,7 +88,7 @@ export const FoodCountResponseEvent = async (interaction: Interaction) => {
                     try {
                         await msg.delete();
                     } catch (e) {
-                        console.log(e);
+                        console.error(e);
                     }
 
                     debug('deleted the count channel user message');

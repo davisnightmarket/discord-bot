@@ -83,7 +83,6 @@ Example:
             }
             const [dateParsed, parsedInputList, parsedInputErrorList] = yield this.getFoodCountDateAndParsedInput(content);
             dateStatus = dateParsed ? 'DATE_PARSED' : 'DATE_TODAY';
-            console.log(date, dateStatus, dateParsed);
             // the date is either in the content, or it is today
             if (dateStatus === 'DATE_PARSED') {
                 date = dateParsed;

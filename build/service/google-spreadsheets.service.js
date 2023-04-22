@@ -13,6 +13,8 @@ exports.GoogleSpreadsheetsService = exports.Alphabet = exports.AlphaIndex = void
 const google_auth_library_1 = require("google-auth-library");
 const googleapis_1 = require("googleapis");
 const nm_service_1 = require("../nm-service");
+const service_1 = require("../service");
+const dbg = (0, service_1.Dbg)('GoogleSpreadsheetsService');
 // the alphabet indexed in array
 exports.AlphaIndex = Array.from(Array(26)).map((e, i) => i + 65);
 // the alphabet in an array
@@ -87,7 +89,7 @@ class GoogleSpreadsheetsService {
                     range,
                     requestBody: { values }
                 });
-                console.log('%d cells updated.', result.data.updatedCells);
+                dbg('%d cells updated.', result.data.updatedCells);
                 return result.data.updatedRange;
             }
             catch (err) {
@@ -228,7 +230,7 @@ class GoogleSpreadsheetsService {
                 return true;
             }
             catch (error) {
-                console.log(error);
+                console.error(error);
                 return false;
             }
         });

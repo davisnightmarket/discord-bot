@@ -131,7 +131,7 @@ export class NmFoodCountDataService {
             )) || [];
         const lastRowIndex = range.length;
         if (lastRowIndex < 2) {
-            console.log('We cannot delete the header');
+            console.error('We cannot delete the header');
             return;
         }
         await GoogleSpreadsheetsService.rowsWrite(
