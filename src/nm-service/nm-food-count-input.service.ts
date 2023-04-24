@@ -48,31 +48,34 @@ export interface FoodCountParsedInputModel {
     note: string;
     filterString: string;
 }
+
 interface FoodCountParsedInputSuccessModel extends FoodCountParsedInputModel {
     status: 'OK';
 }
+
 interface FoodCountParsedInputFailModel extends FoodCountParsedInputModel {
     status: Exclude<FoodCountInputDataStatusType, 'OK'>;
 }
 
 // we only allow food count in one channel
-const COUNT_CHANNEL_NAME = 'food-count',
-    // OR in a "night channel", which always corresponds to a day
-    // this maps the night cap channel name to the day, so we can get a date from the channel name
-    NIGHT_CHANNEL_NAMES_MAP: {
-        [k in string]: DayNameType;
-    } = {
-        // property is the night-channel name, value is the name of a day
-        monday: 'monday',
-        tuesday: 'tuesday',
-        wednesday: 'wednesday',
-        thursday: 'thursday',
-        friday: 'friday',
-        saturday: 'saturday',
-        sunday: 'sunday',
-        // ? i guess saturday will work for weekends for now?
-        weekends: 'saturday'
-    };
+export const COUNT_CHANNEL_NAME = 'food-count';
+
+// OR in a "night channel", which always corresponds to a day
+// this maps the night cap channel name to the day, so we can get a date from the channel name
+export const NIGHT_CHANNEL_NAMES_MAP: {
+    [k in string]: DayNameType;
+} = {
+    // property is the night-channel name, value is the name of a day
+    monday: 'monday',
+    tuesday: 'tuesday',
+    wednesday: 'wednesday',
+    thursday: 'thursday',
+    friday: 'friday',
+    saturday: 'saturday',
+    sunday: 'sunday',
+    // ? i guess saturday will work for weekends for now?
+    weekends: 'saturday'
+};
 
 export class NmFoodCountInputService {
     /* dealing with  messages sent */
@@ -112,10 +115,6 @@ Example:
     }
 
     /* Dealing with content => input */
-
-    static isFoodCountChannelName(channelName: string): boolean {
-        return channelName.toLowerCase() === COUNT_CHANNEL_NAME.toLowerCase();
-    }
 
     static getChannelStatus(channelName: string): FoodCountChannelStatusType {
         if (channelName.toLowerCase() === COUNT_CHANNEL_NAME.toLowerCase()) {
@@ -405,10 +404,10 @@ Example:
     static parseDateFromContent(s: string): [string, string] {
         // we simply want to know if the start of the string looks like mm/dd/yyyy or mm/dd
         const potentialDate = s
-                .trim()
-                .split('\n')[0]
-                ?.split(' ')[0]
-                ?.split('/'),
+            .trim()
+            .split('\n')[0]
+            ?.split(' ')[0]
+            ?.split('/'),
             originalDate = potentialDate.join('/');
 
         // in this case we don't have anything that looks like our date

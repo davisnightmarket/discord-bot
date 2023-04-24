@@ -4,9 +4,9 @@ import {
     ButtonBuilder,
     MessageReplyOptions,
     ButtonStyle,
-    TextChannel
 } from 'discord.js';
 import {
+    COUNT_CHANNEL_NAME,
     NmFoodCountDataService,
     NmFoodCountInputService,
     NmPersonService
@@ -14,6 +14,7 @@ import {
 import { v4 as uuidv4 } from 'uuid';
 import { CacheService, MessageService } from '../service/index';
 import { Dbg } from '../service';
+import { getChannelByName } from '../service/discord.service';
 const debug = Dbg('FoodCountInputEvent');
 
 // status for each cached input: does it get inserted unless cancel? or does it require a confirmation?
@@ -40,15 +41,16 @@ const MsgReply = MessageService.createMap({
 // if the user cancels, this cache is deleted
 // if not, it is inserted into the spreadsheet
 export const FoodCountInputCache = CacheService<{
-        status: CacheStatusType;
-        messageInputId: string;
-        messageResponseId: string;
-        messageCountId: string;
-        stamp: number;
-        insertTimeout: null | NodeJS.Timeout;
-    }>('food-count'),
-    // after a set period of time, the input is inserted. this is that time:
-    TIME_UNTIL_UPDATE = 60 * 1000; // one minute in milliseconds
+    status: CacheStatusType;
+    messageInputId: string;
+    messageResponseId: string;
+    messageCountId: string;
+    stamp: number;
+    insertTimeout: null | NodeJS.Timeout;
+}>('food-count');
+
+// after a set period of time, the input is inserted. this is that time:
+export const TIME_UNTIL_UPDATE = 60 * 1000; // one minute in milliseconds
 
 /**
  *
@@ -153,12 +155,7 @@ export const FoodCountInputEvent = async (message: Message) => {
                 });
 
                 // we want to post to food-count, always, so folks know what's in the db
-                const countChannel = (await message.guild?.channels.cache.find(
-                    (channel) =>
-                        NmFoodCountInputService.isFoodCountChannelName(
-                            channel.name
-                        )
-                )) as TextChannel;
+                const countChannel = getChannelByName(message, COUNT_CHANNEL_NAME)
 
                 countChannel?.send(
                     MsgReply.FOODCOUNT_INSERT({
@@ -170,6 +167,7 @@ export const FoodCountInputEvent = async (message: Message) => {
                     //                     `*OK, posted to db:*
                     // ${lbs} lbs ${note ? `(${note})` : ''} from ${org} on  ${date}.`
                 );
+
                 try {
                     FoodCountInputCache.delete(cacheId);
                     await messageReply.delete();
@@ -216,14 +214,12 @@ export const FoodCountInputEvent = async (message: Message) => {
 
         // because we want to delete this message on cancel, or when the expiration passes
         // we save the reply id
-
         FoodCountInputCache.update(cacheId, {
             messageResponseId: messageReply.id
         });
 
         // get our reporter email address
-        const reporter =
-            (await NmPersonService.getEmailByDiscordId(author.id)) || '';
+        const reporter = await NmPersonService.getEmailByDiscordId(author.id) ?? '';
     }
 
     // loop over errors and post to channel
@@ -245,6 +241,7 @@ export const FoodCountInputEvent = async (message: Message) => {
                 lbs
             });
         }
+
         const responseMessage = await message.reply({
             content
         });
@@ -256,6 +253,7 @@ export const FoodCountInputEvent = async (message: Message) => {
             if ('COUNT_CHANNEL' === channelStatus) {
                 message.delete();
             }
+
             // always delete our own message
             responseMessage.delete();
         }, TIME_UNTIL_UPDATE);
