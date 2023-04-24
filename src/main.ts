@@ -17,15 +17,11 @@ async function main() {
         ],
         partials: [Partials.Message, Partials.Channel]
     });
-    // todo: do we want this on every connection?
-    // const commands = await loadCommands();
-    // client.on(Events.InteractionCreate, async (c) => {
-    //     console.log(c);
-    //     console.log(`Hi!`);
-    // });
+    
     client.once(Events.ClientReady, async (c) => {
         console.log(`Ready! Logged in as ${c.user.tag}`);
     });
+    
     // todo: this will file on every message sent. we probably
     // want a big switchboard and fire different stuff depending on
     // parameters. The reason we create on one message create event

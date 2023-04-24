@@ -23,12 +23,6 @@ function main() {
             ],
             partials: [discord_js_1.Partials.Message, discord_js_1.Partials.Channel]
         });
-        // todo: do we want this on every connection?
-        // const commands = await loadCommands();
-        // client.on(Events.InteractionCreate, async (c) => {
-        //     console.log(c);
-        //     console.log(`Hi!`);
-        // });
         client.once(discord_js_1.Events.ClientReady, (c) => __awaiter(this, void 0, void 0, function* () {
             console.log(`Ready! Logged in as ${c.user.tag}`);
         }));
