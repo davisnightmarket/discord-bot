@@ -8,16 +8,22 @@ import { PersonMetaService } from '../nm-service/nm-person-meta.service';
 
 const dbg = Dbg('PersonMetaEvent');
 
-type MetaStatusType = 'OK'|'NONE'|'EMAIL_NONE'|'PHONE_NONE'
+type MetaStatusType = 'OK'|'NONE'|'EMAIL_NONE'|'PHONE_NONE'|'PHONE_AGAIN'
 
 
-const APPROPRIATE_TIME_TO_BUG_U = 60*60*24*7
+const APPROPRIATE_TIME_TO_BUG_U_IN_SECS = 60*60*24*7,
+A_BIT_OF_LAG_BEFORE_INTROS_IN_SECS = 60*60
 
 const MsgReply = MessageService.createMap({
+    PERSON_FIRST_CONTACT: {
+        username: ''
+    },
     PERSON_REQUEST_EMAIL: {
         username: ''
     },
-
+    PERSON_REQUEST_EMAIL_AGAIN: {
+        username: ''
+    },
     PERSON_REQUEST_EMAIL_FAIL: {
         username: ''
     },
@@ -28,6 +34,9 @@ const MsgReply = MessageService.createMap({
         username: ''
     },
     PERSON_REQUEST_PHONE: {
+        username: ''
+    },
+    PERSON_REQUEST_PHONE_AGAIN: {
         username: ''
     }
 });
@@ -86,7 +95,7 @@ export const PersonMetaEvent = async (message: Message) => {
     personMetaCache[id][3] = NOW_IN_SECONDS
 
 
-    // now we find out if they are communicating directly to crabble
+    // now we find out if they are communicating directly to crabapple
     if ((channel.type as unknown as number) === 1) {
         dbg('DM to bot');
         if(metaStatus==='NONE'){
@@ -117,46 +126,36 @@ export const PersonMetaEvent = async (message: Message) => {
     if(metaStatus==='NONE'){
         // we want to 
         // todo: set a timer and introduce ourselves
+        setTimeout(()=>{
+            // introductions, etc
+            message.author.send(MsgReply.PERSON_FIRST_CONTACT({ username }));
 
-        // in this case metaStatus will be NONE, so we can wait for a reply
+            // and ask for their email
+            message.author.send(MsgReply.PERSON_REQUEST_EMAIL({ username }));
+            
+    
+        },A_BIT_OF_LAG_BEFORE_INTROS_IN_SECS*1000)
+
+        dbg(' if we do not have a record of them, then we have never spoken to them before')
+        // as soon as we have first contacted them we can start waiting for our first meta request
+        personMetaCache[id][0]='EMAIL_NONE'
         return 
     }
 
     // here we have already introduced ourselves. we should check the cache for 
     // a last contacted time, and only contact them if an appropriate time has elapsed
     // since last we got in touch
-    if(NOW_IN_SECONDS -lastContactInSeconds<APPROPRIATE_TIME_TO_BUG_U){
+    if(NOW_IN_SECONDS -lastContactInSeconds<APPROPRIATE_TIME_TO_BUG_U_IN_SECS){
 
-        // we do not bug you if it has not been a good amount of time since we last bugged you
+        dbg('we do not bug you if it has not been a good amount of time since we last bugged you')
         return
     }
 
     if(metaStatus==='EMAIL_NONE'){
         dbg('in this case they have never given us an email')
-        console.log(MsgReply.PERSON_REQUEST_EMAIL({ username }));
-        message.author.send(MsgReply.PERSON_REQUEST_EMAIL({ username }));
+        console.log(MsgReply.PERSON_REQUEST_EMAIL_AGAIN({ username }));
+        message.author.send(MsgReply.PERSON_REQUEST_EMAIL_AGAIN({ username }));
 
-        // todo: this is commented out because it ought to be in the DM section - a person will only ever give meta data to crabapple in DM
-        // const email = ParseContentService.getEmail(content);
-        // if (email) {
-        //     personCache.email = email;
-        //     // todo: now we update record and flush person list cache
-        //     message.author.send(MsgReply.PERSON_REQUEST_EMAIL_OK({ username }));
-        //     console.log(MsgReply.PERSON_REQUEST_EMAIL_OK({ username }));
-        // } else if (content.toLowerCase() === 'decline') {
-        //     // otherwise we let them know and send to db
-        //     personCache.email = 'decline';
-        //     message.author.send(
-        //         MsgReply.PERSON_REQUEST_EMAIL_DECLINE({ username })
-        //     );
-        //     console.log(MsgReply.PERSON_REQUEST_EMAIL_DECLINE({ username }));
-        // } else {
-        //     // try again ...
-        //     message.author.send(
-        //         MsgReply.PERSON_REQUEST_EMAIL_FAIL({ username })
-        //     );
-        //     console.log(MsgReply.PERSON_REQUEST_EMAIL_FAIL({ username }));
-        // }
         return
 
     }
@@ -165,8 +164,17 @@ export const PersonMetaEvent = async (message: Message) => {
         dbg('in this case they have never given us a phone')
         console.log(MsgReply.PERSON_REQUEST_PHONE({ username }));
         message.author.send(MsgReply.PERSON_REQUEST_PHONE({ username }));
+        // here we have now asked them for a phone once, so we want to know that, so new status
+        personMetaCache[id][0]='PHONE_AGAIN'
         return
     }
 
-    // etc
+    if(metaStatus==='PHONE_AGAIN'){
+        dbg('in this case they have never given us a phone again')
+        console.log(MsgReply.PERSON_REQUEST_PHONE_AGAIN({ username }));
+        message.author.send(MsgReply.PERSON_REQUEST_PHONE_AGAIN({ username }));
+        return
+    }
+
+    // todo: all the other questions we want to ask ...
 };
