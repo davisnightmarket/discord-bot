@@ -20,3 +20,4 @@ __exportStar(require("./google-secrets.service"), exports);
 __exportStar(require("./google-spreadsheets.service"), exports);
 __exportStar(require("./parse-content.service"), exports);
 __exportStar(require("./message.service"), exports);
+__exportStar(require("./discord.service"), exports);

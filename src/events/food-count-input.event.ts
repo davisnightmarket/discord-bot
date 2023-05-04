@@ -3,7 +3,7 @@ import {
     Message,
     ButtonBuilder,
     MessageReplyOptions,
-    ButtonStyle,
+    ButtonStyle
 } from 'discord.js';
 import {
     COUNT_CHANNEL_NAME,
@@ -21,12 +21,14 @@ const debug = Dbg('FoodCountInputEvent');
 type CacheStatusType = 'INSERT_UNLESS_CANCEL' | 'DELETE_UNLESS_CONFIRM';
 
 const MsgReply = MessageService.createMap({
+    // message sent when someone posts a food count event
     FOODCOUNT_INSERT: {
         lbs: '',
         note: '',
         org: '',
         date: ''
     },
+    // message sent when a food count gets stuck in the db successfully
     FOODCOUNT_INPUT_OK: {
         lbs: '',
         note: '',
@@ -155,7 +157,10 @@ export const FoodCountInputEvent = async (message: Message) => {
                 });
 
                 // we want to post to food-count, always, so folks know what's in the db
-                const countChannel = getChannelByName(message, COUNT_CHANNEL_NAME)
+                const countChannel = getChannelByName(
+                    message,
+                    COUNT_CHANNEL_NAME
+                );
 
                 countChannel?.send(
                     MsgReply.FOODCOUNT_INSERT({
@@ -219,7 +224,8 @@ export const FoodCountInputEvent = async (message: Message) => {
         });
 
         // get our reporter email address
-        const reporter = await NmPersonService.getEmailByDiscordId(author.id) ?? '';
+        const reporter =
+            (await NmPersonService.getEmailByDiscordId(author.id)) ?? '';
     }
 
     // loop over errors and post to channel

@@ -15,14 +15,17 @@ const nm_service_1 = require("../nm-service");
 const uuid_1 = require("uuid");
 const index_1 = require("../service/index");
 const service_1 = require("../service");
+const discord_service_1 = require("../service/discord.service");
 const debug = (0, service_1.Dbg)('FoodCountInputEvent');
 const MsgReply = index_1.MessageService.createMap({
+    // message sent when someone posts a food count event
     FOODCOUNT_INSERT: {
         lbs: '',
         note: '',
         org: '',
         date: ''
     },
+    // message sent when a food count gets stuck in the db successfully
     FOODCOUNT_INPUT_OK: {
         lbs: '',
         note: '',
@@ -35,7 +38,7 @@ const MsgReply = index_1.MessageService.createMap({
 // give user a set period of time to cancel
 // if the user cancels, this cache is deleted
 // if not, it is inserted into the spreadsheet
-exports.FoodCountInputCache = (0, index_1.CacheService)('food-count'), 
+exports.FoodCountInputCache = (0, index_1.CacheService)('food-count');
 // after a set period of time, the input is inserted. this is that time:
 exports.TIME_UNTIL_UPDATE = 60 * 1000; // one minute in milliseconds
 /**
@@ -44,6 +47,7 @@ exports.TIME_UNTIL_UPDATE = 60 * 1000; // one minute in milliseconds
  * @returns void
  */
 const FoodCountInputEvent = (message) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
     const { channel, author } = message;
     /* STAGE 1: skip the message entirely in some cases */
     // if we are a bot, we do not want to process the message
@@ -104,7 +108,6 @@ const FoodCountInputEvent = (message) => __awaiter(void 0, void 0, void 0, funct
         const cacheId = (0, uuid_1.v4)();
         // now we create our insert event
         const insertTimeout = setTimeout(() => __awaiter(void 0, void 0, void 0, function* () {
-            var _a;
             // we need to make sure teh count has not been cancelled
             // todo: test this
             if (!exports.FoodCountInputCache.get(cacheId)) {
@@ -119,7 +122,7 @@ const FoodCountInputEvent = (message) => __awaiter(void 0, void 0, void 0, funct
                 note
             });
             // we want to post to food-count, always, so folks know what's in the db
-            const countChannel = (yield ((_a = message.guild) === null || _a === void 0 ? void 0 : _a.channels.cache.find((channel) => nm_service_1.NmFoodCountInputService.isFoodCountChannelName(channel.name))));
+            const countChannel = (0, discord_service_1.getChannelByName)(message, nm_service_1.COUNT_CHANNEL_NAME);
             countChannel === null || countChannel === void 0 ? void 0 : countChannel.send(MsgReply.FOODCOUNT_INSERT({
                 lbs: lbs + '',
                 note,
@@ -173,7 +176,7 @@ const FoodCountInputEvent = (message) => __awaiter(void 0, void 0, void 0, funct
             messageResponseId: messageReply.id
         });
         // get our reporter email address
-        const reporter = (yield nm_service_1.NmPersonService.getEmailByDiscordId(author.id)) || '';
+        const reporter = (_a = (yield nm_service_1.NmPersonService.getEmailByDiscordId(author.id))) !== null && _a !== void 0 ? _a : '';
     }
     // loop over errors and post to channel
     for (const { status, lbs, org, orgFuzzy } of parsedInputErrorList) {

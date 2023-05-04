@@ -9,17 +9,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.NmFoodCountDataService = exports.GSPREAD_SHEET_FOODCOUNT_HEADERS = exports.GSPREAD_FOODCOUNT_SHEET_PREFIX = exports.GSPREAD_CORE_ACTIVE_STATE_LIST = void 0;
+exports.NmFoodCountDataService = exports.GSPREAD_SHEET_FOODCOUNT_HEADERS = exports.GSPREAD_FOODCOUNT_SHEET_PREFIX = void 0;
 const service_1 = require("../service");
 const config_1 = require("../config");
-/**
- * CORE DATA
- */
-// across our data model, these strings are used to identify if a resource is active or not
-exports.GSPREAD_CORE_ACTIVE_STATE_LIST = [
-    'active',
-    'inactive'
-];
 /**
  *  FOODCOUNT
  */

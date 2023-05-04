@@ -12,15 +12,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.NmFoodCountInputService = void 0;
+exports.NmFoodCountInputService = exports.NIGHT_CHANNEL_NAMES_MAP = exports.COUNT_CHANNEL_NAME = void 0;
 const nm_org_service_1 = require("./nm-org.service");
 const fuzzy_search_1 = __importDefault(require("fuzzy-search"));
 const service_1 = require("../service");
 // we only allow food count in one channel
-const COUNT_CHANNEL_NAME = 'food-count', 
+exports.COUNT_CHANNEL_NAME = 'food-count';
 // OR in a "night channel", which always corresponds to a day
 // this maps the night cap channel name to the day, so we can get a date from the channel name
-NIGHT_CHANNEL_NAMES_MAP = {
+exports.NIGHT_CHANNEL_NAMES_MAP = {
     // property is the night-channel name, value is the name of a day
     monday: 'monday',
     tuesday: 'tuesday',
@@ -57,14 +57,11 @@ Example:
     "8 lbs Village Bakery"`;
     }
     /* Dealing with content => input */
-    static isFoodCountChannelName(channelName) {
-        return channelName.toLowerCase() === COUNT_CHANNEL_NAME.toLowerCase();
-    }
     static getChannelStatus(channelName) {
-        if (channelName.toLowerCase() === COUNT_CHANNEL_NAME.toLowerCase()) {
+        if (channelName.toLowerCase() === exports.COUNT_CHANNEL_NAME.toLowerCase()) {
             return 'COUNT_CHANNEL';
         }
-        if (Object.keys(NIGHT_CHANNEL_NAMES_MAP)
+        if (Object.keys(exports.NIGHT_CHANNEL_NAMES_MAP)
             .map((a) => a.toLowerCase())
             .includes(channelName.toLowerCase())) {
             return 'NIGHT_CHANNEL';
@@ -121,7 +118,7 @@ Example:
         });
     }
     static getDateFromNightChannelName(channelName) {
-        return NmFoodCountInputService.getDateStringFromDay(NIGHT_CHANNEL_NAMES_MAP[channelName.toLowerCase()]);
+        return NmFoodCountInputService.getDateStringFromDay(exports.NIGHT_CHANNEL_NAMES_MAP[channelName.toLowerCase()]);
     }
     static getDateNightOf() {
         const a = new Date();

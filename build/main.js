@@ -30,11 +30,11 @@ function main() {
         // want a big switchboard and fire different stuff depending on
         // parameters. The reason we create on one message create event
         // is that I think this saves us data costs
-        client.on(discord_js_1.Events.MessageCreate, (client) => {
+        client.on(discord_js_1.Events.MessageCreate, (message) => {
             // here we want to know who people are, so we ask
-            (0, events_1.PersonMetaEvent)(client);
+            (0, events_1.PersonMetaEvent)(message);
             // when someone enters a foox count
-            (0, events_1.FoodCountInputEvent)(client);
+            (0, events_1.FoodCountInputEvent)(message);
         });
         // todo: this will file on every interaction sent. we probably
         // want a big switchboard and fire different stuff depending on

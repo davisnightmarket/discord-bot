@@ -3,7 +3,13 @@ import {
     FoodCountResponseEvent,
     PersonMetaEvent
 } from './events';
-import { Client, Events, GatewayIntentBits, Partials } from 'discord.js';
+import {
+    Client,
+    Events,
+    GatewayIntentBits,
+    Message,
+    Partials
+} from 'discord.js';
 import { NmConfigService } from './nm-service';
 import { Config } from './config';
 
@@ -17,21 +23,21 @@ async function main() {
         ],
         partials: [Partials.Message, Partials.Channel]
     });
-    
+
     client.once(Events.ClientReady, async (c) => {
         console.log(`Ready! Logged in as ${c.user.tag}`);
     });
-    
+
     // todo: this will file on every message sent. we probably
     // want a big switchboard and fire different stuff depending on
     // parameters. The reason we create on one message create event
     // is that I think this saves us data costs
-    client.on(Events.MessageCreate, (client) => {
+    client.on(Events.MessageCreate, (message: Message) => {
         // here we want to know who people are, so we ask
-        PersonMetaEvent(client);
+        PersonMetaEvent(message);
 
         // when someone enters a foox count
-        FoodCountInputEvent(client);
+        FoodCountInputEvent(message);
     });
 
     // todo: this will file on every interaction sent. we probably
@@ -42,6 +48,7 @@ async function main() {
     const {
         discordConfig: { appToken }
     } = await NmConfigService.getParsed();
+
     client.login(appToken);
 }
 
