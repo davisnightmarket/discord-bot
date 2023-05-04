@@ -6,8 +6,9 @@ import {
 } from 'discord.js';
 import { FoodCountInputCache } from './food-count-input.event';
 
-import { NmFoodCountInputService } from '../nm-service';
+import { COUNT_CHANNEL_NAME } from '../nm-service';
 import { Dbg } from '../service';
+import { getChannelByName } from '../service/discord.service';
 const debug = Dbg('FoodCountCancelEvent');
 
 /**
@@ -77,10 +78,7 @@ export const FoodCountResponseEvent = async (interaction: Interaction) => {
         // delete any posting in the food count that came from the night channels
         if (cache.messageCountId) {
             debug('found a count channel user message');
-            const countChannel = (await interaction.guild?.channels.cache.find(
-                (channel) =>
-                    NmFoodCountInputService.isFoodCountChannelName(channel.name)
-            )) as TextChannel;
+            const countChannel = getChannelByName(interaction, COUNT_CHANNEL_NAME);
 
             countChannel.messages
                 ?.fetch(cache.messageCountId)
