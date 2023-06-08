@@ -1,4 +1,4 @@
-import { DayNameType } from '../model/night-market.model';
+import { type DayNameType } from '../model/night-market.model';
 import { NmOrgService } from './nm-org.service';
 import FuzzySearch from 'fuzzy-search';
 import { ParseContentService } from '../service';
@@ -146,11 +146,11 @@ Example:
     > {
         const channelStatus = this.getChannelStatus(channelName);
 
-        let inputStatus: FoodCountInputStatusType = 'INVALID',
-            dateStatus: FoodCountInputDateStatusType,
-            date = ParseContentService.dateFormat(new Date());
+        let inputStatus: FoodCountInputStatusType = 'INVALID';
+        let dateStatus: FoodCountInputDateStatusType;
+        let date = ParseContentService.dateFormat(new Date());
 
-        if ('INVALID_CHANNEL' === channelStatus) {
+        if (channelStatus === 'INVALID_CHANNEL') {
             inputStatus = 'INVALID';
 
             // in this case we don't want to process anything, just return it
@@ -222,10 +222,10 @@ Example:
         s: string
     ): Promise<[string, string, string]> {
         const a = s.split(',');
-        const fuzzyOrg = a[0]?.trim() || '',
-            note = a[1]?.trim() || '',
-            org =
-                (await this.getOrgListFromFuzzyString(fuzzyOrg)).shift() || '';
+        const fuzzyOrg = a[0]?.trim() || '';
+        const note = a[1]?.trim() || '';
+        const org =
+            (await this.getOrgListFromFuzzyString(fuzzyOrg)).shift() || '';
 
         return [org, fuzzyOrg, note];
     }
@@ -244,6 +244,7 @@ Example:
 
         return searcher.search(orgFuzzy).map((a) => a.name);
     }
+
     /**
      *
      * @param content string content that is multiline
@@ -258,10 +259,10 @@ Example:
             FoodCountParsedInputFailModel[]
         ]
     > {
-        let [date, contentLessDate] = this.parseDateFromContent(content);
+        const [date, contentLessDate] = this.parseDateFromContent(content);
 
         // TODO: parse the date and lines
-        //const orgList = NmFoodCountInputService.getOrgListFromFuzzyString();
+        // const orgList = NmFoodCountInputService.getOrgListFromFuzzyString();
         const inputList = contentLessDate
             .split('\n')
             .map((a) => a.trim())
@@ -360,6 +361,7 @@ Example:
         // in this case there was no number, so we return a falsy zero and let them pick one
         return [lbsCount || 0, contentList.join(' ')];
     }
+
     static getNumberFromStringStart(s: string = ''): number {
         let c = 0;
         for (let a = 0; a < s.length; a++) {
@@ -377,7 +379,7 @@ Example:
     }
 
     static getDateStringFromDay(day: DayNameType): string {
-        var days = [
+        const days = [
             'sunday',
             'monday',
             'tuesday',
@@ -387,7 +389,7 @@ Example:
             'saturday'
         ];
         // starting with the current date
-        let d = new Date();
+        const d = new Date();
         while (day !== days[d.getDay()]) {
             // count backwards until we have the right day
             d.setDate(d.getDate() - 1);
@@ -407,8 +409,8 @@ Example:
             .trim()
             .split('\n')[0]
             ?.split(' ')[0]
-            ?.split('/'),
-            originalDate = potentialDate.join('/');
+            ?.split('/');
+        const originalDate = potentialDate.join('/');
 
         // in this case we don't have anything that looks like our date
 

@@ -1,4 +1,7 @@
-import { ActiveStateType, PersonModel } from '../model/night-market.model';
+import {
+    type ActiveStateType,
+    type PersonModel
+} from '../model/night-market.model';
 import { GSPREAD_CORE_ACTIVE_STATE_LIST } from '../nm-const';
 import { GoogleSpreadsheetsService } from '../service';
 
@@ -22,12 +25,12 @@ const CORE_PERSON_SHEET = 'person';
 const PERSON_LIST_CACHE_EXPIRY = 1000 * 60 * 60; // one hour until cache refresh
 
 // we use a cache so we do not have to go to Google spreadsheet everytime we want the people
-let personListCache: PersonModel[] = [],
-    personListCacheLastUpdate = Date.now();
+let personListCache: PersonModel[] = [];
+let personListCacheLastUpdate = Date.now();
 export class NmPersonService {
     static async getPersonList(): Promise<PersonModel[]> {
         if (
-            !personListCache.length ||
+            personListCache.length === 0 ||
             Date.now() - PERSON_LIST_CACHE_EXPIRY > personListCacheLastUpdate
         ) {
             personListCacheLastUpdate = Date.now();
@@ -58,23 +61,24 @@ export class NmPersonService {
             discordId: (a[13] || '').trim()
         };
     }
+
     static async getCleanNameList() {
-        return this.getNameList().then((a) => a.filter((b) => b.trim()));
+        return await this.getNameList().then((a) => a.filter((b) => b.trim()));
     }
 
     static async getCleanEmailList(): Promise<string[]> {
-        return this.getEmailList().then((a) => a.filter((a) => a.trim()));
+        return await this.getEmailList().then((a) => a.filter((a) => a.trim()));
     }
 
     static async getNameList(): Promise<string[]> {
-        return GoogleSpreadsheetsService.rangeGet(
+        return await GoogleSpreadsheetsService.rangeGet(
             this.getColumnDataRangeName('NAME'),
             GSPREAD_CORE_ID
         ).then((a) => a[0]);
     }
 
     static async getEmailList(): Promise<string[]> {
-        return GoogleSpreadsheetsService.rangeGet(
+        return await GoogleSpreadsheetsService.rangeGet(
             this.getColumnDataRangeName('EMAIL'),
             GSPREAD_CORE_ID
         ).then((a) => a.map((b) => b[0]));
@@ -90,7 +94,7 @@ export class NmPersonService {
     }
 
     static async getAllData(): Promise<string[][]> {
-        return GoogleSpreadsheetsService.rangeGet(
+        return await GoogleSpreadsheetsService.rangeGet(
             this.getFullPersonDataRangeName(),
             GSPREAD_CORE_ID
         );
@@ -165,7 +169,7 @@ export class NmPersonService {
                 })
             )
             .then((a) => a.pop());
-        return a || [];
+        return a != null || [];
     }
 
     static async getRowIndexByDiscordIdOrEmail(
@@ -174,7 +178,7 @@ export class NmPersonService {
         idOrEmail = idOrEmail.toLowerCase().trim();
         const emailIndex = this.getColumnIndexByName('EMAIL');
         const discordIdIndex = this.getColumnIndexByName('DISCORD_ID');
-        return GoogleSpreadsheetsService.rangeGet(
+        return await GoogleSpreadsheetsService.rangeGet(
             this.getFullPersonDataRangeName(),
             GSPREAD_CORE_ID
         ).then(
@@ -190,7 +194,7 @@ export class NmPersonService {
 
     // toggle a person state to active
     static async setActiveState(email: string, activeState: ActiveStateType) {
-        if (GSPREAD_CORE_ACTIVE_STATE_LIST.indexOf(activeState) < 0) {
+        if (!GSPREAD_CORE_ACTIVE_STATE_LIST.includes(activeState)) {
             throw new Error(
                 `Must set active state to one of ${GSPREAD_CORE_ACTIVE_STATE_LIST.join(
                     ', '
@@ -220,10 +224,12 @@ export class NmPersonService {
             ColumnMap[columnName]
         );
     }
+
     // returns the full range for all the person data
     static getFullPersonDataRangeName(): string {
         return `${CORE_PERSON_SHEET}!A:${ColumnMap.LAST_COLUMN}`;
     }
+
     // returns the full range for all the person data minus the header
     static getFullPersonDataRangeNameWithoutHeader(): string {
         return `${CORE_PERSON_SHEET}!A${DATA_OFFSET}:${ColumnMap.LAST_COLUMN}`;
@@ -245,8 +251,9 @@ export class NmPersonService {
         // optionally, get columns that follow
         endCol?: string
     ): string {
-        return `${CORE_PERSON_SHEET}!${ColumnMap[columnName]}${index ? index : ''
-            }${endCol ? `:${endCol}` : ''}`;
+        return `${CORE_PERSON_SHEET}!${ColumnMap[columnName]}${index || ''}${
+            endCol ? `:${endCol}` : ''
+        }`;
     }
 
     static getCellRangeName(
@@ -257,7 +264,6 @@ export class NmPersonService {
         if (!index) {
             throw new Error('must have an index to get a row range name');
         }
-        return `${CORE_PERSON_SHEET}!${ColumnMap[columnName]}${index ? index : ''
-            }`;
+        return `${CORE_PERSON_SHEET}!${ColumnMap[columnName]}${index || ''}`;
     }
 }

@@ -1,5 +1,5 @@
 import { GoogleAuth } from 'google-auth-library';
-import { google, sheets_v4 } from 'googleapis';
+import { google, type sheets_v4 } from 'googleapis';
 import { NmConfigService } from '../nm-service';
 import { Dbg } from '../service';
 
@@ -32,6 +32,7 @@ export class GoogleSpreadsheetsService {
         }
         return n;
     }
+
     static async rangeGet<A extends string[][] = string[][]>(
         range: string,
         spreadsheetId: string
@@ -43,7 +44,7 @@ export class GoogleSpreadsheetsService {
             range
         });
 
-        return (result.data.values || []) as A;
+        return (result.data.values != null || []) as A;
     }
 
     static async rowsDelete(
@@ -84,7 +85,7 @@ export class GoogleSpreadsheetsService {
         range: string,
         spreadsheetId: string
     ) {
-        if (!values || !(values instanceof Array) || !values.length) {
+        if (!values || !(values instanceof Array) || values.length === 0) {
             throw new Error('Must pass a valid values');
         }
 
@@ -114,16 +115,16 @@ export class GoogleSpreadsheetsService {
      * @returns range that was affected
      */
     static async rowsAppend(
-        values: (string | number)[][],
+        values: Array<Array<string | number>>,
         range: string,
         spreadsheetId: string
     ): Promise<string> {
-        if (!values || !(values instanceof Array) || !values.length) {
+        if (!values || !(values instanceof Array) || values.length === 0) {
             throw new Error('Must pass a valid values');
         }
         validate(range, spreadsheetId);
         const [gspread] = await Gspread;
-        return new Promise((r, x) => {
+        return await new Promise((r, x) => {
             gspread.spreadsheets.values.append(
                 {
                     spreadsheetId,
@@ -132,7 +133,7 @@ export class GoogleSpreadsheetsService {
                     requestBody: { values }
                 },
                 function (err: Error | null, response: any) {
-                    if (err) {
+                    if (err != null) {
                         x(err);
                     }
                     r(response.data.updates.updatedRange);

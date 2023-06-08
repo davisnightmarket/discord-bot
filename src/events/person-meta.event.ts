@@ -1,5 +1,5 @@
-import { Message } from 'discord.js';
-import { PersonModel } from '../model/night-market.model';
+import { type Message } from 'discord.js';
+import { type PersonModel } from '../model/night-market.model';
 import { NmPersonService } from '../nm-service/nm-person.service';
 import { MessageService } from '../service/message.service';
 import { ParseContentService } from '../service/parse-content.service';
@@ -15,8 +15,8 @@ type MetaStatusType =
     | 'PHONE_NONE'
     | 'PHONE_AGAIN';
 
-const APPROPRIATE_TIME_TO_BUG_U_IN_SECS = 1; //60 * 60 * 24 * 7,
-const A_BIT_OF_LAG_BEFORE_INTROS_IN_SECS = 1; //60 * 60;
+const APPROPRIATE_TIME_TO_BUG_U_IN_SECS = 1; // 60 * 60 * 24 * 7,
+const A_BIT_OF_LAG_BEFORE_INTROS_IN_SECS = 1; // 60 * 60;
 
 const MsgReply = MessageService.createMap({
     PERSON_FIRST_CONTACT: {
@@ -62,8 +62,8 @@ const personMetaCache: {
 } = {};
 
 export const PersonMetaEvent = async (message: Message) => {
-    const { channel, author } = message as Message<true>,
-        NOW_IN_SECONDS = Date.now() / 1000;
+    const { channel, author } = message as Message<true>;
+    const NOW_IN_SECONDS = Date.now() / 1000;
 
     /* STAGE 1: skip the message entirely in some cases */
 
@@ -82,7 +82,9 @@ export const PersonMetaEvent = async (message: Message) => {
     // OK, now we figure out what their data status is
     const personList = await NmPersonService.getPersonList();
 
-    let personStore = personList.find((a) => a.discordId === message.author.id);
+    const personStore = personList.find(
+        (a) => a.discordId === message.author.id
+    );
 
     const { id, username } = message.author;
 
@@ -93,7 +95,7 @@ export const PersonMetaEvent = async (message: Message) => {
         personMetaCache[id] = [
             'NONE',
             { discordId: id, name: username },
-            personStore || {},
+            personStore != null || {},
             NOW_IN_SECONDS
         ];
     }
@@ -207,7 +209,6 @@ export const PersonMetaEvent = async (message: Message) => {
         dbg('in this case they have never given us a phone again');
         console.log(MsgReply.PERSON_REQUEST_PHONE_AGAIN({ username }));
         message.author.send(MsgReply.PERSON_REQUEST_PHONE_AGAIN({ username }));
-        return;
     }
 
     // todo: all the other questions we want to ask ...

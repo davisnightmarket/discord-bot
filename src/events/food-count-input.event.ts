@@ -1,8 +1,8 @@
 import {
     ActionRowBuilder,
-    Message,
+    type Message,
     ButtonBuilder,
-    MessageReplyOptions,
+    type MessageReplyOptions,
     ButtonStyle
 } from 'discord.js';
 import {
@@ -96,7 +96,7 @@ export const FoodCountInputEvent = async (message: Message) => {
 
     // if we are not in a night or count channel
     // we do not send a message, we simply get out
-    if ('INVALID_CHANNEL' === channelStatus) {
+    if (channelStatus === 'INVALID_CHANNEL') {
         return;
     }
 
@@ -144,7 +144,7 @@ export const FoodCountInputEvent = async (message: Message) => {
             async () => {
                 // we need to make sure teh count has not been cancelled
                 // todo: test this
-                if (!FoodCountInputCache.get(cacheId)) {
+                if (FoodCountInputCache.get(cacheId) == null) {
                     return;
                 }
                 // todo: try/catch
@@ -252,11 +252,11 @@ export const FoodCountInputEvent = async (message: Message) => {
             content
         });
 
-        //we delete crabapple message after 1 minute
+        // we delete crabapple message after 1 minute
         //  todo: make this better
         setTimeout(() => {
             // ? we only delete their message if they are in food count channel??
-            if ('COUNT_CHANNEL' === channelStatus) {
+            if (channelStatus === 'COUNT_CHANNEL') {
                 message.delete();
             }
 

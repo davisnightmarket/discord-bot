@@ -38,7 +38,7 @@ export class MessageService {
         a: string[],
         reload: boolean = false
     ): { [k in string]: string } {
-        let c: {
+        const c: {
             [k in string]: string;
         } = {};
         try {
@@ -61,31 +61,28 @@ export class MessageService {
         };
 
         // todo: parse with HBS
-        return Object.keys(messageMap).reduce(
-            (a, b: keyof U) => {
-                // because we do not want a message compile error to break teh app
-                let d = Handlebars.compile('');
+        return Object.keys(messageMap).reduce<{
+            [k in keyof U]: (a: U[k]) => string;
+        }>((a, b: keyof U) => {
+            // because we do not want a message compile error to break teh app
+            let d = Handlebars.compile('');
+            try {
+                d = Handlebars.compile(messageMap[b] || '');
+            } catch (e) {
+                console.error(e);
+            }
+
+            a[b] = (c: U[typeof b]) => {
+                let msg = '';
                 try {
-                    d = Handlebars.compile(messageMap[b] || '');
+                    msg = d({ ...map[b], ...c });
                 } catch (e) {
                     console.error(e);
                 }
-
-                a[b] = (c: U[typeof b]) => {
-                    let msg = '';
-                    try {
-                        msg = d({ ...map[b], ...c });
-                    } catch (e) {
-                        console.error(e);
-                    }
-                    return msg;
-                };
-                return a;
-            },
-            {} as {
-                [k in keyof U]: (a: U[k]) => string;
-            }
-        ) as {
+                return msg;
+            };
+            return a;
+        }, {}) as {
             [k in keyof U]: (a: U[k]) => string;
         };
     }

@@ -40,7 +40,7 @@ export class NmConfigService {
                     await GoogleSecretService.getParsed<DiscordConfigModel>(
                         `nm-${DISCORD_CONFIG_NAME}`
                     )
-            }
+            };
         } else {
             return {
                 googleSpreadsheetsKeys: JSON.parse(
@@ -51,11 +51,14 @@ export class NmConfigService {
                 ),
                 discordConfig: JSON.parse(
                     readFileSync(
-                        join(__dirname, `../../${DISCORD_CONFIG_NAME}.keys.json`),
+                        join(
+                            __dirname,
+                            `../../${DISCORD_CONFIG_NAME}.keys.json`
+                        ),
                         'utf-8'
                     )
                 )
-            }
+            };
         }
     }
 }

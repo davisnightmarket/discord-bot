@@ -1,4 +1,4 @@
-import { ActiveStateType } from '../model/night-market.model';
+import { type ActiveStateType } from '../model/night-market.model';
 import { GSPREAD_CORE_ACTIVE_STATE_LIST } from '../nm-const';
 import { GoogleSpreadsheetsService } from '../service';
 
@@ -11,8 +11,8 @@ interface NmOrgModel {
 }
 // one hour: every hour the org list gets refreshed
 const ORG_LIST_CACHE_EXPIRY = 1000 * 60 * 60;
-let ORG_LIST_CACHE_TIME = Date.now(),
-    OrgCacheList: NmOrgModel[] = [];
+const ORG_LIST_CACHE_TIME = Date.now();
+let OrgCacheList: NmOrgModel[] = [];
 
 // TODO: make this a class service
 
@@ -31,7 +31,7 @@ export class NmOrgService {
     ): Promise<NmOrgModel[]> {
         if (
             // we have a list of orgs AND
-            OrgCacheList.length &&
+            OrgCacheList.length > 0 &&
             // we are not flushing the cache AND
             !flushCache &&
             // the cache is not expired
@@ -39,10 +39,11 @@ export class NmOrgService {
         ) {
             return OrgCacheList;
         }
-        const r = ((await GoogleSpreadsheetsService.rangeGet(
-            'org!A3:C',
-            GSPREAD_CORE_ID
-        )) || []) as [string, string, string][];
+        const r =
+            (await GoogleSpreadsheetsService.rangeGet(
+                'org!A3:C',
+                GSPREAD_CORE_ID
+            )) || [];
         OrgCacheList = r
             .filter(([status, name]) => {
                 if (active && status !== GSPREAD_CORE_ACTIVE_STATE_LIST[0]) {

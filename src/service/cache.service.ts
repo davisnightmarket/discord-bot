@@ -2,9 +2,9 @@
 // todo: add more cache types as needed
 type CacheType = 'food-count';
 
-type PayloadBaseModel = {
+interface PayloadBaseModel {
     stamp: number;
-};
+}
 
 type PayloadModel = {
     [k in string]: any;
@@ -56,7 +56,6 @@ export function CacheService<U extends PayloadModel = PayloadModel>(
                     ...payload
                 });
             }
-            return;
         },
         delete: (id: string): void => {
             if (C[id]) {

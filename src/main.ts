@@ -7,7 +7,7 @@ import {
     Client,
     Events,
     GatewayIntentBits,
-    Message,
+    type Message,
     Partials
 } from 'discord.js';
 import { NmConfigService } from './nm-service';

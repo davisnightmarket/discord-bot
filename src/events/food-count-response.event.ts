@@ -1,8 +1,8 @@
 import {
-    Message,
-    TextChannel,
-    ButtonInteraction,
-    Interaction
+    type Message,
+    type TextChannel,
+    type ButtonInteraction,
+    type Interaction
 } from 'discord.js';
 import { FoodCountInputCache } from './food-count-input.event';
 
@@ -33,12 +33,12 @@ export const FoodCountResponseEvent = async (interaction: Interaction) => {
         const m = (interaction.channel as TextChannel)?.messages;
         const cache = FoodCountInputCache.get(idCache);
 
-        if (!cache) {
+        if (cache == null) {
             debug('no cache found!');
             return;
         }
 
-        if (cache.insertTimeout) {
+        if (cache.insertTimeout != null) {
             debug('cleared insert timeout!');
             clearTimeout(cache.insertTimeout);
         }
@@ -78,7 +78,10 @@ export const FoodCountResponseEvent = async (interaction: Interaction) => {
         // delete any posting in the food count that came from the night channels
         if (cache.messageCountId) {
             debug('found a count channel user message');
-            const countChannel = getChannelByName(interaction, COUNT_CHANNEL_NAME);
+            const countChannel = getChannelByName(
+                interaction,
+                COUNT_CHANNEL_NAME
+            );
 
             countChannel.messages
                 ?.fetch(cache.messageCountId)
