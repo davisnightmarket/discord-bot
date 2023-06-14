@@ -69,15 +69,10 @@ export class GoogleSpreadsheetsService {
         };
         const [gspread] = await Gspread;
 
-        try {
-            await gspread.spreadsheets.batchUpdate({
-                spreadsheetId,
-                requestBody
-            });
-        } catch (err) {
-            // TODO (Developer) - Handle exception
-            throw err;
-        }
+        await gspread.spreadsheets.batchUpdate({
+            spreadsheetId,
+            requestBody
+        });
     }
 
     static async rowsWrite(
@@ -91,20 +86,16 @@ export class GoogleSpreadsheetsService {
 
         validate(range, spreadsheetId);
         const [gspread] = await Gspread;
-        try {
-            const result = await gspread.spreadsheets.values.update({
-                spreadsheetId,
-                valueInputOption: 'RAW',
-                range,
-                requestBody: { values }
-            });
 
-            dbg('%d cells updated.', result.data.updatedCells);
-            return result.data.updatedRange;
-        } catch (err) {
-            // TODO (Developer) - Handle exception
-            throw err;
-        }
+        const result = await gspread.spreadsheets.values.update({
+            spreadsheetId,
+            valueInputOption: 'RAW',
+            range,
+            requestBody: { values }
+        });
+
+        dbg('%d cells updated.', result.data.updatedCells);
+        return result.data.updatedRange;
     }
 
     /**
@@ -165,28 +156,24 @@ export class GoogleSpreadsheetsService {
         title: string,
         spreadsheetId: string
     ): Promise<number> {
-        try {
-            const request = {
-                spreadsheetId,
-                ranges: [title],
-                includeGridData: false
-            };
-            const [gspread] = await Gspread;
-            const res = await gspread.spreadsheets.get(request);
-            if (
-                !res?.data?.sheets?.length ||
-                (!res?.data?.sheets[0]?.properties?.sheetId &&
-                    !(res?.data?.sheets[0]?.properties?.sheetId || 0 >= 0))
-            ) {
-                throw new Error(
-                    `Sheet ${title} does not exist in spreadsheet ${spreadsheetId}`
-                );
-            }
-
-            return res?.data?.sheets[0]?.properties?.sheetId || 0;
-        } catch (e) {
-            throw e;
+        const request = {
+            spreadsheetId,
+            ranges: [title],
+            includeGridData: false
+        };
+        const [gspread] = await Gspread;
+        const res = await gspread.spreadsheets.get(request);
+        if (
+            !res?.data?.sheets?.length ||
+            (!res?.data?.sheets[0]?.properties?.sheetId &&
+                !(res?.data?.sheets[0]?.properties?.sheetId || 0 >= 0))
+        ) {
+            throw new Error(
+                `Sheet ${title} does not exist in spreadsheet ${spreadsheetId}`
+            );
         }
+
+        return res?.data?.sheets[0]?.properties?.sheetId || 0;
     }
 
     static async sheetCreateIfNone(
