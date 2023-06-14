@@ -95,7 +95,7 @@ export const PersonMetaEvent = async (message: Message) => {
         personMetaCache[id] = [
             'NONE',
             { discordId: id, name: username },
-            personStore != null || {},
+            personStore != null ?? {},
             NOW_IN_SECONDS
         ];
     }

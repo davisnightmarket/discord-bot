@@ -222,10 +222,10 @@ Example:
         s: string
     ): Promise<[string, string, string]> {
         const a = s.split(',');
-        const fuzzyOrg = a[0]?.trim() || '';
-        const note = a[1]?.trim() || '';
+        const fuzzyOrg = a[0]?.trim() ?? '';
+        const note = a[1]?.trim() ?? '';
         const org =
-            (await this.getOrgListFromFuzzyString(fuzzyOrg)).shift() || '';
+            (await this.getOrgListFromFuzzyString(fuzzyOrg)).shift() ?? '';
 
         return [org, fuzzyOrg, note];
     }
@@ -359,7 +359,7 @@ Example:
             }
         }
         // in this case there was no number, so we return a falsy zero and let them pick one
-        return [lbsCount || 0, contentList.join(' ')];
+        return [lbsCount ?? 0, contentList.join(' ')];
     }
 
     static getNumberFromStringStart(s: string = ''): number {

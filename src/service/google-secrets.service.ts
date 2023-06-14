@@ -8,6 +8,6 @@ export class GoogleSecretService {
         const [version] = await secretmanagerClient.accessSecretVersion({
             name
         });
-        return JSON.parse(version.payload?.data?.toString() || '{}');
+        return JSON.parse(version.payload?.data?.toString() ?? '{}');
     }
 }

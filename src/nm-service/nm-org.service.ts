@@ -25,9 +25,9 @@ export class NmOrgService {
             active?: boolean;
             flushCache?: boolean;
         } = {
-            active: false,
-            flushCache: true
-        }
+                active: false,
+                flushCache: true
+            }
     ): Promise<NmOrgModel[]> {
         if (
             // we have a list of orgs AND
@@ -43,7 +43,7 @@ export class NmOrgService {
             (await GoogleSpreadsheetsService.rangeGet(
                 'org!A3:C',
                 GSPREAD_CORE_ID
-            )) || [];
+            )) ?? [];
         OrgCacheList = r
             .filter(([status, name]) => {
                 if (active && status !== GSPREAD_CORE_ACTIVE_STATE_LIST[0]) {
@@ -63,7 +63,7 @@ export class NmOrgService {
                         nameAltList
                             ?.split(',')
                             .filter((a) => a.trim())
-                            .map((a) => a.trim()) || []
+                            .map((a) => a.trim()) ?? []
                 };
             });
 
@@ -75,9 +75,9 @@ export class NmOrgService {
             active?: boolean;
             flushCache?: boolean;
         } = {
-            active: false,
-            flushCache: true
-        }
+                active: false,
+                flushCache: true
+            }
     ): Promise<string[]> {
         const r = await this.getOrgList(opts);
         return r.map((a) => a.name);

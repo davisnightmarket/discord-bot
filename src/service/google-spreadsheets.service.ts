@@ -44,7 +44,7 @@ export class GoogleSpreadsheetsService {
             range
         });
 
-        return (result.data.values != null || []) as A;
+        return result.data.values ?? [];
     }
 
     static async rowsDelete(

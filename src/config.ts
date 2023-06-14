@@ -33,9 +33,9 @@ if (!EnvConfig[process.env.NODE_ENV as EnvType]) {
     console.log('No NODE_ENV set, default to test');
 }
 
-export const ENV = (process.env.NODE_ENV as EnvType) || 'test';
+export const ENV = (process.env.NODE_ENV as EnvType) ?? 'test';
 
 export const Config = (
     // allow env to be passed so we can test config in any env
-    env = (process.env.NODE_ENV || 'test') as EnvType
+    env = (process.env.NODE_ENV ?? 'test') as EnvType
 ) => EnvConfig[env];
