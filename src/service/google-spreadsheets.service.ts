@@ -115,7 +115,7 @@ export class GoogleSpreadsheetsService {
         }
         validate(range, spreadsheetId);
         const [gspread] = await Gspread;
-        return await new Promise((r, x) => {
+        return await new Promise((resolve, reject) => {
             gspread.spreadsheets.values.append(
                 {
                     spreadsheetId,
@@ -125,9 +125,9 @@ export class GoogleSpreadsheetsService {
                 },
                 function (err: Error | null, response: any) {
                     if (err != null) {
-                        x(err);
+                        reject(err);
                     }
-                    r(response.data.updates.updatedRange);
+                    resolve(response.data.updates.updatedRange);
                 }
             );
         });
@@ -166,14 +166,14 @@ export class GoogleSpreadsheetsService {
         if (
             !res?.data?.sheets?.length ||
             (!res?.data?.sheets[0]?.properties?.sheetId &&
-                !(res?.data?.sheets[0]?.properties?.sheetId || 0 >= 0))
+                !((res?.data?.sheets[0]?.properties?.sheetId ?? 0) >= 0))
         ) {
             throw new Error(
                 `Sheet ${title} does not exist in spreadsheet ${spreadsheetId}`
             );
         }
 
-        return res?.data?.sheets[0]?.properties?.sheetId || 0;
+        return res?.data?.sheets[0]?.properties?.sheetId ?? 0;
     }
 
     static async sheetCreateIfNone(

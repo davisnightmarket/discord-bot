@@ -16,8 +16,8 @@ type CachePayloadModel<
         stamp: number;
     }
 > = {
-    [k in string]: U;
-};
+        [k in string]: U;
+    };
 
 type CacheModel<U extends PayloadModel = PayloadModel> = {
     [k in CacheType]: CachePayloadModel<U & PayloadBaseModel>;
@@ -35,8 +35,8 @@ export function CacheService<U extends PayloadModel = PayloadModel>(
     name: CacheType
 ): {
     add: (id: string, payload: U) => U;
-    update: (id: string, payload: Partial<U>) => U | void;
-    get: (id: string) => U | void;
+    update: (id: string, payload: Partial<U>) => U | undefined;
+    get: (id: string) => U | undefined;
     delete: (id: string) => void;
 } {
     const C = Cache[name] as CachePayloadModel<U & PayloadBaseModel>;
@@ -50,14 +50,14 @@ export function CacheService<U extends PayloadModel = PayloadModel>(
             return C[id];
         },
         update: (id, payload: Partial<U>) => {
-            if (C && C[id]) {
+            if (C && id in C) {
                 return (C[id] = {
                     ...C[id],
                     ...payload
                 });
             }
         },
-        delete: (id: string): void => {
+        delete: (id: string) => {
             if (C[id]) {
                 delete C[id];
             }

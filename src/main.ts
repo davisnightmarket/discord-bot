@@ -11,7 +11,6 @@ import {
     Partials
 } from 'discord.js';
 import { NmConfigService } from './nm-service';
-import { Config } from './config';
 
 async function main() {
     const client = new Client({

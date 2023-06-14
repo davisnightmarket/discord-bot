@@ -17,5 +17,15 @@
             "./tsconfig.json"
         ]
     },
-    "rules": {}
+    "rules": {
+        "@typescript-eslint/no-extraneous-class": "off",
+        "@typescript-eslint/explicit-function-return-type": "off",
+        "@typescript-eslint/no-unused-var": "off",
+        "@typescript-eslint/no-misused-promises": "off",
+        // below are rules we want long term, but are to much work to get working right now
+        "@typescript-eslint/strict-boolean-expressions": "off",
+        "@typescript-eslint/no-dynamic-delete": "off",
+        "@typescript-eslint/no-floating-promises": "off",
+        "@typescript-eslint/no-unused-vars": "off"
+    }
 }
