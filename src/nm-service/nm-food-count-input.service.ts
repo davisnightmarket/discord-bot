@@ -235,7 +235,7 @@ Example:
     ): Promise<string[]> {
         const orgList = (await NmOrgService.getOrgList()).map((a) => ({
             ...a,
-            nameSearchable: `${a.nameAltList.join(' ')}${a.name}`
+            nameSearchable: `${a.nameAltList.join(' ')} ${a.name}`
         }));
         const searcher = new FuzzySearch(orgList, ['nameSearchable'], {
             caseSensitive: false,
