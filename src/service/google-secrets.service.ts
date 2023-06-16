@@ -8,6 +8,9 @@ export class GoogleSecretService {
         const [version] = await secretmanagerClient.accessSecretVersion({
             name
         });
-        return JSON.parse(version.payload?.data?.toString() ?? '{}');
+
+        // we want empty strings to be replaced with the "{}"
+        // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+        return JSON.parse(version.payload?.data?.toString() || '{}');
     }
 }

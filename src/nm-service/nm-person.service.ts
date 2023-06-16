@@ -169,7 +169,7 @@ export class NmPersonService {
                 })
             )
             .then((a) => a.pop());
-        return a != null ?? [];
+        return a ?? [];
     }
 
     static async getRowIndexByDiscordIdOrEmail(
@@ -251,7 +251,7 @@ export class NmPersonService {
         // optionally, get columns that follow
         endCol?: string
     ): string {
-        return `${CORE_PERSON_SHEET}!${ColumnMap[columnName]}${index ?? ''}${endCol ? `:${endCol}` : ''
+        return `${CORE_PERSON_SHEET}!${ColumnMap[columnName]}${index || ''}${endCol ? `:${endCol}` : ''
             }`;
     }
 
@@ -263,6 +263,6 @@ export class NmPersonService {
         if (!index) {
             throw new Error('must have an index to get a row range name');
         }
-        return `${CORE_PERSON_SHEET}!${ColumnMap[columnName]}${index ?? ''}`;
+        return `${CORE_PERSON_SHEET}!${ColumnMap[columnName]}${index || ''}`;
     }
 }
