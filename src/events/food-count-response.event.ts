@@ -13,8 +13,6 @@ const debug = Dbg('FoodCountCancelEvent');
 
 /**
  *
- * @param interaction Discord interaction event
- * @returns
  */
 export const FoodCountResponseEvent = async (interaction: Interaction) => {
     // discord event listener does not like ButtonInteraction, but

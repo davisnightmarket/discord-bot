@@ -56,8 +56,6 @@ export const TIME_UNTIL_UPDATE = 60 * 1000; // one minute in milliseconds
 
 /**
  *
- * @param message Discord message event
- * @returns void
  */
 export const FoodCountInputEvent = async (message: Message) => {
     const { channel, author } = message as Message<true>;
@@ -164,7 +162,7 @@ export const FoodCountInputEvent = async (message: Message) => {
 
                 countChannel?.send(
                     MsgReply.FOODCOUNT_INSERT({
-                        lbs: lbs + '',
+                        lbs: `${lbs}`,
                         note,
                         org,
                         date
@@ -197,11 +195,11 @@ export const FoodCountInputEvent = async (message: Message) => {
         // our success message
         const reply: MessageReplyOptions = {
             content: MsgReply.FOODCOUNT_INPUT_OK({
-                lbs: lbs + '',
+                lbs: `${lbs}`,
                 note,
                 org,
                 date,
-                seconds: '' + TIME_UNTIL_UPDATE / 1000
+                seconds: `${TIME_UNTIL_UPDATE / 1000}`
             }),
             components: [
                 new ActionRowBuilder<ButtonBuilder>().addComponents(

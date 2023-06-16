@@ -222,10 +222,10 @@ Example:
         s: string
     ): Promise<[string, string, string]> {
         const a = s.split(',');
-        const fuzzyOrg = a[0]?.trim() || '';
-        const note = a[1]?.trim() || '';
+        const fuzzyOrg = a[0]?.trim() ?? '';
+        const note = a[1]?.trim() ?? '';
         const org =
-            (await this.getOrgListFromFuzzyString(fuzzyOrg)).shift() || '';
+            (await this.getOrgListFromFuzzyString(fuzzyOrg)).shift() ?? '';
 
         return [org, fuzzyOrg, note];
     }
@@ -235,7 +235,7 @@ Example:
     ): Promise<string[]> {
         const orgList = (await NmOrgService.getOrgList()).map((a) => ({
             ...a,
-            nameSearchable: a.nameAltList.join(' ') + ' ' + a.name
+            nameSearchable: `${a.nameAltList.join(' ')} ${a.name}`
         }));
         const searcher = new FuzzySearch(orgList, ['nameSearchable'], {
             caseSensitive: false,
@@ -245,11 +245,6 @@ Example:
         return searcher.search(orgFuzzy).map((a) => a.name);
     }
 
-    /**
-     *
-     * @param content string content that is multiline
-     * @returns a date and a food count input list
-     */
     static async getFoodCountDateAndParsedInput(
         content: string
     ): Promise<
@@ -359,7 +354,7 @@ Example:
             }
         }
         // in this case there was no number, so we return a falsy zero and let them pick one
-        return [lbsCount || 0, contentList.join(' ')];
+        return [lbsCount ?? 0, contentList.join(' ')];
     }
 
     static getNumberFromStringStart(s: string = ''): number {
@@ -371,7 +366,7 @@ Example:
                 a = s.length;
             } else {
                 if (!isNaN(b)) {
-                    c = +(c + '' + b);
+                    c = +`${c}${b}`;
                 }
             }
         }
@@ -441,9 +436,9 @@ Example:
             return ['', s];
         }
 
-        const theYear = '' + new Date().getFullYear();
+        const theYear = String(new Date().getFullYear());
 
-        if (potentialDate.length == 2) {
+        if (potentialDate.length === 2) {
             // if no year, add
             potentialDate[2] = theYear;
         } else if (potentialDate[2].length === 2) {

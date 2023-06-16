@@ -7,13 +7,13 @@ export class PersonMetaService {
         if (content.split('@').length === 2) {
             // in case they wrote a sentence with an email in it
             parsed =
-                content.split(' ').find((b) => b.split('@').length === 2) || '';
+                content.split(' ').find((b) => b.split('@').length === 2) ?? '';
             return ['EMAIL', parsed];
         }
         if (content.toLowerCase() === 'decline') {
             // in case they wrote a sentence with an email in it
             parsed =
-                content.split(' ').find((b) => b.split('@').length === 2) || '';
+                content.split(' ').find((b) => b.split('@').length === 2) ?? '';
             return ['DECLINE', 'decline'];
         }
         // todo: phone and boolean

@@ -44,7 +44,7 @@ export class GoogleSpreadsheetsService {
             range
         });
 
-        return (result.data.values != null || []) as A;
+        return result.data.values ?? [];
     }
 
     static async rowsDelete(
@@ -75,7 +75,7 @@ export class GoogleSpreadsheetsService {
                 requestBody
             });
         } catch (err) {
-            // TODO (Developer) - Handle exception
+            console.error(err)
             throw err;
         }
     }
@@ -91,6 +91,7 @@ export class GoogleSpreadsheetsService {
 
         validate(range, spreadsheetId);
         const [gspread] = await Gspread;
+
         try {
             const result = await gspread.spreadsheets.values.update({
                 spreadsheetId,
@@ -102,8 +103,8 @@ export class GoogleSpreadsheetsService {
             dbg('%d cells updated.', result.data.updatedCells);
             return result.data.updatedRange;
         } catch (err) {
-            // TODO (Developer) - Handle exception
-            throw err;
+            console.error(err)
+            throw err
         }
     }
 
@@ -124,7 +125,7 @@ export class GoogleSpreadsheetsService {
         }
         validate(range, spreadsheetId);
         const [gspread] = await Gspread;
-        return await new Promise((r, x) => {
+        return await new Promise((resolve, reject) => {
             gspread.spreadsheets.values.append(
                 {
                     spreadsheetId,
@@ -134,9 +135,9 @@ export class GoogleSpreadsheetsService {
                 },
                 function (err: Error | null, response: any) {
                     if (err != null) {
-                        x(err);
+                        reject(err);
                     }
-                    r(response.data.updates.updatedRange);
+                    resolve(response.data.updates.updatedRange);
                 }
             );
         });
@@ -176,16 +177,17 @@ export class GoogleSpreadsheetsService {
             if (
                 !res?.data?.sheets?.length ||
                 (!res?.data?.sheets[0]?.properties?.sheetId &&
-                    !(res?.data?.sheets[0]?.properties?.sheetId || 0 >= 0))
+                    !((res?.data?.sheets[0]?.properties?.sheetId ?? 0) >= 0))
             ) {
                 throw new Error(
                     `Sheet ${title} does not exist in spreadsheet ${spreadsheetId}`
                 );
             }
 
-            return res?.data?.sheets[0]?.properties?.sheetId || 0;
-        } catch (e) {
-            throw e;
+            return res?.data?.sheets[0]?.properties?.sheetId ?? 0;
+        } catch (err) {
+            console.error(err)
+            throw err
         }
     }
 

@@ -67,7 +67,7 @@ export class MessageService {
             // because we do not want a message compile error to break teh app
             let d = Handlebars.compile('');
             try {
-                d = Handlebars.compile(messageMap[b] || '');
+                d = Handlebars.compile(messageMap[b] ?? '');
             } catch (e) {
                 console.error(e);
             }
@@ -83,7 +83,7 @@ export class MessageService {
             };
             return a;
         }, {}) as {
-            [k in keyof U]: (a: U[k]) => string;
-        };
+                [k in keyof U]: (a: U[k]) => string;
+            };
     }
 }

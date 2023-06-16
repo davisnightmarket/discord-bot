@@ -6,14 +6,13 @@
 // right now dev and test are the same
 type EnvType = 'dev' | 'test' | 'prod';
 
-interface Config {
+
+const EnvConfig: { [k in EnvType]: {
     // the  spreadsheet id for the core data model where people and orgs are kept
     GSPREAD_CORE_ID: string;
     // the  spreadsheet id for where food counts are kept
     GSPREAD_FOODCOUNT_ID: string;
-}
-
-const EnvConfig: { [k in EnvType]: Config } = {
+} } = {
     dev: {
         GSPREAD_CORE_ID: '1y27iAsVWOG_l3yfLEvVIyKqKlL9i571pZN6wegCK_98',
         GSPREAD_FOODCOUNT_ID: '18TujYCUGf4Lko-8VVJtyagmk2SNEouxTTde5opG1eoo'
@@ -33,9 +32,9 @@ if (!EnvConfig[process.env.NODE_ENV as EnvType]) {
     console.log('No NODE_ENV set, default to test');
 }
 
-export const ENV = (process.env.NODE_ENV as EnvType) || 'test';
+export const ENV = (process.env.NODE_ENV as EnvType) ?? 'test';
 
 export const Config = (
     // allow env to be passed so we can test config in any env
-    env = (process.env.NODE_ENV || 'test') as EnvType
+    env = (process.env.NODE_ENV ?? 'test') as EnvType
 ) => EnvConfig[env];

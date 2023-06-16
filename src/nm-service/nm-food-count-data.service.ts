@@ -53,7 +53,7 @@ export class NmFoodCountDataService {
             (await GoogleSpreadsheetsService.rangeGet(
                 `'${sheetName}'!A2:E`,
                 GSPREAD_FOODCOUNT_ID
-            )) || []
+            )) ?? []
         );
     }
 
@@ -118,7 +118,7 @@ export class NmFoodCountDataService {
             (await GoogleSpreadsheetsService.rangeGet(
                 `'${sheetName}'!A:E`,
                 GSPREAD_FOODCOUNT_ID
-            )) || [];
+            )) ?? [];
         const lastRowIndex = range.length;
         if (lastRowIndex < 2) {
             console.error('We cannot delete the header');
