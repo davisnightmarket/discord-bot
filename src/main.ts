@@ -27,21 +27,11 @@ async function main() {
         console.log(`Ready! Logged in as ${c.user.tag}`);
     });
 
-    // todo: this will file on every message sent. we probably
-    // want a big switchboard and fire different stuff depending on
-    // parameters. The reason we create on one message create event
-    // is that I think this saves us data costs
-    client.on(Events.MessageCreate, (message: Message) => {
-        // here we want to know who people are, so we ask
-        PersonMetaEvent(message);
+    // person meta data events
+    client.on(Events.MessageCreate, PersonMetaEvent);
 
-        // when someone enters a foox count
-        FoodCountInputEvent(message);
-    });
-
-    // todo: this will file on every interaction sent. we probably
-    // want a big switchboard and fire different stuff depending on
-    // parameters
+    // food count events
+    client.on(Events.MessageCreate, FoodCountInputEvent);
     client.on(Events.InteractionCreate, FoodCountResponseEvent);
 
     const {
