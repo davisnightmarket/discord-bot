@@ -1,10 +1,12 @@
 import { type ActiveStateType } from '../model/night-market.model';
-import { GSPREAD_CORE_ACTIVE_STATE_LIST } from '../nm-const';
+import {
+    CONFIG_GSPREAD_SHEET_NAME,
+    GSPREAD_CORE_ACTIVE_STATE_LIST
+} from '../nm-const';
 import { GoogleSpreadsheetsService } from '../service';
 
-import { Config } from '../config';
+import { ConfigValueGet } from '../config';
 
-const { GSPREAD_CORE_ID } = Config();
 interface NmOrgModel {
     name: string;
     nameAltList: string[];
@@ -17,7 +19,8 @@ let OrgCacheList: NmOrgModel[] = [];
 // TODO: make this a class service
 
 export class NmOrgService {
-    static async getOrgList(
+    private orgSheetService: GoogleSpreadsheetsService;
+    async getOrgList(
         {
             active = false,
             flushCache = true
@@ -25,9 +28,9 @@ export class NmOrgService {
             active?: boolean;
             flushCache?: boolean;
         } = {
-                active: false,
-                flushCache: true
-            }
+            active: false,
+            flushCache: true
+        }
     ): Promise<NmOrgModel[]> {
         if (
             // we have a list of orgs AND
@@ -39,11 +42,7 @@ export class NmOrgService {
         ) {
             return OrgCacheList;
         }
-        const r =
-            (await GoogleSpreadsheetsService.rangeGet(
-                'org!A3:C',
-                GSPREAD_CORE_ID
-            )) ?? [];
+        const r = (await this.orgSheetService.rangeGet('org!A3:C')) ?? [];
         OrgCacheList = r
             .filter(([status, name]) => {
                 if (active && status !== GSPREAD_CORE_ACTIVE_STATE_LIST[0]) {
@@ -70,14 +69,14 @@ export class NmOrgService {
         return OrgCacheList;
     }
 
-    static async getOrgNameList(
+    async getOrgNameList(
         opts: {
             active?: boolean;
             flushCache?: boolean;
         } = {
-                active: false,
-                flushCache: true
-            }
+            active: false,
+            flushCache: true
+        }
     ): Promise<string[]> {
         const r = await this.getOrgList(opts);
         return r.map((a) => a.name);
@@ -96,5 +95,10 @@ export class NmOrgService {
         // get all the org rows
         // find a match to name
         // update cell for active at row and column index (add method to GSpreadService)
+    }
+    constructor(instanceId: string) {
+        this.orgSheetService = new GoogleSpreadsheetsService(
+            ConfigValueGet(instanceId, CONFIG_GSPREAD_SHEET_NAME.ORG_SHEET)
+        );
     }
 }

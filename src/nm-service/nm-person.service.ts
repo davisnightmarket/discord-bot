@@ -4,12 +4,11 @@ import {
 } from '../model/night-market.model';
 import { GSPREAD_CORE_ACTIVE_STATE_LIST } from '../nm-const';
 import { GoogleSpreadsheetsService } from '../service';
-
-import { Config } from '../config';
+import { CONFIG_GSPREAD_SHEET_NAME } from '../nm-const';
+import { ConfigValueGet } from '../config';
 
 type ColumnMapKeyType = keyof typeof ColumnMap;
 
-const { GSPREAD_CORE_ID } = Config();
 // makes it easier to find and change where data is in sheet columns
 const ColumnMap = {
     EMAIL: 'C',
@@ -28,7 +27,8 @@ const PERSON_LIST_CACHE_EXPIRY = 1000 * 60 * 60; // one hour until cache refresh
 let personListCache: PersonModel[] = [];
 let personListCacheLastUpdate = Date.now();
 export class NmPersonService {
-    static async getPersonList(): Promise<PersonModel[]> {
+    personSheetService: GoogleSpreadsheetsService;
+    async getPersonList(): Promise<PersonModel[]> {
         if (
             personListCache.length === 0 ||
             Date.now() - PERSON_LIST_CACHE_EXPIRY > personListCacheLastUpdate
@@ -42,7 +42,7 @@ export class NmPersonService {
         return personListCache;
     }
 
-    static createFromData(a: string[]): PersonModel {
+    createFromData(a: string[]): PersonModel {
         // todo: make a better mapping, maybe map header to column, make it easier to edit spreadhseet without fuckup script?
         return {
             status: (a[0] ?? '').trim(),
@@ -62,55 +62,47 @@ export class NmPersonService {
         };
     }
 
-    static async getCleanNameList() {
+    async getCleanNameList() {
         return await this.getNameList().then((a) => a.filter((b) => b.trim()));
     }
 
-    static async getCleanEmailList(): Promise<string[]> {
+    async getCleanEmailList(): Promise<string[]> {
         return await this.getEmailList().then((a) => a.filter((a) => a.trim()));
     }
 
-    static async getNameList(): Promise<string[]> {
-        return await GoogleSpreadsheetsService.rangeGet(
-            this.getColumnDataRangeName('NAME'),
-            GSPREAD_CORE_ID
-        ).then((a) => a[0]);
+    async getNameList(): Promise<string[]> {
+        return await this.personSheetService
+            .rangeGet(this.getColumnDataRangeName('NAME'))
+            .then((a) => a[0]);
     }
 
-    static async getEmailList(): Promise<string[]> {
-        return await GoogleSpreadsheetsService.rangeGet(
-            this.getColumnDataRangeName('EMAIL'),
-            GSPREAD_CORE_ID
-        ).then((a) => a.map((b) => b[0]));
+    async getEmailList(): Promise<string[]> {
+        return await this.personSheetService
+            .rangeGet(this.getColumnDataRangeName('EMAIL'))
+            .then((a) => a.map((b) => b[0]));
     }
 
-    static async getAllDataWithoutHeader(): Promise<string[][]> {
+    async getAllDataWithoutHeader(): Promise<string[][]> {
         return (
-            await GoogleSpreadsheetsService.rangeGet(
-                this.getFullPersonDataRangeName(),
-                GSPREAD_CORE_ID
+            await this.personSheetService.rangeGet(
+                this.getFullPersonDataRangeName()
             )
         ).filter((_a, i) => !!i);
     }
 
-    static async getAllData(): Promise<string[][]> {
-        return await GoogleSpreadsheetsService.rangeGet(
-            this.getFullPersonDataRangeName(),
-            GSPREAD_CORE_ID
+    async getAllData(): Promise<string[][]> {
+        return await this.personSheetService.rangeGet(
+            this.getFullPersonDataRangeName()
         );
     }
 
-    static async getPersonRangeByDiscorIdOrEmail(
-        idOrEmail: string
-    ): Promise<string> {
+    async getPersonRangeByDiscorIdOrEmail(idOrEmail: string): Promise<string> {
         const personRange = '';
 
         return personRange;
     }
 
-    static async getPersonByDiscorIdOrEmail(
-        idOrEmail: string
-    ): Promise<PersonModel> {
+    async getPersonByDiscorIdOrEmail(idOrEmail: string): Promise<PersonModel> {
         const [
             status,
             name,
@@ -145,21 +137,17 @@ export class NmPersonService {
         };
     }
 
-    static async getEmailByDiscordId(id: string): Promise<string> {
+    async getEmailByDiscordId(id: string): Promise<string> {
         const [_status, _name, email] = await this.getRowByDiscordIdOrEmail(id);
         return email;
     }
 
-    static async getRowByDiscordIdOrEmail(
-        idOrEmail: string
-    ): Promise<string[]> {
+    async getRowByDiscordIdOrEmail(idOrEmail: string): Promise<string[]> {
         idOrEmail = idOrEmail.toLowerCase().trim();
         const emailIndex = this.getColumnIndexByName('EMAIL');
         const discordIdIndex = this.getColumnIndexByName('DISCORD_ID');
-        const a = await GoogleSpreadsheetsService.rangeGet(
-            this.getFullPersonDataRangeName(),
-            GSPREAD_CORE_ID
-        )
+        const a = await this.personSheetService
+            .rangeGet(this.getFullPersonDataRangeName())
             .then((a) =>
                 a.filter((a) => {
                     return (
@@ -172,28 +160,25 @@ export class NmPersonService {
         return a ?? [];
     }
 
-    static async getRowIndexByDiscordIdOrEmail(
-        idOrEmail: string
-    ): Promise<number> {
+    async getRowIndexByDiscordIdOrEmail(idOrEmail: string): Promise<number> {
         idOrEmail = idOrEmail.toLowerCase().trim();
         const emailIndex = this.getColumnIndexByName('EMAIL');
         const discordIdIndex = this.getColumnIndexByName('DISCORD_ID');
-        return await GoogleSpreadsheetsService.rangeGet(
-            this.getFullPersonDataRangeName(),
-            GSPREAD_CORE_ID
-        ).then(
-            (a) =>
-                a.findIndex((a) => {
-                    return (
-                        idOrEmail === a[emailIndex]?.trim() ||
-                        idOrEmail === a[discordIdIndex]?.trim()
-                    );
-                }) + 1
-        );
+        return await this.personSheetService
+            .rangeGet(this.getFullPersonDataRangeName())
+            .then(
+                (a) =>
+                    a.findIndex((a) => {
+                        return (
+                            idOrEmail === a[emailIndex]?.trim() ||
+                            idOrEmail === a[discordIdIndex]?.trim()
+                        );
+                    }) + 1
+            );
     }
 
     // toggle a person state to active
-    static async setActiveState(email: string, activeState: ActiveStateType) {
+    async setActiveState(email: string, activeState: ActiveStateType) {
         if (!GSPREAD_CORE_ACTIVE_STATE_LIST.includes(activeState)) {
             throw new Error(
                 `Must set active state to one of ${GSPREAD_CORE_ACTIVE_STATE_LIST.join(
@@ -210,33 +195,29 @@ export class NmPersonService {
 
         const range = this.getColumnRangeName('STATUS', rowIndex);
         // update cell for active at row and column index (add method to GSpreadService)
-        await GoogleSpreadsheetsService.rowsWrite(
-            [[activeState]],
-            range,
-            GSPREAD_CORE_ID
-        );
+        await this.personSheetService.rowsWrite([[activeState]], range);
         return range;
     }
 
     // gets the row index number from named column
-    static getColumnIndexByName(columnName: ColumnMapKeyType) {
-        return GoogleSpreadsheetsService.columnIndexFromLetter(
+    getColumnIndexByName(columnName: ColumnMapKeyType) {
+        return this.personSheetService.columnIndexFromLetter(
             ColumnMap[columnName]
         );
     }
 
     // returns the full range for all the person data
-    static getFullPersonDataRangeName(): string {
+    getFullPersonDataRangeName(): string {
         return `${CORE_PERSON_SHEET}!A:${ColumnMap.LAST_COLUMN}`;
     }
 
     // returns the full range for all the person data minus the header
-    static getFullPersonDataRangeNameWithoutHeader(): string {
+    getFullPersonDataRangeNameWithoutHeader(): string {
         return `${CORE_PERSON_SHEET}!A${DATA_OFFSET}:${ColumnMap.LAST_COLUMN}`;
     }
 
     // returns a range for a data set minus the header
-    static getColumnDataRangeName(columnName: ColumnMapKeyType): string {
+    getColumnDataRangeName(columnName: ColumnMapKeyType): string {
         return this.getColumnRangeName(
             columnName,
             DATA_OFFSET,
@@ -244,18 +225,19 @@ export class NmPersonService {
         );
     }
 
-    static getColumnRangeName(
+    getColumnRangeName(
         columnName: ColumnMapKeyType,
         // defaults to full column
         index: number = 0,
         // optionally, get columns that follow
         endCol?: string
     ): string {
-        return `${CORE_PERSON_SHEET}!${ColumnMap[columnName]}${index || ''}${endCol ? `:${endCol}` : ''
-            }`;
+        return `${CORE_PERSON_SHEET}!${ColumnMap[columnName]}${index || ''}${
+            endCol ? `:${endCol}` : ''
+        }`;
     }
 
-    static getCellRangeName(
+    getCellRangeName(
         columnName: ColumnMapKeyType,
         // defaults to full column
         index: number
@@ -264,5 +246,13 @@ export class NmPersonService {
             throw new Error('must have an index to get a row range name');
         }
         return `${CORE_PERSON_SHEET}!${ColumnMap[columnName]}${index || ''}`;
+    }
+    constructor(instanceId: string) {
+        this.personSheetService = new GoogleSpreadsheetsService(
+            ConfigValueGet(
+                'davis.night',
+                CONFIG_GSPREAD_SHEET_NAME.PERSON_SHEET
+            )
+        );
     }
 }

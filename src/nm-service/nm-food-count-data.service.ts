@@ -1,5 +1,6 @@
 import { GoogleSpreadsheetsService } from '../service';
-import { Config } from '../config';
+import { ConfigValueGet } from '../config';
+import { CONFIG_GSPREAD_SHEET_NAME } from '../nm-const';
 
 /**
  *  FOODCOUNT
@@ -18,8 +19,6 @@ export const GSPREAD_SHEET_FOODCOUNT_HEADERS = [
     'note'
 ];
 
-const { GSPREAD_FOODCOUNT_ID } = Config();
-
 type FoodCountList = [string, string, number, string, string];
 
 interface FoodCountMapType {
@@ -31,14 +30,16 @@ interface FoodCountMapType {
 }
 
 export class NmFoodCountDataService {
-    static getFoodCountSheetName(
+    private foodCountSheetService: GoogleSpreadsheetsService;
+
+    getFoodCountSheetName(
         // defaults to current year
         year = new Date().getFullYear()
     ): string {
         return `${GSPREAD_FOODCOUNT_SHEET_PREFIX} ${year}`;
     }
 
-    static fromFoodCountMapToList({
+    fromFoodCountMapToList({
         date,
         org,
         lbs,
@@ -48,86 +49,77 @@ export class NmFoodCountDataService {
         return [date, org, lbs, reporter, note];
     }
 
-    static async getFoodCount(sheetName: string) {
+    async getFoodCount(sheetName: string) {
         return (
-            (await GoogleSpreadsheetsService.rangeGet(
-                `'${sheetName}'!A2:E`,
-                GSPREAD_FOODCOUNT_ID
+            (await this.foodCountSheetService.rangeGet(
+                `'${sheetName}'!A2:E`
             )) ?? []
         );
     }
 
-    static async appendFoodCount(
+    async appendFoodCount(
         foodCount: FoodCountMapType,
         // the current year's sheet name by default
         sheet = this.getFoodCountSheetName()
     ): Promise<[string, number]> {
         // we create a new sheet every year, so we test if the sheet exists, and create it if not
-        if (
-            await GoogleSpreadsheetsService.sheetCreateIfNone(
-                sheet,
-                GSPREAD_FOODCOUNT_ID
-            )
-        ) {
-            await GoogleSpreadsheetsService.rowsAppend(
+        if (await this.foodCountSheetService.sheetCreateIfNone(sheet)) {
+            await this.foodCountSheetService.rowsAppend(
                 [GSPREAD_SHEET_FOODCOUNT_HEADERS],
-                sheet,
-                GSPREAD_FOODCOUNT_ID
+                sheet
             );
         }
         // rowsAppend returns an array tuple of range string, and index inserted
         return [
-            await GoogleSpreadsheetsService.rowsAppend(
+            await this.foodCountSheetService.rowsAppend(
                 [this.fromFoodCountMapToList(foodCount)],
-                sheet,
-                GSPREAD_FOODCOUNT_ID
+                sheet
             ),
             // the length minus 1 is this the zero index of the inserted count
-            (
-                await GoogleSpreadsheetsService.rangeGet(
-                    `'${sheet}'!A1:A`,
-                    GSPREAD_FOODCOUNT_ID
-                )
-            ).length - 1
+            (await this.foodCountSheetService.rangeGet(`'${sheet}'!A1:A`))
+                .length - 1
         ];
     }
 
-    static async deleteFoodCountByIndex(
+    async deleteFoodCountByIndex(
         startIndex: number,
         // todo: this is dangerous? we will delete the last row in tue current sheet by default
         sheetName: string = this.getFoodCountSheetName()
     ) {
-        const sheetId = await GoogleSpreadsheetsService.getSheetIdByName(
-            sheetName,
-            GSPREAD_FOODCOUNT_ID
+        const sheetId = await this.foodCountSheetService.getSheetIdByName(
+            sheetName
         );
 
-        await GoogleSpreadsheetsService.rowsDelete(
+        await this.foodCountSheetService.rowsDelete(
             startIndex,
             startIndex + 1,
-            sheetId,
-            GSPREAD_FOODCOUNT_ID
+            sheetId
         );
     }
 
-    static async deleteLastFoodCount(
+    async deleteLastFoodCount(
         // todo: this is dangerous? we will delete the last row in tue current sheet by default
         sheetName: string = this.getFoodCountSheetName()
     ) {
         const range =
-            (await GoogleSpreadsheetsService.rangeGet(
-                `'${sheetName}'!A:E`,
-                GSPREAD_FOODCOUNT_ID
-            )) ?? [];
+            (await this.foodCountSheetService.rangeGet(`'${sheetName}'!A:E`)) ??
+            [];
         const lastRowIndex = range.length;
         if (lastRowIndex < 2) {
             console.error('We cannot delete the header');
             return;
         }
-        await GoogleSpreadsheetsService.rowsWrite(
+        await this.foodCountSheetService.rowsWrite(
             [['', '', '', '', '']],
-            `'${sheetName}'!A${lastRowIndex}:E${lastRowIndex}`,
-            GSPREAD_FOODCOUNT_ID
+            `'${sheetName}'!A${lastRowIndex}:E${lastRowIndex}`
+        );
+    }
+    constructor(instanceId: string) {
+        this.foodCountSheetService = new GoogleSpreadsheetsService(
+            ConfigValueGet(
+                instanceId,
+                CONFIG_GSPREAD_SHEET_NAME.FOOD_COUNT_SHEET
+            )
         );
     }
 }

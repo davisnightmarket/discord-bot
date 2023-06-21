@@ -15,21 +15,21 @@ interface GoogleSpreadsheetsKeysModel {
     client_x509_cert_url: string;
 }
 
-interface DiscordConfigModel {
+interface DiscordKeysModel {
     appId: string;
     appToken: string;
 }
 
-export interface NmConfigModel {
+export interface NmKeysModel {
     googleSpreadsheetsKeys: GoogleSpreadsheetsKeysModel;
-    discordConfig: DiscordConfigModel;
+    discordConfig: DiscordKeysModel;
 }
 
 const DISCORD_CONFIG_NAME = 'config-discord-api';
 const GOOGLE_KEYS_NAME = 'config-google-api';
 
-export class NmConfigService {
-    static async getParsed(): Promise<NmConfigModel> {
+export class NmKeysService {
+    static async getParsed(): Promise<NmKeysModel> {
         if (process.env.NODE_ENV === 'prod') {
             return {
                 googleSpreadsheetsKeys:
@@ -37,7 +37,7 @@ export class NmConfigService {
                         `nm-${GOOGLE_KEYS_NAME}`
                     ),
                 discordConfig:
-                    await GoogleSecretService.getParsed<DiscordConfigModel>(
+                    await GoogleSecretService.getParsed<DiscordKeysModel>(
                         `nm-${DISCORD_CONFIG_NAME}`
                     )
             };

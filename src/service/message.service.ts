@@ -82,7 +82,9 @@ export class MessageService {
                 return msg;
             };
             return a;
-        }, {}) as {
+        }, {} as {
+            [k in keyof U]: (a: U[k]) => string;
+        }) as {
                 [k in keyof U]: (a: U[k]) => string;
             };
     }
