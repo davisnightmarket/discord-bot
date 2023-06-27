@@ -16,8 +16,8 @@ type CachePayloadModel<
         stamp: number;
     }
 > = {
-        [k in string]: U;
-    };
+    [k in string]: U;
+};
 
 type CacheModel<U extends PayloadModel = PayloadModel> = {
     [k in CacheType]: CachePayloadModel<U & PayloadBaseModel>;

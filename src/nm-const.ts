@@ -1,4 +1,4 @@
-import { ConfigModel } from './config';
+import { type ConfigModel } from './config';
 import { type ActiveStateType } from './model/night-market.model';
 
 /**

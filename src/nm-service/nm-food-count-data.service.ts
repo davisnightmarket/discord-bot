@@ -30,7 +30,7 @@ interface FoodCountMapType {
 }
 
 export class NmFoodCountDataService {
-    private foodCountSheetService: GoogleSpreadsheetsService;
+    private readonly foodCountSheetService: GoogleSpreadsheetsService;
 
     getFoodCountSheetName(
         // defaults to current year
@@ -114,6 +114,7 @@ export class NmFoodCountDataService {
             `'${sheetName}'!A${lastRowIndex}:E${lastRowIndex}`
         );
     }
+
     constructor(instanceId: string) {
         this.foodCountSheetService = new GoogleSpreadsheetsService(
             ConfigValueGet(

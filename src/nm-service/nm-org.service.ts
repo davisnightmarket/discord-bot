@@ -19,7 +19,8 @@ let OrgCacheList: NmOrgModel[] = [];
 // TODO: make this a class service
 
 export class NmOrgService {
-    private orgSheetService: GoogleSpreadsheetsService;
+    private readonly orgSheetService: GoogleSpreadsheetsService;
+
     async getOrgList(
         {
             active = false,
@@ -96,6 +97,7 @@ export class NmOrgService {
         // find a match to name
         // update cell for active at row and column index (add method to GSpreadService)
     }
+
     constructor(instanceId: string) {
         this.orgSheetService = new GoogleSpreadsheetsService(
             ConfigValueGet(instanceId, CONFIG_GSPREAD_SHEET_NAME.ORG_SHEET)

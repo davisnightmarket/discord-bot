@@ -61,9 +61,11 @@ export class MessageService {
         };
 
         // todo: parse with HBS
-        return Object.keys(messageMap).reduce<{
-            [k in keyof U]: (a: U[k]) => string;
-        }>((a, b: keyof U) => {
+        return Object.keys(messageMap).reduce<
+            Partial<{
+                [k in keyof U]: (a: U[k]) => string;
+            }>
+        >((a, b: keyof U) => {
             // because we do not want a message compile error to break teh app
             let d = Handlebars.compile('');
             try {
@@ -82,10 +84,8 @@ export class MessageService {
                 return msg;
             };
             return a;
-        }, {} as {
+        }, {}) as {
             [k in keyof U]: (a: U[k]) => string;
-        }) as {
-                [k in keyof U]: (a: U[k]) => string;
-            };
+        };
     }
 }

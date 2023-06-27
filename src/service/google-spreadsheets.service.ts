@@ -247,6 +247,7 @@ export class GoogleSpreadsheetsService {
             return false;
         }
     }
+
     constructor(spreadsheetId: Promise<string>) {
         this.spreadsheetIdGet = spreadsheetId;
     }
