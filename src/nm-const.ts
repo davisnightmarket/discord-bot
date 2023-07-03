@@ -1,4 +1,3 @@
-import { type ConfigModel } from './config';
 import { type ActiveStateType } from './model/night-market.model';
 
 /**
@@ -11,8 +10,9 @@ export const GSPREAD_CORE_ACTIVE_STATE_LIST: ActiveStateType[] = [
     'inactive'
 ];
 
-export const CONFIG_GSPREAD_SHEET_NAME: { [k in string]: keyof ConfigModel } = {
-    PERSON_SHEET: 'GSPREAD_CORE_ID',
-    ORG_SHEET: 'GSPREAD_CORE_ID',
-    FOOD_COUNT_SHEET: 'GSPREAD_FOODCOUNT_ID'
-};
+// // these are the names of the
+// export const CONFIG_GSPREAD_SHEET_NAME: { [k in string]: keyof ConfigModel } = {
+//     PERSON_SHEET: 'GSPREAD_CORE_ID',
+//     ORG_SHEET: 'GSPREAD_CORE_ID',
+//     FOOD_COUNT_SHEET: 'GSPREAD_FOODCOUNT_ID'
+// };

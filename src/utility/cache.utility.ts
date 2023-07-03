@@ -31,7 +31,7 @@ const Cache: CacheModel<PayloadModel> = {
 // todo: we should probably delete any cached data that is too old once per day
 
 // a model is passed to cache service which types that cache
-export function CacheService<U extends PayloadModel = PayloadModel>(
+export function CacheUtility<U extends PayloadModel = PayloadModel>(
     name: CacheType
 ): {
     add: (id: string, payload: U) => U;

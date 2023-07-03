@@ -1,11 +1,8 @@
 import { type ActiveStateType } from '../model/night-market.model';
-import {
-    CONFIG_GSPREAD_SHEET_NAME,
-    GSPREAD_CORE_ACTIVE_STATE_LIST
-} from '../nm-const';
+import { GSPREAD_CORE_ACTIVE_STATE_LIST } from '../nm-const';
 import { GoogleSpreadsheetsService } from '../service';
 
-import { ConfigValueGet } from '../config';
+import { ConfigValueGet } from '../utility/config.utility';
 
 interface NmOrgModel {
     name: string;
@@ -98,9 +95,7 @@ export class NmOrgService {
         // update cell for active at row and column index (add method to GSpreadService)
     }
 
-    constructor(instanceId: string) {
-        this.orgSheetService = new GoogleSpreadsheetsService(
-            ConfigValueGet(instanceId, CONFIG_GSPREAD_SHEET_NAME.ORG_SHEET)
-        );
+    constructor(orgSpreadsheetId: string) {
+        this.orgSheetService = new GoogleSpreadsheetsService(orgSpreadsheetId);
     }
 }

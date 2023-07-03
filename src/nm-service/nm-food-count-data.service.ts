@@ -1,6 +1,4 @@
 import { GoogleSpreadsheetsService } from '../service';
-import { ConfigValueGet } from '../config';
-import { CONFIG_GSPREAD_SHEET_NAME } from '../nm-const';
 
 /**
  *  FOODCOUNT
@@ -115,12 +113,9 @@ export class NmFoodCountDataService {
         );
     }
 
-    constructor(instanceId: string) {
+    constructor(foodCountSheetId: string) {
         this.foodCountSheetService = new GoogleSpreadsheetsService(
-            ConfigValueGet(
-                instanceId,
-                CONFIG_GSPREAD_SHEET_NAME.FOOD_COUNT_SHEET
-            )
+            foodCountSheetId
         );
     }
 }

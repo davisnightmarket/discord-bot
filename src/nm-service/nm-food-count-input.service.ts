@@ -78,13 +78,13 @@ export const NIGHT_CHANNEL_NAMES_MAP: {
 };
 
 export class NmFoodCountInputService {
+    orgService: NmOrgService;
+    constructor(orgService: NmOrgService) {
+        this.orgService = orgService;
+    }
     /* dealing with  messages sent */
     // todo: we should standardize these messages in central database, with maybe template engine
-    static getMessageErrorNoLbsOrOrg({
-        messageContent
-    }: {
-        messageContent: string;
-    }) {
+    getMessageErrorNoLbsOrOrg({ messageContent }: { messageContent: string }) {
         return `We got "${messageContent}", which does not compute.
 Please enter food count like this: 
   "<number of pounds> <pickup name>"
@@ -92,7 +92,7 @@ Example:
   "8 Village Bakery"`;
     }
 
-    static getMessageErrorNoLbs({ org }: { org: string }) {
+    getMessageErrorNoLbs({ org }: { org: string }) {
         return `We cannot understand how many pounds for "${org}". 
 Please try again like this: 
     "<number of pounds> <pickup name>"
@@ -100,13 +100,7 @@ Example:
     "8 Village Bakery"`;
     }
 
-    static getMessageErrorNoOrg({
-        orgFuzzy,
-        lbs
-    }: {
-        orgFuzzy: string;
-        lbs: number;
-    }) {
+    getMessageErrorNoOrg({ orgFuzzy, lbs }: { orgFuzzy: string; lbs: number }) {
         return `We cannot find a pickup called "${orgFuzzy}". 
 Please try again like this: 
     "${lbs} lbs <pickup name>"
@@ -116,7 +110,7 @@ Example:
 
     /* Dealing with content => input */
 
-    static getChannelStatus(channelName: string): FoodCountChannelStatusType {
+    getChannelStatus(channelName: string): FoodCountChannelStatusType {
         if (channelName.toLowerCase() === COUNT_CHANNEL_NAME.toLowerCase()) {
             return 'COUNT_CHANNEL';
         }
@@ -131,7 +125,7 @@ Example:
     }
 
     //  this is our main hook for getting the food count input from content
-    static async getParsedChannelAndContent(
+    async getParsedChannelAndContent(
         channelName: string,
         content: string
     ): Promise<
@@ -203,13 +197,13 @@ Example:
         ];
     }
 
-    static getDateFromNightChannelName(channelName: string): string {
-        return NmFoodCountInputService.getDateStringFromDay(
+    getDateFromNightChannelName(channelName: string): string {
+        return this.getDateStringFromDay(
             NIGHT_CHANNEL_NAMES_MAP[channelName.toLowerCase()]
         );
     }
 
-    static getDateNightOf() {
+    getDateNightOf() {
         const a = new Date();
         // if we are
         if (a.getHours() < 4) {
@@ -218,7 +212,7 @@ Example:
         return ParseContentService.dateFormat(a);
     }
 
-    static async getOrgAndNodeFromString(
+    async getOrgAndNodeFromString(
         s: string
     ): Promise<[string, string, string]> {
         const a = s.split(',');
@@ -230,10 +224,8 @@ Example:
         return [org, fuzzyOrg, note];
     }
 
-    static async getOrgListFromFuzzyString(
-        orgFuzzy: string
-    ): Promise<string[]> {
-        const orgList = (await NmOrgService.getOrgList()).map((a) => ({
+    async getOrgListFromFuzzyString(orgFuzzy: string): Promise<string[]> {
+        const orgList = (await this.orgService.getOrgList()).map((a) => ({
             ...a,
             nameSearchable: `${a.nameAltList.join(' ')} ${a.name}`
         }));
@@ -245,7 +237,7 @@ Example:
         return searcher.search(orgFuzzy).map((a) => a.name);
     }
 
-    static async getFoodCountDateAndParsedInput(
+    async getFoodCountDateAndParsedInput(
         content: string
     ): Promise<
         [
@@ -308,11 +300,9 @@ Example:
         ];
     }
 
-    static getLbsAndString(content: string): [number, string] {
+    getLbsAndString(content: string): [number, string] {
         const contentList = content.split(' ').filter((a: string) => a.trim());
-        let lbsCount = NmFoodCountInputService.getNumberFromStringStart(
-            contentList[0]
-        );
+        let lbsCount = this.getNumberFromStringStart(contentList[0]);
         // in this case the number was first
         if (lbsCount) {
             // get rid of the number
@@ -328,7 +318,7 @@ Example:
         }
 
         // in this case the number was last
-        lbsCount = NmFoodCountInputService.getNumberFromStringStart(
+        lbsCount = this.getNumberFromStringStart(
             contentList[contentList.length - 1]
         );
         if (lbsCount) {
@@ -338,7 +328,7 @@ Example:
         }
 
         // in this case the number was second to last, and it needs to be followed by a lbs or pounds
-        lbsCount = NmFoodCountInputService.getNumberFromStringStart(
+        lbsCount = this.getNumberFromStringStart(
             contentList[contentList.length - 2]
         );
         if (lbsCount) {
@@ -357,7 +347,7 @@ Example:
         return [lbsCount ?? 0, contentList.join(' ')];
     }
 
-    static getNumberFromStringStart(s: string = ''): number {
+    getNumberFromStringStart(s: string = ''): number {
         let c = 0;
         for (let a = 0; a < s.length; a++) {
             // if the first char is not a number, return zero
@@ -373,7 +363,7 @@ Example:
         return c;
     }
 
-    static getDateStringFromDay(day: DayNameType): string {
+    getDateStringFromDay(day: DayNameType): string {
         const days = [
             'sunday',
             'monday',
@@ -398,7 +388,7 @@ Example:
     // todo: i think this sucks. there must be an easier way to do this, like just ask them for the date in the confirm?
     // ok, we are going with a different method of parsing date: either we get the day from the channel name, or we
     // ask for a confirmation in the food-count channel.
-    static parseDateFromContent(s: string): [string, string] {
+    parseDateFromContent(s: string): [string, string] {
         // we simply want to know if the start of the string looks like mm/dd/yyyy or mm/dd
         const potentialDate = s
             .trim()

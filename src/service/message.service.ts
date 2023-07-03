@@ -1,6 +1,6 @@
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import { Dbg } from './debug.service';
+import { Dbg } from '../utility/debug.utility';
 import Handlebars from 'handlebars';
 
 const dbg = Dbg('MessageService');

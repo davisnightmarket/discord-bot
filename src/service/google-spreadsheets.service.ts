@@ -1,7 +1,7 @@
 import { GoogleAuth } from 'google-auth-library';
 import { google, type sheets_v4 } from 'googleapis';
-import { NmKeysService } from '../nm-service';
-import { Dbg } from '../service';
+import { Dbg } from '../utility';
+import { GetNmSecrets } from '../utility/nm-secrets.utility';
 
 const dbg = Dbg('GoogleSpreadsheetsService');
 // the alphabet indexed in array
@@ -11,7 +11,7 @@ export const Alphabet = AlphaIndex.map((x) =>
     String.fromCharCode(x).toUpperCase()
 );
 
-const Gspread = NmKeysService.getParsed().then((keys) => {
+const Gspread = GetNmSecrets().then((keys) => {
     const credentials = keys.googleSpreadsheetsKeys;
     const auth = new GoogleAuth({
         credentials,
@@ -25,7 +25,7 @@ const Gspread = NmKeysService.getParsed().then((keys) => {
 });
 
 export class GoogleSpreadsheetsService {
-    spreadsheetIdGet: Promise<string>;
+    spreadsheetId: string;
 
     columnIndexFromLetter(a: string): number {
         const n = Alphabet.indexOf(a.toUpperCase());
@@ -39,7 +39,7 @@ export class GoogleSpreadsheetsService {
         range: string
     ): Promise<A> {
         validate(range);
-        const spreadsheetId = await this.spreadsheetIdGet;
+        const spreadsheetId = this.spreadsheetId;
         const [gspread] = await Gspread;
         const result = await gspread.spreadsheets.values.get({
             spreadsheetId,
@@ -50,7 +50,7 @@ export class GoogleSpreadsheetsService {
     }
 
     async rowsDelete(startIndex: number, endIndex: number, sheetId: number) {
-        const spreadsheetId = await this.spreadsheetIdGet;
+        const spreadsheetId = this.spreadsheetId;
         const requestBody = {
             requests: [
                 {
@@ -82,7 +82,7 @@ export class GoogleSpreadsheetsService {
         if (!values || !(values instanceof Array) || values.length === 0) {
             throw new Error('Must pass a valid values');
         }
-        const spreadsheetId = await this.spreadsheetIdGet;
+        const spreadsheetId = this.spreadsheetId;
         validate(range);
         const [gspread] = await Gspread;
 
@@ -116,7 +116,7 @@ export class GoogleSpreadsheetsService {
         if (!values || !(values instanceof Array) || values.length === 0) {
             throw new Error('Must pass a valid values');
         }
-        const spreadsheetId = await this.spreadsheetIdGet;
+        const spreadsheetId = this.spreadsheetId;
         validate(range);
         const [gspread] = await Gspread;
         return await new Promise((resolve, reject) => {
@@ -138,7 +138,7 @@ export class GoogleSpreadsheetsService {
     }
 
     async sheetExists(title: string): Promise<boolean> {
-        const spreadsheetId = await this.spreadsheetIdGet;
+        const spreadsheetId = this.spreadsheetId;
         try {
             const id = await this.getSheetIdByName(title);
             const request = {
@@ -155,7 +155,7 @@ export class GoogleSpreadsheetsService {
     }
 
     async getSheetIdByName(title: string): Promise<number> {
-        const spreadsheetId = await this.spreadsheetIdGet;
+        const spreadsheetId = this.spreadsheetId;
         try {
             const request = {
                 spreadsheetId,
@@ -182,7 +182,7 @@ export class GoogleSpreadsheetsService {
     }
 
     async sheetCreateIfNone(title: string): Promise<boolean> {
-        const spreadsheetId = await this.spreadsheetIdGet;
+        const spreadsheetId = this.spreadsheetId;
         // we create a new sheet every year, so we test if the sheet exists, and create it if not
         if (!(await this.sheetExists(title))) {
             await this.sheetCreate(title);
@@ -193,7 +193,7 @@ export class GoogleSpreadsheetsService {
     }
 
     async sheetCreate(title: string) {
-        const spreadsheetId = await this.spreadsheetIdGet;
+        const spreadsheetId = this.spreadsheetId;
         validate(title);
         const [gspread, auth] = await Gspread;
         try {
@@ -221,7 +221,7 @@ export class GoogleSpreadsheetsService {
     }
 
     async sheetDestroy(title: string) {
-        const spreadsheetId = await this.spreadsheetIdGet;
+        const spreadsheetId = this.spreadsheetId;
         validate(title);
         const [gspread, auth] = await Gspread;
         try {
@@ -248,8 +248,8 @@ export class GoogleSpreadsheetsService {
         }
     }
 
-    constructor(spreadsheetId: Promise<string>) {
-        this.spreadsheetIdGet = spreadsheetId;
+    constructor(spreadsheetId: string) {
+        this.spreadsheetId = spreadsheetId;
     }
 }
 

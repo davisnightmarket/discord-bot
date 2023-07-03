@@ -2,12 +2,9 @@ import {
     type ActiveStateType,
     type PersonModel
 } from '../model/night-market.model';
-import {
-    GSPREAD_CORE_ACTIVE_STATE_LIST,
-    CONFIG_GSPREAD_SHEET_NAME
-} from '../nm-const';
+import { GSPREAD_CORE_ACTIVE_STATE_LIST } from '../nm-const';
 import { GoogleSpreadsheetsService } from '../service';
-import { ConfigValueGet } from '../config';
+import { ConfigValueGet } from '../utility/config.utility';
 
 type ColumnMapKeyType = keyof typeof ColumnMap;
 
@@ -250,12 +247,9 @@ export class NmPersonService {
         return `${CORE_PERSON_SHEET}!${ColumnMap[columnName]}${index || ''}`;
     }
 
-    constructor(instanceId: string) {
+    constructor(personSpreadsheetId: string) {
         this.personSheetService = new GoogleSpreadsheetsService(
-            ConfigValueGet(
-                'davis.night',
-                CONFIG_GSPREAD_SHEET_NAME.PERSON_SHEET
-            )
+            personSpreadsheetId
         );
     }
 }
