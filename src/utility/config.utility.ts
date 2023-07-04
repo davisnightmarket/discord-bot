@@ -1,4 +1,10 @@
-import { EnvType, NMInstanceType, NmConfigModel } from '../model/config.model';
+import {
+    EnvType,
+    NMInstanceType,
+    NmConfigModel,
+    NmCoreConfigModel,
+    NmReplicaConfigModel
+} from '../model/config.model';
 import { EnvConfig } from '../config';
 // TODO: move this to google spread so we can add new discord servers in via spreadsheet?
 
@@ -16,29 +22,48 @@ export const ConfigGet = async (
     env = Env
 ): Promise<NmConfigModel> => EnvConfig[inst][env];
 
-export const ConfigValueGet = async (
+export const ConfigCoreValueGet = async (
     // allow a string to be passed for night market instance
     inst: NMInstanceType,
     // get a string value
-    a: keyof NmConfigModel,
+    a: keyof NmCoreConfigModel,
     // allow env to be passed so we can test config in any env
     env = Env
 ): Promise<string> => {
     const config = await ConfigGet(inst, env);
-    return config[a];
+    return config.coreConfig[a];
+};
+export const ConfigReplicaValueGet = async (
+    // allow a string to be passed for night market instance
+    inst: NMInstanceType,
+    // get a string value
+    a: keyof NmReplicaConfigModel,
+    // allow env to be passed so we can test config in any env
+    env = Env
+): Promise<string> => {
+    const config = await ConfigGet(inst, env);
+    return config.replicaConfig[a];
 };
 
-export const ConfigGuildIdByInstanceIdGet = (
+export const ConfigReplicaIdByGuildIdGet = (
     guildId: string
 ): NMInstanceType | undefined => {
     return Object.keys(EnvConfig)
-        .filter((a) => EnvConfig[a as NMInstanceType][Env].GUILD_ID === guildId)
+        .filter(
+            (a) =>
+                EnvConfig[a as NMInstanceType][Env].replicaConfig
+                    .DISCORD_GUILD_ID === guildId
+        )
         .pop() as NMInstanceType;
 };
 
-export const ConfigByInstanceIdGet = (guildId: string): NmConfigModel => {
+export const ConfigByGuildIdGet = (guildId: string): NmConfigModel => {
     return Object.keys(EnvConfig)
-        .filter((a) => EnvConfig[a as NMInstanceType][Env].GUILD_ID === guildId)
+        .filter(
+            (a) =>
+                EnvConfig[a as NMInstanceType][Env].replicaConfig
+                    .DISCORD_GUILD_ID === guildId
+        )
         .map((a) => EnvConfig[a as NMInstanceType][Env])
         .pop() as NmConfigModel;
 };

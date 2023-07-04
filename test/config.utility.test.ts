@@ -1,3 +1,3 @@
-import { ConfigGuildIdByInstanceIdGet } from '../src/utility';
+import { ConfigReplicaIdByGuildIdGet } from '../src/utility';
 
-ConfigGuildIdByInstanceIdGet('')
+ConfigReplicaIdByGuildIdGet('');

@@ -91,7 +91,7 @@ export const FoodCountInputEvent =
             channelStatus,
             inputStatus,
             // did we get the date from the content, from the channel name, or just today by default?
-            // dateStatus,
+            dateStatus,
             date,
             parsedInputList,
             parsedInputErrorList

@@ -4,7 +4,6 @@ import {
 } from '../model/night-market.model';
 import { GSPREAD_CORE_ACTIVE_STATE_LIST } from '../nm-const';
 import { GoogleSpreadsheetsService } from '../service';
-import { ConfigValueGet } from '../utility/config.utility';
 
 type ColumnMapKeyType = keyof typeof ColumnMap;
 

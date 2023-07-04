@@ -6,17 +6,34 @@ export type EnvType = 'dev' | 'test' | 'prod';
 
 export type NMInstanceType = 'davis.nightmarket';
 
-export interface NmConfigModel {
-    // the guild id
-    GUILD_ID: string;
+// because some data docs are core
+export interface NmCoreConfigModel {
     // the  spreadsheet id for the core data model where people and orgs are kept
-    GSPREAD_CORE_ID: string;
+    GSPREAD_CORE_PERSON_ID: string;
+    // the  spreadsheet id for where food counts are kept
+    GSPREAD_CORE_ORG_ID: string;
+    GSPREAD_CORE_CONFIG_ID: string;
+}
+
+// and some are instances
+export interface NmReplicaConfigModel {
+    // the guild id
+    DISCORD_GUILD_ID: string;
+    // the  spreadsheet id for the core data model where people and orgs are kept
+    GSPREAD_OPS_ID: string;
     // the  spreadsheet id for where food counts are kept
     GSPREAD_FOODCOUNT_ID: string;
 }
 
+export type NmConfigModel = {
+    coreConfig: NmCoreConfigModel;
+    replicaConfig: NmReplicaConfigModel;
+};
 export type EnvConfigModel = {
     [l in NMInstanceType]: {
-        [k in EnvType]: NmConfigModel;
+        [k in EnvType]: {
+            coreConfig: NmCoreConfigModel;
+            replicaConfig: NmReplicaConfigModel;
+        };
     };
 };
