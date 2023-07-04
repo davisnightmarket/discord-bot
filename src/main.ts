@@ -5,7 +5,7 @@ import {
 } from './events';
 import { Client, Events, GatewayIntentBits, Partials } from 'discord.js';
 import { GetNmSecrets } from './utility/nm-secrets.utility';
-import { ConfigByGuildIdGet, ConfigReplicaIdByGuildIdGet } from './utility';
+import { ConfigByGuildIdGet, ConfigInstanceIdByGuildIdGet } from './utility';
 import {
     NmFoodCountDataService,
     NmFoodCountInputService,
@@ -33,7 +33,7 @@ async function main() {
         const GuildIdList = client.guilds.cache.map((guild) => guild.id);
 
         for (const guildId of GuildIdList) {
-            const instanceId = ConfigReplicaIdByGuildIdGet(guildId);
+            const instanceId = ConfigInstanceIdByGuildIdGet(guildId);
             if (!instanceId) {
                 console.log(`No Instance ID found for guild ${guildId}`);
             } else {
@@ -49,7 +49,7 @@ async function main() {
 
                 GuildServiceMap[guildId] = {
                     foodCountDataService: new NmFoodCountDataService(
-                        config.replicaConfig.GSPREAD_FOODCOUNT_ID
+                        config.instanceConfig.GSPREAD_FOODCOUNT_ID
                     ),
                     foodCountInputService: new NmFoodCountInputService(
                         orgService

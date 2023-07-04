@@ -3,7 +3,7 @@ import {
     NMInstanceType,
     NmConfigModel,
     NmCoreConfigModel,
-    NmReplicaConfigModel
+    NmInstanceConfigModel
 } from '../model/config.model';
 import { EnvConfig } from '../config';
 // TODO: move this to google spread so we can add new discord servers in via spreadsheet?
@@ -33,25 +33,25 @@ export const ConfigCoreValueGet = async (
     const config = await ConfigGet(inst, env);
     return config.coreConfig[a];
 };
-export const ConfigReplicaValueGet = async (
+export const ConfigInstanceValueGet = async (
     // allow a string to be passed for night market instance
     inst: NMInstanceType,
     // get a string value
-    a: keyof NmReplicaConfigModel,
+    a: keyof NmInstanceConfigModel,
     // allow env to be passed so we can test config in any env
     env = Env
 ): Promise<string> => {
     const config = await ConfigGet(inst, env);
-    return config.replicaConfig[a];
+    return config.instanceConfig[a];
 };
 
-export const ConfigReplicaIdByGuildIdGet = (
+export const ConfigInstanceIdByGuildIdGet = (
     guildId: string
 ): NMInstanceType | undefined => {
     return Object.keys(EnvConfig)
         .filter(
             (a) =>
-                EnvConfig[a as NMInstanceType][Env].replicaConfig
+                EnvConfig[a as NMInstanceType][Env].instanceConfig
                     .DISCORD_GUILD_ID === guildId
         )
         .pop() as NMInstanceType;
@@ -61,7 +61,7 @@ export const ConfigByGuildIdGet = (guildId: string): NmConfigModel => {
     return Object.keys(EnvConfig)
         .filter(
             (a) =>
-                EnvConfig[a as NMInstanceType][Env].replicaConfig
+                EnvConfig[a as NMInstanceType][Env].instanceConfig
                     .DISCORD_GUILD_ID === guildId
         )
         .map((a) => EnvConfig[a as NMInstanceType][Env])

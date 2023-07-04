@@ -9,7 +9,7 @@ export const EnvConfig: EnvConfigModel = {
                 GSPREAD_CORE_ORG_ID: '',
                 GSPREAD_CORE_CONFIG_ID: ''
             },
-            replicaConfig: {
+            instanceConfig: {
                 DISCORD_GUILD_ID: '',
                 GSPREAD_OPS_ID: '1y27iAsVWOG_l3yfLEvVIyKqKlL9i571pZN6wegCK_98',
                 GSPREAD_FOODCOUNT_ID:
@@ -23,7 +23,7 @@ export const EnvConfig: EnvConfigModel = {
                 GSPREAD_CORE_ORG_ID: '',
                 GSPREAD_CORE_CONFIG_ID: ''
             },
-            replicaConfig: {
+            instanceConfig: {
                 DISCORD_GUILD_ID: '',
                 GSPREAD_OPS_ID: '1y27iAsVWOG_l3yfLEvVIyKqKlL9i571pZN6wegCK_98',
                 GSPREAD_FOODCOUNT_ID:
@@ -36,7 +36,7 @@ export const EnvConfig: EnvConfigModel = {
                 GSPREAD_CORE_ORG_ID: '',
                 GSPREAD_CORE_CONFIG_ID: ''
             },
-            replicaConfig: {
+            instanceConfig: {
                 DISCORD_GUILD_ID: '',
                 GSPREAD_OPS_ID: '17-BwSUuXOD_mawagA_cEjP9kVkWCC_boCUV_FikeDek',
                 GSPREAD_FOODCOUNT_ID:
