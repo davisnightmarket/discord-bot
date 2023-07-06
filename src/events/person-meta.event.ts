@@ -86,9 +86,9 @@ export const PersonMetaEvent =
         if (message.guild?.id) {
             UserGuildServiceMap[author.id] = guildService[message.guild?.id];
         }
-        const { personService } = UserGuildServiceMap[author.id];
+        const { personCoreService } = UserGuildServiceMap[author.id];
 
-        if (!personService) {
+        if (!personCoreService) {
             console.error(
                 'We are not getting a person service because the guild service is not mapped. EXITING!'
             );
@@ -96,7 +96,7 @@ export const PersonMetaEvent =
         }
 
         // OK, now we figure out what their data status is
-        const personList = await personService.getPersonList();
+        const personList = await personCoreService.getPersonList();
 
         const personStore = personList.find(
             (a) => a.discordId === message.author.id

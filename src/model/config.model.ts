@@ -4,12 +4,14 @@ export type EnvType = 'dev' | 'test' | 'prod';
 // ok, time to stub out different night markets with their own discord servers
 // we will call this "Night Market Instance"
 
-export type NMInstanceType = 'davis.nightmarket';
+export type NmInstanceType = 'davis.nightmarket';
 
 // because some data docs are core
 export interface NmCoreConfigModel {
     // the spreadsheet id for where configuration is kept for all market instances
     GSPREAD_CORE_CONFIG_ID: string;
+    // the spreadsheet id for where types are kept for all market instances
+    GSPREAD_CORE_TYPE_ID: string;
     // the spreadsheet id for the core data model where people and orgs are kept
     GSPREAD_CORE_PERSON_ID: string;
     // the spreadsheet id for where organizations are kept
@@ -18,6 +20,7 @@ export interface NmCoreConfigModel {
 
 // and some are instances
 export interface NmInstanceConfigModel {
+    NM_ID: string;
     // the guild id
     DISCORD_GUILD_ID: string;
     // the spreadsheet id for the core data model where people and orgs are kept
@@ -31,10 +34,9 @@ export type NmConfigModel = {
     instanceConfig: NmInstanceConfigModel;
 };
 export type EnvConfigModel = {
-    [l in NMInstanceType]: {
-        [k in EnvType]: {
-            coreConfig: NmCoreConfigModel;
-            instanceConfig: NmInstanceConfigModel;
-        };
+    [k in EnvType]: {
+        coreConfig: NmCoreConfigModel;
+    } & {
+        [k in NmInstanceType]: NmInstanceConfigModel;
     };
 };

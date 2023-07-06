@@ -65,8 +65,11 @@ export const FoodCountInputEvent =
             return;
         }
 
-        const { personService, foodCountInputService, foodCountDataService } =
-            guildService[message.guild?.id];
+        const {
+            personCoreService,
+            foodCountInputInstanceService,
+            foodCountDataInstanceService
+        } = guildService[message.guild?.id];
 
         /* STAGE 1: skip the message entirely in some cases */
         // if we are a bot, we do not want to process the message
@@ -95,7 +98,7 @@ export const FoodCountInputEvent =
             date,
             parsedInputList,
             parsedInputErrorList
-        ] = await foodCountInputService.getParsedChannelAndContent(
+        ] = await foodCountInputInstanceService.getParsedChannelAndContent(
             channel.name,
             content
         );
@@ -163,7 +166,7 @@ export const FoodCountInputEvent =
                         return;
                     }
                     // todo: try/catch
-                    await foodCountDataService.appendFoodCount({
+                    await foodCountDataInstanceService.appendFoodCount({
                         org,
                         date,
                         reporter,
@@ -240,24 +243,25 @@ export const FoodCountInputEvent =
 
             // get our reporter email address
             const reporter =
-                (await personService.getEmailByDiscordId(author.id)) ?? '';
+                (await personCoreService.getEmailByDiscordId(author.id)) ?? '';
         }
 
         // loop over errors and post to channel
         for (const { status, lbs, org, orgFuzzy } of parsedInputErrorList) {
             let content = '';
             if (status === 'NO_LBS_OR_ORG') {
-                content = foodCountInputService.getMessageErrorNoLbsOrOrg({
-                    messageContent: message.content
-                });
+                content =
+                    foodCountInputInstanceService.getMessageErrorNoLbsOrOrg({
+                        messageContent: message.content
+                    });
             }
             if (status === 'NO_LBS') {
-                content = foodCountInputService.getMessageErrorNoLbs({
+                content = foodCountInputInstanceService.getMessageErrorNoLbs({
                     org
                 });
             }
             if (status === 'NO_ORG') {
-                content = foodCountInputService.getMessageErrorNoOrg({
+                content = foodCountInputInstanceService.getMessageErrorNoOrg({
                     orgFuzzy,
                     lbs
                 });

@@ -1,6 +1,6 @@
 import {
     EnvType,
-    NMInstanceType,
+    NmInstanceType,
     NmConfigModel,
     NmCoreConfigModel,
     NmInstanceConfigModel
@@ -17,14 +17,22 @@ if (!['dev', 'test', 'prod'].includes(Env)) {
 
 export const ConfigGet = async (
     // allow a string to be passed for night market instance
-    inst: NMInstanceType,
+    inst: NmInstanceType,
     // allow env to be passed so we can test config in any env
     env = Env
-): Promise<NmConfigModel> => EnvConfig[inst][env];
+): Promise<NmConfigModel> => ({
+    coreConfig: EnvConfig[env].coreConfig,
+    instanceConfig: EnvConfig[env][inst]
+});
+
+export const ConfigCoreGet = async (
+    // allow env to be passed so we can test config in any env
+    env = Env
+): Promise<NmCoreConfigModel> => EnvConfig[env].coreConfig;
 
 export const ConfigCoreValueGet = async (
     // allow a string to be passed for night market instance
-    inst: NMInstanceType,
+    inst: NmInstanceType,
     // get a string value
     a: keyof NmCoreConfigModel,
     // allow env to be passed so we can test config in any env
@@ -35,7 +43,7 @@ export const ConfigCoreValueGet = async (
 };
 export const ConfigInstanceValueGet = async (
     // allow a string to be passed for night market instance
-    inst: NMInstanceType,
+    inst: NmInstanceType,
     // get a string value
     a: keyof NmInstanceConfigModel,
     // allow env to be passed so we can test config in any env
@@ -45,25 +53,25 @@ export const ConfigInstanceValueGet = async (
     return config.instanceConfig[a];
 };
 
-export const ConfigInstanceIdByGuildIdGet = (
+export const ConfigInstanceIdByGuildIdGet = async (
     guildId: string
-): NMInstanceType | undefined => {
+): Promise<NmInstanceType | undefined> => {
     return Object.keys(EnvConfig)
         .filter(
             (a) =>
-                EnvConfig[a as NMInstanceType][Env].instanceConfig
-                    .DISCORD_GUILD_ID === guildId
+                EnvConfig[Env][a as NmInstanceType].DISCORD_GUILD_ID === guildId
         )
-        .pop() as NMInstanceType;
+        .pop() as NmInstanceType;
 };
 
-export const ConfigByGuildIdGet = (guildId: string): NmConfigModel => {
+export const ConfigInstanceByGuildIdGet = async (
+    guildId: string
+): Promise<NmInstanceConfigModel> => {
     return Object.keys(EnvConfig)
         .filter(
             (a) =>
-                EnvConfig[a as NMInstanceType][Env].instanceConfig
-                    .DISCORD_GUILD_ID === guildId
+                EnvConfig[Env][a as NmInstanceType].DISCORD_GUILD_ID === guildId
         )
-        .map((a) => EnvConfig[a as NMInstanceType][Env])
-        .pop() as NmConfigModel;
+        .map((a) => EnvConfig[Env][a as NmInstanceType])
+        .pop() as NmInstanceConfigModel;
 };

@@ -5,7 +5,11 @@ import {
 } from './events';
 import { Client, Events, GatewayIntentBits, Partials } from 'discord.js';
 import { GetNmSecrets } from './utility/nm-secrets.utility';
-import { ConfigByGuildIdGet, ConfigInstanceIdByGuildIdGet } from './utility';
+import {
+    ConfigCoreGet,
+    ConfigInstanceByGuildIdGet,
+    ConfigInstanceIdByGuildIdGet
+} from './utility';
 import {
     NmFoodCountDataService,
     NmFoodCountInputService,
@@ -30,33 +34,41 @@ async function main() {
     client.once(Events.ClientReady, async (c) => {
         console.log(`Ready! Logged in as ${c.user.tag}`);
 
+        // OK, here we loop through guilds and build a service instance for each
         const GuildIdList = client.guilds.cache.map((guild) => guild.id);
 
         for (const guildId of GuildIdList) {
-            const instanceId = ConfigInstanceIdByGuildIdGet(guildId);
+            const instanceId = await ConfigInstanceIdByGuildIdGet(guildId);
             if (!instanceId) {
                 console.log(`No Instance ID found for guild ${guildId}`);
             } else {
-                const config = await ConfigByGuildIdGet(instanceId);
-                if (!config) {
+                const coreConfig = await ConfigCoreGet();
+                const instanceConfig = await ConfigInstanceByGuildIdGet(
+                    instanceId
+                );
+
+                if (!instanceConfig) {
                     console.error(
                         `No config for: ${instanceId} (${guildId})! Guild is not enabled.`
                     );
+                    // in this case we do not create a serviceMap for the guild
+                    continue;
                 }
-                const orgService = new NmOrgService(
-                    config.coreConfig.GSPREAD_CORE_ORG_ID
+
+                const orgCoreService = new NmOrgService(
+                    coreConfig.GSPREAD_CORE_ORG_ID
                 );
 
                 GuildServiceMap[guildId] = {
-                    foodCountDataService: new NmFoodCountDataService(
-                        config.instanceConfig.GSPREAD_FOODCOUNT_ID
+                    foodCountDataInstanceService: new NmFoodCountDataService(
+                        instanceConfig.GSPREAD_FOODCOUNT_ID
                     ),
-                    foodCountInputService: new NmFoodCountInputService(
-                        orgService
+                    foodCountInputInstanceService: new NmFoodCountInputService(
+                        orgCoreService
                     ),
-                    orgService,
-                    personService: new NmPersonService(
-                        config.coreConfig.GSPREAD_CORE_PERSON_ID
+                    orgCoreService,
+                    personCoreService: new NmPersonService(
+                        coreConfig.GSPREAD_CORE_PERSON_ID
                     )
                 };
             }
