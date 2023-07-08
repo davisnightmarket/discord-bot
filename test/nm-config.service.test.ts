@@ -1,6 +1,5 @@
 import { describe, expect, test, jest } from '@jest/globals';
-import { GoogleSecretService } from '../src/service/google-secrets.service';
-import { NmConfigService } from '../src/service/nm-config.service';
+import { GetGoogleSecrets, GetNmSecrets } from '../src/utility';
 
 jest.setTimeout(1000000);
 
@@ -9,14 +8,14 @@ describe('nm-config.service.ts', () => {
     // and make sure you are using a service account with secrets access
     if (process.env.NODE_ENV === 'prod') {
         test('make sure our GoogleSecretService function works', async () => {
-            const a = await GoogleSecretService.getParsed<{ hi: string }>(
+            const a = await GetGoogleSecrets<{ hi: string }>(
                 'nm-config-test-api'
             );
             expect(a.hi).toBe('there');
         });
     } else {
         test('make sure our NmConfigService works locally', async () => {
-            const a = await NmConfigService.getParsed();
+            const a = await GetNmSecrets();
             expect(Object.keys(a).length).toBe(2);
         });
     }

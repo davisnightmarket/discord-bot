@@ -15,3 +15,5 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 __exportStar(require("./night-market.model"), exports);
+__exportStar(require("./config.model"), exports);
+__exportStar(require("./guild-service.model"), exports);

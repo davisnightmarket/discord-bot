@@ -9,3 +9,9 @@ exports.GSPREAD_CORE_ACTIVE_STATE_LIST = [
     'active',
     'inactive'
 ];
+// // these are the names of the
+// export const CONFIG_GSPREAD_SHEET_NAME: { [k in string]: keyof ConfigModel } = {
+//     PERSON_SHEET: 'GSPREAD_CORE_ID',
+//     ORG_SHEET: 'GSPREAD_CORE_ID',
+//     FOOD_COUNT_SHEET: 'GSPREAD_FOODCOUNT_ID'
+// };

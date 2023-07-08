@@ -12,13 +12,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.FoodCountResponseEvent = void 0;
 const food_count_input_event_1 = require("./food-count-input.event");
 const nm_service_1 = require("../nm-service");
-const service_1 = require("../service");
+const utility_1 = require("../utility");
 const discord_service_1 = require("../service/discord.service");
-const debug = (0, service_1.Dbg)('FoodCountCancelEvent');
+const debug = (0, utility_1.Dbg)('FoodCountCancelEvent');
 /**
  *
- * @param interaction Discord interaction event
- * @returns
  */
 const FoodCountResponseEvent = (interaction) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b;
@@ -36,11 +34,11 @@ const FoodCountResponseEvent = (interaction) => __awaiter(void 0, void 0, void 0
     if (idName === 'food-count-cancel') {
         const m = (_a = interaction.channel) === null || _a === void 0 ? void 0 : _a.messages;
         const cache = food_count_input_event_1.FoodCountInputCache.get(idCache);
-        if (!cache) {
+        if (cache == null) {
             debug('no cache found!');
             return;
         }
-        if (cache.insertTimeout) {
+        if (cache.insertTimeout != null) {
             debug('cleared insert timeout!');
             clearTimeout(cache.insertTimeout);
         }

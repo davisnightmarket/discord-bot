@@ -1,30 +1,49 @@
 "use strict";
-// TODO: this can be merged with nm-config.service
-// the main difference is that is an async wrapper for secrets manager
-// while these config aren't secret, but there is no reason not to
-// roll them together I don't think - keeps it simple
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Config = exports.ENV = void 0;
-const EnvConfig = {
+exports.EnvConfig = void 0;
+// TODO: this config we may want to keep in a Core Config spreadsheet
+exports.EnvConfig = {
     dev: {
-        GSPREAD_CORE_ID: '1y27iAsVWOG_l3yfLEvVIyKqKlL9i571pZN6wegCK_98',
-        GSPREAD_FOODCOUNT_ID: '18TujYCUGf4Lko-8VVJtyagmk2SNEouxTTde5opG1eoo'
+        coreConfig: {
+            GSPREAD_CORE_PERSON_ID: '1X5fJDmGKJtbAanHOqyQ3RCHMP63ABQK4fgpvzm9RSLM',
+            GSPREAD_CORE_ORG_ID: '1Y1RerSbgdrVcwocvCjWo8SyxutLr7BLiuJnUJlajodI',
+            GSPREAD_CORE_TYPE_ID: '1MW2utNJZcuJad2LC57D5DDTx_S_Q0iXYNg7XwlzPcx0',
+            GSPREAD_CORE_CONFIG_ID: '1rPyY8Gn7lA59GLLMAQOtCeW47zi5gA2elVcv0zMp-2M'
+        },
+        'davis.nightmarket': {
+            NM_ID: 'davis.nightmarket',
+            DISCORD_GUILD_ID: '',
+            GSPREAD_OPS_ID: '1bTt7dVKTTMY7iMNcxY0-X2Ulkw7B5p-_lmwMTDgyGP4',
+            GSPREAD_FOODCOUNT_ID: '1DPPmJU1w34PEWB3XZKeIBA0Qc7nx3R2xiJFwDbTxeNk'
+        }
     },
     // these point to TEST data in night-tech folder
     test: {
-        GSPREAD_CORE_ID: '1y27iAsVWOG_l3yfLEvVIyKqKlL9i571pZN6wegCK_98',
-        GSPREAD_FOODCOUNT_ID: '18TujYCUGf4Lko-8VVJtyagmk2SNEouxTTde5opG1eoo'
+        coreConfig: {
+            GSPREAD_CORE_PERSON_ID: '1X5fJDmGKJtbAanHOqyQ3RCHMP63ABQK4fgpvzm9RSLM',
+            GSPREAD_CORE_ORG_ID: '1Y1RerSbgdrVcwocvCjWo8SyxutLr7BLiuJnUJlajodI',
+            GSPREAD_CORE_TYPE_ID: '1MW2utNJZcuJad2LC57D5DDTx_S_Q0iXYNg7XwlzPcx0',
+            GSPREAD_CORE_CONFIG_ID: '1rPyY8Gn7lA59GLLMAQOtCeW47zi5gA2elVcv0zMp-2M'
+        },
+        'davis.nightmarket': {
+            NM_ID: 'davis.nightmarket',
+            DISCORD_GUILD_ID: '',
+            GSPREAD_OPS_ID: '1bTt7dVKTTMY7iMNcxY0-X2Ulkw7B5p-_lmwMTDgyGP4',
+            GSPREAD_FOODCOUNT_ID: '1DPPmJU1w34PEWB3XZKeIBA0Qc7nx3R2xiJFwDbTxeNk'
+        }
     },
     prod: {
-        GSPREAD_CORE_ID: '17-BwSUuXOD_mawagA_cEjP9kVkWCC_boCUV_FikeDek',
-        GSPREAD_FOODCOUNT_ID: '1uHQ6oL84fxlu3bXYxPIU7s1-T2RX0uWzCNC1Hxs8sMM'
+        coreConfig: {
+            GSPREAD_CORE_PERSON_ID: '',
+            GSPREAD_CORE_ORG_ID: '',
+            GSPREAD_CORE_CONFIG_ID: '',
+            GSPREAD_CORE_TYPE_ID: ''
+        },
+        'davis.nightmarket': {
+            NM_ID: 'davis.nightmarket',
+            DISCORD_GUILD_ID: '',
+            GSPREAD_OPS_ID: '',
+            GSPREAD_FOODCOUNT_ID: '16aa-OL6mNZfxqZFIfjfF_hFuSjPSkevUqm7qx3v_vXE'
+        }
     }
 };
-if (!EnvConfig[process.env.NODE_ENV]) {
-    console.log('No NODE_ENV set, default to test');
-}
-exports.ENV = process.env.NODE_ENV || 'test';
-const Config = (
-// allow env to be passed so we can test config in any env
-env = (process.env.NODE_ENV || 'test')) => EnvConfig[env];
-exports.Config = Config;

@@ -17,10 +17,16 @@ import {
     NmPersonService
 } from './nm-service';
 import { GuildServiceMapModel } from './model';
+import { AddCron } from './utility/cron-utility';
+import { FoodCountReminder } from './jobs';
 
 const GuildServiceMap: GuildServiceMapModel = {};
 
 async function main() {
+    // Add cron jobs
+    AddCron('* * 9 * *', FoodCountReminder);
+
+    // Start discord client
     const client = new Client({
         intents: [
             GatewayIntentBits.Guilds,
@@ -31,6 +37,7 @@ async function main() {
         partials: [Partials.Message, Partials.Channel]
     });
 
+    // build discord data
     client.once(Events.ClientReady, async (c) => {
         console.log(`Ready! Logged in as ${c.user.tag}`);
 

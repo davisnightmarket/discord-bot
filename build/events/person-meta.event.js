@@ -10,13 +10,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PersonMetaEvent = void 0;
-const nm_person_service_1 = require("../nm-service/nm-person.service");
 const message_service_1 = require("../service/message.service");
-const service_1 = require("../service");
+const utility_1 = require("../utility");
 const nm_person_meta_service_1 = require("../nm-service/nm-person-meta.service");
-const dbg = (0, service_1.Dbg)('PersonMetaEvent');
-const APPROPRIATE_TIME_TO_BUG_U_IN_SECS = 1; //60 * 60 * 24 * 7,
-const A_BIT_OF_LAG_BEFORE_INTROS_IN_SECS = 1; //60 * 60;
+const dbg = (0, utility_1.Dbg)('PersonMetaEvent');
+const APPROPRIATE_TIME_TO_BUG_U_IN_SECS = 1; // 60 * 60 * 24 * 7,
+const A_BIT_OF_LAG_BEFORE_INTROS_IN_SECS = 1; // 60 * 60;
 const MsgReply = message_service_1.MessageService.createMap({
     PERSON_FIRST_CONTACT: {
         username: ''
@@ -46,24 +45,34 @@ const MsgReply = message_service_1.MessageService.createMap({
         username: ''
     }
 });
+// OK, this is kludgy but we need to keep a reference to a user
+// with their guild service attached. Long term I do not know how
+// this works. What if someone is a member of multiple NM Guilds?
+// I think we need a central as well as a per-instance person data record
+// for now this will work
+const UserGuildServiceMap = {};
 // store person info locally
 const personMetaCache = {};
-const PersonMetaEvent = (message) => __awaiter(void 0, void 0, void 0, function* () {
-    const { channel, author } = message, NOW_IN_SECONDS = Date.now() / 1000;
+const PersonMetaEvent = (guildService) => (message) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a, _b;
+    const { channel, author } = message;
+    const NOW_IN_SECONDS = Date.now() / 1000;
     /* STAGE 1: skip the message entirely in some cases */
     // if we are a bot, we do not want to process the message
     if (author.bot) {
         return;
     }
-    let { content } = message;
-    // make sure there is some actual content
-    // this is probably not needed since Discord does not send blanks but it's cheap so leaving it
-    if (!(content = content.trim())) {
+    if ((_a = message.guild) === null || _a === void 0 ? void 0 : _a.id) {
+        UserGuildServiceMap[author.id] = guildService[(_b = message.guild) === null || _b === void 0 ? void 0 : _b.id];
+    }
+    const { personCoreService } = UserGuildServiceMap[author.id];
+    if (!personCoreService) {
+        console.error('We are not getting a person service because the guild service is not mapped. EXITING!');
         return;
     }
     // OK, now we figure out what their data status is
-    const personList = yield nm_person_service_1.NmPersonService.getPersonList();
-    let personStore = personList.find((a) => a.discordId === message.author.id);
+    const personList = yield personCoreService.getPersonList();
+    const personStore = personList.find((a) => a.discordId === message.author.id);
     const { id, username } = message.author;
     // we check if they are in the cache
     if (!personMetaCache[id]) {
@@ -72,48 +81,13 @@ const PersonMetaEvent = (message) => __awaiter(void 0, void 0, void 0, function*
         personMetaCache[id] = [
             'NONE',
             { discordId: id, name: username },
-            personStore || {},
+            personStore !== null && personStore !== void 0 ? personStore : {},
             NOW_IN_SECONDS
         ];
     }
     const [metaStatus, personCache, _, lastContactInSeconds] = personMetaCache[id];
     // reset our cache timestamp
     personMetaCache[id][3] = NOW_IN_SECONDS;
-    // now we find out if they are communicating directly to crabapple
-    if (channel.type === 1) {
-        dbg(`DM to bot meta ${metaStatus}`);
-        if (metaStatus === 'NONE') {
-            message.author.send(MsgReply.PERSON_REQUEST_EMAIL_AGAIN({ username }));
-            return;
-            // we have no record of them, so start at the beginning
-        }
-        const [contentStatus, parsed] = nm_person_meta_service_1.PersonMetaService.parseDirectReply(content);
-        dbg(`DM to bot content ${contentStatus}`);
-        if (contentStatus === 'DECLINE') {
-            if (metaStatus === 'EMAIL_NONE') {
-                message.author.send(MsgReply.PERSON_REQUEST_EMAIL_DECLINE({ username }));
-            }
-        }
-        if (contentStatus === 'NONE') {
-            if (metaStatus === 'EMAIL_NONE') {
-                message.author.send(MsgReply.PERSON_REQUEST_EMAIL_FAIL({ username }));
-            }
-        }
-        if (contentStatus === 'EMAIL') {
-            message.author.send(MsgReply.PERSON_REQUEST_EMAIL_OK({ username }));
-            message.author.send(MsgReply.PERSON_REQUEST_PHONE({ username }));
-            // todo: confirm email? or just insert?
-        }
-        if (contentStatus === 'PHONE') {
-            MsgReply.PERSON_REQUEST_PHONE_OK({ username });
-            // todo: confirm? or just insert?
-        }
-        if (contentStatus === 'BOOL') {
-            // todo: confirm? or just insert?
-        }
-        // we do not continue in this case, as the bot has replied
-        return;
-    }
     // in this case we have a general message to any channel,
     // and we want to do a check on their data, to see what state they are in
     // if we do not have a record of them, then we have never spoken to them before
@@ -158,8 +132,47 @@ const PersonMetaEvent = (message) => __awaiter(void 0, void 0, void 0, function*
         dbg('in this case they have never given us a phone again');
         console.log(MsgReply.PERSON_REQUEST_PHONE_AGAIN({ username }));
         message.author.send(MsgReply.PERSON_REQUEST_PHONE_AGAIN({ username }));
-        return;
     }
     // todo: all the other questions we want to ask ...
 });
 exports.PersonMetaEvent = PersonMetaEvent;
+const PersonDmEvent = (metaStatus, message) => {
+    const { channel, content } = message;
+    const { username } = message.author;
+    // now we find out if they are communicating directly to crabapple
+    if (channel.type === 1) {
+        dbg(`DM to bot meta ${metaStatus}`);
+        if (metaStatus === 'NONE') {
+            message.author.send(MsgReply.PERSON_REQUEST_EMAIL_AGAIN({ username }));
+            return true;
+            // we have no record of them, so start at the beginning
+        }
+        const [contentStatus] = nm_person_meta_service_1.PersonMetaService.parseDirectReply(content);
+        dbg(`DM to bot content ${contentStatus}`);
+        if (contentStatus === 'DECLINE') {
+            if (metaStatus === 'EMAIL_NONE') {
+                message.author.send(MsgReply.PERSON_REQUEST_EMAIL_DECLINE({ username }));
+            }
+        }
+        if (contentStatus === 'NONE') {
+            if (metaStatus === 'EMAIL_NONE') {
+                message.author.send(MsgReply.PERSON_REQUEST_EMAIL_FAIL({ username }));
+            }
+        }
+        if (contentStatus === 'EMAIL') {
+            message.author.send(MsgReply.PERSON_REQUEST_EMAIL_OK({ username }));
+            message.author.send(MsgReply.PERSON_REQUEST_PHONE({ username }));
+            // todo: confirm email? or just insert?
+        }
+        if (contentStatus === 'PHONE') {
+            MsgReply.PERSON_REQUEST_PHONE_OK({ username });
+            // todo: confirm? or just insert?
+        }
+        if (contentStatus === 'BOOL') {
+            // todo: confirm? or just insert?
+        }
+        // we do not continue in this case, as the bot has replied
+        return true;
+    }
+    return false;
+};

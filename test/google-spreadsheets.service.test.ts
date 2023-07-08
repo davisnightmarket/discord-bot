@@ -1,26 +1,31 @@
-import { describe, expect, test } from '@jest/globals';
+import { describe, expect, test, beforeAll } from '@jest/globals';
 import {
     GoogleSpreadsheetsService,
     Alphabet
 } from '../src/service/google-spreadsheets.service';
 
-import { GSPREAD_SHEET_INVENTORY_HEADERS } from '../src/nm-const';
-import { Config } from '../src/config';
+//import { GSPREAD_SHEET_INVENTORY_HEADERS } from '../src/nm-const';
+import { ConfigCoreGet } from '../src/utility';
+let coreGoogSpread: GoogleSpreadsheetsService;
 
-const { GSPREAD_INVENTORY_ID } = Config();
+beforeAll(async () => {
+    coreGoogSpread = new GoogleSpreadsheetsService(
+        (await ConfigCoreGet('test')).GSPREAD_CORE_PERSON_ID
+    );
+});
 
 describe('gspread.service.ts', () => {
-    // test('does a sheet exist', async () => {
-    //     const a = await sheetExists('person', GSPREAD_CORE_ID);
+    test('does a sheet exist', async () => {
+        const a = await coreGoogSpread.sheetExists('person');
 
-    //     expect(a).toBe(true);
-    // });
+        expect(a).toBe(true);
+    });
 
-    // test('does a sheet NOT exist', async () => {
-    //     const a = await sheetExists('person123', GSPREAD_CORE_ID);
+    test('does a sheet NOT exist', async () => {
+        const a = await coreGoogSpread.sheetExists('person123');
 
-    //     expect(a).toBe(false);
-    // });
+        expect(a).toBe(false);
+    });
 
     test('make sure our alphabet function works', () => {
         expect(Alphabet[0]).toBe('A');
@@ -28,62 +33,54 @@ describe('gspread.service.ts', () => {
     });
 
     test('make sure our alphabet index method works', () => {
-        expect(GoogleSpreadsheetsService.columnIndexFromLetter('A')).toBe(0);
-        expect(GoogleSpreadsheetsService.columnIndexFromLetter('Z')).toBe(25);
+        expect(coreGoogSpread.columnIndexFromLetter('A')).toBe(0);
+        expect(coreGoogSpread.columnIndexFromLetter('Z')).toBe(25);
     });
 
-    test('can we  CREATE and DESTOY and ADD ROWS and DELETE ROWS to a sheet', async () => {
-        if (
-            await GoogleSpreadsheetsService.sheetExists(
-                'abc-test',
-                GSPREAD_INVENTORY_ID
-            )
-        ) {
-            const b = await GoogleSpreadsheetsService.sheetDestroy(
-                'abc-test',
-                GSPREAD_INVENTORY_ID
-            );
+    test('can we DESTOY a sheet if it exists', async () => {
+        if (await coreGoogSpread.sheetExists('abc-test')) {
+            const b = coreGoogSpread.sheetDestroy('abc-test');
             expect(b).toBe(true);
         }
-        const a = await GoogleSpreadsheetsService.sheetCreate(
-            'abc-test',
-            GSPREAD_INVENTORY_ID
-        );
-        expect(a).toBe(true);
-        await GoogleSpreadsheetsService.rowsAppend(
-            [GSPREAD_SHEET_INVENTORY_HEADERS],
-            'abc-test',
-            GSPREAD_INVENTORY_ID
-        );
-        const c = await GoogleSpreadsheetsService.rangeGet(
-            'abc-test!A:B',
-            GSPREAD_INVENTORY_ID
-        );
-        expect(c[0][0]).toBe(GSPREAD_SHEET_INVENTORY_HEADERS[0]);
-        expect(c[0][1]).toBe(GSPREAD_SHEET_INVENTORY_HEADERS[1]);
+    });
 
-        await GoogleSpreadsheetsService.rowsAppend(
-            [['hi', 'there']],
-            'abc-test',
-            GSPREAD_INVENTORY_ID
-        );
-        const d = await GoogleSpreadsheetsService.rangeGet(
-            'abc-test!A:B',
-            GSPREAD_INVENTORY_ID
-        );
-        await GoogleSpreadsheetsService.rowsDelete(
+    let a: boolean;
+    test('can we CREATE a sheet', async () => {
+        a = await coreGoogSpread.sheetCreate('abc-test');
+        expect(a).toBe(true);
+    });
+
+    let c: string[][];
+    test('can we ADD ROWS to a sheet', async () => {
+        await coreGoogSpread.rowsAppend([['hi', 'there']], 'abc-test');
+        c = await coreGoogSpread.rangeGet('abc-test!A:B');
+        expect(c[0][0]).toBe('hi');
+        expect(c[0][1]).toBe('there');
+
+        await coreGoogSpread.rowsAppend([['hello', 'again']], 'abc-test');
+        const d = await coreGoogSpread.rangeGet('abc-test!A:B');
+        await coreGoogSpread.rowsDelete(
             1,
             2,
-            await GoogleSpreadsheetsService.getSheetIdByName(
-                'abc-test',
-                GSPREAD_INVENTORY_ID
-            ),
-            GSPREAD_INVENTORY_ID
+            await coreGoogSpread.getSheetIdByName('abc-test')
         );
         expect(d.length).toBe(c.length + 1);
-        // if (a) {
-        //     const c = await sheetDestroy('abc-test', GSPREAD_INVENTORY_ID);
-        //     expect(c).toBe(true);
-        // }
+    });
+
+    test('can we DELETE ROWS from a sheet', async () => {
+        const d = await coreGoogSpread.rangeGet('abc-test!A:B');
+        await coreGoogSpread.rowsDelete(
+            1,
+            2,
+            await coreGoogSpread.getSheetIdByName('abc-test')
+        );
+        expect(d.length).toBe(c.length);
+    });
+
+    test('can we DELETE  a sheet', async () => {
+        if (a) {
+            const b = await coreGoogSpread.sheetDestroy('abc-test');
+            expect(b).toBe(true);
+        }
     });
 });

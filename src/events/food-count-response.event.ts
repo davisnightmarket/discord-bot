@@ -7,7 +7,7 @@ import {
 import { FoodCountInputCache } from './food-count-input.event';
 
 import { COUNT_CHANNEL_NAME } from '../nm-service';
-import { Dbg } from '../service';
+import { Dbg } from '../utility';
 import { getChannelByName } from '../service/discord.service';
 const debug = Dbg('FoodCountCancelEvent');
 

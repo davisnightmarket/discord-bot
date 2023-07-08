@@ -220,7 +220,7 @@ export class GoogleSpreadsheetsService {
         return false;
     }
 
-    async sheetDestroy(title: string) {
+    async sheetDestroy(title: string): Promise<boolean> {
         const spreadsheetId = this.spreadsheetId;
         validate(title);
         const [gspread, auth] = await Gspread;

@@ -6,11 +6,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.MessageService = void 0;
 const fs_1 = require("fs");
 const path_1 = require("path");
-const debug_service_1 = require("./debug.service");
+const debug_utility_1 = require("../utility/debug.utility");
 const handlebars_1 = __importDefault(require("handlebars"));
-const dbg = (0, debug_service_1.Dbg)('MessageService');
+const dbg = (0, debug_utility_1.Dbg)('MessageService');
 const messageCache = {};
 const messagePath = (0, path_1.join)(__dirname, '/../message-md');
+// TODO: do we want massage service to get it's messages from a google drive folder?
+// if so, then we want this to be a service that takes the id of the folder in the constructor
 class MessageService {
     static loadMessage(id, reload = false) {
         if (messageCache[id] && !reload) {
@@ -32,7 +34,7 @@ class MessageService {
         return messageCache[id];
     }
     static loadAllMessage(a, reload = false) {
-        let c = {};
+        const c = {};
         try {
             for (const b of a) {
                 c[b] = this.loadMessage(b, reload);
@@ -47,10 +49,11 @@ class MessageService {
         const messageMap = MessageService.loadAllMessage(Object.keys(map));
         // todo: parse with HBS
         return Object.keys(messageMap).reduce((a, b) => {
+            var _a;
             // because we do not want a message compile error to break teh app
             let d = handlebars_1.default.compile('');
             try {
-                d = handlebars_1.default.compile(messageMap[b] || '');
+                d = handlebars_1.default.compile((_a = messageMap[b]) !== null && _a !== void 0 ? _a : '');
             }
             catch (e) {
                 console.error(e);

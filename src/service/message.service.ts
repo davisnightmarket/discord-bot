@@ -11,6 +11,9 @@ const messageCache: {
 
 const messagePath = join(__dirname, '/../message-md');
 
+// TODO: do we want massage service to get it's messages from a google drive folder?
+// if so, then we want this to be a service that takes the id of the folder in the constructor
+
 export class MessageService {
     static loadMessage(id: string, reload: boolean = false) {
         if (messageCache[id] && !reload) {

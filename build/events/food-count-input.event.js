@@ -14,9 +14,9 @@ const discord_js_1 = require("discord.js");
 const nm_service_1 = require("../nm-service");
 const uuid_1 = require("uuid");
 const index_1 = require("../service/index");
-const service_1 = require("../service");
+const utility_1 = require("../utility");
 const discord_service_1 = require("../service/discord.service");
-const debug = (0, service_1.Dbg)('FoodCountInputEvent');
+const debug = (0, utility_1.Dbg)('FoodCountInputEvent');
 const MsgReply = index_1.MessageService.createMap({
     // message sent when someone posts a food count event
     FOODCOUNT_INSERT: {
@@ -38,17 +38,20 @@ const MsgReply = index_1.MessageService.createMap({
 // give user a set period of time to cancel
 // if the user cancels, this cache is deleted
 // if not, it is inserted into the spreadsheet
-exports.FoodCountInputCache = (0, index_1.CacheService)('food-count');
+exports.FoodCountInputCache = (0, utility_1.CacheUtility)('food-count');
 // after a set period of time, the input is inserted. this is that time:
 exports.TIME_UNTIL_UPDATE = 60 * 1000; // one minute in milliseconds
 /**
  *
- * @param message Discord message event
- * @returns void
  */
-const FoodCountInputEvent = (message) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
+const FoodCountInputEvent = (guildService) => (message) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a, _b, _c;
     const { channel, author } = message;
+    if (!((_a = message.guild) === null || _a === void 0 ? void 0 : _a.id)) {
+        (0, utility_1.Dbg)('FoodCountInputEvent does not happen outside of a guild channel');
+        return;
+    }
+    const { personCoreService, foodCountInputInstanceService, foodCountDataInstanceService } = guildService[(_b = message.guild) === null || _b === void 0 ? void 0 : _b.id];
     /* STAGE 1: skip the message entirely in some cases */
     // if we are a bot, we do not want to process the message
     if (author.bot ||
@@ -66,10 +69,10 @@ const FoodCountInputEvent = (message) => __awaiter(void 0, void 0, void 0, funct
     /* STAGE 2: figure out our input status */
     const [channelStatus, inputStatus, 
     // did we get the date from the content, from the channel name, or just today by default?
-    dateStatus, date, parsedInputList, parsedInputErrorList] = yield nm_service_1.NmFoodCountInputService.getParsedChannelAndContent(channel.name, content);
+    dateStatus, date, parsedInputList, parsedInputErrorList] = yield foodCountInputInstanceService.getParsedChannelAndContent(channel.name, content);
     // if we are not in a night or count channel
     // we do not send a message, we simply get out
-    if ('INVALID_CHANNEL' === channelStatus) {
+    if (channelStatus === 'INVALID_CHANNEL') {
         return;
     }
     // because when we have an invalid input, and we are in the count channel ...
@@ -83,13 +86,15 @@ const FoodCountInputEvent = (message) => __awaiter(void 0, void 0, void 0, funct
         return;
     }
     // because when we have only errors, and we are in the night channel ...
-    if (inputStatus === 'ONLY_ERRORS' && channelStatus === 'NIGHT_CHANNEL') {
+    if (inputStatus === 'ONLY_ERRORS' &&
+        channelStatus === 'NIGHT_CHANNEL') {
         // we want to ask them nicely if they meant to do a count at all
         // ? perhaps we want a a separate cache for this case and let them confirm?
         return;
     }
     // because when we have some errors, and we are in the night channel ...
-    if (inputStatus === 'OK_WITH_ERRORS' && channelStatus === 'NIGHT_CHANNEL') {
+    if (inputStatus === 'OK_WITH_ERRORS' &&
+        channelStatus === 'NIGHT_CHANNEL') {
         // we want to ask them nicely if they meant to do a count
         // because we do not assume that we are doing a count in this case ?
         // ? perhaps we want a a separate cache for this case and let them confirm?
@@ -97,7 +102,8 @@ const FoodCountInputEvent = (message) => __awaiter(void 0, void 0, void 0, funct
         return;
     }
     // because when we have only errors, and we are in the count channel ...
-    if (inputStatus === 'ONLY_ERRORS' && channelStatus === 'COUNT_CHANNEL') {
+    if (inputStatus === 'ONLY_ERRORS' &&
+        channelStatus === 'COUNT_CHANNEL') {
         // we want to show them their errors, ask if they meant to do it
         return;
     }
@@ -110,11 +116,11 @@ const FoodCountInputEvent = (message) => __awaiter(void 0, void 0, void 0, funct
         const insertTimeout = setTimeout(() => __awaiter(void 0, void 0, void 0, function* () {
             // we need to make sure teh count has not been cancelled
             // todo: test this
-            if (!exports.FoodCountInputCache.get(cacheId)) {
+            if (exports.FoodCountInputCache.get(cacheId) == null) {
                 return;
             }
             // todo: try/catch
-            yield nm_service_1.NmFoodCountDataService.appendFoodCount({
+            yield foodCountDataInstanceService.appendFoodCount({
                 org,
                 date,
                 reporter,
@@ -124,7 +130,7 @@ const FoodCountInputEvent = (message) => __awaiter(void 0, void 0, void 0, funct
             // we want to post to food-count, always, so folks know what's in the db
             const countChannel = (0, discord_service_1.getChannelByName)(message, nm_service_1.COUNT_CHANNEL_NAME);
             countChannel === null || countChannel === void 0 ? void 0 : countChannel.send(MsgReply.FOODCOUNT_INSERT({
-                lbs: lbs + '',
+                lbs: `${lbs}`,
                 note,
                 org,
                 date
@@ -154,11 +160,11 @@ const FoodCountInputEvent = (message) => __awaiter(void 0, void 0, void 0, funct
         // our success message
         const reply = {
             content: MsgReply.FOODCOUNT_INPUT_OK({
-                lbs: lbs + '',
+                lbs: `${lbs}`,
                 note,
                 org,
                 date,
-                seconds: '' + exports.TIME_UNTIL_UPDATE / 1000
+                seconds: `${exports.TIME_UNTIL_UPDATE / 1000}`
             }),
             components: [
                 new discord_js_1.ActionRowBuilder().addComponents(new discord_js_1.ButtonBuilder()
@@ -176,23 +182,24 @@ const FoodCountInputEvent = (message) => __awaiter(void 0, void 0, void 0, funct
             messageResponseId: messageReply.id
         });
         // get our reporter email address
-        const reporter = (_a = (yield nm_service_1.NmPersonService.getEmailByDiscordId(author.id))) !== null && _a !== void 0 ? _a : '';
+        const reporter = (_c = (yield personCoreService.getEmailByDiscordId(author.id))) !== null && _c !== void 0 ? _c : '';
     }
     // loop over errors and post to channel
     for (const { status, lbs, org, orgFuzzy } of parsedInputErrorList) {
         let content = '';
         if (status === 'NO_LBS_OR_ORG') {
-            content = nm_service_1.NmFoodCountInputService.getMessageErrorNoLbsOrOrg({
-                messageContent: message.content
-            });
+            content =
+                foodCountInputInstanceService.getMessageErrorNoLbsOrOrg({
+                    messageContent: message.content
+                });
         }
         if (status === 'NO_LBS') {
-            content = nm_service_1.NmFoodCountInputService.getMessageErrorNoLbs({
+            content = foodCountInputInstanceService.getMessageErrorNoLbs({
                 org
             });
         }
         if (status === 'NO_ORG') {
-            content = nm_service_1.NmFoodCountInputService.getMessageErrorNoOrg({
+            content = foodCountInputInstanceService.getMessageErrorNoOrg({
                 orgFuzzy,
                 lbs
             });
@@ -200,11 +207,11 @@ const FoodCountInputEvent = (message) => __awaiter(void 0, void 0, void 0, funct
         const responseMessage = yield message.reply({
             content
         });
-        //we delete crabapple message after 1 minute
+        // we delete crabapple message after 1 minute
         //  todo: make this better
         setTimeout(() => {
             // ? we only delete their message if they are in food count channel??
-            if ('COUNT_CHANNEL' === channelStatus) {
+            if (channelStatus === 'COUNT_CHANNEL') {
                 message.delete();
             }
             // always delete our own message
