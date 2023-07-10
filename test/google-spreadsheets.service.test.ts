@@ -5,14 +5,15 @@ import {
 } from '../src/service/google-spreadsheets.service';
 
 //import { GSPREAD_SHEET_INVENTORY_HEADERS } from '../src/nm-const';
-import { ConfigCoreGet } from '../src/utility';
-let coreGoogSpread: GoogleSpreadsheetsService;
+import { ConfigInstanceByGuildIdGet } from '../src/utility';
 
-beforeAll(async () => {
-    coreGoogSpread = new GoogleSpreadsheetsService(
-        (await ConfigCoreGet('test')).GSPREAD_CORE_PERSON_ID
-    );
-});
+const config = ConfigInstanceByGuildIdGet('##TEST##');
+
+if (config === undefined) {
+    throw new Error("Can't find test config!")
+}
+
+const coreGoogSpread = new GoogleSpreadsheetsService(config.GSPREAD_CORE_PERSON_ID);
 
 describe('gspread.service.ts', () => {
     test('does a sheet exist', async () => {
