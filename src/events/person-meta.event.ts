@@ -2,7 +2,7 @@ import { type Message } from 'discord.js';
 import { type PersonModel } from '../model/night-market.model';
 import { MessageService } from '../service/message.service';
 import { Dbg } from '../utility';
-import { PersonMetaService } from '../nm-service/nm-person-meta.service';
+import { PersonInputService } from '../nm-service/nm-person-input.service';
 import { GuildServiceModel } from '../model';
 
 const dbg = Dbg('PersonMetaEvent');
@@ -207,7 +207,7 @@ const PersonDmEvent = (metaStatus: MetaStatusType, message: Message) => {
             // we have no record of them, so start at the beginning
         }
 
-        const [contentStatus] = PersonMetaService.parseDirectReply(content);
+        const [contentStatus] = PersonInputService.parseDirectReply(content);
 
         dbg(`DM to bot content ${contentStatus}`);
         if (contentStatus === 'DECLINE') {

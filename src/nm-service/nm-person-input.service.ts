@@ -1,6 +1,6 @@
 type ReplyStatusType = 'EMAIL' | 'PHONE' | 'BOOL' | 'NONE' | 'DECLINE';
 
-export class PersonMetaService {
+export class PersonInputService {
     static parseDirectReply(content: string): [ReplyStatusType, string] {
         content = content.toLowerCase();
         let parsed: string = '';

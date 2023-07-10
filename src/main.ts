@@ -14,9 +14,9 @@ import {
     NmFoodCountDataService,
     NmFoodCountInputService,
     NmOrgService,
-    NmPersonService
+    NmPersonDataService
 } from './nm-service';
-import { GuildServiceMapModel } from './model';
+import type { GuildServiceMapModel } from './model';
 import { AddCron } from './utility/cron-utility';
 import { FoodCountReminder } from './jobs';
 
@@ -74,7 +74,7 @@ async function main() {
                         orgCoreService
                     ),
                     orgCoreService,
-                    personCoreService: new NmPersonService(
+                    personCoreService: new NmPersonDataService(
                         coreConfig.GSPREAD_CORE_PERSON_ID
                     )
                 };
