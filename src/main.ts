@@ -5,16 +5,14 @@ import {
 } from './events';
 import { Client, Events, GatewayIntentBits, Partials } from 'discord.js';
 import { GetNmSecrets } from './utility/nm-secrets.utility';
-import {
-    ConfigInstanceByGuildIdGet,
-} from './utility';
+import { ConfigInstanceByGuildIdGet } from './utility';
 import {
     NmFoodCountDataService,
     NmFoodCountInputService,
     NmOrgService,
     NmPersonService
 } from './nm-service';
-import { GuildServiceMapModel } from './model';
+import { type GuildServiceMapModel } from './model';
 import { AddCron } from './utility/cron-utility';
 import { DailyPickupsThread } from './jobs';
 
@@ -44,7 +42,8 @@ async function main() {
             const config = ConfigInstanceByGuildIdGet(guild.id);
 
             if (!config) {
-                return console.log(`No Instance ID found for guild ${guild.name}`);
+                console.log(`No config found for ${guild.name}`);
+                continue;
             }
 
             const orgCoreService = new NmOrgService(config.GSPREAD_CORE_ORG_ID);
@@ -59,7 +58,7 @@ async function main() {
                 personCoreService: new NmPersonService(
                     config.GSPREAD_CORE_PERSON_ID
                 )
-            }; 
+            };
         }
     });
 

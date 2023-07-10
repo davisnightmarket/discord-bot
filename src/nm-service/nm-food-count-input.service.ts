@@ -1,5 +1,5 @@
 import { type DayNameType } from '../model/night-market.model';
-import { NmOrgService } from './nm-org.service';
+import { type NmOrgService } from './nm-org.service';
 import FuzzySearch from 'fuzzy-search';
 import { ParseContentService } from '../service';
 
@@ -82,6 +82,7 @@ export class NmFoodCountInputService {
     constructor(orgService: NmOrgService) {
         this.orgService = orgService;
     }
+
     /* dealing with  messages sent */
     // todo: we should standardize these messages in central database, with maybe template engine
     getMessageErrorNoLbsOrOrg({ messageContent }: { messageContent: string }) {

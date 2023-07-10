@@ -14,5 +14,3 @@ export interface NmInstanceConfigModel {
     // the spreadsheet id for where organizations are kept
     GSPREAD_CORE_ORG_ID: string;
 }
-
-export type EnvConfigModel = Array<NmInstanceConfigModel>;

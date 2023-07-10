@@ -10,7 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { MessageService } from '../service/index';
 import { Dbg, CacheUtility } from '../utility';
 import { getChannelByName } from '../service/discord.service';
-import { GuildServiceModel } from '../model';
+import { type GuildServiceModel } from '../model';
 const debug = Dbg('FoodCountInputEvent');
 
 // status for each cached input: does it get inserted unless cancel? or does it require a confirmation?

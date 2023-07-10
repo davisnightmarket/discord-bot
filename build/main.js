@@ -38,7 +38,8 @@ function main() {
             for (const guild of client.guilds.cache.values()) {
                 const config = (0, utility_1.ConfigInstanceByGuildIdGet)(guild.id);
                 if (!config) {
-                    return console.log(`No Instance ID found for guild ${guild.name}`);
+                    console.log(`No config found for ${guild.name}`);
+                    continue;
                 }
                 const orgCoreService = new nm_service_1.NmOrgService(config.GSPREAD_CORE_ORG_ID);
                 GuildServiceMap[guild.id] = {

@@ -1,4 +1,4 @@
-import { NmInstanceConfigModel } from '../model/config.model';
+import { type NmInstanceConfigModel } from '../model/config.model';
 import { EnvConfig } from '../config';
 
 export const ConfigInstanceByGuildIdGet = (

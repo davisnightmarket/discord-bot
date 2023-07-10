@@ -1,18 +1,19 @@
 import {
-    NmFoodCountDataService,
-    NmFoodCountInputService,
-    NmOrgService,
-    NmPersonService
+    type NmFoodCountDataService,
+    type NmFoodCountInputService,
+    type NmOrgService,
+    type NmPersonService
 } from '../nm-service';
 
 /* Models for services taht are guild specific */
 
-export type GuildServiceModel = {
+export interface GuildServiceModel {
     foodCountDataInstanceService: NmFoodCountDataService;
     foodCountInputInstanceService: NmFoodCountInputService;
     orgCoreService: NmOrgService;
     personCoreService: NmPersonService;
-};
+}
+
 export type GuildServiceMapModel = {
     [k in string]: GuildServiceModel;
 };

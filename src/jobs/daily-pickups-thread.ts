@@ -1,3 +1,1 @@
-export function DailyPickupsThread() {
-    
-}
+export function DailyPickupsThread() {}

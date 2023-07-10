@@ -3,7 +3,7 @@ import { type PersonModel } from '../model/night-market.model';
 import { MessageService } from '../service/message.service';
 import { Dbg } from '../utility';
 import { PersonMetaService } from '../nm-service/nm-person-meta.service';
-import { GuildServiceModel } from '../model';
+import { type GuildServiceModel } from '../model';
 
 const dbg = Dbg('PersonMetaEvent');
 

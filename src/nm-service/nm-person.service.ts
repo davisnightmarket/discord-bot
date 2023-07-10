@@ -24,6 +24,7 @@ const PERSON_LIST_CACHE_EXPIRY = 1000 * 60 * 60; // one hour until cache refresh
 // we use a cache so we do not have to go to Google spreadsheet everytime we want the people
 let personListCache: PersonModel[] = [];
 let personListCacheLastUpdate = Date.now();
+
 export class NmPersonService {
     personSheetService: GoogleSpreadsheetsService;
     async getPersonList(): Promise<PersonModel[]> {
