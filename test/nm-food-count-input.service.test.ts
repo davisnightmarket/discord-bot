@@ -1,17 +1,14 @@
 import { describe, expect, test } from '@jest/globals';
 import { ParseContentService } from '../src/service';
 import {
-    NmFoodCountInputService,
-    NmFoodCountDataService,
     GSPREAD_SHEET_FOODCOUNT_HEADERS
 } from '../src/nm-service';
-import { Config } from '../src/config';
-import { GoogleSpreadsheetsService } from '../src/service/google-spreadsheets.service';
+import { foodCountInputService, foodCountDataService, coreGoogSpread } from './test-services'
 
-describe('NmFoodCountInputService', () => {
+describe('foodCountInputService', () => {
     test('getting a list of parsed data from a content', async () => {
         const [date, listOk, listFail] =
-            await NmFoodCountInputService.getFoodCountDateAndParsedInput(`
+            await foodCountInputService.getFoodCountDateAndParsedInput(`
 3/27
 4 vb
 1 DCM
@@ -45,7 +42,7 @@ student farm
     });
 
     test('getting the most recent date from a day name', async () => {
-        const a = NmFoodCountInputService.getDateStringFromDay('monday');
+        const a = foodCountInputService.getDateStringFromDay('monday');
         expect(new Date(a).getDay()).toBe(
             // a known monday
             new Date('February 27, 2023').getDay()
@@ -53,55 +50,51 @@ student farm
     });
 
     test('getting the number and string from content', async () => {
-        let a = NmFoodCountInputService.getLbsAndString('8 lbs Village Bakery');
+        let a = foodCountInputService.getLbsAndString('8 lbs Village Bakery');
         expect(a[0]).toBe(8);
         expect(a[1]).toBe('Village Bakery');
 
-        a = NmFoodCountInputService.getLbsAndString('8 Village Bakery');
+        a = foodCountInputService.getLbsAndString('8 Village Bakery');
         expect(a[0]).toBe(8);
         expect(a[1]).toBe('Village Bakery');
 
-        a = NmFoodCountInputService.getLbsAndString('8lbs Village Bakery');
+        a = foodCountInputService.getLbsAndString('8lbs Village Bakery');
         expect(a[0]).toBe(8);
         expect(a[1]).toBe('Village Bakery');
 
-        a = NmFoodCountInputService.getLbsAndString('Village Bakery  8lbs ');
+        a = foodCountInputService.getLbsAndString('Village Bakery  8lbs ');
         expect(a[0]).toBe(8);
         expect(a[1]).toBe('Village Bakery');
 
-        a = NmFoodCountInputService.getLbsAndString(
+        a = foodCountInputService.getLbsAndString(
             'Village Bakery  8 pounds '
         );
         expect(a[0]).toBe(8);
         expect(a[1]).toBe('Village Bakery');
 
-        a = NmFoodCountInputService.getLbsAndString('Village Bakery');
+        a = foodCountInputService.getLbsAndString('Village Bakery');
         expect(a[0]).toBe(0);
         expect(a[1]).toBe('Village Bakery');
 
-        a = NmFoodCountInputService.getLbsAndString('');
+        a = foodCountInputService.getLbsAndString('');
         expect(a[0]).toBe(0);
         expect(a[1]).toBe('');
     });
 });
 
 test('appends to the food count and deletes it', async () => {
-    const { GSPREAD_FOODCOUNT_ID } = Config();
-
-    const sheetName = NmFoodCountDataService.getFoodCountSheetName(1877);
+    const sheetName = foodCountDataService.getFoodCountSheetName(1877);
     expect(sheetName).toBe('food-count 1877');
 
-    await GoogleSpreadsheetsService.sheetCreateIfNone(
+    await coreGoogSpread.sheetCreateIfNone(
         sheetName,
-        GSPREAD_FOODCOUNT_ID
     );
-    await GoogleSpreadsheetsService.rowsAppend(
+    await coreGoogSpread.rowsAppend(
         [GSPREAD_SHEET_FOODCOUNT_HEADERS],
         sheetName,
-        GSPREAD_FOODCOUNT_ID
     );
 
-    const foodCountBefore = await NmFoodCountDataService.getFoodCount(
+    const foodCountBefore = await foodCountDataService.getFoodCount(
         sheetName
     );
     const foodRecordOne = {
@@ -113,19 +106,18 @@ test('appends to the food count and deletes it', async () => {
     };
 
     // appends to current year
-    const a = await NmFoodCountDataService.appendFoodCount(
+    const a = await foodCountDataService.appendFoodCount(
         foodRecordOne,
         sheetName
     );
 
     expect(a[1]).toBeGreaterThan(0);
 
-    const b = await GoogleSpreadsheetsService.rangeGet(
+    const b = await coreGoogSpread.rangeGet(
         a[0],
-        GSPREAD_FOODCOUNT_ID
     );
 
-    const foodCountAfter = await NmFoodCountDataService.getFoodCount(sheetName);
+    const foodCountAfter = await foodCountDataService.getFoodCount(sheetName);
 
     expect(foodCountAfter.length).toBe(foodCountBefore.length + 1);
 
@@ -159,11 +151,11 @@ test('appends to the food count and deletes it', async () => {
         reporter: 'christian@night-market.org'
     };
 
-    await NmFoodCountDataService.appendFoodCount(foodRecordTwo, sheetName);
+    await foodCountDataService.appendFoodCount(foodRecordTwo, sheetName);
 
-    await NmFoodCountDataService.deleteLastFoodCount(sheetName);
+    await foodCountDataService.deleteLastFoodCount(sheetName);
 
-    const foodCountFinal = await NmFoodCountDataService.getFoodCount(sheetName);
+    const foodCountFinal = await foodCountDataService.getFoodCount(sheetName);
     expect(foodCountFinal[foodCountFinal.length - 1][0]).toBe(
         foodRecordOne.date
     );
@@ -179,8 +171,7 @@ test('appends to the food count and deletes it', async () => {
     expect(foodCountFinal[foodCountFinal.length - 1][4]).toBe(
         foodRecordOne.note
     );
-    await GoogleSpreadsheetsService.sheetDestroy(
+    await coreGoogSpread.sheetDestroy(
         sheetName,
-        GSPREAD_FOODCOUNT_ID
     );
 });

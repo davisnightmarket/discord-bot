@@ -1,19 +1,8 @@
-import { describe, expect, test, beforeAll } from '@jest/globals';
+import { describe, expect, test } from '@jest/globals';
 import {
-    GoogleSpreadsheetsService,
     Alphabet
 } from '../src/service/google-spreadsheets.service';
-
-//import { GSPREAD_SHEET_INVENTORY_HEADERS } from '../src/nm-const';
-import { ConfigInstanceByGuildIdGet } from '../src/utility';
-
-const config = ConfigInstanceByGuildIdGet('##TEST##');
-
-if (config === undefined) {
-    throw new Error("Can't find test config!")
-}
-
-const coreGoogSpread = new GoogleSpreadsheetsService(config.GSPREAD_CORE_PERSON_ID);
+import { coreGoogSpread } from './test-services';
 
 describe('gspread.service.ts', () => {
     test('does a sheet exist', async () => {

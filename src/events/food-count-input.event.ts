@@ -67,8 +67,8 @@ export const FoodCountInputEvent =
 
         const {
             personCoreService,
-            foodCountInputInstanceService,
-            foodCountDataInstanceService
+            foodCountInputService,
+            foodCountDataService
         } = guildService[message.guild?.id];
 
         /* STAGE 1: skip the message entirely in some cases */
@@ -98,7 +98,7 @@ export const FoodCountInputEvent =
             date,
             parsedInputList,
             parsedInputErrorList
-        ] = await foodCountInputInstanceService.getParsedChannelAndContent(
+        ] = await foodCountInputService.getParsedChannelAndContent(
             channel.name,
             content
         );
@@ -166,7 +166,7 @@ export const FoodCountInputEvent =
                         return;
                     }
                     // todo: try/catch
-                    await foodCountDataInstanceService.appendFoodCount({
+                    await foodCountDataService.appendFoodCount({
                         org,
                         date,
                         reporter,
@@ -251,17 +251,17 @@ export const FoodCountInputEvent =
             let content = '';
             if (status === 'NO_LBS_OR_ORG') {
                 content =
-                    foodCountInputInstanceService.getMessageErrorNoLbsOrOrg({
+                    foodCountInputService.getMessageErrorNoLbsOrOrg({
                         messageContent: message.content
                     });
             }
             if (status === 'NO_LBS') {
-                content = foodCountInputInstanceService.getMessageErrorNoLbs({
+                content = foodCountInputService.getMessageErrorNoLbs({
                     org
                 });
             }
             if (status === 'NO_ORG') {
-                content = foodCountInputInstanceService.getMessageErrorNoOrg({
+                content = foodCountInputService.getMessageErrorNoOrg({
                     orgFuzzy,
                     lbs
                 });

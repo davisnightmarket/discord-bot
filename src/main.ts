@@ -5,13 +5,7 @@ import {
 } from './events';
 import { Client, Events, GatewayIntentBits, Partials } from 'discord.js';
 import { GetNmSecrets } from './utility/nm-secrets.utility';
-import { ConfigInstanceByGuildIdGet } from './utility';
-import {
-    NmFoodCountDataService,
-    NmFoodCountInputService,
-    NmOrgService,
-    NmPersonService
-} from './nm-service';
+import { ConfigInstanceByGuildIdGet, InitInstanceServices } from './utility';
 import { type GuildServiceMapModel } from './model';
 import { AddCron } from './utility/cron-utility';
 import { DailyPickupsThread } from './jobs';
@@ -46,19 +40,7 @@ async function main() {
                 continue;
             }
 
-            const orgCoreService = new NmOrgService(config.GSPREAD_CORE_ORG_ID);
-            GuildServiceMap[guild.id] = {
-                foodCountDataInstanceService: new NmFoodCountDataService(
-                    config.GSPREAD_FOODCOUNT_ID
-                ),
-                foodCountInputInstanceService: new NmFoodCountInputService(
-                    orgCoreService
-                ),
-                orgCoreService,
-                personCoreService: new NmPersonService(
-                    config.GSPREAD_CORE_PERSON_ID
-                )
-            };
+            GuildServiceMap[guild.id] = InitInstanceServices(config);
         }
     });
 
