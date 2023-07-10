@@ -33,6 +33,7 @@ export type NmConfigModel = {
     coreConfig: NmCoreConfigModel;
     instanceConfig: NmInstanceConfigModel;
 };
+
 export type EnvConfigModel = {
     [k in EnvType]: {
         coreConfig: NmCoreConfigModel;

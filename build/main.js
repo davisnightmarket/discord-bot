@@ -14,9 +14,14 @@ const discord_js_1 = require("discord.js");
 const nm_secrets_utility_1 = require("./utility/nm-secrets.utility");
 const utility_1 = require("./utility");
 const nm_service_1 = require("./nm-service");
+const cron_utility_1 = require("./utility/cron-utility");
+const jobs_1 = require("./jobs");
 const GuildServiceMap = {};
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
+        // Add cron jobs
+        (0, cron_utility_1.AddCron)('* * 9 * *', jobs_1.DailyPickupsThread);
+        // Start discord client
         const client = new discord_js_1.Client({
             intents: [
                 discord_js_1.GatewayIntentBits.Guilds,
@@ -26,6 +31,7 @@ function main() {
             ],
             partials: [discord_js_1.Partials.Message, discord_js_1.Partials.Channel]
         });
+        // build discord data
         client.once(discord_js_1.Events.ClientReady, (c) => __awaiter(this, void 0, void 0, function* () {
             console.log(`Ready! Logged in as ${c.user.tag}`);
             // OK, here we loop through guilds and build a service instance for each

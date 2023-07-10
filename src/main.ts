@@ -18,13 +18,13 @@ import {
 } from './nm-service';
 import { GuildServiceMapModel } from './model';
 import { AddCron } from './utility/cron-utility';
-import { FoodCountReminder } from './jobs';
+import { DailyPickupsThread } from './jobs';
 
 const GuildServiceMap: GuildServiceMapModel = {};
 
 async function main() {
     // Add cron jobs
-    AddCron('* * 9 * *', FoodCountReminder);
+    AddCron('* * 9 * *', DailyPickupsThread);
 
     // Start discord client
     const client = new Client({

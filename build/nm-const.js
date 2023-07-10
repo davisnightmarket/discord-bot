@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.GSPREAD_CORE_ACTIVE_STATE_LIST = void 0;
+exports.DAYS_OF_WEEK = exports.GSPREAD_CORE_ACTIVE_STATE_LIST = void 0;
 /**
  * CORE DATA
  */
@@ -15,3 +15,12 @@ exports.GSPREAD_CORE_ACTIVE_STATE_LIST = [
 //     ORG_SHEET: 'GSPREAD_CORE_ID',
 //     FOOD_COUNT_SHEET: 'GSPREAD_FOODCOUNT_ID'
 // };
+exports.DAYS_OF_WEEK = [
+    'sunday',
+    'monday',
+    'tuesday',
+    'wednesday',
+    'thursday',
+    'friday',
+    'saturday'
+];
