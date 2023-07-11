@@ -1,9 +1,11 @@
-import { describe, expect, test } from '@jest/globals';
+import { describe, expect, test, jest } from '@jest/globals';
 import { ParseContentService } from '../src/service';
 import {
     GSPREAD_SHEET_FOODCOUNT_HEADERS
 } from '../src/nm-service';
-import { foodCountInputService, foodCountDataService, coreGoogSpread } from './test-services'
+import { foodCountInputService, foodCountDataService, foodSheetService } from './test-services'
+
+jest.setTimeout(1000000);
 
 describe('foodCountInputService', () => {
     test('getting a list of parsed data from a content', async () => {
@@ -86,17 +88,14 @@ test('appends to the food count and deletes it', async () => {
     const sheetName = foodCountDataService.getFoodCountSheetName(1877);
     expect(sheetName).toBe('food-count 1877');
 
-    await coreGoogSpread.sheetCreateIfNone(
-        sheetName,
-    );
-    await coreGoogSpread.rowsAppend(
+    await foodSheetService.sheetCreateIfNone(sheetName);
+    await foodSheetService.rowsAppend(
         [GSPREAD_SHEET_FOODCOUNT_HEADERS],
         sheetName,
     );
 
-    const foodCountBefore = await foodCountDataService.getFoodCount(
-        sheetName
-    );
+    const foodCountBefore = await foodCountDataService.getFoodCount(sheetName);
+
     const foodRecordOne = {
         date: '01/19/1996',
         org: 'Sutter General',
@@ -113,9 +112,7 @@ test('appends to the food count and deletes it', async () => {
 
     expect(a[1]).toBeGreaterThan(0);
 
-    const b = await coreGoogSpread.rangeGet(
-        a[0],
-    );
+    const b = await foodSheetService.rangeGet(a[0]);
 
     const foodCountAfter = await foodCountDataService.getFoodCount(sheetName);
 
@@ -127,21 +124,11 @@ test('appends to the food count and deletes it', async () => {
     expect(b[0][3]).toBe(foodRecordOne.reporter);
     expect(b[0][4]).toBe(foodRecordOne.note);
 
-    expect(foodCountAfter[foodCountAfter.length - 1][0]).toBe(
-        foodRecordOne.date
-    );
-    expect(foodCountAfter[foodCountAfter.length - 1][1]).toBe(
-        foodRecordOne.org
-    );
-    expect(+foodCountAfter[foodCountAfter.length - 1][2]).toBe(
-        foodRecordOne.lbs
-    );
-    expect(foodCountAfter[foodCountAfter.length - 1][3]).toBe(
-        foodRecordOne.reporter
-    );
-    expect(foodCountAfter[foodCountAfter.length - 1][4]).toBe(
-        foodRecordOne.note
-    );
+    expect(foodCountAfter[foodCountAfter.length - 1][0]).toBe(foodRecordOne.date);
+    expect(foodCountAfter[foodCountAfter.length - 1][1]).toBe(foodRecordOne.org);
+    expect(+foodCountAfter[foodCountAfter.length - 1][2]).toBe(foodRecordOne.lbs);
+    expect(foodCountAfter[foodCountAfter.length - 1][3]).toBe(foodRecordOne.reporter);
+    expect(foodCountAfter[foodCountAfter.length - 1][4]).toBe(foodRecordOne.note);
 
     const foodRecordTwo = {
         date: '01/19/1999',
@@ -156,22 +143,11 @@ test('appends to the food count and deletes it', async () => {
     await foodCountDataService.deleteLastFoodCount(sheetName);
 
     const foodCountFinal = await foodCountDataService.getFoodCount(sheetName);
-    expect(foodCountFinal[foodCountFinal.length - 1][0]).toBe(
-        foodRecordOne.date
-    );
-    expect(foodCountFinal[foodCountFinal.length - 1][1]).toBe(
-        foodRecordOne.org
-    );
-    expect(+foodCountFinal[foodCountFinal.length - 1][2]).toBe(
-        foodRecordOne.lbs
-    );
-    expect(foodCountFinal[foodCountFinal.length - 1][3]).toBe(
-        foodRecordOne.reporter
-    );
-    expect(foodCountFinal[foodCountFinal.length - 1][4]).toBe(
-        foodRecordOne.note
-    );
-    await coreGoogSpread.sheetDestroy(
-        sheetName,
-    );
+    expect(foodCountFinal[foodCountFinal.length - 1][0]).toBe(foodRecordOne.date);
+    expect(foodCountFinal[foodCountFinal.length - 1][1]).toBe(foodRecordOne.org);
+    expect(+foodCountFinal[foodCountFinal.length - 1][2]).toBe(foodRecordOne.lbs);
+    expect(foodCountFinal[foodCountFinal.length - 1][3]).toBe(foodRecordOne.reporter);
+    expect(foodCountFinal[foodCountFinal.length - 1][4]).toBe(foodRecordOne.note);
+
+    await foodSheetService.sheetDestroy(sheetName);
 });
