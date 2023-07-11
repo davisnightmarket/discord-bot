@@ -8,13 +8,14 @@ import { GetNmSecrets } from './utility/nm-secrets.utility';
 import { ConfigInstanceByGuildIdGet, InitInstanceServices } from './utility';
 import { type GuildServiceMapModel } from './model';
 import { AddCron } from './utility/cron-utility';
-import { DailyPickupsThread } from './jobs';
+import { FoodCountReminder, DailyPickupsThread } from './jobs';
 
 const GuildServiceMap: GuildServiceMapModel = {};
 
 async function main() {
     // Add cron jobs
     AddCron('* * 9 * *', DailyPickupsThread);
+    AddCron('* * 9 * *', FoodCountReminder);
 
     // Start discord client
     const client = new Client({

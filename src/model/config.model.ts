@@ -1,4 +1,6 @@
 export interface NmInstanceConfigModel {
+    // the name of the config
+    NM_ID: string;
     // the guild id
     DISCORD_GUILD_ID: string;
     // the spreadsheet id for the core data model where people and orgs are kept
