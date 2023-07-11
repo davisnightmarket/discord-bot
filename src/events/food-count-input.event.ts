@@ -11,7 +11,6 @@ import { MessageService } from '../service/index';
 import { Dbg, CacheUtility } from '../utility';
 import { getChannelByName } from '../service/discord.service';
 import { type GuildServiceModel } from '../model';
-const debug = Dbg('FoodCountInputEvent');
 
 // status for each cached input: does it get inserted unless cancel? or does it require a confirmation?
 type CacheStatusType = 'INSERT_UNLESS_CANCEL' | 'DELETE_UNLESS_CONFIRM';

@@ -1,5 +1,5 @@
 import { type DayNameType } from '../model/night-market.model';
-import { type NmOrgService } from './nm-org.service';
+import type { NmOrgService } from './nm-org-data.service';
 import FuzzySearch from 'fuzzy-search';
 import { ParseContentService } from '../service';
 
