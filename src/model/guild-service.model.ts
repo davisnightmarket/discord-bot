@@ -8,8 +8,8 @@ import type {
 /* Models for services taht are guild specific */
 
 export interface GuildServiceModel {
-    foodCountDataInstanceService: NmFoodCountDataService;
-    foodCountInputInstanceService: NmFoodCountInputService;
+    foodCountDataService: NmFoodCountDataService;
+    foodCountInputService: NmFoodCountInputService;
     orgCoreService: NmOrgService;
     personCoreService: NmPersonDataService;
 }
