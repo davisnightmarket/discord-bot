@@ -10,7 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { MessageService } from '../service/index';
 import { Dbg, CacheUtility } from '../utility';
 import { getChannelByName } from '../service/discord.service';
-import { type GuildServiceModel } from '../model';
+import { type GuildServiceMapModel } from '../model';
 
 // status for each cached input: does it get inserted unless cancel? or does it require a confirmation?
 type CacheStatusType = 'INSERT_UNLESS_CANCEL' | 'DELETE_UNLESS_CONFIRM';
@@ -53,7 +53,7 @@ export const TIME_UNTIL_UPDATE = 60 * 1000; // one minute in milliseconds
  *
  */
 export const FoodCountInputEvent =
-    (guildService: { [k in string]: GuildServiceModel }) =>
+    (guildServices: GuildServiceMapModel) =>
     async (message: Message) => {
         const { channel, author } = message as Message<true>;
 
@@ -68,7 +68,7 @@ export const FoodCountInputEvent =
             personCoreService,
             foodCountInputService,
             foodCountDataService
-        } = guildService[message.guild?.id];
+        } = guildServices[message.guild?.id];
 
         /* STAGE 1: skip the message entirely in some cases */
         // if we are a bot, we do not want to process the message
@@ -175,7 +175,7 @@ export const FoodCountInputEvent =
 
                     // we want to post to food-count, always, so folks know what's in the db
                     const countChannel = getChannelByName(
-                        message,
+                        message.guild,
                         COUNT_CHANNEL_NAME
                     );
 

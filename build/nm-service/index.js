@@ -16,5 +16,6 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
 Object.defineProperty(exports, "__esModule", { value: true });
 __exportStar(require("./nm-food-count-input.service"), exports);
 __exportStar(require("./nm-food-count-data.service"), exports);
-__exportStar(require("./nm-org.service"), exports);
-__exportStar(require("./nm-person.service"), exports);
+__exportStar(require("./nm-org-data.service"), exports);
+__exportStar(require("./nm-person-data.service"), exports);
+__exportStar(require("./nm-pickups-data.service"), exports);

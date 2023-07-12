@@ -12,7 +12,8 @@ function InitInstanceServices(config) {
     return {
         foodCountDataService: new nm_service_1.NmFoodCountDataService(config.GSPREAD_FOODCOUNT_ID),
         foodCountInputService: new nm_service_1.NmFoodCountInputService(orgCoreService),
-        personCoreService: new nm_service_1.NmPersonService(config.GSPREAD_CORE_PERSON_ID),
+        personCoreService: new nm_service_1.NmPersonDataService(config.GSPREAD_CORE_PERSON_ID),
+        pickupsDataService: new nm_service_1.NmPickupsDataService(config),
         orgCoreService,
     };
 }

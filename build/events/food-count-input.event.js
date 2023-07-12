@@ -16,7 +16,6 @@ const uuid_1 = require("uuid");
 const index_1 = require("../service/index");
 const utility_1 = require("../utility");
 const discord_service_1 = require("../service/discord.service");
-const debug = (0, utility_1.Dbg)('FoodCountInputEvent');
 const MsgReply = index_1.MessageService.createMap({
     // message sent when someone posts a food count event
     FOODCOUNT_INSERT: {
@@ -44,14 +43,14 @@ exports.TIME_UNTIL_UPDATE = 60 * 1000; // one minute in milliseconds
 /**
  *
  */
-const FoodCountInputEvent = (guildService) => (message) => __awaiter(void 0, void 0, void 0, function* () {
+const FoodCountInputEvent = (guildServices) => (message) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b, _c;
     const { channel, author } = message;
     if (!((_a = message.guild) === null || _a === void 0 ? void 0 : _a.id)) {
         (0, utility_1.Dbg)('FoodCountInputEvent does not happen outside of a guild channel');
         return;
     }
-    const { personCoreService, foodCountInputInstanceService, foodCountDataInstanceService } = guildService[(_b = message.guild) === null || _b === void 0 ? void 0 : _b.id];
+    const { personCoreService, foodCountInputService, foodCountDataService } = guildServices[(_b = message.guild) === null || _b === void 0 ? void 0 : _b.id];
     /* STAGE 1: skip the message entirely in some cases */
     // if we are a bot, we do not want to process the message
     if (author.bot ||
@@ -69,7 +68,7 @@ const FoodCountInputEvent = (guildService) => (message) => __awaiter(void 0, voi
     /* STAGE 2: figure out our input status */
     const [channelStatus, inputStatus, 
     // did we get the date from the content, from the channel name, or just today by default?
-    dateStatus, date, parsedInputList, parsedInputErrorList] = yield foodCountInputInstanceService.getParsedChannelAndContent(channel.name, content);
+    dateStatus, date, parsedInputList, parsedInputErrorList] = yield foodCountInputService.getParsedChannelAndContent(channel.name, content);
     // if we are not in a night or count channel
     // we do not send a message, we simply get out
     if (channelStatus === 'INVALID_CHANNEL') {
@@ -120,7 +119,7 @@ const FoodCountInputEvent = (guildService) => (message) => __awaiter(void 0, voi
                 return;
             }
             // todo: try/catch
-            yield foodCountDataInstanceService.appendFoodCount({
+            yield foodCountDataService.appendFoodCount({
                 org,
                 date,
                 reporter,
@@ -128,7 +127,7 @@ const FoodCountInputEvent = (guildService) => (message) => __awaiter(void 0, voi
                 note
             });
             // we want to post to food-count, always, so folks know what's in the db
-            const countChannel = (0, discord_service_1.getChannelByName)(message, nm_service_1.COUNT_CHANNEL_NAME);
+            const countChannel = (0, discord_service_1.getChannelByName)(message.guild, nm_service_1.COUNT_CHANNEL_NAME);
             countChannel === null || countChannel === void 0 ? void 0 : countChannel.send(MsgReply.FOODCOUNT_INSERT({
                 lbs: `${lbs}`,
                 note,
@@ -189,17 +188,17 @@ const FoodCountInputEvent = (guildService) => (message) => __awaiter(void 0, voi
         let content = '';
         if (status === 'NO_LBS_OR_ORG') {
             content =
-                foodCountInputInstanceService.getMessageErrorNoLbsOrOrg({
+                foodCountInputService.getMessageErrorNoLbsOrOrg({
                     messageContent: message.content
                 });
         }
         if (status === 'NO_LBS') {
-            content = foodCountInputInstanceService.getMessageErrorNoLbs({
+            content = foodCountInputService.getMessageErrorNoLbs({
                 org
             });
         }
         if (status === 'NO_ORG') {
-            content = foodCountInputInstanceService.getMessageErrorNoOrg({
+            content = foodCountInputService.getMessageErrorNoOrg({
                 orgFuzzy,
                 lbs
             });

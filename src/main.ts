@@ -3,7 +3,7 @@ import {
     FoodCountResponseEvent,
     PersonMetaEvent
 } from './events';
-import { Client, Events, GatewayIntentBits, Partials } from 'discord.js';
+import { Client, Events, GatewayIntentBits, GuildTextBasedChannel, Message, Partials } from 'discord.js';
 import { GetNmSecrets } from './utility/nm-secrets.utility';
 import { ConfigInstanceByGuildIdGet, InitInstanceServices } from './utility';
 import { type GuildServiceMapModel } from './model';
@@ -14,7 +14,7 @@ const GuildServiceMap: GuildServiceMapModel = {};
 
 async function main() {
     // Add cron jobs
-    AddCron('* * 9 * *', DailyPickupsThread);
+    // AddCron('* * 9 * *', DailyPickupsThread);
     AddCron('* * 9 * *', FoodCountReminder);
 
     // Start discord client
@@ -42,6 +42,10 @@ async function main() {
             }
 
             GuildServiceMap[guild.id] = InitInstanceServices(config);
+        }
+
+        for (const guild of c.guilds.cache.values()) {
+            DailyPickupsThread(guild, GuildServiceMap[guild.id])
         }
     });
 

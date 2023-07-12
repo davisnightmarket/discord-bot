@@ -13,14 +13,14 @@ const events_1 = require("./events");
 const discord_js_1 = require("discord.js");
 const nm_secrets_utility_1 = require("./utility/nm-secrets.utility");
 const utility_1 = require("./utility");
-const nm_service_1 = require("./nm-service");
 const cron_utility_1 = require("./utility/cron-utility");
 const jobs_1 = require("./jobs");
 const GuildServiceMap = {};
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
         // Add cron jobs
-        (0, cron_utility_1.AddCron)('* * 9 * *', jobs_1.DailyPickupsThread);
+        // AddCron('* * 9 * *', DailyPickupsThread);
+        (0, cron_utility_1.AddCron)('* * 9 * *', jobs_1.FoodCountReminder);
         // Start discord client
         const client = new discord_js_1.Client({
             intents: [
@@ -41,13 +41,10 @@ function main() {
                     console.log(`No config found for ${guild.name}`);
                     continue;
                 }
-                const orgCoreService = new nm_service_1.NmOrgService(config.GSPREAD_CORE_ORG_ID);
-                GuildServiceMap[guild.id] = {
-                    foodCountDataInstanceService: new nm_service_1.NmFoodCountDataService(config.GSPREAD_FOODCOUNT_ID),
-                    foodCountInputInstanceService: new nm_service_1.NmFoodCountInputService(orgCoreService),
-                    orgCoreService,
-                    personCoreService: new nm_service_1.NmPersonService(config.GSPREAD_CORE_PERSON_ID)
-                };
+                GuildServiceMap[guild.id] = (0, utility_1.InitInstanceServices)(config);
+            }
+            for (const guild of c.guilds.cache.values()) {
+                (0, jobs_1.DailyPickupsThread)(guild, GuildServiceMap[guild.id]);
             }
         }));
         // person meta data events

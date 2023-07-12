@@ -9,14 +9,16 @@ type ColumnMapKeyType = keyof typeof ColumnMap;
 
 // makes it easier to find and change where data is in sheet columns
 const ColumnMap = {
-    EMAIL: 'C',
-    NAME: 'B',
     STATUS: 'A',
+    NAME: 'B',
+    EMAIL: 'C',
     DISCORD_ID: 'N',
     LAST_COLUMN: 'N'
 };
+
 // exclude the header when we want only data
 const DATA_OFFSET = 2;
+
 // the name of the core sheet where all people are
 const CORE_PERSON_SHEET = 'person';
 const PERSON_LIST_CACHE_EXPIRY = 1000 * 60 * 60; // one hour until cache refresh
@@ -27,6 +29,7 @@ let personListCacheLastUpdate = Date.now();
 
 export class NmPersonDataService {
     personSheetService: GoogleSpreadsheetsService;
+
     async getPersonList(): Promise<PersonModel[]> {
         if (
             personListCache.length === 0 ||

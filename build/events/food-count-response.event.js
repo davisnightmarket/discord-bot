@@ -78,7 +78,7 @@ const FoodCountResponseEvent = (interaction) => __awaiter(void 0, void 0, void 0
         // delete any posting in the food count that came from the night channels
         if (cache.messageCountId) {
             debug('found a count channel user message');
-            const countChannel = (0, discord_service_1.getChannelByName)(interaction, nm_service_1.COUNT_CHANNEL_NAME);
+            const countChannel = (0, discord_service_1.getChannelByName)(interaction.guild, nm_service_1.COUNT_CHANNEL_NAME);
             (_b = countChannel.messages) === null || _b === void 0 ? void 0 : _b.fetch(cache.messageCountId).then((msg) => __awaiter(void 0, void 0, void 0, function* () {
                 try {
                     yield msg.delete();

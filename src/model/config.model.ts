@@ -15,4 +15,6 @@ export interface NmInstanceConfigModel {
     GSPREAD_CORE_PERSON_ID: string;
     // the spreadsheet id for where organizations are kept
     GSPREAD_CORE_ORG_ID: string;
+    // the spreadsheet id for where pickups are kept
+    GSPREAD_CORE_PICKUPS_ID: string;
 }

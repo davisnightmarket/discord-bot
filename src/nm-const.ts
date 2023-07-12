@@ -25,4 +25,4 @@ export const DAYS_OF_WEEK = [
     'thursday',
     'friday',
     'saturday'
-];
+] as const;

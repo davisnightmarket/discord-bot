@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.NmFoodCountInputService = exports.NIGHT_CHANNEL_NAMES_MAP = exports.COUNT_CHANNEL_NAME = void 0;
 const fuzzy_search_1 = __importDefault(require("fuzzy-search"));
 const service_1 = require("../service");
+const nm_const_1 = require("../nm-const");
 // we only allow food count in one channel
 exports.COUNT_CHANNEL_NAME = 'food-count';
 // OR in a "night channel", which always corresponds to a day
@@ -215,13 +216,6 @@ Example:
             }
             return [lbsCount, contentList.join(' ')];
         }
-        // in this case the number was last
-        lbsCount = this.getNumberFromStringStart(contentList[contentList.length - 1]);
-        if (lbsCount) {
-            // get rid of the number
-            contentList.pop();
-            return [lbsCount, contentList.join(' ')];
-        }
         // in this case the number was second to last, and it needs to be followed by a lbs or pounds
         lbsCount = this.getNumberFromStringStart(contentList[contentList.length - 2]);
         if (lbsCount) {
@@ -254,18 +248,9 @@ Example:
         return c;
     }
     getDateStringFromDay(day) {
-        const days = [
-            'sunday',
-            'monday',
-            'tuesday',
-            'wednesday',
-            'thursday',
-            'friday',
-            'saturday'
-        ];
         // starting with the current date
         const d = new Date();
-        while (day !== days[d.getDay()]) {
+        while (day !== nm_const_1.DAYS_OF_WEEK[d.getDay()]) {
             // count backwards until we have the right day
             d.setDate(d.getDate() - 1);
         }
