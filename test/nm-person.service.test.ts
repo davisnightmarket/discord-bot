@@ -1,6 +1,5 @@
 import { describe, expect, test, jest } from '@jest/globals';
-
-import { NmPersonService } from '../src/nm-service';
+import { personCoreService } from './test-services';
 
 jest.setTimeout(20000);
 
@@ -19,7 +18,7 @@ describe('nm-person.service', () => {
     // });
 
     test('update a person active status in central spreadsheet', async () => {
-        const a = await NmPersonService.setActiveState(
+        const a = await personCoreService.setActiveState(
             'christianco@gmail.com',
             'active'
         );

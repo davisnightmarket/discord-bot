@@ -1,11 +1,11 @@
 import { describe, expect, test, jest } from '@jest/globals';
-import { NmOrgService } from '../src/nm-service';
+import { orgCoreService } from './test-services'
 
 jest.setTimeout(20000);
 
 describe('NightMarketDataService', () => {
     test('gets the list of orgs from central spreadsheet', async () => {
-        const orgList = await NmOrgService.getOrgNameList({});
+        const orgList = await orgCoreService.getOrgNameList({});
         expect(orgList.length).toBeGreaterThan(3);
     });
 });

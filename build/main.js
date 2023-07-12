@@ -14,9 +14,14 @@ const discord_js_1 = require("discord.js");
 const nm_secrets_utility_1 = require("./utility/nm-secrets.utility");
 const utility_1 = require("./utility");
 const nm_service_1 = require("./nm-service");
+const cron_utility_1 = require("./utility/cron-utility");
+const jobs_1 = require("./jobs");
 const GuildServiceMap = {};
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
+        // Add cron jobs
+        (0, cron_utility_1.AddCron)('* * 9 * *', jobs_1.DailyPickupsThread);
+        // Start discord client
         const client = new discord_js_1.Client({
             intents: [
                 discord_js_1.GatewayIntentBits.Guilds,
@@ -26,35 +31,27 @@ function main() {
             ],
             partials: [discord_js_1.Partials.Message, discord_js_1.Partials.Channel]
         });
+        // build discord data
         client.once(discord_js_1.Events.ClientReady, (c) => __awaiter(this, void 0, void 0, function* () {
             console.log(`Ready! Logged in as ${c.user.tag}`);
-            // OK, here we loop through guilds and build a service instance for each
-            const GuildIdList = client.guilds.cache.map((guild) => guild.id);
-            for (const guildId of GuildIdList) {
-                const instanceId = yield (0, utility_1.ConfigInstanceIdByGuildIdGet)(guildId);
-                if (!instanceId) {
-                    console.log(`No Instance ID found for guild ${guildId}`);
+            // set up instances of services for each server crabapple is one
+            for (const guild of client.guilds.cache.values()) {
+                const config = (0, utility_1.ConfigInstanceByGuildIdGet)(guild.id);
+                if (!config) {
+                    console.log(`No config found for ${guild.name}`);
+                    continue;
                 }
-                else {
-                    const coreConfig = yield (0, utility_1.ConfigCoreGet)();
-                    const instanceConfig = yield (0, utility_1.ConfigInstanceByGuildIdGet)(instanceId);
-                    if (!instanceConfig) {
-                        console.error(`No config for: ${instanceId} (${guildId})! Guild is not enabled.`);
-                        // in this case we do not create a serviceMap for the guild
-                        continue;
-                    }
-                    const orgCoreService = new nm_service_1.NmOrgService(coreConfig.GSPREAD_CORE_ORG_ID);
-                    GuildServiceMap[guildId] = {
-                        foodCountDataInstanceService: new nm_service_1.NmFoodCountDataService(instanceConfig.GSPREAD_FOODCOUNT_ID),
-                        foodCountInputInstanceService: new nm_service_1.NmFoodCountInputService(orgCoreService),
-                        orgCoreService,
-                        personCoreService: new nm_service_1.NmPersonService(coreConfig.GSPREAD_CORE_PERSON_ID)
-                    };
-                }
+                const orgCoreService = new nm_service_1.NmOrgService(config.GSPREAD_CORE_ORG_ID);
+                GuildServiceMap[guild.id] = {
+                    foodCountDataInstanceService: new nm_service_1.NmFoodCountDataService(config.GSPREAD_FOODCOUNT_ID),
+                    foodCountInputInstanceService: new nm_service_1.NmFoodCountInputService(orgCoreService),
+                    orgCoreService,
+                    personCoreService: new nm_service_1.NmPersonService(config.GSPREAD_CORE_PERSON_ID)
+                };
             }
         }));
         // person meta data events
-        client.on(discord_js_1.Events.MessageCreate, (0, events_1.PersonMetaEvent)(GuildServiceMap));
+        // client.on(Events.MessageCreate, PersonMetaEvent(GuildServiceMap));
         // food count events
         client.on(discord_js_1.Events.MessageCreate, (0, events_1.FoodCountInputEvent)(GuildServiceMap));
         client.on(discord_js_1.Events.InteractionCreate, events_1.FoodCountResponseEvent);
