@@ -6,8 +6,6 @@ import type {
     NmPickupsDataService
 } from '../nm-service';
 
-/* Models for services taht are guild specific */
-
 export interface GuildServiceModel {
     foodCountDataService: NmFoodCountDataService;
     foodCountInputService: NmFoodCountInputService;

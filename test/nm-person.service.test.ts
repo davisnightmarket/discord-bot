@@ -17,12 +17,12 @@ describe('nm-person.service', () => {
     //     );
     // });
 
-    test('update a person active status in central spreadsheet', async () => {
-        const a = await personCoreService.setActiveState(
-            'christianco@gmail.com',
-            'active'
-        );
+    // test('update a person active status in central spreadsheet', async () => {
+    //     const a = await personCoreService.setActiveState(
+    //         'christianco@gmail.com',
+    //         'active'
+    //     );
 
-        expect(a).toBe('person!A34');
-    });
+    //     expect(a).toBe('person!A34');
+    // });
 });

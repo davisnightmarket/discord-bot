@@ -3,8 +3,21 @@ import { getChannelByName } from "../service";
 import { DAYS_OF_WEEK } from "../nm-const";
 import { type GuildServiceModel } from "../model";
 
-function today() {
-    return DAYS_OF_WEEK[new Date().getDay()]
+export async function DailyPickupsThread(guild: Guild, services: GuildServiceModel) {
+    const thread = await createTodaysPickupThread(guild);
+
+    // ping everyone signed up to help with today
+    const roleId = await getRoleByName(guild, today()).then((role) => role.id)
+    thread.send(roleMention(roleId))
+
+    // list all the pick ups happening today
+    const pickups = await services.pickupsDataService.getPickupsFor(today())
+    for (const pickup of pickups) {
+        thread.send([
+            `${bold(pickup.org)} at ${pickup.time}. ${pickup.comments ?? ''}`,
+            ``
+        ].join("\n"))
+    }
 }
 
 async function createTodaysPickupThread(guild: Guild) {
@@ -19,17 +32,6 @@ async function getRoleByName(guild: Guild, name: string) {
     return role
 }
 
-export async function DailyPickupsThread(guild: Guild, services: GuildServiceModel) {
-    const thread = await createTodaysPickupThread(guild);
-    const roleId = await getRoleByName(guild, today()).then((role) => role.id)
-    const pickups = await services.pickupsDataService.getPickupsFor(today())
-
-    thread.send(roleMention(roleId))
-
-    for (const pickup of pickups) {
-        thread.send([
-            `${bold(pickup.org)} at ${pickup.time}. ${pickup.comments ?? ''}`,
-            ``
-        ].join("\n"))
-    }
+function today() {
+    return DAYS_OF_WEEK[new Date().getDay()]
 }

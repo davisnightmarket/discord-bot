@@ -1,8 +1,5 @@
 import { describe, expect, test, jest } from '@jest/globals';
 import { ParseContentService } from '../src/service';
-import {
-    GSPREAD_SHEET_FOODCOUNT_HEADERS
-} from '../src/nm-service';
 import { foodCountInputService, foodCountDataService, foodSheetService } from './test-services'
 
 jest.setTimeout(1000000);

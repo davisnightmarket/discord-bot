@@ -1,7 +1,4 @@
 import { describe, expect, test } from '@jest/globals';
-import {
-    Alphabet
-} from '../src/service/google-spreadsheets.service';
 import { coreSheetService } from './test-services';
 
 describe('gspread.service.ts', () => {
@@ -15,16 +12,6 @@ describe('gspread.service.ts', () => {
         const a = await coreSheetService.sheetExists('person123');
 
         expect(a).toBe(false);
-    });
-
-    test('make sure our alphabet function works', () => {
-        expect(Alphabet[0]).toBe('A');
-        expect(Alphabet[25]).toBe('Z');
-    });
-
-    test('make sure our alphabet index method works', () => {
-        expect(coreSheetService.columnIndexFromLetter('A')).toBe(0);
-        expect(coreSheetService.columnIndexFromLetter('Z')).toBe(25);
     });
 
     test('can we DESTOY a sheet if it exists', async () => {

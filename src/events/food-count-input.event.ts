@@ -165,13 +165,13 @@ export const FoodCountInputEvent =
                         return;
                     }
                     // todo: try/catch
-                    await foodCountDataService.appendFoodCount({
+                    await foodCountDataService.appendFoodCount([{
                         org,
                         date,
                         reporter,
                         lbs,
                         note
-                    });
+                    }]);
 
                     // we want to post to food-count, always, so folks know what's in the db
                     const countChannel = getChannelByName(

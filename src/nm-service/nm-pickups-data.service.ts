@@ -1,17 +1,5 @@
 import { type DayNameType, type NmInstanceConfigModel } from '../model';
-import { GoogleSpreadsheetsService } from '../service';
-
-const rowNames: Array<keyof PickUp> = [
-    "day",
-    "time",
-    "org",
-    "volunteer1",
-    "volunteer2",
-    "volunteer3",
-    "activity",
-    "comments",
-    "contact",
-]
+import { Sheet } from '../service';
 
 interface PickUp {
     day: string;
@@ -26,27 +14,17 @@ interface PickUp {
 }
 
 export class NmPickupsDataService {
-    private readonly pickupsSheetService: GoogleSpreadsheetsService;
+    private readonly pickupsSheetService: Sheet<PickUp>;
 
     constructor(config: NmInstanceConfigModel) {
-        this.pickupsSheetService = new GoogleSpreadsheetsService(config.GSPREAD_CORE_PICKUPS_ID);
+        this.pickupsSheetService = new Sheet({
+            sheetId: config.GSPREAD_CORE_PICKUPS_ID,
+            range: "pickups!A2:I"
+        });
     }
 
     async getAllPickups() {
-        return await this.pickupsSheetService
-            .rangeGet("pickups!A2:I")
-            .then((rows) => rows
-                .filter(row => row.length > 0)
-                .map(row => {
-                    const pickup: Partial<PickUp> = {}
-                    
-                    for (let i = 0; i < row.length; i++) {
-                        pickup[rowNames[i]] = row[i]
-                    }
-
-                    return pickup as PickUp
-                })
-            )
+        return await this.pickupsSheetService.get()
     }
 
     async getPickupsFor(day: DayNameType) {
