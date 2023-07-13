@@ -119,13 +119,13 @@ const FoodCountInputEvent = (guildServices) => (message) => __awaiter(void 0, vo
                 return;
             }
             // todo: try/catch
-            yield foodCountDataService.appendFoodCount({
-                org,
-                date,
-                reporter,
-                lbs,
-                note
-            });
+            yield foodCountDataService.appendFoodCount([{
+                    org,
+                    date,
+                    reporter,
+                    lbs,
+                    note
+                }]);
             // we want to post to food-count, always, so folks know what's in the db
             const countChannel = (0, discord_service_1.getChannelByName)(message.guild, nm_service_1.COUNT_CHANNEL_NAME);
             countChannel === null || countChannel === void 0 ? void 0 : countChannel.send(MsgReply.FOODCOUNT_INSERT({

@@ -13,9 +13,24 @@ exports.DailyPickupsThread = void 0;
 const discord_js_1 = require("discord.js");
 const service_1 = require("../service");
 const nm_const_1 = require("../nm-const");
-function today() {
-    return nm_const_1.DAYS_OF_WEEK[new Date().getDay()];
+function DailyPickupsThread(guild, services) {
+    var _a;
+    return __awaiter(this, void 0, void 0, function* () {
+        const thread = yield createTodaysPickupThread(guild);
+        // ping everyone signed up to help with today
+        const roleId = yield getRoleByName(guild, today()).then((role) => role.id);
+        thread.send((0, discord_js_1.roleMention)(roleId));
+        // list all the pick ups happening today
+        const pickups = yield services.pickupsDataService.getPickupsFor(today());
+        for (const pickup of pickups) {
+            thread.send([
+                `${(0, discord_js_1.bold)(pickup.org)} at ${pickup.time}. ${(_a = pickup.comments) !== null && _a !== void 0 ? _a : ''}`,
+                ``
+            ].join("\n"));
+        }
+    });
 }
+exports.DailyPickupsThread = DailyPickupsThread;
 function createTodaysPickupThread(guild) {
     return __awaiter(this, void 0, void 0, function* () {
         const channel = (0, service_1.getChannelByName)(guild, today());
@@ -31,19 +46,6 @@ function getRoleByName(guild, name) {
         return role;
     });
 }
-function DailyPickupsThread(guild, services) {
-    var _a;
-    return __awaiter(this, void 0, void 0, function* () {
-        const thread = yield createTodaysPickupThread(guild);
-        const roleId = yield getRoleByName(guild, today()).then((role) => role.id);
-        const pickups = yield services.pickupsDataService.getPickupsFor(today());
-        thread.send((0, discord_js_1.roleMention)(roleId));
-        for (const pickup of pickups) {
-            thread.send([
-                `${(0, discord_js_1.bold)(pickup.org)} at ${pickup.time}. ${(_a = pickup.comments) !== null && _a !== void 0 ? _a : ''}`,
-                ``
-            ].join("\n"));
-        }
-    });
+function today() {
+    return nm_const_1.DAYS_OF_WEEK[new Date().getDay()];
 }
-exports.DailyPickupsThread = DailyPickupsThread;

@@ -15,7 +15,7 @@ export class NmFoodCountDataService {
     constructor(foodCountSheetId: string) {
         this.foodCountSheetService = new Sheet({
             sheetId: foodCountSheetId,
-            range: `'${getFoodCountSheetName()}'!A2:E`
+            range: `'${getFoodCountSheetName()}'!A1:E`
         });
     }
 
@@ -24,7 +24,7 @@ export class NmFoodCountDataService {
     }
 
     async appendFoodCount(foodCount: FoodCountModel[]) {
-        this.foodCountSheetService.add(foodCount);
+        this.foodCountSheetService.append(foodCount);
     }
 }
 

@@ -229,7 +229,7 @@ Example:
     async getOrgListFromFuzzyString(orgFuzzy: string): Promise<string[]> {
         const orgList = (await this.orgService.getOrgList()).map((a) => ({
             ...a,
-            nameSearchable: `${a.nameAltList.join(' ')} ${a.name}`
+            nameSearchable: `${a.nameAlt} ${a.name}`
         }));
         const searcher = new FuzzySearch(orgList, ['nameSearchable'], {
             caseSensitive: false,

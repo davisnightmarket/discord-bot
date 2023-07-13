@@ -19,7 +19,7 @@ export class NmPickupsDataService {
     constructor(config: NmInstanceConfigModel) {
         this.pickupsSheetService = new Sheet({
             sheetId: config.GSPREAD_CORE_PICKUPS_ID,
-            range: "pickups!A2:I"
+            range: "pickups!A1:I"
         });
     }
 

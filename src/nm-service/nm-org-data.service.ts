@@ -2,7 +2,7 @@ import { Sheet } from '../service';
 
 interface OrgModel {
     name: string;
-    nameAltList: string[];
+    nameAlt: string;
 }
 
 export class NmOrgService {
@@ -11,7 +11,7 @@ export class NmOrgService {
     constructor(orgSpreadsheetId: string) {
         this.orgSheetService = new Sheet({
             sheetId: orgSpreadsheetId,
-            range: 'org!A3:C',
+            range: 'org!A2:C',
         });
     }
 

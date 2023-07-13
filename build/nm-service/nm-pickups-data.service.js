@@ -11,34 +11,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.NmPickupsDataService = void 0;
 const service_1 = require("../service");
-const rowNames = [
-    "day",
-    "time",
-    "org",
-    "volunteer1",
-    "volunteer2",
-    "volunteer3",
-    "activity",
-    "comments",
-    "contact",
-];
 class NmPickupsDataService {
     constructor(config) {
-        this.pickupsSheetService = new service_1.GoogleSpreadsheetsService(config.GSPREAD_CORE_PICKUPS_ID);
+        this.pickupsSheetService = new service_1.Sheet({
+            sheetId: config.GSPREAD_CORE_PICKUPS_ID,
+            range: "pickups!A1:I"
+        });
     }
     getAllPickups() {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.pickupsSheetService
-                .rangeGet("pickups!A2:I")
-                .then((rows) => rows
-                .filter(row => row.length > 0)
-                .map(row => {
-                const pickup = {};
-                for (let i = 0; i < row.length; i++) {
-                    pickup[rowNames[i]] = row[i];
-                }
-                return pickup;
-            }));
+            return yield this.pickupsSheetService.get();
         });
     }
     getPickupsFor(day) {

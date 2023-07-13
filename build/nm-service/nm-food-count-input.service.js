@@ -145,7 +145,7 @@ Example:
     }
     getOrgListFromFuzzyString(orgFuzzy) {
         return __awaiter(this, void 0, void 0, function* () {
-            const orgList = (yield this.orgService.getOrgList()).map((a) => (Object.assign(Object.assign({}, a), { nameSearchable: `${a.nameAltList.join(' ')} ${a.name}` })));
+            const orgList = (yield this.orgService.getOrgList()).map((a) => (Object.assign(Object.assign({}, a), { nameSearchable: `${a.nameAlt} ${a.name}` })));
             const searcher = new fuzzy_search_1.default(orgList, ['nameSearchable'], {
                 caseSensitive: false,
                 sort: true
