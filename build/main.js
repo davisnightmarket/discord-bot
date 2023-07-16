@@ -13,14 +13,15 @@ const events_1 = require("./events");
 const discord_js_1 = require("discord.js");
 const nm_secrets_utility_1 = require("./utility/nm-secrets.utility");
 const utility_1 = require("./utility");
-const nm_service_1 = require("./nm-service");
 const cron_utility_1 = require("./utility/cron-utility");
 const jobs_1 = require("./jobs");
 const GuildServiceMap = {};
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
         // Add cron jobs
+        // todo: add cron reminder times to instance config spreadsheet?
         (0, cron_utility_1.AddCron)('* * 9 * *', jobs_1.DailyPickupsThread);
+        (0, cron_utility_1.AddCron)('* * 8 * *', jobs_1.FoodCountReminder);
         // Start discord client
         const client = new discord_js_1.Client({
             intents: [
@@ -36,18 +37,13 @@ function main() {
             console.log(`Ready! Logged in as ${c.user.tag}`);
             // set up instances of services for each server crabapple is one
             for (const guild of client.guilds.cache.values()) {
-                const config = (0, utility_1.ConfigInstanceByGuildIdGet)(guild.id);
-                if (!config) {
-                    console.log(`No config found for ${guild.name}`);
-                    continue;
+                try {
+                    GuildServiceMap[guild.id] = yield (0, utility_1.GetInstanceServicesByGuildId)(guild.id);
                 }
-                const orgCoreService = new nm_service_1.NmOrgService(config.GSPREAD_CORE_ORG_ID);
-                GuildServiceMap[guild.id] = {
-                    foodCountDataInstanceService: new nm_service_1.NmFoodCountDataService(config.GSPREAD_FOODCOUNT_ID),
-                    foodCountInputInstanceService: new nm_service_1.NmFoodCountInputService(orgCoreService),
-                    orgCoreService,
-                    personCoreService: new nm_service_1.NmPersonService(config.GSPREAD_CORE_PERSON_ID)
-                };
+                catch (e) {
+                    console.log(e);
+                    console.log(`Could not create a guild service for ${guild.id}:`);
+                }
             }
         }));
         // person meta data events

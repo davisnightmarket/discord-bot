@@ -12,7 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.PersonMetaEvent = void 0;
 const message_service_1 = require("../service/message.service");
 const utility_1 = require("../utility");
-const nm_person_meta_service_1 = require("../nm-service/nm-person-meta.service");
+const nm_person_input_service_1 = require("../nm-service/nm-person-input.service");
 const dbg = (0, utility_1.Dbg)('PersonMetaEvent');
 const APPROPRIATE_TIME_TO_BUG_U_IN_SECS = 1; // 60 * 60 * 24 * 7,
 const A_BIT_OF_LAG_BEFORE_INTROS_IN_SECS = 1; // 60 * 60;
@@ -147,7 +147,7 @@ const PersonDmEvent = (metaStatus, message) => {
             return true;
             // we have no record of them, so start at the beginning
         }
-        const [contentStatus] = nm_person_meta_service_1.PersonMetaService.parseDirectReply(content);
+        const [contentStatus] = nm_person_input_service_1.PersonInputService.parseDirectReply(content);
         dbg(`DM to bot content ${contentStatus}`);
         if (contentStatus === 'DECLINE') {
             if (metaStatus === 'EMAIL_NONE') {

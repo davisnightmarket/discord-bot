@@ -1,11 +1,7 @@
-import {
-    FoodCountInputEvent,
-    FoodCountResponseEvent,
-    PersonMetaEvent
-} from './events';
+import { FoodCountInputEvent, FoodCountResponseEvent } from './events';
 import { Client, Events, GatewayIntentBits, Partials } from 'discord.js';
 import { GetNmSecrets } from './utility/nm-secrets.utility';
-import { ConfigInstanceByGuildIdGet, InitInstanceServices } from './utility';
+import { GetInstanceServicesByGuildId } from './utility';
 import { type GuildServiceMapModel } from './model';
 import { AddCron } from './utility/cron-utility';
 import { FoodCountReminder, DailyPickupsThread } from './jobs';
@@ -14,8 +10,9 @@ const GuildServiceMap: GuildServiceMapModel = {};
 
 async function main() {
     // Add cron jobs
+    // todo: add cron reminder times to instance config spreadsheet?
     AddCron('* * 9 * *', DailyPickupsThread);
-    AddCron('* * 9 * *', FoodCountReminder);
+    AddCron('* * 8 * *', FoodCountReminder);
 
     // Start discord client
     const client = new Client({
@@ -34,14 +31,16 @@ async function main() {
 
         // set up instances of services for each server crabapple is one
         for (const guild of client.guilds.cache.values()) {
-            const config = ConfigInstanceByGuildIdGet(guild.id);
-
-            if (!config) {
-                console.log(`No config found for ${guild.name}`);
-                continue;
+            try {
+                GuildServiceMap[guild.id] = await GetInstanceServicesByGuildId(
+                    guild.id
+                );
+            } catch (e: any) {
+                console.log(e);
+                console.log(
+                    `Could not create a guild service for ${guild.id}:`
+                );
             }
-
-            GuildServiceMap[guild.id] = InitInstanceServices(config);
         }
     });
 

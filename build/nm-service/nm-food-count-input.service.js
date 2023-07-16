@@ -215,13 +215,6 @@ Example:
             }
             return [lbsCount, contentList.join(' ')];
         }
-        // in this case the number was last
-        lbsCount = this.getNumberFromStringStart(contentList[contentList.length - 1]);
-        if (lbsCount) {
-            // get rid of the number
-            contentList.pop();
-            return [lbsCount, contentList.join(' ')];
-        }
         // in this case the number was second to last, and it needs to be followed by a lbs or pounds
         lbsCount = this.getNumberFromStringStart(contentList[contentList.length - 2]);
         if (lbsCount) {
