@@ -63,13 +63,13 @@ student farm
     });
 });
 
-test('appends to the food count and deletes it', async () => {
+test('appends to the food count', async () => {
     const foodCountBefore = await foodCountDataService.getFoodCount();
 
     const foodRecordOne = {
         date: '01/19/1996',
         org: 'Sutter General',
-        lbs: 8,
+        lbs: Math.floor(Math.random() * 100),
         note: 'baby food',
         reporter: 'christianco@gmail.com'
     };

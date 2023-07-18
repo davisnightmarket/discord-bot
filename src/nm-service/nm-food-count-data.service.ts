@@ -8,25 +8,47 @@ interface FoodCountModel {
     note: string;
 }
 
+// collumns for a food count sheet in case we need to create a new one
+export const FOODCOUNT_HEADERS = [
+    'date',
+    'org',
+    'lbs',
+    'reporter',
+    'note'
+];
+
 export class NmFoodCountDataService {
-    private readonly foodCountSheetService: Sheet<FoodCountModel>;
+    private readonly foodCountSheetMap = new Map<number, Sheet<FoodCountModel>>();
+    private readonly foodCountSheetId: string;
 
     constructor(foodCountSheetId: string) {
-        this.foodCountSheetService = new Sheet({
-            sheetId: foodCountSheetId,
-            range: `'${getFoodCountSheetName()}'!A1:E`
-        });
+        this.foodCountSheetId = foodCountSheetId;
     }
 
-    async getFoodCount() {
-        return await this.foodCountSheetService.get();
+    private createSheet(year: number) {
+        // create the new sheet wraper
+        const sheet = new Sheet<FoodCountModel>({
+            sheetId: this.foodCountSheetId,
+            range: `'food-count ${year}'!A1:E`,
+            defaultHeaders: FOODCOUNT_HEADERS
+        })
+
+        // add it to the map
+        this.foodCountSheetMap.set(year, sheet)
+
+        // return
+        return sheet
     }
 
-    async appendFoodCount(foodCount: FoodCountModel[]) {
-        await this.foodCountSheetService.append(foodCount);
+    private for(year: number = new Date().getFullYear()): Sheet<FoodCountModel> {
+        return this.foodCountSheetMap.get(year) ?? this.createSheet(year)
     }
-}
 
-function getFoodCountSheetName(year = new Date().getFullYear()): string {
-    return `food-count ${year}`;
+    async getFoodCount(year?: number) {
+        return await this.for(year).get();
+    }
+
+    async appendFoodCount(foodCount: FoodCountModel[], year?: number) {
+        await this.for(year).append(foodCount);
+    }
 }

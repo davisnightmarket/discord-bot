@@ -21,6 +21,7 @@ interface SheetConfig {
     sheetId: string;
     range: string;
     cacheTime?: number;
+    defaultHeaders?: string[]
 }
 
 export class Sheet<T extends Record<string, any>> {
@@ -32,11 +33,38 @@ export class Sheet<T extends Record<string, any>> {
     header: Array<keyof T> = [];
 
     constructor(config: SheetConfig) {
+        // store params
         this.spreadsheetId = config.sheetId;
         this.range = config.range;
         this.cacheTime = config.cacheTime ?? DEAFULT_CACHE_TIME;
 
+        // if request, make sure the sheet exists
+        // using the default headers to create a new sheet if needed
+        if (config.defaultHeaders) {
+            this.createIfNone(config.defaultHeaders)
+        }
+
+        // update the cache and get headers
         this.updateCache();
+    }
+
+    async createIfNone(header: string[]) {
+        // get the name of the sheet
+        const name = a1RangeToGridRange(this.range).sheet
+
+        // create it if it dosent exist
+        if (await sheetExists(this.spreadsheetId, name)) {
+            await sheetCreate(this.spreadsheetId, name)
+
+            // add in the headers
+            const [gspread] = await Gspread;
+            await gspread.spreadsheets.values.append({
+                spreadsheetId: this.spreadsheetId,
+                range: this.range,
+                valueInputOption: 'USER_ENTERED',
+                requestBody: { values: [header] }
+            });    
+        }
     }
 
     async get(): Promise<T[]> {
@@ -198,5 +226,64 @@ function a1RangeToGridRange(range: string): GridRange {
         sheet,
         a: parseCell(a),
         b: parseCell(b),
+    }
+}
+
+export async function sheetCreate(spreadsheetId: string, title: string) {
+    const [gspread, auth] = await Gspread;
+    try {
+        const request = {
+            spreadsheetId,
+            resource: {
+                requests: [
+                    {
+                        addSheet: {
+                            properties: {
+                                title
+                            }
+                        }
+                    }
+                ]
+            },
+            auth
+        };
+        await gspread.spreadsheets.batchUpdate(request);
+        return true;
+    } catch (error) {
+        console.error(error);
+        return false;
+    }
+}
+
+async function getSheetIdByName(spreadsheetId: string, title: string): Promise<number> {
+    try {
+        const request = {
+            spreadsheetId,
+            ranges: [title],
+            includeGridData: false
+        };
+        const [gspread] = await Gspread;
+        const res = await gspread.spreadsheets.get(request);
+        if (
+            !res?.data?.sheets?.length ||
+            (!res?.data?.sheets[0]?.properties?.sheetId &&
+                !((res?.data?.sheets[0]?.properties?.sheetId ?? 0) >= 0))
+        ) {
+            throw new Error(`Sheet ${title} does not exist in spreadsheet ${spreadsheetId}`);
+        }
+
+        return res?.data?.sheets[0]?.properties?.sheetId ?? 0;
+    } catch (err) {
+        console.error(err);
+        throw err;
+    }
+}
+
+async function sheetExists(spreadsheetId: string, title: string): Promise<boolean> {
+    try {
+        const id = await getSheetIdByName(spreadsheetId, title);
+        return id >= 0;
+    } catch (e) {
+        return false;
     }
 }
