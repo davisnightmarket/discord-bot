@@ -37,6 +37,6 @@ export class NmPersonDataService {
     }
 
     async setActiveState(email: string, status: ActiveStateType) {
-        this.personSheetService.update({ email }, { status })
+        await this.personSheetService.update({ email }, { status })
     }
 }

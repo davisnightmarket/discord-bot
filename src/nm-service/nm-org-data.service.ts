@@ -21,14 +21,10 @@ export class NmOrgService {
     }
 
     async getOrgFromFuzzyString(orgFuzzy: string): Promise<string | undefined> {
-        const orgList = (await this.getOrgList()).map((a) => {
-            const bla = a?.nameAlt.split(",").join(" ") ?? '';
-
-            return ({
-                ...a,
-                nameSearchable: `${bla} ${a.name}`
-            })
-        });
+        const orgList = (await this.getOrgList()).map((a) => ({
+            ...a,
+            nameSearchable: `${a?.nameAlt?.split(",")?.join(" ") ?? ''} ${a.name}`
+        }));
     
         const searcher = new FuzzySearch(orgList, ['nameSearchable'], {
             caseSensitive: false,
