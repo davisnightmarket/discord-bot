@@ -52,25 +52,21 @@ const MsgReply = MessageService.createMap({
 // this works. What if someone is a member of multiple NM Guilds?
 // I think we need a central as well as a per-instance person data record
 // for now this will work
-const UserGuildServiceMap: {
-    [k in string]: GuildServiceModel;
-} = {};
+const UserGuildServiceMap: Record<string, GuildServiceModel> = {};
 
 // store person info locally
-const personMetaCache: {
-    [k in string]: [
-        // tells us what step in the meta data collection process they are at
-        MetaStatusType,
-        // stores data temporarily while we step through the process
-        Partial<PersonModel>,
-        // this is what is in the actual database
-        Partial<PersonModel>,
-        number
-    ];
-} = {};
+const personMetaCache: Record<string, [
+    // tells us what step in the meta data collection process they are at
+    MetaStatusType,
+    // stores data temporarily while we step through the process
+    Partial<PersonModel>,
+    // this is what is in the actual database
+    Partial<PersonModel>,
+    number
+]> = {};
 
 export const PersonMetaEvent =
-    (guildService: { [k in string]: GuildServiceModel }) =>
+    (guildService: Record<string, GuildServiceModel>) =>
     async (message: Message) => {
         const { channel, author } = message as Message<true>;
 

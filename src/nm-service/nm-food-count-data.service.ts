@@ -8,7 +8,6 @@ interface FoodCountModel {
     note: string;
 }
 
-
 export class NmFoodCountDataService {
     private readonly foodCountSheetService: Sheet<FoodCountModel>;
 

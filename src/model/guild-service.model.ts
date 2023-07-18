@@ -14,6 +14,4 @@ export interface GuildServiceModel {
     pickupsDataService: NmPickupsDataService;
 }
 
-export type GuildServiceMapModel = {
-    [k in string]: GuildServiceModel;
-};
+export type GuildServiceMapModel = Record<string, GuildServiceModel>;
