@@ -1,3 +1,4 @@
+import { type ActiveStateType } from '../model';
 import { Sheet } from '../service';
 
 export interface PersonModel {
@@ -24,7 +25,6 @@ export class NmPersonDataService {
         this.personSheetService = new Sheet({
             sheetId: personSpreadsheetId,
             range: `person!A:N`,
-            cacheTime: 1000 * 60 * 60, // one hour until cache refresh
         });
     }
 
@@ -32,17 +32,11 @@ export class NmPersonDataService {
         return await this.personSheetService.get();
     }
 
-    async getPersonByName(name: string) {
-        const people = await this.getPersonList();
-        return people.find((person) => person.name === name);
+    async getPerson(query: Partial<PersonModel>) {
+        return await this.personSheetService.search(query);
     }
 
-    async getPersonByDiscorId(id: string): Promise<PersonModel | undefined> {
-        const people = await this.getPersonList();
-        return people.find((person) => person.discordId === id);
-    }
-
-    async getEmailByDiscordId(id: string): Promise<string | undefined> {
-        return await this.getPersonByDiscorId(id).then(person => person?.email);
+    async setActiveState(email: string, status: ActiveStateType) {
+        this.personSheetService.update({ email }, { status })
     }
 }

@@ -91,14 +91,11 @@ export const PersonMetaEvent =
             return;
         }
 
-        // OK, now we figure out what their data status is
-        const personList = await personCoreService.getPersonList();
-
-        const personStore = personList.find(
-            (a) => a.discordId === message.author.id
-        );
 
         const { id, username } = message.author;
+    
+        // OK, now we figure out what their data status is
+        const personStore = await personCoreService.getPerson({ discordId: id });
 
         // we check if they are in the cache
         if (!personMetaCache[id]) {

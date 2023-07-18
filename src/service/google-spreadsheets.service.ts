@@ -57,16 +57,21 @@ export class Sheet<T extends Record<string, any>> {
         return values.findIndex(matchs(partial))
     }
 
-    async update(source: T, update: Partial<T>) {
-        const key = await this.getRangeForItem(source);
-        const row = this.valueToRow({ ...source, ...update });
+    async update(source: Partial<T>, update: Partial<T>) {
+        // get complete item and update it
+        const full = await this.search(source);
+        if (!full) throw new Error("Can not find item to update");
+        const row = this.valueToRow({ ...full, ...update });
+
+        // get the range so that we can update it
+        const range = await this.getRangeForItem(source);
 
         // update the spread sheet
         const [gspread] = await Gspread;
         await gspread.spreadsheets.values.update({
             spreadsheetId: this.spreadsheetId,
             valueInputOption: 'USER_ENTERED',
-            range: key,
+            range,
             requestBody: { values: [ row ] }
         });
 
@@ -74,7 +79,7 @@ export class Sheet<T extends Record<string, any>> {
         await this.updateCache();
     }
 
-    async getRangeForItem(value: T) {
+    async getRangeForItem(value: Partial<T>) {
         // parse the range so the we can figure out the row for the element
         const range = a1RangeToGridRange(this.range); 
 

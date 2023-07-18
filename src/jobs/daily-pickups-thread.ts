@@ -27,7 +27,7 @@ async function getVolunteerList(services: GuildServiceModel, pickup: PickUp) {
     const people = await Promise.all(
         [pickup.volunteer1, pickup.volunteer3, pickup.volunteer3]
             .filter((name) => name !== undefined || name !== "")
-            .map(async (name) => await services.personCoreService.getPersonByName(name))
+            .map(async (name) => await services.personCoreService.getPerson({ name }))
     )
 
     return people

@@ -168,7 +168,7 @@ export const FoodCountInputEvent =
                     await foodCountDataService.appendFoodCount([{
                         org,
                         date,
-                        reporter,
+                        reporter: reporter?.email ?? '',
                         lbs,
                         note
                     }]);
@@ -241,8 +241,7 @@ export const FoodCountInputEvent =
             });
 
             // get our reporter email address
-            const reporter =
-                (await personCoreService.getEmailByDiscordId(author.id)) ?? '';
+            const reporter = await personCoreService.getPerson({ discordId: author.id });
         }
 
         // loop over errors and post to channel
