@@ -24,6 +24,12 @@ class NmPersonDataService {
             return yield this.personSheetService.get();
         });
     }
+    getPersonByName(name) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const people = yield this.getPersonList();
+            return people.find((person) => person.name === name);
+        });
+    }
     getPersonByDiscorId(id) {
         return __awaiter(this, void 0, void 0, function* () {
             const people = yield this.getPersonList();

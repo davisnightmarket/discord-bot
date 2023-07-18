@@ -1,7 +1,7 @@
 import { type DayNameType, type NmInstanceConfigModel } from '../model';
 import { Sheet } from '../service';
 
-interface PickUp {
+export interface PickUp {
     day: string;
     time: string;
     org: string;

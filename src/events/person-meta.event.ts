@@ -1,9 +1,9 @@
 import { type Message } from 'discord.js';
-import { type PersonModel } from '../model/night-market.model';
 import { MessageService } from '../service/message.service';
 import { Dbg } from '../utility';
 import { PersonInputService } from '../nm-service/nm-person-input.service';
 import { type GuildServiceModel } from '../model';
+import { type PersonModel } from '../nm-service';
 
 const dbg = Dbg('PersonMetaEvent');
 

@@ -19,12 +19,12 @@ export class NmFoodCountDataService {
         });
     }
 
-    async getFoodCount(sheetName: string) {
+    async getFoodCount() {
         return await this.foodCountSheetService.get();
     }
 
     async appendFoodCount(foodCount: FoodCountModel[]) {
-        this.foodCountSheetService.append(foodCount);
+        await this.foodCountSheetService.append(foodCount);
     }
 }
 

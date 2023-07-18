@@ -25,12 +25,25 @@ function DailyPickupsThread(guild, services) {
         for (const pickup of pickups) {
             thread.send([
                 `${(0, discord_js_1.bold)(pickup.org)} at ${pickup.time}. ${(_a = pickup.comments) !== null && _a !== void 0 ? _a : ''}`,
+                ``,
+                `people helping: ${yield getVolunteerList(services, pickup)}`,
                 ``
             ].join("\n"));
         }
     });
 }
 exports.DailyPickupsThread = DailyPickupsThread;
+function getVolunteerList(services, pickup) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const people = yield Promise.all([pickup.volunteer1, pickup.volunteer3, pickup.volunteer3]
+            .filter((name) => name !== undefined || name !== "")
+            .map((name) => __awaiter(this, void 0, void 0, function* () { return yield services.personCoreService.getPersonByName(name); })));
+        return people
+            .filter((person) => !!person)
+            .map(person => (0, discord_js_1.userMention)(person.discordId))
+            .join(", ");
+    });
+}
 function createTodaysPickupThread(guild) {
     return __awaiter(this, void 0, void 0, function* () {
         const channel = (0, service_1.getChannelByName)(guild, today());

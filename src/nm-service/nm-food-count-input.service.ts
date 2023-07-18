@@ -1,6 +1,5 @@
 import { type DayNameType } from '../model/night-market.model';
 import type { NmOrgService } from './nm-org-data.service';
-import FuzzySearch from 'fuzzy-search';
 import { ParseContentService } from '../service';
 import { DAYS_OF_WEEK } from '../nm-const';
 
@@ -220,23 +219,9 @@ Example:
         const a = s.split(',');
         const fuzzyOrg = a[0]?.trim() ?? '';
         const note = a[1]?.trim() ?? '';
-        const org =
-            (await this.getOrgListFromFuzzyString(fuzzyOrg)).shift() ?? '';
+        const org = await this.orgService.getOrgFromFuzzyString(fuzzyOrg) ?? '';
 
         return [org, fuzzyOrg, note];
-    }
-
-    async getOrgListFromFuzzyString(orgFuzzy: string): Promise<string[]> {
-        const orgList = (await this.orgService.getOrgList()).map((a) => ({
-            ...a,
-            nameSearchable: `${a.nameAlt} ${a.name}`
-        }));
-        const searcher = new FuzzySearch(orgList, ['nameSearchable'], {
-            caseSensitive: false,
-            sort: true
-        });
-
-        return searcher.search(orgFuzzy).map((a) => a.name);
     }
 
     async getFoodCountDateAndParsedInput(

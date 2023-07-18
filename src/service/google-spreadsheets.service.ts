@@ -56,18 +56,15 @@ export class Sheet<T> {
 
         // append the rows to the sheet
         const [gspread] = await Gspread;
-        const req = gspread.spreadsheets.values.append({
+        const req = await gspread.spreadsheets.values.append({
             spreadsheetId: this.spreadsheetId,
             range: this.range,
             valueInputOption: 'USER_ENTERED',
             requestBody: { values: rows }
         });
 
-        // append the rows to the cache if the call succeeds
-        return await req.then((res) => {
-            this.cache.push(...values);
-            return res?.data?.updates?.updatedRange ?? [];
-        })
+        // update the cache
+        await this.updateCache();
     }
 
     async updateCache() {
@@ -103,5 +100,5 @@ function rowNameToModelKey(rowName: string): string {
 }
 
 function capitlize(word: string) {
-    return word.charAt(0) + word.substring(1);
+    return word.charAt(0).toUpperCase() + word.substring(1).toLowerCase();
 }

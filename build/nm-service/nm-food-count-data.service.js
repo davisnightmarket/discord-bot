@@ -18,7 +18,7 @@ class NmFoodCountDataService {
             range: `'${getFoodCountSheetName()}'!A1:E`
         });
     }
-    getFoodCount(sheetName) {
+    getFoodCount() {
         return __awaiter(this, void 0, void 0, function* () {
             return yield this.foodCountSheetService.get();
         });

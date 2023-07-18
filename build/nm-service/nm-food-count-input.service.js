@@ -8,12 +8,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.NmFoodCountInputService = exports.NIGHT_CHANNEL_NAMES_MAP = exports.COUNT_CHANNEL_NAME = void 0;
-const fuzzy_search_1 = __importDefault(require("fuzzy-search"));
 const service_1 = require("../service");
 const nm_const_1 = require("../nm-const");
 // we only allow food count in one channel
@@ -139,18 +135,8 @@ Example:
             const a = s.split(',');
             const fuzzyOrg = (_b = (_a = a[0]) === null || _a === void 0 ? void 0 : _a.trim()) !== null && _b !== void 0 ? _b : '';
             const note = (_d = (_c = a[1]) === null || _c === void 0 ? void 0 : _c.trim()) !== null && _d !== void 0 ? _d : '';
-            const org = (_e = (yield this.getOrgListFromFuzzyString(fuzzyOrg)).shift()) !== null && _e !== void 0 ? _e : '';
+            const org = (_e = yield this.orgService.getOrgFromFuzzyString(fuzzyOrg)) !== null && _e !== void 0 ? _e : '';
             return [org, fuzzyOrg, note];
-        });
-    }
-    getOrgListFromFuzzyString(orgFuzzy) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const orgList = (yield this.orgService.getOrgList()).map((a) => (Object.assign(Object.assign({}, a), { nameSearchable: `${a.nameAlt} ${a.name}` })));
-            const searcher = new fuzzy_search_1.default(orgList, ['nameSearchable'], {
-                caseSensitive: false,
-                sort: true
-            });
-            return searcher.search(orgFuzzy).map((a) => a.name);
         });
     }
     getFoodCountDateAndParsedInput(content) {
