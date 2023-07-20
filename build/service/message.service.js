@@ -49,11 +49,10 @@ class MessageService {
         const messageMap = MessageService.loadAllMessage(Object.keys(map));
         // todo: parse with HBS
         return Object.keys(messageMap).reduce((a, b) => {
-            var _a;
             // because we do not want a message compile error to break teh app
             let d = handlebars_1.default.compile('');
             try {
-                d = handlebars_1.default.compile((_a = messageMap[b]) !== null && _a !== void 0 ? _a : '');
+                d = handlebars_1.default.compile(messageMap[b] ?? '');
             }
             catch (e) {
                 console.error(e);
@@ -61,7 +60,7 @@ class MessageService {
             a[b] = (c) => {
                 let msg = '';
                 try {
-                    msg = d(Object.assign(Object.assign({}, map[b]), c));
+                    msg = d({ ...map[b], ...c });
                 }
                 catch (e) {
                     console.error(e);

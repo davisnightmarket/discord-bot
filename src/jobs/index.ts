@@ -1,2 +1,2 @@
 export * from './food-count-reminder';
-export * from './daily-pickups-thread';
+export * from './daily-pickups';

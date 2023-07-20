@@ -1,35 +1,40 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.NmFoodCountDataService = void 0;
+exports.NmFoodCountDataService = exports.FOODCOUNT_HEADERS = void 0;
 const service_1 = require("../service");
+// collumns for a food count sheet in case we need to create a new one
+exports.FOODCOUNT_HEADERS = [
+    'date',
+    'org',
+    'lbs',
+    'reporter',
+    'note'
+];
 class NmFoodCountDataService {
     constructor(foodCountSheetId) {
-        this.foodCountSheetService = new service_1.Sheet({
-            sheetId: foodCountSheetId,
-            range: `'${getFoodCountSheetName()}'!A1:E`
-        });
+        this.foodCountSheetMap = new Map();
+        this.foodCountSheetId = foodCountSheetId;
     }
-    getFoodCount() {
-        return __awaiter(this, void 0, void 0, function* () {
-            return yield this.foodCountSheetService.get();
+    createSheet(year) {
+        // create the new sheet wraper
+        const sheet = new service_1.Sheet({
+            sheetId: this.foodCountSheetId,
+            range: `'food-count ${year}'!A1:E`,
+            defaultHeaders: exports.FOODCOUNT_HEADERS
         });
+        // add it to the map
+        this.foodCountSheetMap.set(year, sheet);
+        // return
+        return sheet;
     }
-    appendFoodCount(foodCount) {
-        return __awaiter(this, void 0, void 0, function* () {
-            this.foodCountSheetService.append(foodCount);
-        });
+    for(year = new Date().getFullYear()) {
+        return this.foodCountSheetMap.get(year) ?? this.createSheet(year);
+    }
+    async getFoodCount(year) {
+        return await this.for(year).get();
+    }
+    async appendFoodCount(foodCount, year) {
+        await this.for(year).append(foodCount);
     }
 }
 exports.NmFoodCountDataService = NmFoodCountDataService;
-function getFoodCountSheetName(year = new Date().getFullYear()) {
-    return `food-count ${year}`;
-}

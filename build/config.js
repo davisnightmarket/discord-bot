@@ -16,7 +16,25 @@ const ProdSheets = {
     GSPREAD_CORE_PICKUPS_ID: '1aPaHi5LJ1UB0terT4Tc0XuFE4IIYzjai6d5TM8rtWBQ',
 };
 exports.EnvConfig = [
-    Object.assign({ NM_ID: "davis.nightmarket", DISCORD_GUILD_ID: '', GSPREAD_OPS_ID: '', GSPREAD_FOODCOUNT_ID: '16aa-OL6mNZfxqZFIfjfF_hFuSjPSkevUqm7qx3v_vXE' }, ProdSheets),
-    Object.assign({ NM_ID: "davis.nightmarket.test", DISCORD_GUILD_ID: '1094663742559625367', GSPREAD_OPS_ID: '1bTt7dVKTTMY7iMNcxY0-X2Ulkw7B5p-_lmwMTDgyGP4', GSPREAD_FOODCOUNT_ID: '1DPPmJU1w34PEWB3XZKeIBA0Qc7nx3R2xiJFwDbTxeNk' }, DevSheets),
-    Object.assign({ NM_ID: "test", DISCORD_GUILD_ID: '##TEST##', GSPREAD_OPS_ID: '1bTt7dVKTTMY7iMNcxY0-X2Ulkw7B5p-_lmwMTDgyGP4', GSPREAD_FOODCOUNT_ID: '1DPPmJU1w34PEWB3XZKeIBA0Qc7nx3R2xiJFwDbTxeNk' }, DevSheets)
+    /* Davis prod environment */ {
+        NM_ID: "davis.nightmarket",
+        DISCORD_GUILD_ID: '',
+        GSPREAD_OPS_ID: '',
+        GSPREAD_FOODCOUNT_ID: '16aa-OL6mNZfxqZFIfjfF_hFuSjPSkevUqm7qx3v_vXE',
+        ...ProdSheets
+    },
+    /* Davis dev environment */ {
+        NM_ID: "davis.nightmarket.test",
+        DISCORD_GUILD_ID: '1094663742559625367',
+        GSPREAD_OPS_ID: '1bTt7dVKTTMY7iMNcxY0-X2Ulkw7B5p-_lmwMTDgyGP4',
+        GSPREAD_FOODCOUNT_ID: '1DPPmJU1w34PEWB3XZKeIBA0Qc7nx3R2xiJFwDbTxeNk',
+        ...DevSheets
+    },
+    /* unit test enviroment */ {
+        NM_ID: "test",
+        DISCORD_GUILD_ID: '##TEST##',
+        GSPREAD_OPS_ID: '1bTt7dVKTTMY7iMNcxY0-X2Ulkw7B5p-_lmwMTDgyGP4',
+        GSPREAD_FOODCOUNT_ID: '1DPPmJU1w34PEWB3XZKeIBA0Qc7nx3R2xiJFwDbTxeNk',
+        ...DevSheets
+    }
 ];

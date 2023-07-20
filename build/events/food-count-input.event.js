@@ -1,13 +1,4 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FoodCountInputEvent = exports.TIME_UNTIL_UPDATE = exports.FoodCountInputCache = void 0;
 const discord_js_1 = require("discord.js");
@@ -43,14 +34,13 @@ exports.TIME_UNTIL_UPDATE = 60 * 1000; // one minute in milliseconds
 /**
  *
  */
-const FoodCountInputEvent = (guildServices) => (message) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b, _c;
+const FoodCountInputEvent = (guildServices) => async (message) => {
     const { channel, author } = message;
-    if (!((_a = message.guild) === null || _a === void 0 ? void 0 : _a.id)) {
+    if (!message.guild?.id) {
         (0, utility_1.Dbg)('FoodCountInputEvent does not happen outside of a guild channel');
         return;
     }
-    const { personCoreService, foodCountInputService, foodCountDataService } = guildServices[(_b = message.guild) === null || _b === void 0 ? void 0 : _b.id];
+    const { personCoreService, foodCountInputService, foodCountDataService } = guildServices[message.guild?.id];
     /* STAGE 1: skip the message entirely in some cases */
     // if we are a bot, we do not want to process the message
     if (author.bot ||
@@ -68,7 +58,7 @@ const FoodCountInputEvent = (guildServices) => (message) => __awaiter(void 0, vo
     /* STAGE 2: figure out our input status */
     const [channelStatus, inputStatus, 
     // did we get the date from the content, from the channel name, or just today by default?
-    dateStatus, date, parsedInputList, parsedInputErrorList] = yield foodCountInputService.getParsedChannelAndContent(channel.name, content);
+    dateStatus, date, parsedInputList, parsedInputErrorList] = await foodCountInputService.getParsedChannelAndContent(channel.name, content);
     // if we are not in a night or count channel
     // we do not send a message, we simply get out
     if (channelStatus === 'INVALID_CHANNEL') {
@@ -112,23 +102,23 @@ const FoodCountInputEvent = (guildServices) => (message) => __awaiter(void 0, vo
         // we need a unique id for our cache
         const cacheId = (0, uuid_1.v4)();
         // now we create our insert event
-        const insertTimeout = setTimeout(() => __awaiter(void 0, void 0, void 0, function* () {
+        const insertTimeout = setTimeout(async () => {
             // we need to make sure teh count has not been cancelled
             // todo: test this
             if (exports.FoodCountInputCache.get(cacheId) == null) {
                 return;
             }
             // todo: try/catch
-            yield foodCountDataService.appendFoodCount([{
+            await foodCountDataService.appendFoodCount([{
                     org,
                     date,
-                    reporter,
+                    reporter: reporter?.email ?? '',
                     lbs,
                     note
                 }]);
             // we want to post to food-count, always, so folks know what's in the db
             const countChannel = (0, discord_service_1.getChannelByName)(message.guild, nm_service_1.COUNT_CHANNEL_NAME);
-            countChannel === null || countChannel === void 0 ? void 0 : countChannel.send(MsgReply.FOODCOUNT_INSERT({
+            countChannel?.send(MsgReply.FOODCOUNT_INSERT({
                 lbs: `${lbs}`,
                 note,
                 org,
@@ -139,12 +129,12 @@ const FoodCountInputEvent = (guildServices) => (message) => __awaiter(void 0, vo
             );
             try {
                 exports.FoodCountInputCache.delete(cacheId);
-                yield messageReply.delete();
+                await messageReply.delete();
             }
             catch (e) {
                 console.log(e);
             }
-        }), 
+        }, 
         // we give them a certain amount of time to hit cancel
         exports.TIME_UNTIL_UPDATE);
         // create our cache
@@ -174,14 +164,14 @@ const FoodCountInputEvent = (guildServices) => (message) => __awaiter(void 0, vo
             ]
         };
         // we need a reference to the message
-        const messageReply = yield message.reply(reply);
+        const messageReply = await message.reply(reply);
         // because we want to delete this message on cancel, or when the expiration passes
         // we save the reply id
         exports.FoodCountInputCache.update(cacheId, {
             messageResponseId: messageReply.id
         });
         // get our reporter email address
-        const reporter = (_c = (yield personCoreService.getEmailByDiscordId(author.id))) !== null && _c !== void 0 ? _c : '';
+        const reporter = await personCoreService.getPerson({ discordId: author.id });
     }
     // loop over errors and post to channel
     for (const { status, lbs, org, orgFuzzy } of parsedInputErrorList) {
@@ -203,7 +193,7 @@ const FoodCountInputEvent = (guildServices) => (message) => __awaiter(void 0, vo
                 lbs
             });
         }
-        const responseMessage = yield message.reply({
+        const responseMessage = await message.reply({
             content
         });
         // we delete crabapple message after 1 minute
@@ -217,5 +207,5 @@ const FoodCountInputEvent = (guildServices) => (message) => __awaiter(void 0, vo
             responseMessage.delete();
         }, exports.TIME_UNTIL_UPDATE);
     }
-});
+};
 exports.FoodCountInputEvent = FoodCountInputEvent;
