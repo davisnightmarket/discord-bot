@@ -248,6 +248,10 @@ export class GoogleSpreadsheetsService {
         }
     }
 
+    static create(spreadsheetId: string) {
+        return new GoogleSpreadsheetsService(spreadsheetId);
+    }
+
     constructor(spreadsheetId: string) {
         this.spreadsheetId = spreadsheetId;
     }

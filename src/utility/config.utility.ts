@@ -7,7 +7,7 @@ import {
     NmOrgService,
     NmPersonDataService
 } from '../nm-service';
-import { GoogleSpreadsheetsService } from '../service';
+import { GoogleSpreadsheetsService } from '../service/google-spreadsheets.service';
 
 const Env = process.env.NODE_ENV as EnvType;
 
@@ -19,28 +19,29 @@ type InstanceConfigMapModel = {
     [k in string]: Partial<InstanceConfigModel>;
 };
 
-const InstanceConfigMapGet = new GoogleSpreadsheetsService(
-    EnvConfig[Env].GSPREAD_CORE_CONFIG_ID
-)
-    .rangeGet('config!A2:C')
-    .then((configList) =>
-        configList.reduce<InstanceConfigMapModel>((a, b) => {
-            // here we are using config from a range that looks like:
-            // nm_id, key, value
-            if (!a[b[0]]) {
-                a[b[0]] = {
-                    NM_ID: b[0]
-                };
-            }
-            a[b[0]][b[1] as keyof InstanceConfigModel] = b[2];
-            return a;
-        }, {})
-    );
+export const GetInstanceConfigMap = async () =>
+    await GoogleSpreadsheetsService.create(
+        EnvConfig[Env].GSPREAD_CORE_CONFIG_ID
+    )
+        .rangeGet('config-instance!A2:C')
+        .then((configList) =>
+            configList.reduce<InstanceConfigMapModel>((a, b) => {
+                // here we are using config from a range that looks like:
+                // nm_id, key, value
+                if (!a[b[0]]) {
+                    a[b[0]] = {
+                        NM_ID: b[0]
+                    };
+                }
+                a[b[0]][b[1] as keyof InstanceConfigModel] = b[2];
+                return a;
+            }, {})
+        );
 
 export const GetConfigInstanceByGuildId = async (
     guildId: string
 ): Promise<ConfigModel> => {
-    const instanceConfigList = Object.values(await InstanceConfigMapGet);
+    const instanceConfigList = Object.values(await GetInstanceConfigMap());
 
     const a =
         instanceConfigList.find((a) => a.DISCORD_GUILD_ID === guildId) ?? {};

@@ -1,6 +1,3 @@
-Hello {{username}}, it looks like we don't have you in our database yet. May we have your email address?
+Great thanks for the email! We will keep it safe. Also, you can delete all your contact information by DM'ing me:
 
-_Email private policy:_
-
--   emails are not shared with anyone in the organization except Community Coordinators, who have access to our database.
--   you may delete your contact information from our databse at any time by asking a Community Coordinator or Night Tech person.
+"Delete all my contact info"

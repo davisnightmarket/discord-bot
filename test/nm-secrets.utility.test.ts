@@ -1,9 +1,9 @@
 import { describe, expect, test, jest } from '@jest/globals';
 import { GetGoogleSecrets, GetNmSecrets } from '../src/utility';
 
-jest.setTimeout(1000000);
+jest.setTimeout(5000);
 
-describe('nm-config.service.ts', () => {
+describe('nm-secrets.utility.ts', () => {
     // to run this, set the NODE_ENV to prod when running Jest
     // and make sure you are using a service account with secrets access
     if (process.env.NODE_ENV === 'prod') {

@@ -14,7 +14,7 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-__exportStar(require("./google-spreadsheets.service"), exports);
 __exportStar(require("./parse-content.service"), exports);
 __exportStar(require("./message.service"), exports);
 __exportStar(require("./discord.service"), exports);
+__exportStar(require("./google-spreadsheets.service"), exports);

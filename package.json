@@ -12,7 +12,7 @@
     "format": "prettier --config .prettierrc 'src/**/*.ts' --write",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --fix --ext .ts",
-    "postbuild": "cp -r './src/message-md' ./build/message-md/"
+    "postbuild": "cp -r ./src/message-md ./build/"
   },
   "husky": {
     "hooks": {

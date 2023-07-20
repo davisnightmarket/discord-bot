@@ -304,7 +304,7 @@ Example:
     getLbsAndString(content: string): [number, string] {
         const contentList = content.split(' ').filter((a: string) => a.trim());
         let lbsCount = this.getNumberFromStringStart(contentList[0]);
-    
+
         // in this case the number was first
         if (lbsCount) {
             // get rid of the number
