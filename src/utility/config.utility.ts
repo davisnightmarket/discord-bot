@@ -18,7 +18,7 @@ if (!Env || !Object.keys(EnvConfig).includes(Env)) {
 type InstanceConfigMapModel = {
     [k in string]: Partial<InstanceConfigModel>;
 };
-
+// todo: we might want to store this range locally or cache it?
 export const GetInstanceConfigMap = async () =>
     await GoogleSpreadsheetsService.create(
         EnvConfig[Env].GSPREAD_CORE_CONFIG_ID
@@ -38,7 +38,7 @@ export const GetInstanceConfigMap = async () =>
             }, {})
         );
 
-export const GetConfigInstanceByGuildId = async (
+export const GetConfigByGuildId = async (
     guildId: string
 ): Promise<ConfigModel> => {
     const instanceConfigList = Object.values(await GetInstanceConfigMap());
@@ -52,7 +52,7 @@ export const GetConfigInstanceByGuildId = async (
 };
 
 export async function GetInstanceServicesByGuildId(guildId: string) {
-    const config = await GetConfigInstanceByGuildId(guildId);
+    const config = await GetConfigByGuildId(guildId);
 
     const orgCoreService = new NmOrgService(config.GSPREAD_CORE_ORG_ID);
 

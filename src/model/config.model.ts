@@ -84,7 +84,8 @@ export class ConfigModel implements AllConfigModel {
             throw new Error('Missing GSPREAD_FOODCOUNT_ID');
         }
         this.NM_ID = NM_ID;
-        this.DISCORD_GUILD_ID = DISCORD_GUILD_ID;
+        // adding strings to this because it is an integer id
+        this.DISCORD_GUILD_ID = DISCORD_GUILD_ID + '';
         this.GSPREAD_OPS_ID = GSPREAD_OPS_ID;
         this.GSPREAD_FOODCOUNT_ID = GSPREAD_FOODCOUNT_ID;
     }
