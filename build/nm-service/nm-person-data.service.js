@@ -15,6 +15,18 @@ class NmPersonDataService {
     async getPerson(query) {
         return await this.personSheetService.search(query);
     }
+    async getNameList() {
+        const people = await this.getPersonList();
+        return people
+            .map((person) => person.name)
+            .filter((name) => name.trim());
+    }
+    async getEmailList() {
+        const people = await this.getPersonList();
+        return people
+            .map((person) => person.email)
+            .filter((email) => email.trim());
+    }
     async setActiveState(email, status) {
         await this.personSheetService.update({ email }, { status });
     }
