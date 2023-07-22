@@ -44,7 +44,7 @@ const MsgReply = message_service_1.MessageService.createMap({
 const UserGuildServiceMap = {};
 // store person info locally
 const personMetaCache = {};
-const PersonMetaEvent = (guildService) => async (message) => {
+const PersonMetaEvent = (guildServices) => async (message) => {
     const { channel, author } = message;
     const NOW_IN_SECONDS = Date.now() / 1000;
     /* STAGE 1: skip the message entirely in some cases */
@@ -53,7 +53,7 @@ const PersonMetaEvent = (guildService) => async (message) => {
         return;
     }
     if (message.guild?.id) {
-        UserGuildServiceMap[author.id] = guildService[message.guild?.id];
+        UserGuildServiceMap[author.id] = await guildServices.getServicesForGuildId(message.guild?.id);
     }
     const { personCoreService } = UserGuildServiceMap[author.id];
     if (!personCoreService) {

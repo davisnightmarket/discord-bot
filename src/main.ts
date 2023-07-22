@@ -43,7 +43,7 @@ async function main() {
     });
 
     // person meta data events
-    // client.on(Events.MessageCreate, PersonMetaEvent(GuildServiceMap));
+    // client.on(Events.MessageCreate, PersonMetaEvent(services));
 
     // food count events
     client.on(Events.MessageCreate, FoodCountInputEvent(services));

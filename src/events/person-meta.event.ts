@@ -4,6 +4,7 @@ import { Dbg } from '../utility';
 import { PersonInputService } from '../nm-service/nm-person-input.service';
 import { type GuildServiceModel } from '../model';
 import { type PersonModel } from '../nm-service';
+import { type ConfigSerive } from '../service';
 
 const dbg = Dbg('PersonMetaEvent');
 
@@ -69,7 +70,7 @@ const personMetaCache: Record<
 > = {};
 
 export const PersonMetaEvent =
-    (guildService: Record<string, GuildServiceModel>) =>
+    (guildServices: ConfigSerive) =>
     async (message: Message) => {
         const { channel, author } = message as Message<true>;
 
@@ -83,7 +84,7 @@ export const PersonMetaEvent =
         }
 
         if (message.guild?.id) {
-            UserGuildServiceMap[author.id] = guildService[message.guild?.id];
+            UserGuildServiceMap[author.id] = await guildServices.getServicesForGuildId(message.guild?.id);
         }
         const { personCoreService } = UserGuildServiceMap[author.id];
 

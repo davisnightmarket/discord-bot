@@ -29,7 +29,7 @@ async function main() {
         console.log(`Ready! Logged in as ${c.user.tag}`);
     });
     // person meta data events
-    // client.on(Events.MessageCreate, PersonMetaEvent(GuildServiceMap));
+    client.on(discord_js_1.Events.MessageCreate, (0, events_1.PersonMetaEvent)(services));
     // food count events
     client.on(discord_js_1.Events.MessageCreate, (0, events_1.FoodCountInputEvent)(services));
     client.on(discord_js_1.Events.InteractionCreate, events_1.FoodCountResponseEvent);
