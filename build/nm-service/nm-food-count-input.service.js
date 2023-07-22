@@ -122,7 +122,7 @@ Example:
         const a = s.split(',');
         const fuzzyOrg = a[0]?.trim() ?? '';
         const note = a[1]?.trim() ?? '';
-        const org = await this.orgService.getOrgFromFuzzyString(fuzzyOrg) ?? '';
+        const org = (await this.orgService.getOrgFromFuzzyString(fuzzyOrg)) ?? '';
         return [org, fuzzyOrg, note];
     }
     async getFoodCountDateAndParsedInput(content) {

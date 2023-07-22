@@ -34,7 +34,7 @@ class Sheet {
         // get the name of the sheet
         const name = a1RangeToGridRange(this.range).sheet;
         // create it if it dosent exist
-        if (await sheetExists(this.spreadsheetId, name)) {
+        if (!(await sheetExists(this.spreadsheetId, name))) {
             await sheetCreate(this.spreadsheetId, name);
             // add in the headers
             const [gspread] = await Gspread;
@@ -56,6 +56,10 @@ class Sheet {
         const values = await this.get();
         return values.find(matchs(partial));
     }
+    async filter(partial) {
+        const values = await this.get();
+        return values.filter(matchs(partial));
+    }
     async searchIndex(partial) {
         const values = await this.get();
         return values.findIndex(matchs(partial));
@@ -64,7 +68,7 @@ class Sheet {
         // get complete item and update it
         const full = await this.search(source);
         if (!full)
-            throw new Error("Can not find item to update");
+            throw new Error('Can not find item to update');
         const row = this.valueToRow({ ...full, ...update });
         // get the range so that we can update it
         const range = await this.getRangeForItem(source);
@@ -114,15 +118,14 @@ class Sheet {
         const [gspread] = await Gspread;
         const result = await gspread.spreadsheets.values.get({
             spreadsheetId: this.spreadsheetId,
-            range: this.range,
+            range: this.range
         });
         if (!result.data.values)
-            throw new Error("!!!");
+            throw new Error('!!!');
         // update the cache using the headers in the range to map to build the model
         const [header, ...rows] = result.data.values;
         this.header = header.map(rowNameToModelKey);
-        this.cache = rows
-            .map((row) => {
+        this.cache = rows.map((row) => {
             const a = {};
             for (let i = 0; i < this.header.length; i++) {
                 a[this.header[i]] = row[i] ?? '';
@@ -135,11 +138,11 @@ class Sheet {
 }
 exports.Sheet = Sheet;
 function matchs(a) {
-    return (b) => Object.keys(a).some((key) => a[key] === b[key]);
+    return (b) => !Object.keys(a).some((key) => a[key] !== b[key]);
 }
 function rowNameToModelKey(rowName) {
     const [first, ...rest] = rowName.split(/[_-\s]/g);
-    return first + rest.map(capitlize).join("");
+    return first + rest.map(capitlize).join('');
 }
 function capitlize(word) {
     return word.charAt(0).toUpperCase() + word.substring(1).toLowerCase();
@@ -151,8 +154,8 @@ function gridRangeToA1Range(r) {
     return `${r.sheet}!${r.a.col}${r.a.row ?? ''}:${r.b.col}${r.b.row ?? ''}`;
 }
 function a1RangeToGridRange(range) {
-    const [area, sheet] = range.split("!").reverse();
-    const [a, b] = area.split(":");
+    const [area, sheet] = range.split('!').reverse();
+    const [a, b] = area.split(':');
     function parseCell(cell) {
         if (!cell)
             throw new Error(`Invalid a1range ${range}!`);
@@ -169,7 +172,7 @@ function a1RangeToGridRange(range) {
     return {
         sheet,
         a: parseCell(a),
-        b: parseCell(b),
+        b: parseCell(b)
     };
 }
 async function sheetCreate(spreadsheetId, title) {

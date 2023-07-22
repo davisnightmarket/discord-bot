@@ -15,6 +15,9 @@ const FoodCountResponseEvent = async (interaction) => {
     interaction = interaction;
     // we set the customId of the button
     const { customId } = interaction;
+    // its not a custom id
+    if (!customId)
+        return;
     // we gave it an action name, and a cache id
     const [idName, idCache] = customId.split('--');
     // this kills the interaction so it doesn't report a failure

@@ -40,7 +40,7 @@ const FoodCountInputEvent = (guildServices) => async (message) => {
         (0, utility_1.Dbg)('FoodCountInputEvent does not happen outside of a guild channel');
         return;
     }
-    const { personCoreService, foodCountInputService, foodCountDataService } = guildServices[message.guild?.id];
+    const { personCoreService, foodCountInputService, foodCountDataService } = await guildServices.getServicesForGuildId(message.guild?.id);
     /* STAGE 1: skip the message entirely in some cases */
     // if we are a bot, we do not want to process the message
     if (author.bot ||
@@ -109,17 +109,19 @@ const FoodCountInputEvent = (guildServices) => async (message) => {
                 return;
             }
             // todo: try/catch
-            await foodCountDataService.appendFoodCount([{
+            await foodCountDataService.appendFoodCount([
+                {
                     org,
                     date,
                     reporter: reporter?.email ?? '',
                     lbs,
                     note
-                }]);
+                }
+            ]);
             // we want to post to food-count, always, so folks know what's in the db
             const countChannel = (0, discord_service_1.getChannelByName)(message.guild, nm_service_1.COUNT_CHANNEL_NAME);
             countChannel?.send(MsgReply.FOODCOUNT_INSERT({
-                lbs: `${lbs}`,
+                lbs: lbs.toString(),
                 note,
                 org,
                 date
@@ -171,16 +173,17 @@ const FoodCountInputEvent = (guildServices) => async (message) => {
             messageResponseId: messageReply.id
         });
         // get our reporter email address
-        const reporter = await personCoreService.getPerson({ discordId: author.id });
+        const reporter = await personCoreService.getPerson({
+            discordId: author.id
+        });
     }
     // loop over errors and post to channel
     for (const { status, lbs, org, orgFuzzy } of parsedInputErrorList) {
         let content = '';
         if (status === 'NO_LBS_OR_ORG') {
-            content =
-                foodCountInputService.getMessageErrorNoLbsOrOrg({
-                    messageContent: message.content
-                });
+            content = foodCountInputService.getMessageErrorNoLbsOrOrg({
+                messageContent: message.content
+            });
         }
         if (status === 'NO_LBS') {
             content = foodCountInputService.getMessageErrorNoLbs({

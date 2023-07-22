@@ -62,7 +62,9 @@ const PersonMetaEvent = (guildService) => async (message) => {
     }
     const { id, username } = message.author;
     // OK, now we figure out what their data status is
-    const personStore = await personCoreService.getPerson({ discordId: id });
+    const personStore = await personCoreService.getPerson({
+        discordId: id
+    });
     // we check if they are in the cache
     if (!personMetaCache[id]) {
         // if not, make sure to add them

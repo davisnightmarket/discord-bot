@@ -10,7 +10,7 @@ class NmOrgService {
     constructor(orgSpreadsheetId) {
         this.orgSheetService = new service_1.Sheet({
             sheetId: orgSpreadsheetId,
-            range: 'org!A2:C',
+            range: 'org!A2:C'
         });
     }
     async getOrgList() {
@@ -19,7 +19,7 @@ class NmOrgService {
     async getOrgFromFuzzyString(orgFuzzy) {
         const orgList = (await this.getOrgList()).map((a) => ({
             ...a,
-            nameSearchable: `${a?.nameAlt?.split(",")?.join(" ") ?? ''} ${a.name}`
+            nameSearchable: `${a?.nameAlt?.split(',')?.join(' ') ?? ''} ${a.name}`
         }));
         const searcher = new fuzzy_search_1.default(orgList, ['nameSearchable'], {
             caseSensitive: false,

@@ -6,7 +6,7 @@ class NmPersonDataService {
     constructor(personSpreadsheetId) {
         this.personSheetService = new service_1.Sheet({
             sheetId: personSpreadsheetId,
-            range: `person!A:N`,
+            range: `person!A:N`
         });
     }
     async getPersonList() {

@@ -20,6 +20,8 @@ export const FoodCountResponseEvent = async (interaction: Interaction) => {
     interaction = interaction as ButtonInteraction;
     // we set the customId of the button
     const { customId } = interaction;
+    // its not a custom id
+    if (!customId) return;
     // we gave it an action name, and a cache id
     const [idName, idCache] = customId.split('--');
 

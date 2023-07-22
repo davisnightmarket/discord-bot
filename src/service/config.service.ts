@@ -32,7 +32,7 @@ export class ConfigSerive {
     constructor() {
         this.sheet = new Sheet<ConfigItem>({
             sheetId: EnvConfig[Env].GSPREAD_CORE_CONFIG_ID,
-            range: 'config-instance!A2:C'
+            range: 'config-instance!A1:C'
         });
     }
 

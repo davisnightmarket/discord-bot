@@ -6,17 +6,16 @@ class NmPickupsDataService {
     constructor(config) {
         this.pickupsSheetService = new service_1.Sheet({
             sheetId: config.GSPREAD_CORE_PICKUPS_ID,
-            range: "pickups!A1:I"
+            range: 'pickups!A1:I'
         });
     }
     async getAllPickups() {
         return await this.pickupsSheetService.get();
     }
     async getPickupsFor(day) {
-        return await this.getAllPickups()
-            .then((pickups) => pickups
+        return await this.getAllPickups().then((pickups) => pickups
             .filter((pickup) => pickup.day === day)
-            .filter((pickup) => pickup.activity === "food pickup"));
+            .filter((pickup) => pickup.activity === 'food pickup'));
     }
 }
 exports.NmPickupsDataService = NmPickupsDataService;

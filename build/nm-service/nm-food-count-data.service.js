@@ -3,13 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.NmFoodCountDataService = exports.FOODCOUNT_HEADERS = void 0;
 const service_1 = require("../service");
 // collumns for a food count sheet in case we need to create a new one
-exports.FOODCOUNT_HEADERS = [
-    'date',
-    'org',
-    'lbs',
-    'reporter',
-    'note'
-];
+exports.FOODCOUNT_HEADERS = ['date', 'org', 'lbs', 'reporter', 'note'];
 class NmFoodCountDataService {
     constructor(foodCountSheetId) {
         this.foodCountSheetMap = new Map();

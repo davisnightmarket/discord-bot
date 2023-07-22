@@ -15,10 +15,11 @@ import { GetNmSecrets } from './utility/nm-secrets.utility';
 import { type GuildServiceMapModel } from './model';
 import { AddCron } from './utility/cron-utility';
 import { FoodCountReminder, DailyPickupsWithoutThread } from './jobs';
-import { ConfigSerive } from './service';
+import { CommandSerice, ConfigSerive } from './service';
 
 async function main() {
     const services = new ConfigSerive();
+    const commands = new CommandSerice();
 
     // Add cron jobs
     // AddCron('* * 9 * *', DailyPickupsThread);
@@ -37,6 +38,10 @@ async function main() {
 
     // build discord data
     client.once(Events.ClientReady, async (c) => {
+        for (const guild of c.guilds.cache.values()) {
+            commands.register(guild)
+        }
+        
         console.log(`Ready! Logged in as ${c.user.tag}`);
     });
 
@@ -46,6 +51,9 @@ async function main() {
     // food count events
     client.on(Events.MessageCreate, FoodCountInputEvent(services));
     client.on(Events.InteractionCreate, FoodCountResponseEvent);
+
+    // commands
+    client.on(Events.InteractionCreate, commands.execute(services))
 
     const {
         discordConfig: { appToken }

@@ -15,7 +15,6 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 __exportStar(require("./debug.utility"), exports);
-__exportStar(require("./config.utility"), exports);
 __exportStar(require("./cache.utility"), exports);
 __exportStar(require("./google-secrets.utility"), exports);
 __exportStar(require("./nm-secrets.utility"), exports);

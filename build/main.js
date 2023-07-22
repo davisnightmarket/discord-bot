@@ -3,11 +3,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const events_1 = require("./events");
 const discord_js_1 = require("discord.js");
 const nm_secrets_utility_1 = require("./utility/nm-secrets.utility");
-const utility_1 = require("./utility");
 const cron_utility_1 = require("./utility/cron-utility");
 const jobs_1 = require("./jobs");
-const GuildServiceMap = {};
+const service_1 = require("./service");
 async function main() {
+    const services = new service_1.ConfigSerive();
+    const commands = new service_1.CommandSerice();
     // Add cron jobs
     // AddCron('* * 9 * *', DailyPickupsThread);
     (0, cron_utility_1.AddCron)('* * 9 * *', jobs_1.FoodCountReminder);
@@ -23,25 +24,18 @@ async function main() {
     });
     // build discord data
     client.once(discord_js_1.Events.ClientReady, async (c) => {
-        console.log(`Ready! Logged in as ${c.user.tag}`);
-        // set up instances of services for each server crabapple is one
-        for (const guild of client.guilds.cache.values()) {
-            const config = (0, utility_1.ConfigInstanceByGuildIdGet)(guild.id);
-            if (!config) {
-                console.log(`No config found for ${guild.name}`);
-                continue;
-            }
-            GuildServiceMap[guild.id] = (0, utility_1.InitInstanceServices)(config);
-        }
         for (const guild of c.guilds.cache.values()) {
-            (0, jobs_1.DailyPickupsWithoutThread)(guild, GuildServiceMap[guild.id]);
+            commands.register(guild);
         }
+        console.log(`Ready! Logged in as ${c.user.tag}`);
     });
     // person meta data events
     // client.on(Events.MessageCreate, PersonMetaEvent(GuildServiceMap));
     // food count events
-    client.on(discord_js_1.Events.MessageCreate, (0, events_1.FoodCountInputEvent)(GuildServiceMap));
+    client.on(discord_js_1.Events.MessageCreate, (0, events_1.FoodCountInputEvent)(services));
     client.on(discord_js_1.Events.InteractionCreate, events_1.FoodCountResponseEvent);
+    // commands
+    client.on(discord_js_1.Events.InteractionCreate, commands.execute(services));
     const { discordConfig: { appToken } } = await (0, nm_secrets_utility_1.GetNmSecrets)();
     client.login(appToken);
 }
