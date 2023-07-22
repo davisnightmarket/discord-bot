@@ -50,6 +50,11 @@ export class NmPersonDataService {
             .filter((email) => email.trim())
     }
 
+    async getPersonByEmailOrDiscord(emailOrDiscordId: string) {
+        return await this.personSheetService.search({ email: emailOrDiscordId })
+            ?? await this.personSheetService.search({ discordId: emailOrDiscordId });
+    }
+
     async setActiveState(email: string, status: ActiveStateType) {
         await this.personSheetService.update({ email }, { status });
     }

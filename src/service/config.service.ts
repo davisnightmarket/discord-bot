@@ -1,8 +1,7 @@
 import { Sheet } from '.';
 import { EnvConfig } from '../config';
 import {
-    type GuildServiceModel,
-    type ConfigModel,
+    type GuildServiceModel, ConfigModel,
     type EnvType
 } from '../model';
 import {
@@ -55,7 +54,7 @@ export class ConfigSerive {
         }
 
         // return
-        return config;
+        return new ConfigModel(config);
     }
 
     getSericesFotTest() {

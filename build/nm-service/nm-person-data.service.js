@@ -27,6 +27,10 @@ class NmPersonDataService {
             .map((person) => person.email)
             .filter((email) => email.trim());
     }
+    async getPersonByEmailOrDiscord(emailOrDiscordId) {
+        return await this.personSheetService.search({ email: emailOrDiscordId })
+            ?? await this.personSheetService.search({ discordId: emailOrDiscordId });
+    }
     async setActiveState(email, status) {
         await this.personSheetService.update({ email }, { status });
     }

@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ConfigSerive = void 0;
 const _1 = require(".");
 const config_1 = require("../config");
+const model_1 = require("../model");
 const nm_service_1 = require("../nm-service");
 const Env = process.env.NODE_ENV;
 if (!Env || !Object.keys(config_1.EnvConfig).includes(Env)) {
@@ -33,7 +34,7 @@ class ConfigSerive {
             config[item.code] = item.value;
         }
         // return
-        return config;
+        return new model_1.ConfigModel(config);
     }
     getSericesFotTest() {
         const config = config_1.EnvConfig.test;
