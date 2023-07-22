@@ -12,20 +12,22 @@ export class NmOrgService {
     constructor(orgSpreadsheetId: string) {
         this.orgSheetService = new Sheet({
             sheetId: orgSpreadsheetId,
-            range: 'org!A2:C',
+            range: 'org!A2:C'
         });
     }
 
     async getOrgList(): Promise<OrgModel[]> {
-        return await this.orgSheetService.get()
+        return await this.orgSheetService.get();
     }
 
     async getOrgFromFuzzyString(orgFuzzy: string): Promise<string | undefined> {
         const orgList = (await this.getOrgList()).map((a) => ({
             ...a,
-            nameSearchable: `${a?.nameAlt?.split(",")?.join(" ") ?? ''} ${a.name}`
+            nameSearchable: `${a?.nameAlt?.split(',')?.join(' ') ?? ''} ${
+                a.name
+            }`
         }));
-    
+
         const searcher = new FuzzySearch(orgList, ['nameSearchable'], {
             caseSensitive: false,
             sort: true

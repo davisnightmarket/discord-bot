@@ -1,5 +1,8 @@
-export interface NmInstanceConfigModel {
-    // the name of the config
+export type EnvType = 'dev' | 'test' | 'prod';
+
+// these config values are needed for all nm instances
+export interface ConfigModel {
+    // the id of the instance
     NM_ID: string;
     // the guild id
     DISCORD_GUILD_ID: string;
@@ -15,6 +18,6 @@ export interface NmInstanceConfigModel {
     GSPREAD_CORE_PERSON_ID: string;
     // the spreadsheet id for where organizations are kept
     GSPREAD_CORE_ORG_ID: string;
-    // the spreadsheet id for where pickups are kept
+    // the spreadsheet id for where pickup are kept
     GSPREAD_CORE_PICKUPS_ID: string;
 }

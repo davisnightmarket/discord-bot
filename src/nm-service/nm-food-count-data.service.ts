@@ -9,16 +9,13 @@ interface FoodCountModel {
 }
 
 // collumns for a food count sheet in case we need to create a new one
-export const FOODCOUNT_HEADERS = [
-    'date',
-    'org',
-    'lbs',
-    'reporter',
-    'note'
-];
+export const FOODCOUNT_HEADERS = ['date', 'org', 'lbs', 'reporter', 'note'];
 
 export class NmFoodCountDataService {
-    private readonly foodCountSheetMap = new Map<number, Sheet<FoodCountModel>>();
+    private readonly foodCountSheetMap = new Map<
+        number,
+        Sheet<FoodCountModel>
+    >();
     private readonly foodCountSheetId: string;
 
     constructor(foodCountSheetId: string) {
@@ -31,17 +28,19 @@ export class NmFoodCountDataService {
             sheetId: this.foodCountSheetId,
             range: `'food-count ${year}'!A1:E`,
             defaultHeaders: FOODCOUNT_HEADERS
-        })
+        });
 
         // add it to the map
-        this.foodCountSheetMap.set(year, sheet)
+        this.foodCountSheetMap.set(year, sheet);
 
         // return
-        return sheet
+        return sheet;
     }
 
-    private for(year: number = new Date().getFullYear()): Sheet<FoodCountModel> {
-        return this.foodCountSheetMap.get(year) ?? this.createSheet(year)
+    private for(
+        year: number = new Date().getFullYear()
+    ): Sheet<FoodCountModel> {
+        return this.foodCountSheetMap.get(year) ?? this.createSheet(year);
     }
 
     async getFoodCount(year?: number) {

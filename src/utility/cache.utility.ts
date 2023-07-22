@@ -15,7 +15,10 @@ type CachePayloadModel<
     }
 > = Record<string, U>;
 
-type CacheModel<U extends PayloadModel = PayloadModel> = Record<CacheType, CachePayloadModel<U & PayloadBaseModel>>;
+type CacheModel<U extends PayloadModel = PayloadModel> = Record<
+    CacheType,
+    CachePayloadModel<U & PayloadBaseModel>
+>;
 
 // the private cache
 const Cache: CacheModel<PayloadModel> = {

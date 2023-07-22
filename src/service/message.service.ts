@@ -35,7 +35,10 @@ export class MessageService {
         return messageCache[id];
     }
 
-    static loadAllMessage(a: string[], reload: boolean = false): Record<string, string> {
+    static loadAllMessage(
+        a: string[],
+        reload: boolean = false
+    ): Record<string, string> {
         const c: Record<string, string> = {};
         try {
             for (const b of a) {
@@ -48,10 +51,14 @@ export class MessageService {
     }
 
     static createMap<U extends Record<string, Record<string, string>>>(map: U) {
-        const messageMap = MessageService.loadAllMessage(Object.keys(map)) as Record<keyof U, string>;
+        const messageMap = MessageService.loadAllMessage(
+            Object.keys(map)
+        ) as Record<keyof U, string>;
 
         // todo: parse with HBS
-        return Object.keys(messageMap).reduce<Partial<Record<(keyof U), (a: U[keyof U]) => string>>>((a, b: keyof U) => {
+        return Object.keys(messageMap).reduce<
+            Partial<Record<keyof U, (a: U[keyof U]) => string>>
+        >((a, b: keyof U) => {
             // because we do not want a message compile error to break teh app
             let d = Handlebars.compile('');
             try {

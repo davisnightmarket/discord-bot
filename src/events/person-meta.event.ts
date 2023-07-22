@@ -55,15 +55,18 @@ const MsgReply = MessageService.createMap({
 const UserGuildServiceMap: Record<string, GuildServiceModel> = {};
 
 // store person info locally
-const personMetaCache: Record<string, [
-    // tells us what step in the meta data collection process they are at
-    MetaStatusType,
-    // stores data temporarily while we step through the process
-    Partial<PersonModel>,
-    // this is what is in the actual database
-    Partial<PersonModel>,
-    number
-]> = {};
+const personMetaCache: Record<
+    string,
+    [
+        // tells us what step in the meta data collection process they are at
+        MetaStatusType,
+        // stores data temporarily while we step through the process
+        Partial<PersonModel>,
+        // this is what is in the actual database
+        Partial<PersonModel>,
+        number
+    ]
+> = {};
 
 export const PersonMetaEvent =
     (guildService: Record<string, GuildServiceModel>) =>
@@ -91,11 +94,12 @@ export const PersonMetaEvent =
             return;
         }
 
-
         const { id, username } = message.author;
-    
+
         // OK, now we figure out what their data status is
-        const personStore = await personCoreService.getPerson({ discordId: id });
+        const personStore = await personCoreService.getPerson({
+            discordId: id
+        });
 
         // we check if they are in the cache
         if (!personMetaCache[id]) {

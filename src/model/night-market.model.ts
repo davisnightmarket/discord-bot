@@ -8,4 +8,3 @@ export type DayNameType =
     | 'saturday';
 
 export type ActiveStateType = 'active' | 'inactive';
-

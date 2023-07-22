@@ -24,7 +24,7 @@ export class NmPersonDataService {
     constructor(personSpreadsheetId: string) {
         this.personSheetService = new Sheet({
             sheetId: personSpreadsheetId,
-            range: `person!A:N`,
+            range: `person!A:N`
         });
     }
 
@@ -37,6 +37,6 @@ export class NmPersonDataService {
     }
 
     async setActiveState(email: string, status: ActiveStateType) {
-        await this.personSheetService.update({ email }, { status })
+        await this.personSheetService.update({ email }, { status });
     }
 }

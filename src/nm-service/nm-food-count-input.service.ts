@@ -219,7 +219,8 @@ Example:
         const a = s.split(',');
         const fuzzyOrg = a[0]?.trim() ?? '';
         const note = a[1]?.trim() ?? '';
-        const org = await this.orgService.getOrgFromFuzzyString(fuzzyOrg) ?? '';
+        const org =
+            (await this.orgService.getOrgFromFuzzyString(fuzzyOrg)) ?? '';
 
         return [org, fuzzyOrg, note];
     }
@@ -290,7 +291,7 @@ Example:
     getLbsAndString(content: string): [number, string] {
         const contentList = content.split(' ').filter((a: string) => a.trim());
         let lbsCount = this.getNumberFromStringStart(contentList[0]);
-    
+
         // in this case the number was first
         if (lbsCount) {
             // get rid of the number

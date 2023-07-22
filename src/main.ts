@@ -3,16 +3,23 @@ import {
     FoodCountResponseEvent,
     PersonMetaEvent
 } from './events';
-import { Client, Events, GatewayIntentBits, GuildTextBasedChannel, Message, Partials } from 'discord.js';
+import {
+    Client,
+    Events,
+    GatewayIntentBits,
+    GuildTextBasedChannel,
+    Message,
+    Partials
+} from 'discord.js';
 import { GetNmSecrets } from './utility/nm-secrets.utility';
-import { ConfigInstanceByGuildIdGet, InitInstanceServices } from './utility';
 import { type GuildServiceMapModel } from './model';
 import { AddCron } from './utility/cron-utility';
 import { FoodCountReminder, DailyPickupsWithoutThread } from './jobs';
-
-const GuildServiceMap: GuildServiceMapModel = {};
+import { ConfigSerive } from './service';
 
 async function main() {
+    const services = new ConfigSerive();
+
     // Add cron jobs
     // AddCron('* * 9 * *', DailyPickupsThread);
     AddCron('* * 9 * *', FoodCountReminder);
@@ -31,29 +38,13 @@ async function main() {
     // build discord data
     client.once(Events.ClientReady, async (c) => {
         console.log(`Ready! Logged in as ${c.user.tag}`);
-
-        // set up instances of services for each server crabapple is one
-        for (const guild of client.guilds.cache.values()) {
-            const config = ConfigInstanceByGuildIdGet(guild.id);
-
-            if (!config) {
-                console.log(`No config found for ${guild.name}`);
-                continue;
-            }
-
-            GuildServiceMap[guild.id] = InitInstanceServices(config);
-        }
-
-        for (const guild of c.guilds.cache.values()) {
-            DailyPickupsWithoutThread(guild, GuildServiceMap[guild.id])
-        }
     });
 
     // person meta data events
     // client.on(Events.MessageCreate, PersonMetaEvent(GuildServiceMap));
 
     // food count events
-    client.on(Events.MessageCreate, FoodCountInputEvent(GuildServiceMap));
+    client.on(Events.MessageCreate, FoodCountInputEvent(services));
     client.on(Events.InteractionCreate, FoodCountResponseEvent);
 
     const {

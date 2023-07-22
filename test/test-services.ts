@@ -1,12 +1,8 @@
-import { ConfigInstanceByGuildIdGet, InitInstanceServices } from "../src/utility";
+import { ConfigSerive } from "../src/service"
 
-export const config = ConfigInstanceByGuildIdGet('##TEST##');
+export const config = new ConfigSerive();
 
-if (config === undefined) {
-    throw new Error("Can't find test config!");
-}
-
-export const services = InitInstanceServices(config);
+export const services = config.getSericesFotTest();
 
 export const foodCountDataService = services.foodCountDataService;
 export const foodCountInputService = services.foodCountInputService;
