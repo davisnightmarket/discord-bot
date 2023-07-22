@@ -10,7 +10,6 @@ async function main() {
     const services = new service_1.ConfigSerive();
     const commands = new service_1.CommandSerice();
     // Add cron jobs
-    // AddCron('* * 9 * *', DailyPickupsThread);
     (0, cron_utility_1.AddCron)('* * 9 * *', jobs_1.FoodCountReminder);
     // Start discord client
     const client = new discord_js_1.Client({

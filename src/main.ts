@@ -7,8 +7,6 @@ import {
     Client,
     Events,
     GatewayIntentBits,
-    GuildTextBasedChannel,
-    Message,
     Partials
 } from 'discord.js';
 import { GetNmSecrets } from './utility/nm-secrets.utility';
@@ -22,7 +20,6 @@ async function main() {
     const commands = new CommandSerice();
 
     // Add cron jobs
-    // AddCron('* * 9 * *', DailyPickupsThread);
     AddCron('* * 9 * *', FoodCountReminder);
 
     // Start discord client
