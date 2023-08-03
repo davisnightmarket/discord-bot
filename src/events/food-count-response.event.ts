@@ -20,6 +20,8 @@ export const FoodCountResponseEvent = async (interaction: Interaction) => {
     interaction = interaction as ButtonInteraction;
     // we set the customId of the button
     const { customId } = interaction;
+    // its not a custom id
+    if (!customId) return;
     // we gave it an action name, and a cache id
     const [idName, idCache] = customId.split('--');
 
@@ -77,7 +79,7 @@ export const FoodCountResponseEvent = async (interaction: Interaction) => {
         if (cache.messageCountId) {
             debug('found a count channel user message');
             const countChannel = getChannelByName(
-                interaction,
+                interaction.guild,
                 COUNT_CHANNEL_NAME
             );
 

@@ -1,7 +1,7 @@
 import { type DayNameType } from '../model/night-market.model';
 import type { NmOrgService } from './nm-org-data.service';
-import FuzzySearch from 'fuzzy-search';
 import { ParseContentService } from '../service';
+import { DAYS_OF_WEEK } from '../nm-const';
 
 // what type of channel are we in?
 type FoodCountChannelStatusType =
@@ -220,22 +220,9 @@ Example:
         const fuzzyOrg = a[0]?.trim() ?? '';
         const note = a[1]?.trim() ?? '';
         const org =
-            (await this.getOrgListFromFuzzyString(fuzzyOrg)).shift() ?? '';
+            (await this.orgService.getOrgFromFuzzyString(fuzzyOrg)) ?? '';
 
         return [org, fuzzyOrg, note];
-    }
-
-    async getOrgListFromFuzzyString(orgFuzzy: string): Promise<string[]> {
-        const orgList = (await this.orgService.getOrgList()).map((a) => ({
-            ...a,
-            nameSearchable: `${a.nameAltList.join(' ')} ${a.name}`
-        }));
-        const searcher = new FuzzySearch(orgList, ['nameSearchable'], {
-            caseSensitive: false,
-            sort: true
-        });
-
-        return searcher.search(orgFuzzy).map((a) => a.name);
     }
 
     async getFoodCountDateAndParsedInput(
@@ -357,18 +344,9 @@ Example:
     }
 
     getDateStringFromDay(day: DayNameType): string {
-        const days = [
-            'sunday',
-            'monday',
-            'tuesday',
-            'wednesday',
-            'thursday',
-            'friday',
-            'saturday'
-        ];
         // starting with the current date
         const d = new Date();
-        while (day !== days[d.getDay()]) {
+        while (day !== DAYS_OF_WEEK[d.getDay()]) {
             // count backwards until we have the right day
             d.setDate(d.getDate() - 1);
         }

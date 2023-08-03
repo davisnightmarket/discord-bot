@@ -1,8 +1,10 @@
 {
   "compilerOptions": {
-    "target": "es2016",
+    "target": "es2021",
     "lib": [
-      "es6","DOM"
+      "es6",
+      "DOM",
+      "ES2021"
     ],
     "module": "Node16",
     "rootDir": "src",

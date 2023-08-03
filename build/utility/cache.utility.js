@@ -11,7 +11,7 @@ function CacheUtility(name) {
     const C = Cache[name];
     return {
         add: (id, payload) => {
-            Cache[name][id] = Object.assign(Object.assign({}, payload), { stamp: Date.now() });
+            Cache[name][id] = { ...payload, stamp: Date.now() };
             return payload;
         },
         get: (id) => {
@@ -19,7 +19,10 @@ function CacheUtility(name) {
         },
         update: (id, payload) => {
             if (C && id in C) {
-                return (C[id] = Object.assign(Object.assign({}, C[id]), payload));
+                return (C[id] = {
+                    ...C[id],
+                    ...payload
+                });
             }
         },
         delete: (id) => {

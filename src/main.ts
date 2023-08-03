@@ -1,18 +1,26 @@
-import { FoodCountInputEvent, FoodCountResponseEvent } from './events';
-import { Client, Events, GatewayIntentBits, Partials } from 'discord.js';
+import {
+    FoodCountInputEvent,
+    FoodCountResponseEvent,
+    PersonMetaEvent
+} from './events';
+import {
+    Client,
+    Events,
+    GatewayIntentBits,
+    Partials
+} from 'discord.js';
 import { GetNmSecrets } from './utility/nm-secrets.utility';
-import { GetInstanceServicesByGuildId } from './utility';
 import { type GuildServiceMapModel } from './model';
 import { AddCron } from './utility/cron-utility';
-import { FoodCountReminder, DailyPickupsThread } from './jobs';
-
-const GuildServiceMap: GuildServiceMapModel = {};
+import { FoodCountReminder, DailyPickupsWithoutThread } from './jobs';
+import { CommandSerice, ConfigSerive } from './service';
 
 async function main() {
+    const services = new ConfigSerive();
+    const commands = new CommandSerice();
+
     // Add cron jobs
-    // todo: add cron reminder times to instance config spreadsheet?
-    AddCron('* * 9 * *', DailyPickupsThread);
-    AddCron('* * 8 * *', FoodCountReminder);
+    AddCron('* * 9 * *', FoodCountReminder);
 
     // Start discord client
     const client = new Client({
@@ -27,29 +35,22 @@ async function main() {
 
     // build discord data
     client.once(Events.ClientReady, async (c) => {
-        console.log(`Ready! Logged in as ${c.user.tag}`);
-
-        // set up instances of services for each server crabapple is one
-        for (const guild of client.guilds.cache.values()) {
-            try {
-                GuildServiceMap[guild.id] = await GetInstanceServicesByGuildId(
-                    guild.id
-                );
-            } catch (e: any) {
-                console.log(e);
-                console.log(
-                    `Could not create a guild service for ${guild.id}:`
-                );
-            }
+        for (const guild of c.guilds.cache.values()) {
+            commands.register(guild)
         }
+        
+        console.log(`Ready! Logged in as ${c.user.tag}`);
     });
 
     // person meta data events
-    // client.on(Events.MessageCreate, PersonMetaEvent(GuildServiceMap));
+    // client.on(Events.MessageCreate, PersonMetaEvent(services));
 
     // food count events
-    client.on(Events.MessageCreate, FoodCountInputEvent(GuildServiceMap));
+    client.on(Events.MessageCreate, FoodCountInputEvent(services));
     client.on(Events.InteractionCreate, FoodCountResponseEvent);
+
+    // commands
+    client.on(Events.InteractionCreate, commands.execute(services))
 
     const {
         discordConfig: { appToken }

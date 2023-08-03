@@ -1,9 +1,10 @@
 import { type Message } from 'discord.js';
-import { type PersonModel } from '../model/night-market.model';
 import { MessageService } from '../service/message.service';
 import { Dbg } from '../utility';
 import { PersonInputService } from '../nm-service/nm-person-input.service';
 import { type GuildServiceModel } from '../model';
+import { type PersonModel } from '../nm-service';
+import { type ConfigSerive } from '../service';
 
 const dbg = Dbg('PersonMetaEvent');
 
@@ -52,13 +53,12 @@ const MsgReply = MessageService.createMap({
 // this works. What if someone is a member of multiple NM Guilds?
 // I think we need a central as well as a per-instance person data record
 // for now this will work
-const UserGuildServiceMap: {
-    [k in string]: GuildServiceModel;
-} = {};
+const UserGuildServiceMap: Record<string, GuildServiceModel> = {};
 
 // store person info locally
-const personMetaCache: {
-    [k in string]: [
+const personMetaCache: Record<
+    string,
+    [
         // tells us what step in the meta data collection process they are at
         MetaStatusType,
         // stores data temporarily while we step through the process
@@ -66,11 +66,11 @@ const personMetaCache: {
         // this is what is in the actual database
         Partial<PersonModel>,
         number
-    ];
-} = {};
+    ]
+> = {};
 
 export const PersonMetaEvent =
-    (guildService: { [k in string]: GuildServiceModel }) =>
+    (guildServices: ConfigSerive) =>
     async (message: Message) => {
         const { channel, author } = message as Message<true>;
 
@@ -84,7 +84,7 @@ export const PersonMetaEvent =
         }
 
         if (message.guild?.id) {
-            UserGuildServiceMap[author.id] = guildService[message.guild?.id];
+            UserGuildServiceMap[author.id] = await guildServices.getServicesForGuildId(message.guild?.id);
         }
         const { personCoreService } = UserGuildServiceMap[author.id];
 
@@ -95,14 +95,12 @@ export const PersonMetaEvent =
             return;
         }
 
-        // OK, now we figure out what their data status is
-        const personList = await personCoreService.getPersonList();
-
-        const personStore = personList.find(
-            (a) => a.discordId === message.author.id
-        );
-
         const { id, username } = message.author;
+
+        // OK, now we figure out what their data status is
+        const personStore = await personCoreService.getPerson({
+            discordId: id
+        });
 
         // we check if they are in the cache
         if (!personMetaCache[id]) {
