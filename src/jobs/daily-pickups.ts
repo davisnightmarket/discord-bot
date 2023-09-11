@@ -3,92 +3,91 @@ import {
     type Guild,
     bold,
     userMention,
-    EmbedBuilder,
+    type ChatInputCommandInteraction,
+    ActionRowBuilder,
+    ButtonBuilder,
+    ButtonStyle,
+    type ButtonInteraction,
+    type Interaction,
 } from 'discord.js';
-import { getChannelByName } from '../service';
+import { type ConfigSerive, getChannelByName } from '../service';
 import { DAYS_OF_WEEK } from '../nm-const';
-import { type GuildServiceModel } from '../model';
+import { type DayNameType, type GuildServiceModel } from '../model';
 import { type PersonModel, type PickUp } from '../nm-service';
 
-export async function DailyPickupsUsingEmbed(
-    guild: Guild,
-    services: GuildServiceModel
-) {
-    const channel = getChannelByName(guild, today());
+export const PickupsRefreshEvent = (sevicesConfig: ConfigSerive) => async (interaction: Interaction) => {
+    // Is this our interaction to deal with?
+    interaction = interaction as ButtonInteraction;
+    const { customId } = interaction;
+    if (!customId) return;
+    const [name, day] = customId.split('--');
+    if (name !== "pickups-refresh") return;
+ 
+    // Get em services
+    const guild = interaction.guild
+    if (!guild) return
+    const services = await sevicesConfig.getServicesForGuildId(guild.id)
+    
+    // make sure we have the most up to date info
+    await services.pickupsDataService.updateCache()
 
-    const pickups = await services.pickupsDataService.getPickupsFor(today());
-    const pickupDescriptions = await Promise.all(
-        pickups.map(
-            async (pickup) =>
-                `* [${pickup.org}](https://www.example.com) at ${
-                    pickup.time
-                }: ${await getVolunteerList(services, pickup)}`
-        )
-    );
-
-    const embed = new EmbedBuilder()
-        .setColor(0x0099ff)
-        .setTitle(`pickups`)
-        .setDescription(pickupDescriptions.join('\n'));
-
-    channel.send({ embeds: [embed] });
+    // regenerate the message
+    const roleId = await getRoleByName(guild, day);
+    let message = `## ${roleMention(roleId)} pickups!\n`
+    const pickups = await services.pickupsDataService.getPickupsFor(day as DayNameType);
+    for (const pickup of pickups) {
+        message += `> ${bold(pickup.org)} at ${
+                pickup.time
+            }: ${await getVolunteerList(guild, services, pickup)}\n`
+    }
+    
+    // update it
+    interaction.message.edit(message)
 }
 
 export async function DailyPickupsWithoutThread(
     guild: Guild,
-    services: GuildServiceModel
+    services: GuildServiceModel,
+    interaction?: ChatInputCommandInteraction,
 ) {
-    const channel = getChannelByName(guild, today());
 
     // ping everyone signed up to help with today
-    const roleId = await getRoleByName(guild, today()).then((role) => role.id);
-    channel.send(`Lets go ${roleMention(roleId)}!`);
-
-    const link = 'https://davisnightmarket.github.io/';
+    const roleId = await getRoleByName(guild, today());
 
     // list all the pick ups happening today
     const pickups = await services.pickupsDataService.getPickupsFor(today());
+
+    let message = `## ${roleMention(roleId)} pickups!\n`
+
     for (const pickup of pickups) {
-        channel.send(
-            [
-                `${bold(pickup.org)} at ${
-                    pickup.time
-                }: ${await getVolunteerList(services, pickup)}`
-            ].join('\n')
-        );
+        message += `> ${bold(pickup.org)} at ${
+                pickup.time
+            }: ${await getVolunteerList(guild, services, pickup)}\n`
+    }
+
+    if (interaction) {
+        const refreshButton = new ButtonBuilder()
+			.setCustomId(`pickups-refresh--${today()}`)
+			.setLabel('Refresh')
+			.setStyle(ButtonStyle.Secondary);
+
+        const row = new ActionRowBuilder<ButtonBuilder>()
+			.addComponents(refreshButton);
+
+        interaction.reply({
+            content: message,
+            components: [row],    
+        })
+    } else {
+        const channel = getChannelByName(guild, today());
+        channel.send(message)
     }
 }
 
-export async function DailyPickupsThread(
-    guild: Guild,
-    services: GuildServiceModel
-) {
-    const thread = await createTodaysPickupThread(guild);
-
-    // ping everyone signed up to help with today
-    const roleId = await getRoleByName(guild, today()).then((role) => role.id);
-    thread.send(`Lets go ${roleMention(roleId)}!`);
-
-    // list all the pick ups happening today
-    const pickups = await services.pickupsDataService.getPickupsFor(today());
-    for (const pickup of pickups) {
-        thread.send(
-            [
-                `${bold(pickup.org)} at ${pickup.time}. ${
-                    pickup.comments ?? ''
-                }`,
-                ``,
-                `people helping: ${await getVolunteerList(services, pickup)}`,
-                ``
-            ].join('\n')
-        );
-    }
-}
-
-async function getVolunteerList(services: GuildServiceModel, pickup: PickUp) {
+async function getVolunteerList(guild: Guild, services: GuildServiceModel, pickup: PickUp) {
     const people = await Promise.all(
         [pickup.volunteer1, pickup.volunteer2, pickup.volunteer3]
-            .filter((name) => name !== undefined && name !== '')
+            .filter((name) => name !== undefined && name !== '' && name !== "NEEDED")
             .map(
                 async (name) =>
                     (await services.personCoreService.getPerson({ name })) ?? {
@@ -97,7 +96,7 @@ async function getVolunteerList(services: GuildServiceModel, pickup: PickUp) {
             )
     );
 
-    if (people.length === 0) return bold('NEEDED');
+    if (people.length === 0) return roleMention(await getRoleByName(guild, "NEEDED"));
 
     return people
         .filter((person): person is PersonModel => !!person)
@@ -115,8 +114,8 @@ async function createTodaysPickupThread(guild: Guild) {
 
 async function getRoleByName(guild: Guild, name: string) {
     const role = guild.roles.cache.find((role) => role.name === name);
-    if (!role) return await guild.roles.create({ name });
-    return role;
+    if (!role) return await guild.roles.create({ name }).then((role) => role.id);
+    return role.id;
 }
 
 function today() {

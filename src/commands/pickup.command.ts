@@ -11,7 +11,7 @@ export default {
             await interaction.reply("ony works in server")
             return
         }
-        await DailyPickupsWithoutThread(interaction.guild, services)
-        await interaction.reply("done")
+
+        await DailyPickupsWithoutThread(interaction.guild, services, interaction)
     }
 }

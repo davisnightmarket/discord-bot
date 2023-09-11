@@ -11,7 +11,6 @@ exports.default = {
             await interaction.reply("ony works in server");
             return;
         }
-        await (0, jobs_1.DailyPickupsWithoutThread)(interaction.guild, services);
-        await interaction.reply("done");
+        await (0, jobs_1.DailyPickupsWithoutThread)(interaction.guild, services, interaction);
     }
 };

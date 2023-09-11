@@ -34,4 +34,8 @@ export class NmPickupsDataService {
                 .filter((pickup) => pickup.activity === 'food pickup')
         );
     }
+
+    async updateCache() {
+        await this.pickupsSheetService.updateCache()
+    }
 }

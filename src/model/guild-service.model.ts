@@ -13,5 +13,3 @@ export interface GuildServiceModel {
     personCoreService: NmPersonDataService;
     pickupsDataService: NmPickupsDataService;
 }
-
-export type GuildServiceMapModel = Record<string, GuildServiceModel>;
