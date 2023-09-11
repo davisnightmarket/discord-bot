@@ -1,13 +1,4 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PersonMetaEvent = void 0;
 const message_service_1 = require("../service/message.service");
@@ -53,8 +44,7 @@ const MsgReply = message_service_1.MessageService.createMap({
 const UserGuildServiceMap = {};
 // store person info locally
 const personMetaCache = {};
-const PersonMetaEvent = (guildService) => (message) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b;
+const PersonMetaEvent = (guildServices) => async (message) => {
     const { channel, author } = message;
     const NOW_IN_SECONDS = Date.now() / 1000;
     /* STAGE 1: skip the message entirely in some cases */
@@ -62,18 +52,19 @@ const PersonMetaEvent = (guildService) => (message) => __awaiter(void 0, void 0,
     if (author.bot) {
         return;
     }
-    if ((_a = message.guild) === null || _a === void 0 ? void 0 : _a.id) {
-        UserGuildServiceMap[author.id] = guildService[(_b = message.guild) === null || _b === void 0 ? void 0 : _b.id];
+    if (message.guild?.id) {
+        UserGuildServiceMap[author.id] = await guildServices.getServicesForGuildId(message.guild?.id);
     }
     const { personCoreService } = UserGuildServiceMap[author.id];
     if (!personCoreService) {
         console.error('We are not getting a person service because the guild service is not mapped. EXITING!');
         return;
     }
-    // OK, now we figure out what their data status is
-    const personList = yield personCoreService.getPersonList();
-    const personStore = personList.find((a) => a.discordId === message.author.id);
     const { id, username } = message.author;
+    // OK, now we figure out what their data status is
+    const personStore = await personCoreService.getPerson({
+        discordId: id
+    });
     // we check if they are in the cache
     if (!personMetaCache[id]) {
         // if not, make sure to add them
@@ -81,7 +72,7 @@ const PersonMetaEvent = (guildService) => (message) => __awaiter(void 0, void 0,
         personMetaCache[id] = [
             'NONE',
             { discordId: id, name: username },
-            personStore !== null && personStore !== void 0 ? personStore : {},
+            personStore ?? {},
             NOW_IN_SECONDS
         ];
     }
@@ -134,7 +125,7 @@ const PersonMetaEvent = (guildService) => (message) => __awaiter(void 0, void 0,
         message.author.send(MsgReply.PERSON_REQUEST_PHONE_AGAIN({ username }));
     }
     // todo: all the other questions we want to ask ...
-});
+};
 exports.PersonMetaEvent = PersonMetaEvent;
 const PersonDmEvent = (metaStatus, message) => {
     const { channel, content } = message;

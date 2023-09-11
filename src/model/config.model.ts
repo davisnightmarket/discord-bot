@@ -11,6 +11,7 @@ export interface InstanceConfigModel {
     // the spreadsheet id for where food counts are kept
     GSPREAD_FOODCOUNT_ID: string;
 }
+
 // these config values are needed for all nm instances
 export interface CoreConfigModel {
     // the spreadsheet id for where configuration is kept for all market instances
@@ -21,6 +22,8 @@ export interface CoreConfigModel {
     GSPREAD_CORE_PERSON_ID: string;
     // the spreadsheet id for where organizations are kept
     GSPREAD_CORE_ORG_ID: string;
+    // the spreadsheet id for where pickup are kept
+    GSPREAD_CORE_PICKUPS_ID: string;
 }
 
 export type AllConfigModel = CoreConfigModel & InstanceConfigModel;
@@ -43,6 +46,8 @@ export class ConfigModel implements AllConfigModel {
     GSPREAD_OPS_ID: string;
     // the spreadsheet id for where food counts are kept
     GSPREAD_FOODCOUNT_ID: string;
+    // the spreadsheet id for where pickup are kept
+    GSPREAD_CORE_PICKUPS_ID: string;
 
     constructor({
         GSPREAD_CORE_CONFIG_ID,
@@ -52,7 +57,8 @@ export class ConfigModel implements AllConfigModel {
         NM_ID,
         DISCORD_GUILD_ID,
         GSPREAD_OPS_ID,
-        GSPREAD_FOODCOUNT_ID
+        GSPREAD_FOODCOUNT_ID,
+        GSPREAD_CORE_PICKUPS_ID
     }: Partial<AllConfigModel>) {
         if (!GSPREAD_CORE_CONFIG_ID) {
             throw new Error('Missing GSPREAD_CORE_CONFIG_ID');
@@ -83,10 +89,14 @@ export class ConfigModel implements AllConfigModel {
         if (!GSPREAD_FOODCOUNT_ID) {
             throw new Error('Missing GSPREAD_FOODCOUNT_ID');
         }
+        if (!GSPREAD_CORE_PICKUPS_ID) {
+            throw new Error('Missing GSPREAD_CORE_PICKUPS_ID');
+        }
         this.NM_ID = NM_ID;
         // adding strings to this because it is an integer id
         this.DISCORD_GUILD_ID = DISCORD_GUILD_ID + '';
         this.GSPREAD_OPS_ID = GSPREAD_OPS_ID;
         this.GSPREAD_FOODCOUNT_ID = GSPREAD_FOODCOUNT_ID;
+        this.GSPREAD_CORE_PICKUPS_ID = GSPREAD_CORE_PICKUPS_ID
     }
 }

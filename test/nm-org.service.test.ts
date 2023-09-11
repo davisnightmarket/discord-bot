@@ -5,7 +5,7 @@ jest.setTimeout(20000);
 
 describe('NightMarketDataService', () => {
     test('gets the list of orgs from central spreadsheet', async () => {
-        const orgList = await orgCoreService.getOrgNameList({});
+        const orgList = await orgCoreService.getOrgList();
         expect(orgList.length).toBeGreaterThan(3);
     });
 });

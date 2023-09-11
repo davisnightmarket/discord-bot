@@ -1,99 +1,38 @@
-import { type ActiveStateType } from '../model/night-market.model';
-import { GSPREAD_CORE_ACTIVE_STATE_LIST } from '../nm-const';
-import { GoogleSpreadsheetsService } from '../service';
+import FuzzySearch from 'fuzzy-search';
+import { Sheet } from '../service';
 
-interface NmOrgModel {
+interface OrgModel {
     name: string;
-    nameAltList: string[];
+    nameAlt: string;
 }
-// one hour: every hour the org list gets refreshed
-const ORG_LIST_CACHE_EXPIRY = 1000 * 60 * 60;
-const ORG_LIST_CACHE_TIME = Date.now();
-let OrgCacheList: NmOrgModel[] = [];
-
-// TODO: make this a class service
 
 export class NmOrgService {
-    private readonly orgSheetService: GoogleSpreadsheetsService;
-
-    async getOrgList(
-        {
-            active = false,
-            flushCache = true
-        }: {
-            active?: boolean;
-            flushCache?: boolean;
-        } = {
-            active: false,
-            flushCache: true
-        }
-    ): Promise<NmOrgModel[]> {
-        if (
-            // we have a list of orgs AND
-            OrgCacheList.length > 0 &&
-            // we are not flushing the cache AND
-            !flushCache &&
-            // the cache is not expired
-            Date.now() - ORG_LIST_CACHE_TIME < ORG_LIST_CACHE_EXPIRY
-        ) {
-            return OrgCacheList;
-        }
-        const r = (await this.orgSheetService.rangeGet('org!A3:C')) ?? [];
-        OrgCacheList = r
-            .filter(([status, name]) => {
-                if (active && status !== GSPREAD_CORE_ACTIVE_STATE_LIST[0]) {
-                    return false;
-                }
-                // filter any blank names as well
-                return !!name.trim();
-            })
-            .map(([_, name, nameAltList]) => {
-                // if we have requested only active orgs
-
-                // otherwise return just the name
-                return {
-                    name: name.trim(),
-                    nameAltList:
-                        // spreadsheet service does not return a value if there is nothing defined
-                        nameAltList
-                            ?.split(',')
-                            .filter((a) => a.trim())
-                            .map((a) => a.trim()) ?? []
-                };
-            });
-
-        return OrgCacheList;
-    }
-
-    async getOrgNameList(
-        opts: {
-            active?: boolean;
-            flushCache?: boolean;
-        } = {
-            active: false,
-            flushCache: true
-        }
-    ): Promise<string[]> {
-        const r = await this.getOrgList(opts);
-        return r.map((a) => a.name);
-    }
-
-    // toggle an org state to active
-    static async setOrgActiveState(
-        _name: string,
-        activeState: ActiveStateType
-    ) {
-        if (!GSPREAD_CORE_ACTIVE_STATE_LIST.indexOf(activeState)) {
-            throw new Error('Must set active state');
-        }
-
-        // TODO:
-        // get all the org rows
-        // find a match to name
-        // update cell for active at row and column index (add method to GSpreadService)
-    }
+    private readonly orgSheetService: Sheet<OrgModel>;
 
     constructor(orgSpreadsheetId: string) {
-        this.orgSheetService = new GoogleSpreadsheetsService(orgSpreadsheetId);
+        this.orgSheetService = new Sheet({
+            sheetId: orgSpreadsheetId,
+            range: 'org!A2:C'
+        });
+    }
+
+    async getOrgList(): Promise<OrgModel[]> {
+        return await this.orgSheetService.get();
+    }
+
+    async getOrgFromFuzzyString(orgFuzzy: string): Promise<string | undefined> {
+        const orgList = (await this.getOrgList()).map((a) => ({
+            ...a,
+            nameSearchable: `${a?.nameAlt?.split(',')?.join(' ') ?? ''} ${
+                a.name
+            }`
+        }));
+
+        const searcher = new FuzzySearch(orgList, ['nameSearchable'], {
+            caseSensitive: false,
+            sort: true
+        });
+
+        return searcher.search(orgFuzzy).map((a) => a.name)[0];
     }
 }

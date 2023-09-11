@@ -18,3 +18,4 @@ __exportStar(require("./nm-food-count-input.service"), exports);
 __exportStar(require("./nm-food-count-data.service"), exports);
 __exportStar(require("./nm-org-data.service"), exports);
 __exportStar(require("./nm-person-data.service"), exports);
+__exportStar(require("./nm-pickups-data.service"), exports);

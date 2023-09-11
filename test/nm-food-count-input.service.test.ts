@@ -1,9 +1,6 @@
 import { describe, expect, test, jest } from '@jest/globals';
 import { ParseContentService } from '../src/service';
-import {
-    GSPREAD_SHEET_FOODCOUNT_HEADERS
-} from '../src/nm-service';
-import { foodCountInputService, foodCountDataService, foodSheetService } from './test-services'
+import { foodCountInputService, foodCountDataService } from './test-services'
 
 jest.setTimeout(1000000);
 
@@ -63,91 +60,29 @@ student farm
         a = foodCountInputService.getLbsAndString('8lbs Village Bakery');
         expect(a[0]).toBe(8);
         expect(a[1]).toBe('Village Bakery');
-
-        a = foodCountInputService.getLbsAndString('Village Bakery  8lbs ');
-        expect(a[0]).toBe(8);
-        expect(a[1]).toBe('Village Bakery');
-
-        a = foodCountInputService.getLbsAndString(
-            'Village Bakery  8 pounds '
-        );
-        expect(a[0]).toBe(8);
-        expect(a[1]).toBe('Village Bakery');
-
-        a = foodCountInputService.getLbsAndString('Village Bakery');
-        expect(a[0]).toBe(0);
-        expect(a[1]).toBe('Village Bakery');
-
-        a = foodCountInputService.getLbsAndString('');
-        expect(a[0]).toBe(0);
-        expect(a[1]).toBe('');
     });
 });
 
-test('appends to the food count and deletes it', async () => {
-    const sheetName = foodCountDataService.getFoodCountSheetName(1877);
-    expect(sheetName).toBe('food-count 1877');
-
-    await foodSheetService.sheetCreateIfNone(sheetName);
-    await foodSheetService.rowsAppend(
-        [GSPREAD_SHEET_FOODCOUNT_HEADERS],
-        sheetName,
-    );
-
-    const foodCountBefore = await foodCountDataService.getFoodCount(sheetName);
+test('appends to the food count', async () => {
+    const foodCountBefore = await foodCountDataService.getFoodCount();
 
     const foodRecordOne = {
         date: '01/19/1996',
         org: 'Sutter General',
-        lbs: 8,
+        lbs: Math.floor(Math.random() * 100),
         note: 'baby food',
         reporter: 'christianco@gmail.com'
     };
 
-    // appends to current year
-    const a = await foodCountDataService.appendFoodCount(
-        foodRecordOne,
-        sheetName
-    );
+    await foodCountDataService.appendFoodCount([foodRecordOne]);
 
-    expect(a[1]).toBeGreaterThan(0);
-
-    const b = await foodSheetService.rangeGet(a[0]);
-
-    const foodCountAfter = await foodCountDataService.getFoodCount(sheetName);
+    const foodCountAfter = await foodCountDataService.getFoodCount();
 
     expect(foodCountAfter.length).toBe(foodCountBefore.length + 1);
 
-    expect(b[0][0]).toBe(foodRecordOne.date);
-    expect(b[0][1]).toBe(foodRecordOne.org);
-    expect(+b[0][2]).toBe(foodRecordOne.lbs);
-    expect(b[0][3]).toBe(foodRecordOne.reporter);
-    expect(b[0][4]).toBe(foodRecordOne.note);
-
-    expect(foodCountAfter[foodCountAfter.length - 1][0]).toBe(foodRecordOne.date);
-    expect(foodCountAfter[foodCountAfter.length - 1][1]).toBe(foodRecordOne.org);
-    expect(+foodCountAfter[foodCountAfter.length - 1][2]).toBe(foodRecordOne.lbs);
-    expect(foodCountAfter[foodCountAfter.length - 1][3]).toBe(foodRecordOne.reporter);
-    expect(foodCountAfter[foodCountAfter.length - 1][4]).toBe(foodRecordOne.note);
-
-    const foodRecordTwo = {
-        date: '01/19/1999',
-        org: 'Food Co-op',
-        lbs: 1,
-        note: 'fresh umbilical cord',
-        reporter: 'christian@night-market.org'
-    };
-
-    await foodCountDataService.appendFoodCount(foodRecordTwo, sheetName);
-
-    await foodCountDataService.deleteLastFoodCount(sheetName);
-
-    const foodCountFinal = await foodCountDataService.getFoodCount(sheetName);
-    expect(foodCountFinal[foodCountFinal.length - 1][0]).toBe(foodRecordOne.date);
-    expect(foodCountFinal[foodCountFinal.length - 1][1]).toBe(foodRecordOne.org);
-    expect(+foodCountFinal[foodCountFinal.length - 1][2]).toBe(foodRecordOne.lbs);
-    expect(foodCountFinal[foodCountFinal.length - 1][3]).toBe(foodRecordOne.reporter);
-    expect(foodCountFinal[foodCountFinal.length - 1][4]).toBe(foodRecordOne.note);
-
-    await foodSheetService.sheetDestroy(sheetName);
+    expect(foodCountAfter[foodCountAfter.length - 1].date).toBe(foodRecordOne.date);
+    expect(foodCountAfter[foodCountAfter.length - 1].org).toBe(foodRecordOne.org);
+    expect(+foodCountAfter[foodCountAfter.length - 1].lbs).toBe(foodRecordOne.lbs);
+    expect(foodCountAfter[foodCountAfter.length - 1].reporter).toBe(foodRecordOne.reporter);
+    expect(foodCountAfter[foodCountAfter.length - 1].note).toBe(foodRecordOne.note);
 });

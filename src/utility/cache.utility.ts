@@ -6,22 +6,19 @@ interface PayloadBaseModel {
     stamp: number;
 }
 
-type PayloadModel = {
-    [k in string]: any;
-};
+type PayloadModel = Record<string, any>;
 
 // a basic object map for named caches
 type CachePayloadModel<
     U extends PayloadModel & {
         stamp: number;
     }
-> = {
-    [k in string]: U;
-};
+> = Record<string, U>;
 
-type CacheModel<U extends PayloadModel = PayloadModel> = {
-    [k in CacheType]: CachePayloadModel<U & PayloadBaseModel>;
-};
+type CacheModel<U extends PayloadModel = PayloadModel> = Record<
+    CacheType,
+    CachePayloadModel<U & PayloadBaseModel>
+>;
 
 // the private cache
 const Cache: CacheModel<PayloadModel> = {
