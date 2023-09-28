@@ -5,11 +5,11 @@ import {
     type MessageReplyOptions,
     ButtonStyle
 } from 'discord.js';
-import { COUNT_CHANNEL_NAME } from '../nm-service';
+import { COUNT_CHANNEL_NAME } from '../service';
 import { v4 as uuidv4 } from 'uuid';
-import { type ConfigSerive, MessageService } from '../service/index';
+import { type ConfigService, MessageService } from '../service';
 import { Dbg, CacheUtility } from '../utility';
-import { getChannelByName } from '../service/discord.service';
+import { GetChannelByName } from '../utility';
 
 // status for each cached input: does it get inserted unless cancel? or does it require a confirmation?
 type CacheStatusType = 'INSERT_UNLESS_CANCEL' | 'DELETE_UNLESS_CONFIRM';
@@ -52,7 +52,7 @@ export const TIME_UNTIL_UPDATE = 60 * 1000; // one minute in milliseconds
  *
  */
 export const FoodCountInputEvent =
-    (guildServices: ConfigSerive) => async (message: Message) => {
+    (guildServices: ConfigService) => async (message: Message) => {
         const { channel, author } = message as Message<true>;
 
         if (!message.guild?.id) {
@@ -163,18 +163,16 @@ export const FoodCountInputEvent =
                         return;
                     }
                     // todo: try/catch
-                    await foodCountDataService.appendFoodCount([
-                        {
-                            org,
-                            date,
-                            reporter: reporter?.email ?? '',
-                            lbs,
-                            note
-                        }
-                    ]);
+                    await foodCountDataService.appendFoodCount({
+                        org,
+                        date,
+                        reporter: reporter?.email ?? '',
+                        lbs,
+                        note
+                    });
 
                     // we want to post to food-count, always, so folks know what's in the db
-                    const countChannel = getChannelByName(
+                    const countChannel = GetChannelByName(
                         message.guild,
                         COUNT_CHANNEL_NAME
                     );
@@ -241,9 +239,8 @@ export const FoodCountInputEvent =
             });
 
             // get our reporter email address
-            const reporter = await personCoreService.getPerson({
-                discordId: author.id
-            });
+            const reporter =
+                await personCoreService.getPersonByEmailOrDiscordId(author.id);
         }
 
         // loop over errors and post to channel

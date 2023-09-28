@@ -1,23 +1,23 @@
 import FuzzySearch from 'fuzzy-search';
-import { Sheet } from '../service';
+import { GoogleSheetService, SpreadsheetDataModel } from '../service';
 
-interface OrgModel {
+interface OrgModel extends SpreadsheetDataModel {
     name: string;
     nameAlt: string;
 }
 
 export class NmOrgService {
-    private readonly orgSheetService: Sheet<OrgModel>;
+    private readonly orgSheetService: GoogleSheetService<OrgModel>;
 
-    constructor(orgSpreadsheetId: string) {
-        this.orgSheetService = new Sheet({
-            sheetId: orgSpreadsheetId,
-            range: 'org!A2:C'
+    constructor(spreadsheetId: string) {
+        this.orgSheetService = new GoogleSheetService({
+            spreadsheetId,
+            sheetName: 'org'
         });
     }
 
     async getOrgList(): Promise<OrgModel[]> {
-        return await this.orgSheetService.get();
+        return await this.orgSheetService.getAllRowsAsMaps();
     }
 
     async getOrgFromFuzzyString(orgFuzzy: string): Promise<string | undefined> {

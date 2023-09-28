@@ -1,4 +1,4 @@
-export type DayNameType =
+export type NmDayNameType =
     | 'sunday'
     | 'monday'
     | 'tuesday'
@@ -7,4 +7,10 @@ export type DayNameType =
     | 'friday'
     | 'saturday';
 
-export type ActiveStateType = 'active' | 'inactive';
+export type NmActiveStateType = 'active' | 'inactive';
+
+export type NmRoleType =
+    | 'community-coordinator'
+    | 'night-host'
+    | 'night-captain'
+    | 'night-pickup';

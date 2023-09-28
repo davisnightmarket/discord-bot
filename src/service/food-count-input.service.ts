@@ -1,5 +1,5 @@
-import { type DayNameType } from '../model/night-market.model';
-import type { NmOrgService } from './nm-org-data.service';
+import { type NmDayNameType } from '../model/night-market.model';
+import type { NmOrgService } from './org-data.service';
 import { ParseContentService } from '../service';
 import { DAYS_OF_WEEK } from '../nm-const';
 
@@ -63,7 +63,7 @@ export const COUNT_CHANNEL_NAME = 'food-count';
 // OR in a "night channel", which always corresponds to a day
 // this maps the night cap channel name to the day, so we can get a date from the channel name
 export const NIGHT_CHANNEL_NAMES_MAP: {
-    [k in string]: DayNameType;
+    [k in string]: NmDayNameType;
 } = {
     // property is the night-channel name, value is the name of a day
     monday: 'monday',
@@ -343,7 +343,7 @@ Example:
         return c;
     }
 
-    getDateStringFromDay(day: DayNameType): string {
+    getDateStringFromDay(day: NmDayNameType): string {
         // starting with the current date
         const d = new Date();
         while (day !== DAYS_OF_WEEK[d.getDay()]) {
