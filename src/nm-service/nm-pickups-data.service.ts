@@ -1,5 +1,5 @@
 import { type ConfigModel, type DayNameType } from '../model';
-import { Sheet } from '../service';
+import { GoogleSheetService } from '../service';
 
 export interface PickUp {
     day: string;
@@ -14,7 +14,7 @@ export interface PickUp {
 }
 
 export class NmPickupsDataService {
-    private readonly pickupsSheetService: Sheet<PickUp>;
+    private readonly pickupsSheetService: GoogleSheetService<PickUp>;
 
     constructor(config: ConfigModel) {
         this.pickupsSheetService = new Sheet({
@@ -23,11 +23,11 @@ export class NmPickupsDataService {
         });
     }
 
-    async getAllPickups() {
+    async getAllPickups(): Promise<PickUp[]> {
         return await this.pickupsSheetService.get();
     }
 
-    async getPickupsFor(day: DayNameType) {
+    async getPickupsFor(day: DayNameType): Promise<PickUp[]> {
         return await this.getAllPickups().then((pickups) =>
             pickups
                 .filter((pickup) => pickup.day === day)
@@ -36,6 +36,6 @@ export class NmPickupsDataService {
     }
 
     async updateCache() {
-        await this.pickupsSheetService.updateCache()
+        await this.pickupsSheetService.updateCache();
     }
 }

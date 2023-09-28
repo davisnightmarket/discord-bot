@@ -19,7 +19,7 @@ async function main() {
     const commands = new CommandSerice();
 
     // Add cron jobs
-    AddCron('* * 9 * *', FoodCountReminder);
+    //AddCron('* * 9 * *', FoodCountReminder);
 
     // Start discord client
     const client = new Client({

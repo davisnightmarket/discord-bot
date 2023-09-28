@@ -1,4 +1,5 @@
-export * from './google-spreadsheets.service';
+export * from './google-spreadsheet.service';
+export * from './google-sheet.service';
 export * from './parse-content.service';
 export * from './message.service';
 export * from './discord.service';
