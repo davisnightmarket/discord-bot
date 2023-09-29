@@ -10,6 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { type ConfigService, MessageService } from '../service';
 import { Dbg, CacheUtility } from '../utility';
 import { GetChannelByName } from '../utility';
+import { GuildServiceModel } from '../model';
 
 // status for each cached input: does it get inserted unless cancel? or does it require a confirmation?
 type CacheStatusType = 'INSERT_UNLESS_CANCEL' | 'DELETE_UNLESS_CONFIRM';
@@ -52,21 +53,13 @@ export const TIME_UNTIL_UPDATE = 60 * 1000; // one minute in milliseconds
  *
  */
 export const FoodCountInputEvent =
-    (guildServices: ConfigService) => async (message: Message) => {
+    ({
+        personCoreService,
+        foodCountInputService,
+        foodCountDataService
+    }: GuildServiceModel) =>
+    async (message: Message) => {
         const { channel, author } = message as Message<true>;
-
-        if (!message.guild?.id) {
-            Dbg(
-                'FoodCountInputEvent does not happen outside of a guild channel'
-            );
-            return;
-        }
-
-        const {
-            personCoreService,
-            foodCountInputService,
-            foodCountDataService
-        } = await guildServices.getServicesForGuildId(message.guild?.id);
 
         /* STAGE 1: skip the message entirely in some cases */
         // if we are a bot, we do not want to process the message

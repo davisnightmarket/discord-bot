@@ -1,12 +1,12 @@
-import { DAYS_OF_WEEK } from '../nm-const';
-import { NIGHT_CHANNEL_NAMES_MAP } from '../nm-service';
+import { NIGHT_CHANNEL_NAMES_MAP } from '../service';
+import { GetChannelDayToday, GetChannelDayYesterday } from '../utility';
 
-export const FoodCountReminder = () => {
+export const FoodCountReminderJob = () => {
     console.log('running a task at 9 am');
     // first we want to know what day it is
     const d = new Date();
-    const today = DAYS_OF_WEEK[d.getDay()];
-    const yesterday = DAYS_OF_WEEK[d.getDay() - 1] || DAYS_OF_WEEK[6];
+    const today = GetChannelDayToday();
+    const yesterday = GetChannelDayYesterday();
     // did we do it right?
     console.log(today);
     console.log(yesterday);

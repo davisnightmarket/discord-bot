@@ -1,7 +1,7 @@
 import { GoogleAuth } from 'google-auth-library';
 import { google, type sheets_v4 } from 'googleapis';
 import { Dbg } from '../utility';
-import { GetNmSecrets } from '../utility/nm-secrets.utility';
+import { NmSecrets } from '../utility/secrets.utility';
 
 export type SpreadsheetDataValueModel = string | number | undefined;
 
@@ -17,7 +17,7 @@ export const Alphabet = AlphaIndex.map((x) =>
     String.fromCharCode(x).toUpperCase()
 );
 
-const Gspread = GetNmSecrets().then((keys) => {
+const Gspread = NmSecrets.then((keys) => {
     const credentials = keys.googleSpreadsheetsKeys;
     const auth = new GoogleAuth({
         credentials,

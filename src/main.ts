@@ -1,23 +1,17 @@
 import {
     FoodCountInputEvent,
     FoodCountResponseEvent,
-    PersonMetaEvent
+    PickupChangeEvent
 } from './events';
+import { Client, Events, GatewayIntentBits, Partials } from 'discord.js';
 import {
-    Client,
-    Events,
-    GatewayIntentBits,
-    Partials
-} from 'discord.js';
-import { GetNmSecrets } from './utility/nm-secrets.utility';
-import { AddCron } from './utility/cron-utility';
-import { FoodCountReminder, PickupsRefreshEvent } from './jobs';
-import { CommandSerice, ConfigSerive } from './service';
+    NmSecrets,
+    GetGuildServices,
+    RegisterGuildCommand,
+    ExecuteGuildCommand
+} from './utility';
 
 async function main() {
-    const services = new ConfigSerive();
-    const commands = new CommandSerice();
-
     // Add cron jobs
     //AddCron('* * 9 * *', FoodCountReminder);
 
@@ -35,9 +29,9 @@ async function main() {
     // build discord data
     client.once(Events.ClientReady, async (c) => {
         for (const guild of c.guilds.cache.values()) {
-            commands.register(guild)
+            RegisterGuildCommand(guild);
         }
-        
+
         console.log(`Ready! Logged in as ${c.user.tag}`);
     });
 
@@ -45,18 +39,25 @@ async function main() {
     // client.on(Events.MessageCreate, PersonMetaEvent(services));
 
     // food count events
-    client.on(Events.MessageCreate, FoodCountInputEvent(services));
-    client.on(Events.InteractionCreate, FoodCountResponseEvent);
+    client.on(Events.MessageCreate, async (client) => {
+        FoodCountInputEvent(await GetGuildServices(client.guildId || ''));
+    });
+    client.on(Events.InteractionCreate, async (client) => {
+        FoodCountResponseEvent(client);
+    });
 
-    // pickup events
-    client.on(Events.InteractionCreate, PickupsRefreshEvent(services));
+    // ops events
+    client.on(Events.InteractionCreate, async (client) =>
+        PickupChangeEvent(await GetGuildServices(client.guildId || ''), client)
+    );
 
     // commands
-    client.on(Events.InteractionCreate, commands.execute(services))
-
+    client.on(Events.InteractionCreate, async (client) => {
+        ExecuteGuildCommand(await GetGuildServices(client.guildId || ''));
+    });
     const {
         discordConfig: { appToken }
-    } = await GetNmSecrets();
+    } = await NmSecrets;
 
     client.login(appToken);
 }

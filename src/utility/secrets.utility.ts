@@ -56,3 +56,5 @@ export async function GetNmSecrets(): Promise<NmKeysModel> {
         };
     }
 }
+
+export const NmSecrets = GetNmSecrets();
