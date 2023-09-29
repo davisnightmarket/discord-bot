@@ -66,13 +66,23 @@ export async function DailyPickupsWithoutThread(
     }
 
     if (interaction) {
+        const editButton = new ButtonBuilder()
+			.setCustomId(`pickups-edit--${today()}`)
+			.setLabel('Edit')
+			.setStyle(ButtonStyle.Primary);
+
+        const helpButton = new ButtonBuilder()
+			.setCustomId(`pickups-help--${today()}`)
+			.setLabel('Help')
+			.setStyle(ButtonStyle.Success);
+
         const refreshButton = new ButtonBuilder()
 			.setCustomId(`pickups-refresh--${today()}`)
 			.setLabel('Refresh')
 			.setStyle(ButtonStyle.Secondary);
 
         const row = new ActionRowBuilder<ButtonBuilder>()
-			.addComponents(refreshButton);
+			.addComponents(editButton, helpButton, refreshButton);
 
         interaction.reply({
             content: message,

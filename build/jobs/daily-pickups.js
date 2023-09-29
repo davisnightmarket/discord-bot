@@ -41,12 +41,20 @@ async function DailyPickupsWithoutThread(guild, services, interaction) {
         message += `> ${(0, discord_js_1.bold)(pickup.org)} at ${pickup.time}: ${await getVolunteerList(guild, services, pickup)}\n`;
     }
     if (interaction) {
+        const editButton = new discord_js_1.ButtonBuilder()
+            .setCustomId(`pickups-edit--${today()}`)
+            .setLabel('Edit')
+            .setStyle(discord_js_1.ButtonStyle.Primary);
+        const helpButton = new discord_js_1.ButtonBuilder()
+            .setCustomId(`pickups-help--${today()}`)
+            .setLabel('Help')
+            .setStyle(discord_js_1.ButtonStyle.Success);
         const refreshButton = new discord_js_1.ButtonBuilder()
             .setCustomId(`pickups-refresh--${today()}`)
             .setLabel('Refresh')
             .setStyle(discord_js_1.ButtonStyle.Secondary);
         const row = new discord_js_1.ActionRowBuilder()
-            .addComponents(refreshButton);
+            .addComponents(editButton, helpButton, refreshButton);
         interaction.reply({
             content: message,
             components: [row],
