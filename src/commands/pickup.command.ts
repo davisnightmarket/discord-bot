@@ -1,9 +1,10 @@
 import {
     type ChatInputCommandInteraction,
-    SlashCommandBuilder
+    SlashCommandBuilder,
+    Guild
 } from 'discord.js';
 import { type GuildServiceModel } from '../model';
-import { PickupsListRequestEvent } from '../events';
+import { PickupsListEvent } from '../events';
 
 export default {
     data: new SlashCommandBuilder()
@@ -13,10 +14,19 @@ export default {
         interaction: ChatInputCommandInteraction,
         services: GuildServiceModel
     ) {
+        // I think what we are doing here is saying that you cannot issue /command to crabapple directly
+        // since you would not be in a guild.
         if (!interaction.guild) {
-            console.error('cannot interact outside of server');
+            interaction.reply({
+                content: 'You can only use this command in a channel',
+                ephemeral: true
+            });
             return;
         }
-        await PickupsListRequestEvent(services, interaction.guild, interaction);
+        await PickupsListEvent(
+            services,
+            interaction.guild as Guild,
+            interaction
+        );
     }
 };

@@ -1,11 +1,7 @@
-import { NmRoleType, NmDayNameType } from '../model';
+import { NmRoleType, NmDayNameType, GuildServiceModel } from '../model';
 import { GetChannelDayToday } from '../utility';
-import {
-    GoogleSheetService,
-    SpreadsheetDataModel,
-    NmPersonDataService
-} from './';
-export interface PickUp extends SpreadsheetDataModel {}
+import { GoogleSheetService, NmPersonDataService } from './';
+import { type PersonModel } from './';
 
 export type OpsModel = {
     day: NmDayNameType;
@@ -19,9 +15,20 @@ export type OpsModel = {
     contact: string;
 };
 
+export type OpsWithPersonListModel = OpsModel & {
+    personList: PersonModel[];
+};
+
+type OpsByDayWithPersonListModel = {
+    [k in NmDayNameType]: OpsWithPersonListModel[];
+};
+
 export class NmOpsDataService {
     private readonly opsSheetService: GoogleSheetService<OpsModel>;
     personCoreDataService: NmPersonDataService;
+
+    opsWithPersonCache: Partial<OpsByDayWithPersonListModel> = {};
+
     constructor(
         spreadsheetId: string,
         personCoreDataService: NmPersonDataService
@@ -33,6 +40,8 @@ export class NmOpsDataService {
             sheetName: 'ops'
         });
         this.personCoreDataService = personCoreDataService;
+
+        this.refreshCache();
     }
 
     async getOpsByDay(
@@ -41,5 +50,52 @@ export class NmOpsDataService {
     ): Promise<OpsModel[]> {
         const p = await this.opsSheetService.getAllRowsAsMaps();
         return p.filter((pickup) => pickup.day === day);
+    }
+
+    async getOpsWithPersonListByDay(
+        day: NmDayNameType = GetChannelDayToday()
+    ): Promise<OpsWithPersonListModel[]> {
+        if (!this.opsWithPersonCache[day]) {
+            await this.refreshCache();
+        }
+        if (!this.opsWithPersonCache[day]) {
+            // todo:logger
+            console.log('We are missing ops for day ' + day);
+        }
+        return this.opsWithPersonCache[day] || [];
+    }
+
+    async refreshCache() {
+        const a = (await this.getOpsByDay())
+            .filter((a) => a.role === 'night-pickup')
+            .reduce((a, b) => {
+                if (!a[b.day as NmDayNameType]) {
+                    a[b.day as NmDayNameType] = [];
+                }
+
+                a[b.day as NmDayNameType].push({
+                    ...b,
+                    personList: [] as PersonModel[]
+                });
+
+                return a;
+            }, {} as OpsByDayWithPersonListModel);
+
+        for (const b of Object.values(a)) {
+            for (const c in b) {
+                b[c].personList = [
+                    // todo: lets make these individual rows in the sheet
+                    await this.personCoreDataService.getPersonByEmailOrDiscordId(
+                        b[c].volunteer1
+                    ),
+                    await this.personCoreDataService.getPersonByEmailOrDiscordId(
+                        b[c].volunteer1
+                    ),
+                    await this.personCoreDataService.getPersonByEmailOrDiscordId(
+                        b[c].volunteer1
+                    )
+                ].filter((a) => a) as PersonModel[];
+            }
+        }
     }
 }

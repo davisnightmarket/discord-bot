@@ -12,7 +12,7 @@ import { NmSecrets } from '../utility';
 import {} from 'discord.js';
 import { GuildServiceModel } from '../model';
 
-export function GetChannelByName(guild: Guild | null, name: string) {
+export function GetChannelByName(name: string, guild?: Guild | null) {
     return guild?.channels.cache.find(
         (c) => c.type === ChannelType.GuildText && c.name === name.toLowerCase()
     ) as TextChannel;
@@ -25,18 +25,13 @@ export async function GetGuildRoleIdByName(guild: Guild, name: string) {
     return role.id;
 }
 
-export async function RegisterGuildCommand(guild: Guild) {
-    if (!guild) {
-        //todo: logger
-        console.log(`Could not register commands  -- no guild given.`);
-        return;
-    }
-    const services = await NmSecrets;
+export async function RegisterGuildCommand(guildId: string) {
+    const { discordConfig } = await NmSecrets;
 
-    const rest = new REST().setToken(services.discordConfig.appToken);
+    const rest = new REST().setToken(discordConfig.appToken);
 
     await rest.put(
-        Routes.applicationGuildCommands(services.discordConfig.appId, guild.id),
+        Routes.applicationGuildCommands(discordConfig.appId, guildId),
         {
             body: Commands.map((command) => command.data.toJSON())
         }

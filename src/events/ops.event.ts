@@ -8,72 +8,22 @@ import {
     ButtonBuilder,
     ButtonStyle,
     type ButtonInteraction,
-    type Interaction,
-    type Client
+    type Interaction
 } from 'discord.js';
-import { OpsModel, type PersonModel } from '../service';
+
 import {
     GetChannelByName,
     GetChannelDayToday,
     GetGuildRoleIdByName
 } from '../utility';
-import { type NmDayNameType, type GuildServiceModel } from '../model';
+import { type GuildServiceModel } from '../model';
+import { OpsWithPersonListModel } from '../service';
 
-type OpsWithPersonModel = OpsModel & {
-    personList: PersonModel[];
-};
-
-type OpsWithPersonListModel = {
-    [k in NmDayNameType]: OpsWithPersonModel[];
-};
-
-// Let's keep a cache of role operations in here, because we will know when it gets updated in this module
-let pickupsCache: OpsWithPersonListModel;
-
-// get a fresh set of ops
-async function pickupsCacheRefresh({
-    opsDataService,
-    personCoreService
-}: Pick<GuildServiceModel, 'opsDataService' | 'personCoreService'>) {
-    const a = (await opsDataService.getOpsByDay())
-        .filter((a) => a.role === 'night-pickup')
-        .reduce((a, b) => {
-            if (!a[b.day as NmDayNameType]) {
-                a[b.day as NmDayNameType] = [];
-            }
-            a[b.day as NmDayNameType].push({
-                ...b,
-                personList: []
-            });
-            return a;
-        }, {} as OpsWithPersonListModel);
-
-    for (const b of Object.values(a)) {
-        for (const c in b) {
-            b[c].personList = [
-                // todo: lets make these individual rows in the sheet
-                await personCoreService.getPersonByEmailOrDiscordId(
-                    b[c].volunteer1
-                ),
-                await personCoreService.getPersonByEmailOrDiscordId(
-                    b[c].volunteer1
-                ),
-                await personCoreService.getPersonByEmailOrDiscordId(
-                    b[c].volunteer1
-                )
-            ].filter((a) => a) as PersonModel[];
-        }
-    }
-}
-
-export const PickupChangeEvent = async (
-    { opsDataService, personCoreService }: GuildServiceModel,
+// when a person opts in to do a pickup or role per night
+export const PickupJoinEvent = async (
+    { opsDataService }: GuildServiceModel,
     interaction: Interaction
 ) => {
-    if (!pickupsCache) {
-        pickupsCacheRefresh({ opsDataService, personCoreService });
-    }
-
     // Is this our interaction to deal with?
     interaction = interaction as ButtonInteraction;
     const { customId } = interaction;
@@ -87,34 +37,41 @@ export const PickupChangeEvent = async (
     // regenerate the message
 
     const channelDay = GetChannelDayToday();
+    const pickupsList = await opsDataService.getOpsWithPersonListByDay(
+        channelDay
+    );
 
     const content = createPickupsMessage(
         await GetGuildRoleIdByName(guild, channelDay),
-        pickupsCache[channelDay]
+        pickupsList
     );
 
     // update it
     interaction.message.edit(content);
 };
 
-export async function PickupsListRequestEvent(
+// when a person requests a listing of
+export async function PickupsListEvent(
     { opsDataService, personCoreService }: GuildServiceModel,
     guild: Guild,
     interaction?: ChatInputCommandInteraction
 ) {
-    if (!pickupsCache) {
-        pickupsCacheRefresh({ opsDataService, personCoreService });
-    }
+    // if (!pickupsCache) {
+    //     pickupsCacheRefresh({ opsDataService, personCoreService });
+    // }
 
     const channelDay = GetChannelDayToday();
+    const pickupsList = await opsDataService.getOpsWithPersonListByDay(
+        channelDay
+    );
 
     const content = createPickupsMessage(
         await GetGuildRoleIdByName(guild, channelDay),
-        pickupsCache[channelDay]
+        pickupsList
     );
     if (interaction) {
-        // TODO: instead of a button which will get lost, we might want to simply send an announce to the night cap
-        // when a person has taken a role
+        // todo: not sure we need a button. I think it's more likely folks will simply hit the / command again
+        // rather than scroll up and hit a button, especially if there's been a lot of conversation since.
         const refreshButton = new ButtonBuilder()
             .setCustomId(`pickups-refresh--${channelDay}`)
             .setLabel('Refresh')
@@ -126,17 +83,25 @@ export async function PickupsListRequestEvent(
 
         interaction.reply({
             content,
-            components: [row]
+            components: [row],
+            // if this is an interaction then it's come from
+            // a slash command, so in that case we only want the
+            // person who issued the command to see it
+            // since we can have one or more cron based announcement for everyone else
+            // this will prevent people spamming everyone every time
+            // they want to see what the pickups are
+            ephemeral: true
         });
     } else {
-        const channel = GetChannelByName(guild, channelDay);
+        const channel = GetChannelByName(channelDay);
         channel.send(content);
     }
 }
 
+// todo: move this to the message service
 function createPickupsMessage(
     roleId: string,
-    ops: OpsWithPersonModel[]
+    ops: OpsWithPersonListModel[]
 ): string {
     let message = `## ${roleMention(roleId)} pickups!\n\n`;
     ops.filter((op) => op.role === 'night-pickup').forEach((op) => {
@@ -152,6 +117,7 @@ function createPickupsMessage(
     return message;
 }
 
+// todo: does it make sense to create a thread when there's a dedicated channel?
 // async function createTodaysPickupThread(guild: Guild) {
 //     const channel = GetChannelByName(guild, GetChannelDayToday());
 //     const name = `${new Date().getDate()}/${new Date().getMonth()} pickups`;

@@ -7,7 +7,7 @@ import {
 } from 'discord.js';
 import { COUNT_CHANNEL_NAME } from '../service';
 import { v4 as uuidv4 } from 'uuid';
-import { type ConfigService, MessageService } from '../service';
+import { MessageService } from '../service';
 import { Dbg, CacheUtility } from '../utility';
 import { GetChannelByName } from '../utility';
 import { GuildServiceModel } from '../model';
@@ -166,8 +166,8 @@ export const FoodCountInputEvent =
 
                     // we want to post to food-count, always, so folks know what's in the db
                     const countChannel = GetChannelByName(
-                        message.guild,
-                        COUNT_CHANNEL_NAME
+                        COUNT_CHANNEL_NAME,
+                        message.guild
                     );
 
                     countChannel?.send(

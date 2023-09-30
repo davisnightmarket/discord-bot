@@ -8,6 +8,9 @@ export const InstanceConfig = {
     GSPREAD_OPS_ID: ''
 };
 
+// important: the "core" goog spreadsheet ids are hard coded since there is only ever one of them
+// the instance ones are defined in the core one, so you have to await those with the Config Utility
+
 export const EnvConfig: Record<EnvType, ConfigModel> = {
     test: {
         NM_ID: '##TEST##',

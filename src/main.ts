@@ -4,12 +4,7 @@ import {
     PickupChangeEvent
 } from './events';
 import { Client, Events, GatewayIntentBits, Partials } from 'discord.js';
-import {
-    NmSecrets,
-    GetGuildServices,
-    RegisterGuildCommand,
-    ExecuteGuildCommand
-} from './utility';
+import { NmSecrets, GetGuildServices, ExecuteGuildCommand } from './utility';
 
 async function main() {
     // Add cron jobs
@@ -24,15 +19,6 @@ async function main() {
             GatewayIntentBits.DirectMessages
         ],
         partials: [Partials.Message, Partials.Channel]
-    });
-
-    // build discord data
-    client.once(Events.ClientReady, async (c) => {
-        for (const guild of c.guilds.cache.values()) {
-            RegisterGuildCommand(guild);
-        }
-
-        console.log(`Ready! Logged in as ${c.user.tag}`);
     });
 
     // person meta data events
@@ -55,6 +41,7 @@ async function main() {
     client.on(Events.InteractionCreate, async (client) => {
         ExecuteGuildCommand(await GetGuildServices(client.guildId || ''));
     });
+
     const {
         discordConfig: { appToken }
     } = await NmSecrets;

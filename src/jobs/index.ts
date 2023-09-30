@@ -1,2 +1,2 @@
 export * from './food-count-reminder.job';
-export * from '../events/daily-pickups.event';
+export * from '../events/ops.event';

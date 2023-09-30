@@ -1,4 +1,4 @@
-import { GoogleSheetService } from '../service';
+import { GetConfigByGuildId } from '../utility';
 import { EnvConfig } from '../config';
 import { type GuildServiceModel, ConfigModel, type EnvType } from '../model';
 import {
@@ -6,21 +6,9 @@ import {
     NmFoodCountInputService,
     NmOrgService,
     NmPersonDataService,
-    NmOpsDataService,
-    SpreadsheetDataModel
+    NmOpsDataService
 } from '../service';
 
-const Env = process.env.NODE_ENV as EnvType;
-
-if (!Env || !Object.keys(EnvConfig).includes(Env)) {
-    throw new Error('');
-}
-
-interface ConfigItem extends SpreadsheetDataModel {
-    marketId: string;
-    code: keyof ConfigModel;
-    value: string;
-}
 const servicesByGuildId = new Map<
     string,
     GuildServiceModel & {
@@ -28,40 +16,12 @@ const servicesByGuildId = new Map<
         config: ConfigModel;
     }
 >();
-const coreConfigSheetService = new GoogleSheetService<ConfigItem>({
-    spreadsheetId: EnvConfig[Env].GSPREAD_CORE_CONFIG_ID,
-    sheetName: 'config-instance'
-});
-
-async function getConfigByGuildId(guildId: string) {
-    // get the market id
-    const configRows = await coreConfigSheetService.getAllRowsAsMaps();
-    const marketId = configRows.find(
-        (a) => a.code === 'DISCORD_GUILD_ID'
-    )?.marketId;
-    if (!marketId) {
-        throw new Error(`No config found for guild ${guildId}!`);
-    }
-    const configRow = (await coreConfigSheetService.getAllRowsAsMaps()).filter(
-        (row) => row.marketId === marketId
-    );
-
-    // build the config
-
-    const config = { ...EnvConfig[Env] };
-    for (const row of configRow) {
-        config[row.code] = row.value;
-    }
-
-    // return
-    return new ConfigModel(config);
-}
 
 // because we need to build a set of services that are connected to data per guild
 // as well as services that are "core", meaning the same data source for all guilds
 export async function GetGuildServices(guildId: string) {
     if (!servicesByGuildId.has(guildId)) {
-        const config = await getConfigByGuildId(guildId);
+        const config = await GetConfigByGuildId(guildId);
 
         const orgCoreService = new NmOrgService(config.GSPREAD_CORE_ORG_ID);
         const personCoreService = new NmPersonDataService(

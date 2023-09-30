@@ -79,8 +79,8 @@ export const FoodCountResponseEvent = async (interaction: Interaction) => {
         if (cache.messageCountId) {
             debug('found a count channel user message');
             const countChannel = GetChannelByName(
-                interaction.guild,
-                COUNT_CHANNEL_NAME
+                COUNT_CHANNEL_NAME,
+                interaction.guild
             );
 
             countChannel.messages
