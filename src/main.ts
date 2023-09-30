@@ -24,16 +24,14 @@ async function main() {
     // person meta data events
     // client.on(Events.MessageCreate, PersonMetaEvent(services));
 
-    // food count events
     client.on(Events.MessageCreate, async (client) => {
+        // food count input
         FoodCountInputEvent(await GetGuildServices(client.guildId || ''));
     });
     client.on(Events.InteractionCreate, async (client) => {
+        // food count response (cancel food count)
         FoodCountResponseEvent(client);
-    });
-
-    // slash commands
-    client.on(Events.InteractionCreate, async (client) => {
+        // slash commands
         ExecuteGuildCommand(await GetGuildServices(client.guildId || ''));
     });
 
