@@ -1,7 +1,7 @@
 import {
     FoodCountInputEvent,
     FoodCountResponseEvent,
-    PickupChangeEvent
+    PickupsListEvent
 } from './events';
 import { Client, Events, GatewayIntentBits, Partials } from 'discord.js';
 import { NmSecrets, GetGuildServices, ExecuteGuildCommand } from './utility';
@@ -32,12 +32,7 @@ async function main() {
         FoodCountResponseEvent(client);
     });
 
-    // ops events
-    client.on(Events.InteractionCreate, async (client) =>
-        PickupChangeEvent(await GetGuildServices(client.guildId || ''), client)
-    );
-
-    // commands
+    // slash commands
     client.on(Events.InteractionCreate, async (client) => {
         ExecuteGuildCommand(await GetGuildServices(client.guildId || ''));
     });
