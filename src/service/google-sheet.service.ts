@@ -1,9 +1,9 @@
-import { GoogleSpreadsheetsService } from './google-spreadsheet.service';
 import {
+    GoogleSpreadsheetsService,
     SpreadsheetDataModel,
     SpreadsheetDataValueModel
 } from './google-spreadsheet.service';
-interface SheetConfig {
+interface SheetModel {
     spreadsheetId: string;
     sheetName: string;
     headersList?: string[];
@@ -17,7 +17,7 @@ export class GoogleSheetService<T extends SpreadsheetDataModel> {
     waitingForSheetId: Promise<number>;
     headerList: (keyof T)[] = [];
 
-    constructor({ spreadsheetId, sheetName, headersList }: SheetConfig) {
+    constructor({ spreadsheetId, sheetName, headersList }: SheetModel) {
         // store params
         this.spreadsheetService = new GoogleSpreadsheetsService(spreadsheetId);
         this.sheetName = sheetName;

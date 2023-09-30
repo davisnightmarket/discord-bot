@@ -1,6 +1,6 @@
+import { NmSecrets, GetAllGuildIds } from './utility';
 import commands from './commands';
 import { REST, Routes } from 'discord.js';
-import { NmSecrets, GetAllGuildIds } from './utility';
 
 (async () => {
     try {

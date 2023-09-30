@@ -1,5 +1,3 @@
-export * from './google-spreadsheet.service';
-export * from './google-sheet.service';
 export * from './parse-content.service';
 export * from './message.service';
 export * from './food-count-input.service';
@@ -7,3 +5,5 @@ export * from './food-count-data.service';
 export * from './org-data.service';
 export * from './person-data.service';
 export * from './ops-data.service';
+export * from './google-spreadsheet.service';
+export * from './google-sheet.service';

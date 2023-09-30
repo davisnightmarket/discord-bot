@@ -1,12 +1,11 @@
-import { GoogleSheetService } from '../service';
 import { EnvConfig } from '../config';
 import { ConfigModel, type EnvType } from '../model';
-import { SpreadsheetDataModel } from '../service';
+import { SpreadsheetDataModel, GoogleSheetService } from '../service';
 
 const Env = process.env.NODE_ENV as EnvType;
 
 if (!Env || !Object.keys(EnvConfig).includes(Env)) {
-    throw new Error('');
+    throw new Error('Must set an environment');
 }
 
 interface ConfigItem extends SpreadsheetDataModel {
@@ -14,6 +13,7 @@ interface ConfigItem extends SpreadsheetDataModel {
     code: keyof ConfigModel;
     value: string;
 }
+console.log(GoogleSheetService);
 
 const coreConfigSheetService = new GoogleSheetService<ConfigItem>({
     spreadsheetId: EnvConfig[Env].GSPREAD_CORE_CONFIG_ID,

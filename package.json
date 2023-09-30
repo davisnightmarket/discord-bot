@@ -7,6 +7,8 @@
     "start": "NODE_ENV=prod node build/main.js",
     "dev": "NODE_ENV=dev npm run watch",
     "test": "jest",
+    "deploy:commands:test": "NODE_ENV=test ts-node src/deploy.ts",
+    "deploy:commands:prod": "NODE_ENV=prod ts-node src/deploy.ts",
     "build": "tsc -p .",
     "watch": "tsc -w -p . & nodemon",
     "format": "prettier --config .prettierrc 'src/**/*.ts' --write",
