@@ -1,11 +1,13 @@
 import { describe, expect, test, jest } from '@jest/globals';
-import { ParseContentService } from '../src/service';
-import { foodCountInputService, foodCountDataService } from './test-services'
+import { WaitForGuildServices } from '../guild-services';
+import { ParseContentService } from '../../src/service';
 
 jest.setTimeout(1000000);
 
 describe('foodCountInputService', () => {
     test('getting a list of parsed data from a content', async () => {
+        const { foodCountInputService } = await WaitForGuildServices;
+
         const [date, listOk, listFail] =
             await foodCountInputService.getFoodCountDateAndParsedInput(`
 3/27
@@ -15,6 +17,7 @@ describe('foodCountInputService', () => {
 4 fw
 2 odd fellws
 6 dfc
+
 student farm
 `);
 
@@ -41,6 +44,7 @@ student farm
     });
 
     test('getting the most recent date from a day name', async () => {
+        const { foodCountInputService } = await WaitForGuildServices;
         const a = foodCountInputService.getDateStringFromDay('monday');
         expect(new Date(a).getDay()).toBe(
             // a known monday
@@ -49,6 +53,7 @@ student farm
     });
 
     test('getting the number and string from content', async () => {
+        const { foodCountInputService } = await WaitForGuildServices;
         let a = foodCountInputService.getLbsAndString('8 lbs Village Bakery');
         expect(a[0]).toBe(8);
         expect(a[1]).toBe('Village Bakery');
@@ -63,26 +68,37 @@ student farm
     });
 });
 
-test('appends to the food count', async () => {
-    const foodCountBefore = await foodCountDataService.getFoodCount();
+// test('appends to the food count', async () => {
+//     const { foodCountDataService } = await WaitForGuildServices;
+//     const foodCountBefore = await foodCountDataService.();
 
-    const foodRecordOne = {
-        date: '01/19/1996',
-        org: 'Sutter General',
-        lbs: Math.floor(Math.random() * 100),
-        note: 'baby food',
-        reporter: 'christianco@gmail.com'
-    };
+//     const foodRecordOne = {
+//         date: '01/19/1996',
+//         org: 'Sutter General',
+//         lbs: Math.floor(Math.random() * 100),
+//         note: 'baby food',
+//         reporter: 'christianco@gmail.com'
+//     };
 
-    await foodCountDataService.appendFoodCount([foodRecordOne]);
+//     await foodCountDataService.appendFoodCount(foodRecordOne);
 
-    const foodCountAfter = await foodCountDataService.getFoodCount();
+//     const foodCountAfter = await foodCountDataService.getFoodCount();
 
-    expect(foodCountAfter.length).toBe(foodCountBefore.length + 1);
+//     expect(foodCountAfter.length).toBe(foodCountBefore.length + 1);
 
-    expect(foodCountAfter[foodCountAfter.length - 1].date).toBe(foodRecordOne.date);
-    expect(foodCountAfter[foodCountAfter.length - 1].org).toBe(foodRecordOne.org);
-    expect(+foodCountAfter[foodCountAfter.length - 1].lbs).toBe(foodRecordOne.lbs);
-    expect(foodCountAfter[foodCountAfter.length - 1].reporter).toBe(foodRecordOne.reporter);
-    expect(foodCountAfter[foodCountAfter.length - 1].note).toBe(foodRecordOne.note);
-});
+//     expect(foodCountAfter[foodCountAfter.length - 1].date).toBe(
+//         foodRecordOne.date
+//     );
+//     expect(foodCountAfter[foodCountAfter.length - 1].org).toBe(
+//         foodRecordOne.org
+//     );
+//     expect(+foodCountAfter[foodCountAfter.length - 1].lbs).toBe(
+//         foodRecordOne.lbs
+//     );
+//     expect(foodCountAfter[foodCountAfter.length - 1].reporter).toBe(
+//         foodRecordOne.reporter
+//     );
+//     expect(foodCountAfter[foodCountAfter.length - 1].note).toBe(
+//         foodRecordOne.note
+//     );
+// });

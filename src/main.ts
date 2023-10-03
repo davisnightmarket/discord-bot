@@ -1,8 +1,4 @@
-import {
-    FoodCountInputEvent,
-    FoodCountResponseEvent,
-    PickupsListEvent
-} from './events';
+import { FoodCountInputEvent, FoodCountResponseEvent } from './events';
 import { Client, Events, GatewayIntentBits, Partials } from 'discord.js';
 import { NmSecrets, GetGuildServices, ExecuteGuildCommand } from './utility';
 

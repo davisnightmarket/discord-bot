@@ -1,6 +1,6 @@
 import { describe, expect, test } from '@jest/globals';
-import { CacheUtility } from '../src/utility';
-import { TestCache, TEST_CACHE_STRING } from './cache.trial';
+import { CacheUtility } from '../../src/utility';
+import { TestCache, TEST_CACHE_STRING } from '../cache.trial';
 
 describe('CacheUtility', () => {
     test('make sure our cache payload works', () => {

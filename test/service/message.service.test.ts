@@ -1,5 +1,5 @@
 import { describe, expect, test } from '@jest/globals';
-import { MessageService } from '../src/service';
+import { MessageService } from '../../src/service';
 
 const messageInit = {
     FOODCOUNT_INSERT: {

@@ -105,6 +105,7 @@ export class NmOpsDataService {
         // updating data, always get fresh data
         // because we use the cache to update
         await this.refreshCache();
+        const headerList = await this.opsSheetService.waitingForHeaderList;
         const opsData = [...this.opsCache.map(this.fromOpToOpData)].flat();
 
         // add the new data
@@ -125,10 +126,8 @@ export class NmOpsDataService {
             // turn it into an array of data mapping to the headers
             .map((op) => {
                 return op
-                    ? this.opsSheetService.headerList.map(
-                          (header) => op[header]
-                      )
-                    : this.opsSheetService.headerList.map((header) => '');
+                    ? headerList.map((header) => op[header])
+                    : headerList.map(() => '');
             });
 
         await this.opsSheetService.replaceAllRowsExceptHeader(opsRows);

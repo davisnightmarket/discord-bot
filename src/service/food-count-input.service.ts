@@ -213,7 +213,7 @@ Example:
         return ParseContentService.dateFormat(a);
     }
 
-    async getOrgAndNodeFromString(
+    async getOrgAndNoteFromString(
         s: string
     ): Promise<[string, string, string]> {
         const a = s.split(',');
@@ -248,7 +248,7 @@ Example:
             const [lbs, filterString] = this.getLbsAndString(a);
 
             // todo: check for lbs first, so we save a trip to the db
-            const [org, orgFuzzy, note] = await this.getOrgAndNodeFromString(
+            const [org, orgFuzzy, note] = await this.getOrgAndNoteFromString(
                 filterString
             );
 

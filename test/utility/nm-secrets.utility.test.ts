@@ -1,5 +1,5 @@
 import { describe, expect, test, jest } from '@jest/globals';
-import { GetGoogleSecrets, GetNmSecrets } from '../src/utility';
+import { GetGoogleSecrets, GetNmSecrets } from '../../src/utility';
 
 jest.setTimeout(5000);
 

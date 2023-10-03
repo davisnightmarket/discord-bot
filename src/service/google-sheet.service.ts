@@ -15,7 +15,7 @@ export class GoogleSheetService<T extends SpreadsheetDataModel> {
 
     // we can await this in the methods so we are sure the sheet exists
     waitingForSheetId: Promise<number>;
-    headerList: (keyof T)[] = [];
+    waitingForHeaderList: Promise<(keyof T)[]>;
 
     constructor({ spreadsheetId, sheetName, headersList }: SheetModel) {
         // store params
@@ -25,7 +25,9 @@ export class GoogleSheetService<T extends SpreadsheetDataModel> {
         this.waitingForSheetId = this.spreadsheetService.getSheetIdByTitle(
             this.sheetName
         );
-        this.getOrCreateHeaders(headersList as (keyof T)[]);
+        this.waitingForHeaderList = this.getOrCreateHeaders(
+            headersList as (keyof T)[]
+        );
     }
 
     // TODO: test this
@@ -45,9 +47,8 @@ export class GoogleSheetService<T extends SpreadsheetDataModel> {
     }
     // TODO: test this
     async appendOneMap(map: T) {
-        const row = this.headerList.map(
-            (a) => map[a] as SpreadsheetDataValueModel
-        );
+        const headerList = await this.waitingForHeaderList;
+        const row = headerList.map((a) => map[a] as SpreadsheetDataValueModel);
         await this.spreadsheetService.rowsAppend(
             [row],
             this.getSheetRangeString()
@@ -64,7 +65,7 @@ export class GoogleSheetService<T extends SpreadsheetDataModel> {
 
     async replaceAllRowsExceptHeader(rows: string[][]) {
         await this.spreadsheetService.sheetClear(this.sheetName);
-        await this.getOrCreateHeaders();
+        this.waitingForHeaderList = this.getOrCreateHeaders();
         await Promise.all(rows.map(this.appendOneRow));
     }
 
@@ -82,15 +83,16 @@ export class GoogleSheetService<T extends SpreadsheetDataModel> {
             limitRows?: number;
         } = { includeHeader: false, limitToHeaders: [], limitRows: 0 }
     ): Promise<SpreadsheetDataValueModel[][]> {
-        const rangeLetter = includeHeader ? 'A' : 'B';
         let dataList = await this.spreadsheetService.rangeGet(
             this.getSheetRangeString(
-                limitRows ? rangeLetter + 1 : rangeLetter,
-                limitRows ? rangeLetter + limitRows : rangeLetter
+                'A' + (includeHeader ? 1 : 2),
+                'Z' + (limitRows ? limitRows : '')
             )
         );
         if (limitToHeaders.length) {
-            const indexList = this.getIndexesByHeaderValues(limitToHeaders);
+            const indexList = await this.getIndexesByHeaderValues(
+                limitToHeaders
+            );
 
             // now we make sure that there is no missing data! This should never happen
             for (let i of indexList) {
@@ -125,6 +127,7 @@ export class GoogleSheetService<T extends SpreadsheetDataModel> {
             limitRows?: number;
         } = { includeHeader: false, limitToHeaders: [], limitRows: 0 }
     ): Promise<T[]> {
+        const headerList = await this.waitingForHeaderList;
         const rows = await this.getAllRows({
             includeHeader,
             limitToHeaders,
@@ -133,8 +136,7 @@ export class GoogleSheetService<T extends SpreadsheetDataModel> {
 
         return rows.map((r) => ({
             ...r.reduce((a, b, i) => {
-                a[this.headerList[i] as string] =
-                    b as SpreadsheetDataValueModel;
+                a[headerList[i] as string] = b as SpreadsheetDataValueModel;
                 return a;
             }, {} as { [k in string]: SpreadsheetDataValueModel })
         })) as T[];
@@ -161,25 +163,26 @@ export class GoogleSheetService<T extends SpreadsheetDataModel> {
             .filter((a) => a > 0);
     }
 
-    getIndexesByHeaderValues(a: (keyof T)[]) {
-        return a.map(this.headerList.indexOf);
+    async getIndexesByHeaderValues(a: (keyof T)[]) {
+        const headerList = await this.waitingForHeaderList;
+        return a.map(headerList.indexOf);
     }
 
     getSheetRangeString(columnStart?: string, columnEnd?: string) {
         // this will return the sheet name alone unless parameters are passed.
         // if columnStart is passed it will add the column letter
         // if columnEnd is passed it will end the end column letter
-        return `${this.sheetName}!${columnStart ? columnStart : ''}${
-            columnStart && columnEnd ? ':' + columnStart : ''
+        return `${this.sheetName}${columnStart ? '!' + columnStart : ''}${
+            columnStart && columnEnd ? ':' + columnEnd : ''
         }`;
     }
     // this is called in the constructor to populate the headers
     // if the headers have changed, this will update them in the sheet before populating
     async getOrCreateHeaders(headerList?: (keyof T)[]): Promise<(keyof T)[]> {
         await this.waitingForSheetId;
-        this.headerList = ((
+        let list = ((
             await this.spreadsheetService.rangeGet(
-                this.getSheetRangeString('A', 'A')
+                this.getSheetRangeString('A', 'C')
             )
         )[0] || []) as (keyof T)[];
 
@@ -188,13 +191,13 @@ export class GoogleSheetService<T extends SpreadsheetDataModel> {
         if (headerList) {
             // the keys do NOT match, we throw an error
             if (
-                !this.headerList.every((a, i) => {
-                    this.headerList[i] === a;
+                !list.every((a, i) => {
+                    list[i] === a;
                 })
             ) {
                 throw new Error(`header list mismatch! The spreadsheet is out of sync with the model:
 
-                the spreadsheet: ${this.headerList.join(', ')}
+                the spreadsheet: ${list.join(', ')}
                 the model:       ${headerList.join(', ')}
 
                 `);
@@ -203,9 +206,9 @@ export class GoogleSheetService<T extends SpreadsheetDataModel> {
                 [headerList as (string | number)[]],
                 this.getSheetRangeString('A', 'A')
             );
-            this.headerList = headerList;
+            list = headerList;
         }
-        return this.headerList;
+        return list;
     }
 
     // async getRowsWhereValueMatches(Partial<T>)

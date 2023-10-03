@@ -13,7 +13,6 @@ interface ConfigItem extends SpreadsheetDataModel {
     code: keyof ConfigModel;
     value: string;
 }
-console.log(GoogleSheetService);
 
 const coreConfigSheetService = new GoogleSheetService<ConfigItem>({
     spreadsheetId: EnvConfig[Env].GSPREAD_CORE_CONFIG_ID,

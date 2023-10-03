@@ -70,8 +70,7 @@ const personMetaCache: Record<
 > = {};
 
 export const PersonMetaEvent =
-    (guildServices: ConfigSerive) =>
-    async (message: Message) => {
+    (guildServices: ConfigSerive) => async (message: Message) => {
         const { channel, author } = message as Message<true>;
 
         const NOW_IN_SECONDS = Date.now() / 1000;
@@ -84,7 +83,8 @@ export const PersonMetaEvent =
         }
 
         if (message.guild?.id) {
-            UserGuildServiceMap[author.id] = await guildServices.getServicesForGuildId(message.guild?.id);
+            UserGuildServiceMap[author.id] =
+                await guildServices.getServicesForGuildId(message.guild?.id);
         }
         const { personCoreService } = UserGuildServiceMap[author.id];
 
