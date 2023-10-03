@@ -55,6 +55,23 @@ export class GoogleSpreadsheetsService {
         return (result.data.values ?? []) as A;
     }
 
+    async sheetClear(sheetName: string) {
+        const spreadsheetId = this.spreadsheetId;
+
+        const [gspread] = await Gspread;
+
+        try {
+            await gspread.spreadsheets.values.batchClear({
+                spreadsheetId,
+                requestBody: {
+                    ranges: [sheetName]
+                }
+            });
+        } catch (err) {
+            console.error(err);
+            throw err;
+        }
+    }
     async rowsDelete(startIndex: number, endIndex: number, sheetId: number) {
         const spreadsheetId = this.spreadsheetId;
         const requestBody = {

@@ -62,21 +62,32 @@ export class GoogleSheetService<T extends SpreadsheetDataModel> {
         );
     }
 
+    async replaceAllRowsExceptHeader(rows: string[][]) {
+        await this.spreadsheetService.sheetClear(this.sheetName);
+        await this.getOrCreateHeaders();
+        await Promise.all(rows.map(this.appendOneRow));
+    }
+
     async getAllRows(
         {
             // if true, we get the first row as headers
             includeHeader = false,
             // if there are values in this array, they correspond to headers and
             // therefore we return a data set with only the columns matching the header values in this array
-            limitToHeaders = []
+            limitToHeaders = [],
+            limitRows = 0
         }: {
             includeHeader?: boolean;
             limitToHeaders?: (keyof T)[];
-        } = { includeHeader: false, limitToHeaders: [] }
+            limitRows?: number;
+        } = { includeHeader: false, limitToHeaders: [], limitRows: 0 }
     ): Promise<SpreadsheetDataValueModel[][]> {
         const rangeLetter = includeHeader ? 'A' : 'B';
         let dataList = await this.spreadsheetService.rangeGet(
-            this.getSheetRangeString(rangeLetter, rangeLetter)
+            this.getSheetRangeString(
+                limitRows ? rangeLetter + 1 : rangeLetter,
+                limitRows ? rangeLetter + limitRows : rangeLetter
+            )
         );
         if (limitToHeaders.length) {
             const indexList = this.getIndexesByHeaderValues(limitToHeaders);
@@ -106,13 +117,19 @@ export class GoogleSheetService<T extends SpreadsheetDataModel> {
             includeHeader = false,
             // if there are values in this array, they correspond to headers and
             // therefore we return a data set with only the columns matching the header values in this array
-            limitToHeaders = []
+            limitToHeaders = [],
+            limitRows = 0
         }: {
             includeHeader?: boolean;
             limitToHeaders?: (keyof T)[];
-        } = { includeHeader: false, limitToHeaders: [] }
+            limitRows?: number;
+        } = { includeHeader: false, limitToHeaders: [], limitRows: 0 }
     ): Promise<T[]> {
-        const rows = await this.getAllRows({ includeHeader, limitToHeaders });
+        const rows = await this.getAllRows({
+            includeHeader,
+            limitToHeaders,
+            limitRows
+        });
 
         return rows.map((r) => ({
             ...r.reduce((a, b, i) => {

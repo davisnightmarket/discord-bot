@@ -17,7 +17,7 @@ import {
     GetGuildRoleIdByName
 } from '../utility';
 import { type GuildServiceModel } from '../model';
-import { OpsWithPersonListModel } from '../service';
+import { OpsModel } from '../service';
 
 // when a person opts in to do a pickup or role per night
 export const PickupJoinEvent = async (
@@ -28,7 +28,7 @@ export const PickupJoinEvent = async (
     interaction = interaction as ButtonInteraction;
     const { customId } = interaction;
     if (!customId) return;
-    const [name, day] = customId.split('--');
+    const [name, day, time] = customId.split('--');
     if (name !== 'pickups-refresh') return;
 
     const guild = interaction.guild;
@@ -37,9 +37,7 @@ export const PickupJoinEvent = async (
     // regenerate the message
 
     const channelDay = GetChannelDayToday();
-    const pickupsList = await opsDataService.getOpsWithPersonListByDay(
-        channelDay
-    );
+    const pickupsList = await opsDataService.getOpsByDay(channelDay);
 
     const content = createPickupsMessage(
         await GetGuildRoleIdByName(guild, channelDay),
@@ -48,6 +46,13 @@ export const PickupJoinEvent = async (
 
     // update it
     interaction.message.edit(content);
+
+    // TODO: update pickups list with new data
+
+    opsDataService.updateOpsSheet({
+        day,
+        time
+    });
 };
 
 // when a person requests a listing of
@@ -56,14 +61,8 @@ export async function PickupsListEvent(
     guild: Guild,
     interaction?: ChatInputCommandInteraction
 ) {
-    // if (!pickupsCache) {
-    //     pickupsCacheRefresh({ opsDataService, personCoreService });
-    // }
-
     const channelDay = GetChannelDayToday();
-    const pickupsList = await opsDataService.getOpsWithPersonListByDay(
-        channelDay
-    );
+    const pickupsList = await opsDataService.getOpsByDay(channelDay);
 
     const content = createPickupsMessage(
         await GetGuildRoleIdByName(guild, channelDay),
@@ -99,22 +98,18 @@ export async function PickupsListEvent(
 }
 
 // todo: move this to the message service
-function createPickupsMessage(
-    roleId: string,
-    ops: OpsWithPersonListModel[]
-): string {
-    let message = `## ${roleMention(roleId)} pickups!\n\n`;
-    ops.filter((op) => op.role === 'night-pickup').forEach((op) => {
-        message += `${bold(op.org)} at ${op.time}\n`;
-        op.personList
-            .filter((a) => a)
+function createPickupsMessage(roleId: string, ops: OpsModel[]): string {
+    return ops.reduce((message, o) => {
+        message += `${bold(o.org)} at ${o.timeStart}\n`;
+        o.personList
+            .filter((a) => a.role === 'night-pickup')
             .forEach((person) => {
                 message += `> ${bold(person.name)} ${
                     person.discordId ? userMention(person.discordId) : ''
                 }\n`;
             });
-    });
-    return message;
+        return message;
+    }, `## ${roleMention(roleId)} pickups!\n\n`);
 }
 
 // todo: does it make sense to create a thread when there's a dedicated channel?
