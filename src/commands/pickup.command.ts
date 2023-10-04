@@ -10,23 +10,25 @@ import { DAYS_OF_WEEK } from '../nm-const';
 export default {
     data: new SlashCommandBuilder()
         .setName('pickups')
-        .setDescription('Remind me ')
-        .addStringOption((option) =>
-            option
-                .setName('day')
-                .setDescription('The gif category')
-                .setRequired(false)
-                .addChoices(
-                    ...DAYS_OF_WEEK.map((name) => ({
-                        name: name,
-                        value: name
-                    }))
-                )
-        ),
+        .setDescription('Remind me '),
+    // .addStringOption(
+    //     (option) =>
+    //         option
+    //             .setName('day')
+    //             .setDescription('The gif category')
+    //             .setRequired(false)
+    //     // .addChoices(
+    //     //     ...DAYS_OF_WEEK.map((name) => ({
+    //     //         name,
+    //     //         value: name
+    //     //     }))
+    //     // )
+    // )
     async execute(
         interaction: ChatInputCommandInteraction,
         services: GuildServiceModel
     ) {
+        console.log('hi');
         if (!interaction.guild) {
             interaction.reply({
                 content: 'You can only use this command in a channel',
@@ -34,10 +36,6 @@ export default {
             });
             return;
         }
-        await PickupsListEvent(
-            services,
-            interaction.guild as Guild,
-            interaction
-        );
+        await PickupsListEvent(services, interaction.guild, interaction);
     }
 };

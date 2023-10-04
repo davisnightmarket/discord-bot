@@ -1,87 +1,47 @@
-import {
-    roleMention,
-    type Guild,
-    bold,
-    userMention,
-    type ChatInputCommandInteraction,
-    ActionRowBuilder,
-    ButtonBuilder,
-    ButtonStyle,
-    type ButtonInteraction,
-    type Interaction
-} from 'discord.js';
-
-import {
-    GetChannelByName,
-    GetChannelDayToday,
-    GetGuildRoleIdByName
-} from '../utility';
-import { type GuildServiceModel } from '../model';
-import { type OpsModel } from '../service';
-
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.PickupsListEvent = exports.PickupJoinEvent = void 0;
+const discord_js_1 = require("discord.js");
+const utility_1 = require("../utility");
 // when a person opts in to do a pickup or role per night
-export const PickupJoinEvent = async (
-    { opsDataService }: GuildServiceModel,
-    interaction: Interaction
-) => {
+const PickupJoinEvent = async ({ opsDataService }, interaction) => {
     // Is this our interaction to deal with?
-    interaction = interaction as ButtonInteraction;
+    interaction = interaction;
     const { customId } = interaction;
-    if (!customId) return;
+    if (!customId)
+        return;
     const [name, day, time] = customId.split('--');
-    if (name !== 'pickups-refresh') return;
-
+    if (name !== 'pickups-refresh')
+        return;
     const guild = interaction.guild;
-    if (!guild) return;
-
+    if (!guild)
+        return;
     // regenerate the message
-
-    const channelDay = GetChannelDayToday();
+    const channelDay = (0, utility_1.GetChannelDayToday)();
     const pickupsList = await opsDataService.getOpsByDay(channelDay);
-
-    const content = createPickupsMessage(
-        await GetGuildRoleIdByName(guild, channelDay),
-        pickupsList
-    );
-
+    const content = createPickupsMessage(await (0, utility_1.GetGuildRoleIdByName)(guild, channelDay), pickupsList);
     // update it
     interaction.message.edit(content);
-
     // TODO: update pickups list with new data
-
     opsDataService.updateOpsSheet({
         day,
         time
     });
 };
-
+exports.PickupJoinEvent = PickupJoinEvent;
 // when a person requests a listing of
-export async function PickupsListEvent(
-    { opsDataService }: GuildServiceModel,
-    guild: Guild,
-    interaction?: ChatInputCommandInteraction
-) {
-    const channelDay = GetChannelDayToday();
-    console.log(channelDay);
+async function PickupsListEvent({ opsDataService, personCoreService }, guild, interaction) {
+    const channelDay = (0, utility_1.GetChannelDayToday)();
     const pickupsList = await opsDataService.getOpsByDay(channelDay);
-
-    const content = createPickupsMessage(
-        await GetGuildRoleIdByName(guild, channelDay),
-        pickupsList
-    );
-
+    const content = createPickupsMessage(await (0, utility_1.GetGuildRoleIdByName)(guild, channelDay), pickupsList);
     if (interaction) {
         // todo: not sure we need a button. I think it's more likely folks will simply hit the / command again
         // rather than scroll up and hit a button, especially if there's been a lot of conversation since.
-        const refreshButton = new ButtonBuilder()
+        const refreshButton = new discord_js_1.ButtonBuilder()
             .setCustomId(`pickups-refresh--${channelDay}`)
             .setLabel('Refresh')
-            .setStyle(ButtonStyle.Secondary);
-
-        const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
-            refreshButton
-        );
-
+            .setStyle(discord_js_1.ButtonStyle.Secondary);
+        const row = new discord_js_1.ActionRowBuilder().addComponents(refreshButton);
         interaction.reply({
             content,
             components: [row],
@@ -93,27 +53,25 @@ export async function PickupsListEvent(
             // they want to see what the pickups are
             ephemeral: true
         });
-    } else {
-        const channel = GetChannelByName(channelDay);
+    }
+    else {
+        const channel = (0, utility_1.GetChannelByName)(channelDay);
         channel.send(content);
     }
 }
-
+exports.PickupsListEvent = PickupsListEvent;
 // todo: move this to the message service
-function createPickupsMessage(roleId: string, ops: OpsModel[]): string {
+function createPickupsMessage(roleId, ops) {
     return ops.reduce((message, o) => {
-        message += `${bold(o.org)} at ${o.timeStart}\n`;
+        message += `${(0, discord_js_1.bold)(o.org)} at ${o.timeStart}\n`;
         o.personList
             .filter((a) => a.role === 'night-pickup')
             .forEach((person) => {
-                message += `> ${bold(person.name)} ${
-                    person.discordId ? userMention(person.discordId) : ''
-                }\n`;
-            });
+            message += `> ${(0, discord_js_1.bold)(person.name)} ${person.discordId ? (0, discord_js_1.userMention)(person.discordId) : ''}\n`;
+        });
         return message;
-    }, `## ${roleMention(roleId)} pickups!\n\n`);
+    }, `## ${(0, discord_js_1.roleMention)(roleId)} pickups!\n\n`);
 }
-
 // todo: does it make sense to create a thread when there's a dedicated channel?
 // async function createTodaysPickupThread(guild: Guild) {
 //     const channel = GetChannelByName(guild, GetChannelDayToday());

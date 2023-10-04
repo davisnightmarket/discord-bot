@@ -1,23 +1,20 @@
-import { NmSecrets, GetAllGuildIds } from './utility';
+import { NmSecrets, GetAllGuildIds, Dbg } from './utility';
 import commands from './commands';
 import { REST, Routes } from 'discord.js';
-
+const dbg = Dbg('Deploy');
 (async () => {
     try {
         const {
-            discordConfig: { appToken }
+            discordConfig: { clientId, appToken }
         } = await NmSecrets;
-
         const rest = new REST().setToken(appToken);
-
-        console.log(
-            `Started refreshing ${commands.length} application (/) commands.`
-        );
+        dbg(`Started refreshing ${commands.length} application (/) commands.`);
         const body = commands.map((a) => a.data.toJSON());
         // The put method is used to fully refresh all commands in the guild with the current set
         const guildIdList = await GetAllGuildIds();
+
         for (const guildId of guildIdList) {
-            await rest.put(Routes.applicationGuildCommands(appToken, guildId), {
+            await rest.put(Routes.applicationGuildCommands(clientId, guildId), {
                 body
             });
             console.log(

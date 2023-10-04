@@ -1,16 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const events_1 = require("./events");
 const discord_js_1 = require("discord.js");
-const nm_secrets_utility_1 = require("./utility/nm-secrets.utility");
-const cron_utility_1 = require("./utility/cron-utility");
-const jobs_1 = require("./jobs");
-const service_1 = require("./service");
+const utility_1 = require("./utility");
+const events_1 = require("./events");
 async function main() {
-    const services = new service_1.ConfigSerive();
-    const commands = new service_1.CommandSerice();
     // Add cron jobs
-    (0, cron_utility_1.AddCron)('* * 9 * *', jobs_1.FoodCountReminder);
+    //AddCron('* * 9 * *', FoodCountReminder);
     // Start discord client
     const client = new discord_js_1.Client({
         intents: [
@@ -21,23 +16,19 @@ async function main() {
         ],
         partials: [discord_js_1.Partials.Message, discord_js_1.Partials.Channel]
     });
-    // build discord data
-    client.once(discord_js_1.Events.ClientReady, async (c) => {
-        for (const guild of c.guilds.cache.values()) {
-            commands.register(guild);
-        }
-        console.log(`Ready! Logged in as ${c.user.tag}`);
-    });
     // person meta data events
     // client.on(Events.MessageCreate, PersonMetaEvent(services));
-    // food count events
-    client.on(discord_js_1.Events.MessageCreate, (0, events_1.FoodCountInputEvent)(services));
-    client.on(discord_js_1.Events.InteractionCreate, events_1.FoodCountResponseEvent);
-    // pickup events
-    client.on(discord_js_1.Events.InteractionCreate, (0, jobs_1.PickupsRefreshEvent)(services));
-    // commands
-    client.on(discord_js_1.Events.InteractionCreate, commands.execute(services));
-    const { discordConfig: { appToken } } = await (0, nm_secrets_utility_1.GetNmSecrets)();
+    client.on(discord_js_1.Events.MessageCreate, async (client) => {
+        // food count input
+        (0, events_1.FoodCountInputEvent)(await (0, utility_1.GetGuildServices)(client.guildId || ''));
+    });
+    client.on(discord_js_1.Events.InteractionCreate, async (client) => {
+        // food count response (cancel food count)
+        (0, events_1.FoodCountResponseEvent)(client);
+        // slash commands
+        (0, utility_1.ExecuteGuildCommand)(await (0, utility_1.GetGuildServices)(client.guildId || ''));
+    });
+    const { discordConfig: { appToken } } = await utility_1.NmSecrets;
     client.login(appToken);
 }
 main();

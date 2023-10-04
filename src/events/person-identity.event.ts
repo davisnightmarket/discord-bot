@@ -1,12 +1,11 @@
 import { type Message } from 'discord.js';
 import { MessageService } from '../service/message.service';
 import { Dbg } from '../utility';
-import { PersonInputService } from '../nm-service/person-input.service';
+import { PersonInputService } from '../service/person-input.service';
 import { type GuildServiceModel } from '../model';
-import { type PersonModel } from '../nm-service';
-import { type ConfigSerive } from '../service';
+import { type PersonModel } from '../service';
 
-const dbg = Dbg('PersonMetaEvent');
+const dbg = Dbg('PersonIdentityEvent');
 
 type MetaStatusType =
     | 'OK'
@@ -69,8 +68,9 @@ const personMetaCache: Record<
     ]
 > = {};
 
-export const PersonMetaEvent =
-    (guildServices: ConfigSerive) => async (message: Message) => {
+export const PersonIdentityEvent =
+    ({ personCoreService }: GuildServiceModel) =>
+    async (message: Message) => {
         const { channel, author } = message as Message<true>;
 
         const NOW_IN_SECONDS = Date.now() / 1000;
@@ -82,25 +82,18 @@ export const PersonMetaEvent =
             return;
         }
 
-        if (message.guild?.id) {
-            UserGuildServiceMap[author.id] =
-                await guildServices.getServicesForGuildId(message.guild?.id);
-        }
-        const { personCoreService } = UserGuildServiceMap[author.id];
+        // if (message.guild?.id) {
+        //     UserGuildServiceMap[author.id] =
+        //         await guildServices.getServicesForGuildId(message.guild?.id);
+        // }
 
-        if (!personCoreService) {
-            console.error(
-                'We are not getting a person service because the guild service is not mapped. EXITING!'
-            );
-            return;
-        }
 
         const { id, username } = message.author;
 
         // OK, now we figure out what their data status is
-        const personStore = await personCoreService.getPerson({
-            discordId: id
-        });
+        const personStore = await personCoreService.getPersonByEmailOrDiscordId(
+            id
+        );
 
         // we check if they are in the cache
         if (!personMetaCache[id]) {

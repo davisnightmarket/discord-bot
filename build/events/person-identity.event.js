@@ -1,10 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PersonMetaEvent = void 0;
+exports.PersonIdentityEvent = void 0;
 const message_service_1 = require("../service/message.service");
 const utility_1 = require("../utility");
-const person_input_service_1 = require("../nm-service/person-input.service");
-const dbg = (0, utility_1.Dbg)('PersonMetaEvent');
+const person_input_service_1 = require("../service/person-input.service");
+const dbg = (0, utility_1.Dbg)('PersonIdentityEvent');
 const APPROPRIATE_TIME_TO_BUG_U_IN_SECS = 1; // 60 * 60 * 24 * 7,
 const A_BIT_OF_LAG_BEFORE_INTROS_IN_SECS = 1; // 60 * 60;
 const MsgReply = message_service_1.MessageService.createMap({
@@ -44,7 +44,7 @@ const MsgReply = message_service_1.MessageService.createMap({
 const UserGuildServiceMap = {};
 // store person info locally
 const personMetaCache = {};
-const PersonMetaEvent = (guildServices) => async (message) => {
+const PersonIdentityEvent = ({ personCoreService }) => async (message) => {
     const { channel, author } = message;
     const NOW_IN_SECONDS = Date.now() / 1000;
     /* STAGE 1: skip the message entirely in some cases */
@@ -52,15 +52,10 @@ const PersonMetaEvent = (guildServices) => async (message) => {
     if (author.bot) {
         return;
     }
-    if (message.guild?.id) {
-        UserGuildServiceMap[author.id] =
-            await guildServices.getServicesForGuildId(message.guild?.id);
-    }
-    const { personCoreService } = UserGuildServiceMap[author.id];
-    if (!personCoreService) {
-        console.error('We are not getting a person service because the guild service is not mapped. EXITING!');
-        return;
-    }
+    // if (message.guild?.id) {
+    //     UserGuildServiceMap[author.id] =
+    //         await guildServices.getServicesForGuildId(message.guild?.id);
+    // }
     const { id, username } = message.author;
     // OK, now we figure out what their data status is
     const personStore = await personCoreService.getPersonByEmailOrDiscordId(id);
@@ -125,7 +120,7 @@ const PersonMetaEvent = (guildServices) => async (message) => {
     }
     // todo: all the other questions we want to ask ...
 };
-exports.PersonMetaEvent = PersonMetaEvent;
+exports.PersonIdentityEvent = PersonIdentityEvent;
 const PersonDmEvent = (metaStatus, message) => {
     const { channel, content } = message;
     const { username } = message.author;

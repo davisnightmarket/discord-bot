@@ -2,12 +2,12 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FoodCountInputEvent = exports.TIME_UNTIL_UPDATE = exports.FoodCountInputCache = void 0;
 const discord_js_1 = require("discord.js");
-const nm_service_1 = require("../nm-service");
+const service_1 = require("../service");
 const uuid_1 = require("uuid");
-const index_1 = require("../service/index");
+const service_2 = require("../service");
 const utility_1 = require("../utility");
-const discord_service_1 = require("../service/discord.service");
-const MsgReply = index_1.MessageService.createMap({
+const utility_2 = require("../utility");
+const MsgReply = service_2.MessageService.createMap({
     // message sent when someone posts a food count event
     FOODCOUNT_INSERT: {
         lbs: '',
@@ -34,13 +34,8 @@ exports.TIME_UNTIL_UPDATE = 60 * 1000; // one minute in milliseconds
 /**
  *
  */
-const FoodCountInputEvent = (guildServices) => async (message) => {
+const FoodCountInputEvent = ({ personCoreService, foodCountInputService, foodCountDataService }) => async (message) => {
     const { channel, author } = message;
-    if (!message.guild?.id) {
-        (0, utility_1.Dbg)('FoodCountInputEvent does not happen outside of a guild channel');
-        return;
-    }
-    const { personCoreService, foodCountInputService, foodCountDataService } = await guildServices.getServicesForGuildId(message.guild?.id);
     /* STAGE 1: skip the message entirely in some cases */
     // if we are a bot, we do not want to process the message
     if (author.bot ||
@@ -109,17 +104,15 @@ const FoodCountInputEvent = (guildServices) => async (message) => {
                 return;
             }
             // todo: try/catch
-            await foodCountDataService.appendFoodCount([
-                {
-                    org,
-                    date,
-                    reporter: reporter?.email ?? '',
-                    lbs,
-                    note
-                }
-            ]);
+            await foodCountDataService.appendFoodCount({
+                org,
+                date,
+                reporter: reporter?.email ?? '',
+                lbs,
+                note
+            });
             // we want to post to food-count, always, so folks know what's in the db
-            const countChannel = (0, discord_service_1.getChannelByName)(message.guild, nm_service_1.COUNT_CHANNEL_NAME);
+            const countChannel = (0, utility_2.GetChannelByName)(service_1.COUNT_CHANNEL_NAME, message.guild);
             countChannel?.send(MsgReply.FOODCOUNT_INSERT({
                 lbs: lbs.toString(),
                 note,
@@ -173,9 +166,7 @@ const FoodCountInputEvent = (guildServices) => async (message) => {
             messageResponseId: messageReply.id
         });
         // get our reporter email address
-        const reporter = await personCoreService.getPerson({
-            discordId: author.id
-        });
+        const reporter = await personCoreService.getPersonByEmailOrDiscordId(author.id);
     }
     // loop over errors and post to channel
     for (const { status, lbs, org, orgFuzzy } of parsedInputErrorList) {

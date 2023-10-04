@@ -16,7 +16,7 @@ interface GoogleSpreadsheetsKeysModel {
 }
 
 interface DiscordKeysModel {
-    appId: string;
+    clientId: string;
     appToken: string;
 }
 

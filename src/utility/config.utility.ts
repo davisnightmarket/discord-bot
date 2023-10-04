@@ -1,6 +1,6 @@
 import { EnvConfig } from '../config';
 import { ConfigModel, type EnvType } from '../model';
-import { SpreadsheetDataModel, GoogleSheetService } from '../service';
+import { type SpreadsheetDataModel, GoogleSheetService } from '../service';
 
 const Env = process.env.NODE_ENV as EnvType;
 
@@ -49,5 +49,5 @@ export async function GetAllGuildIds(): Promise<string[]> {
     const configRows = await coreConfigSheetService.getAllRowsAsMaps();
     return configRows
         .filter((a) => a.code === 'DISCORD_GUILD_ID')
-        .map((a) => a.marketId);
+        .map((a) => a.value);
 }
