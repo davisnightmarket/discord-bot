@@ -1,8 +1,11 @@
-import { NmRoleType, NmDayNameType, GuildServiceModel } from '../model';
+import { type NmRoleType, type NmDayNameType } from '../model';
 import { DAYS_OF_WEEK } from '../nm-const';
 import { GetChannelDayToday } from '../utility';
-import { GoogleSheetService, NmPersonDataService } from './';
-import { type PersonModel } from './';
+import {
+    GoogleSheetService,
+    type NmPersonDataService,
+    type PersonModel
+} from './';
 
 export type OpsDataModel = {
     day: NmDayNameType;
@@ -49,8 +52,7 @@ export class NmOpsDataService {
     private readonly opsNotesSheetService: GoogleSheetService<OpsDataOrgPickupModel>;
     personCoreDataService: NmPersonDataService;
 
-    opsCache: OpsModel[] = [];
-
+    opsCache: Promise<OpsModel[]> = Promise.resolve([]);
     constructor(
         spreadsheetId: string,
         personCoreDataService: NmPersonDataService
@@ -77,7 +79,7 @@ export class NmOpsDataService {
         this.refreshCache();
     }
 
-    updateOpsSheet({}) {}
+    updateOpsSheet() {}
 
     async getOpsTimelineList(
         // we don't need more than 1000 records to figure out the timeline
@@ -97,7 +99,8 @@ export class NmOpsDataService {
     async getOpsByDay(
         day: NmDayNameType = GetChannelDayToday()
     ): Promise<OpsModel[]> {
-        return this.opsCache.filter((a) => a.day === day);
+        const opsCache = await this.opsCache;
+        return opsCache.filter((a) => a.day === day);
     }
 
     // send a new ops record to the sheet
@@ -105,8 +108,9 @@ export class NmOpsDataService {
         // updating data, always get fresh data
         // because we use the cache to update
         await this.refreshCache();
+        const opsCache = await this.opsCache;
         const headerList = await this.opsSheetService.waitingForHeaderList;
-        const opsData = [...this.opsCache.map(this.fromOpToOpData)].flat();
+        const opsData = [...opsCache.map(this.fromOpToOpData)].flat();
 
         // add the new data
         opsData.push(opToUpdate);
@@ -117,12 +121,12 @@ export class NmOpsDataService {
                     DAYS_OF_WEEK.indexOf(a.day) - DAYS_OF_WEEK.indexOf(b.day)
             )
             // in here we add blank lines
-            .reduce((a, b, i) => {
+            .reduce<Array<OpsDataModel | null>>((a, b, i) => {
                 if (opsData[i + 1]?.day !== b.day) {
-                    a.push(null);
+                    a?.push(null);
                 }
                 return a;
-            }, [] as (OpsDataModel | null)[])
+            }, [])
             // turn it into an array of data mapping to the headers
             .map((op) => {
                 return op
@@ -153,6 +157,10 @@ export class NmOpsDataService {
     }
 
     async refreshCache() {
+        this.opsCache = this.getOpsCache();
+    }
+
+    async getOpsCache() {
         const notesList = await this.opsNotesSheetService.getAllRowsAsMaps();
 
         const opsList = await this.opsSheetService.getAllRowsAsMaps();
@@ -160,55 +168,62 @@ export class NmOpsDataService {
         // get unique persons and add role, period, and discordIdOrEmail
         const personList: OpsPersonModel[] = (
             await Promise.all(
-                opsList.map(async ({ role, discordIdOrEmail, period }) =>
-                    this.personCoreDataService
-                        .getPersonByEmailOrDiscordId(discordIdOrEmail)
-                        .then((b) => {
-                            return b
-                                ? {
-                                      ...b,
-                                      discordIdOrEmail,
-                                      period,
-                                      role
-                                  }
-                                : null;
-                        })
+                opsList.map(
+                    async ({ role, discordIdOrEmail, period }) =>
+                        await this.personCoreDataService
+                            .getPersonByEmailOrDiscordId(discordIdOrEmail)
+                            .then((b) => {
+                                return b
+                                    ? {
+                                          ...b,
+                                          discordIdOrEmail,
+                                          period,
+                                          role
+                                      }
+                                    : null;
+                            })
                 )
             )
         ).filter((a) => a) as OpsPersonModel[];
 
         // reduce ops to one per day+org+timeStart
         // which allows us to collect people and roles
-        const opsUnique = opsList.reduce((a, b) => {
-            if (!a[b.day + b.org + b.timeStart]) {
-                a[b.day + b.org + b.timeStart] = {
-                    ...b,
-                    personList: [],
-                    noteList: notesList
-                        .filter(
-                            (note) =>
-                                note.day === b.day &&
-                                note.org === b.org &&
-                                // if there is a note timeStart, it means the
-                                // note is for a specific pickup time, not just that day and org
-                                (note.timeStart
-                                    ? note.timeStart === b.timeStart
-                                    : true)
-                        )
-                        .map((n) => n.note)
-                };
-            }
-            const p = personList.find(
-                (p) => (p.discordIdOrEmail = b.discordIdOrEmail)
-            );
-            if (p) {
-                a[b.day + b.org + b.timeStart].personList.push(p);
-            }
+        const opsUnique = opsList.reduce<{ [k in string]: OpsModel }>(
+            (a, { day, org, timeStart, timeEnd, discordIdOrEmail }) => {
+                if (!a[day + org + timeStart]) {
+                    a[day + org + timeStart] = {
+                        day,
+                        org,
+                        timeStart,
+                        timeEnd,
+                        personList: [],
+                        noteList: notesList
+                            .filter(
+                                (note) =>
+                                    note.day === day &&
+                                    note.org === org &&
+                                    // if there is a note timeStart, it means the
+                                    // note is for a specific pickup time, not just that day and org
+                                    (note.timeStart
+                                        ? note.timeStart === timeStart
+                                        : true)
+                            )
+                            .map((n) => n.note)
+                    };
+                }
+                const p = personList.find(
+                    (p) => (p.discordIdOrEmail = discordIdOrEmail)
+                );
+                if (p) {
+                    a[day + org + timeStart].personList.push(p);
+                }
 
-            return a;
-        }, {} as { [k in string]: OpsModel });
+                return a;
+            },
+            {}
+        );
 
         // we expect an array
-        this.opsCache = Object.values(opsUnique);
+        return Object.values(opsUnique);
     }
 }

@@ -2,9 +2,7 @@ import { Client, Events, GatewayIntentBits, Partials } from 'discord.js';
 import { NmSecrets, GetGuildServices, ExecuteGuildCommand } from './utility';
 import { FoodCountInputEvent, FoodCountResponseEvent } from './events';
 
-console.log('HIHI');
 async function main() {
-    console.log('HIHI');
     // Add cron jobs
     // AddCron('* * 9 * *', FoodCountReminder);
 
