@@ -4,6 +4,8 @@ exports.NightListRequestEvent = void 0;
 const discord_js_1 = require("discord.js");
 const utility_1 = require("../utility");
 const const_1 = require("../const");
+// this tells us if
+let isUpdatingSheet = {};
 // when a person requests a listing of
 async function NightListRequestEvent({ nightDataService }, interaction) {
     if (!interaction.guild) {
@@ -39,7 +41,6 @@ async function NightListRequestEvent({ nightDataService }, interaction) {
         return;
     }
     const [command, day, role, period] = interaction?.customId.split('--');
-    console.log(command, day, role, period);
     if (command !== 'volunteer') {
         return;
     }
@@ -112,7 +113,7 @@ async function NightListRequestEvent({ nightDataService }, interaction) {
                 .addOptions(pickupList.map(({ org, timeStart, timeEnd, personList }) => new discord_js_1.StringSelectMenuOptionBuilder()
                 .setLabel(org)
                 .setDescription(`at ${timeStart}${personList.length ? ' with ' : ''}${personList.map((a) => a.name).join(', ')}`)
-                .setValue(`${org}---${timeStart}---${timeEnd}`)));
+                .setValue(`${org}---${timeStart}---${timeEnd || '0000'}`)));
             interaction.editReply({
                 content: 'OK, all set!',
                 components: [

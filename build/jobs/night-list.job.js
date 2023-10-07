@@ -11,9 +11,7 @@ const NightListJob = (client) => async () => {
         const { nightDataService } = await (0, utility_1.GetGuildServices)(guild.id);
         // get the channel by today name
         const channelDay = (0, utility_1.GetChannelDayToday)();
-        console.log(JSON.stringify(await nightDataService.getNightByDay(channelDay), null, 2));
         const content = (0, utility_1.GetAnnounceMessage)(await (0, utility_1.GetGuildRoleIdByName)(guild, channelDay), await nightDataService.getNightByDay(channelDay));
-        console.log(content);
         (await guild.channels.cache.find((channel) => channel.name === channelDay))?.send({
             content
         });

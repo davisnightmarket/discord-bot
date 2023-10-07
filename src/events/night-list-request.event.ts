@@ -9,11 +9,8 @@ import {
     ButtonStyle,
     type ButtonInteraction,
     Interaction,
-    CommandInteraction,
     StringSelectMenuOptionBuilder,
-    StringSelectMenuBuilder,
-    AnySelectMenuInteraction,
-    StringSelectMenuInteraction
+    StringSelectMenuBuilder
 } from 'discord.js';
 
 import { GetChannelDayToday, GetPickupJoinMessage } from '../utility';
@@ -24,6 +21,11 @@ import {
     NmRolePeriodType
 } from '../model';
 import { DAYS_OF_WEEK, NM_NIGHT_ROLES } from '../const';
+
+// this tells us if
+let isUpdatingSheet: {
+    [k in number]: Promise<boolean>;
+} = {};
 
 // when a person requests a listing of
 export async function NightListRequestEvent(
@@ -85,7 +87,7 @@ export async function NightListRequestEvent(
         NmNightRoleType,
         NmRolePeriodType
     ];
-    console.log(command, day, role, period);
+
     if (command !== 'volunteer') {
         return;
     }
@@ -178,7 +180,9 @@ export async function NightListRequestEvent(
                                     personList.length ? ' with ' : ''
                                 }${personList.map((a) => a.name).join(', ')}`
                             )
-                            .setValue(`${org}---${timeStart}---${timeEnd}`)
+                            .setValue(
+                                `${org}---${timeStart}---${timeEnd || '0000'}`
+                            )
                     )
                 );
 
