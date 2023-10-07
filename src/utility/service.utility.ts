@@ -1,12 +1,11 @@
 import { GetConfigByGuildId } from '../utility';
-import { EnvConfig } from '../config';
-import { type GuildServiceModel, ConfigModel, type EnvType } from '../model';
+import { type GuildServiceModel, type ConfigModel } from '../model';
 import {
     NmFoodCountDataService,
     NmFoodCountInputService,
     NmOrgService,
     NmPersonDataService,
-    NmOpsDataService
+    NmNightDataService
 } from '../service';
 
 const servicesByGuildId = new Map<
@@ -23,14 +22,14 @@ export async function GetGuildServices(guildId: string) {
     if (!servicesByGuildId.has(guildId)) {
         const config = await GetConfigByGuildId(guildId);
 
-        const orgCoreService = new NmOrgService(config.GSPREAD_CORE_ORG_ID);
+        const orgCoreService = new NmOrgService(config.GSPREAD_ORG_ID);
         const personCoreService = new NmPersonDataService(
-            config.GSPREAD_CORE_PERSON_ID
+            config.GSPREAD_PERSON_ID
         );
         servicesByGuildId.set(guildId, {
             config,
-            opsDataService: new NmOpsDataService(
-                config.GSPREAD_OPS_ID,
+            nightDataService: new NmNightDataService(
+                config.GSPREAD_NIGHT_ID,
                 personCoreService
             ),
             foodCountDataService: new NmFoodCountDataService(

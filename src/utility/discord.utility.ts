@@ -12,7 +12,7 @@ import { NmSecrets } from '../utility';
 import {} from 'discord.js';
 import { type GuildServiceModel } from '../model';
 
-export function GetChannelByName(name: string, guild?: Guild | null) {
+export function GetChannelByName(name: string, guild: Guild | null) {
     return guild?.channels.cache.find(
         (c) => c.type === ChannelType.GuildText && c.name === name.toLowerCase()
     ) as TextChannel;

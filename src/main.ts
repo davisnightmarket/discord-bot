@@ -1,6 +1,10 @@
 import { Client, Events, GatewayIntentBits, Partials } from 'discord.js';
 import { NmSecrets, GetGuildServices, ExecuteGuildCommand } from './utility';
-import { FoodCountInputEvent, FoodCountResponseEvent } from './events';
+import {
+    FoodCountInputEvent,
+    FoodCountResponseEvent,
+    OpsListResponseEvent
+} from './events';
 
 async function main() {
     // Add cron jobs
@@ -19,21 +23,24 @@ async function main() {
 
     // person meta data events
     // client.on(Events.MessageCreate, PersonMetaEvent(services));
-    client.on(Events.ClientReady, async (client) => {
+    client.on(Events.ClientReady, async () => {
         // food count input
         console.log('Crabapple READY!');
     });
-    client.on(Events.MessageCreate, async (client) => {
+    client.on(Events.MessageCreate, async (message) => {
+        const services = await GetGuildServices(message.guildId ?? '');
         // food count input
-        FoodCountInputEvent(await GetGuildServices(client.guildId ?? ''));
+        FoodCountInputEvent(services);
     });
-    client.on(Events.InteractionCreate, async (client) => {
+    client.on(Events.InteractionCreate, async (interaction) => {
         // food count response (cancel food count)
-        FoodCountResponseEvent(client);
+        const services = await GetGuildServices(interaction.guildId ?? '');
+        FoodCountResponseEvent(interaction);
+        OpsListResponseEvent(services, interaction);
         // slash commands
         ExecuteGuildCommand(
-            await GetGuildServices(client.guildId ?? ''),
-            client
+            await GetGuildServices(interaction.guildId ?? ''),
+            interaction
         );
     });
 

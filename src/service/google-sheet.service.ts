@@ -1,7 +1,7 @@
 import {
     GoogleSpreadsheetsService,
-    SpreadsheetDataModel,
-    SpreadsheetDataValueModel
+    type SpreadsheetDataModel,
+    type SpreadsheetDataValueModel
 } from './google-spreadsheet.service';
 interface SheetModel {
     spreadsheetId: string;
@@ -15,7 +15,7 @@ export class GoogleSheetService<T extends SpreadsheetDataModel> {
 
     // we can await this in the methods so we are sure the sheet exists
     waitingForSheetId: Promise<number>;
-    waitingForHeaderList: Promise<(keyof T)[]>;
+    waitingForHeaderList: Promise<Array<keyof T>>;
 
     constructor({ spreadsheetId, sheetName, headersList }: SheetModel) {
         // store params
@@ -26,13 +26,13 @@ export class GoogleSheetService<T extends SpreadsheetDataModel> {
             this.sheetName
         );
         this.waitingForHeaderList = this.getOrCreateHeaders(
-            headersList as (keyof T)[]
+            headersList as Array<keyof T>
         );
     }
 
     // TODO: test this
     async updateRowByIndex(index: number, value: SpreadsheetDataValueModel) {
-        return this.spreadsheetService.rowsWrite(
+        return await this.spreadsheetService.rowsWrite(
             [[value]],
             this.getSheetRangeString(`A${index}`)
         );
@@ -45,10 +45,11 @@ export class GoogleSheetService<T extends SpreadsheetDataModel> {
             this.getSheetRangeString()
         );
     }
+
     // TODO: test this
     async appendOneMap(map: T) {
         const headerList = await this.waitingForHeaderList;
-        const row = headerList.map((a) => map[a] as SpreadsheetDataValueModel);
+        const row = headerList.map((a) => map[a]);
         await this.spreadsheetService.rowsAppend(
             [row],
             this.getSheetRangeString()
@@ -79,14 +80,14 @@ export class GoogleSheetService<T extends SpreadsheetDataModel> {
             limitRows = 0
         }: {
             includeHeader?: boolean;
-            limitToHeaders?: (keyof T)[];
+            limitToHeaders?: Array<keyof T>;
             limitRows?: number;
         } = { includeHeader: false, limitToHeaders: [], limitRows: 0 }
     ): Promise<SpreadsheetDataValueModel[][]> {
         let dataList = await this.spreadsheetService.rangeGet(
             this.getSheetRangeString(
-                'A' + (includeHeader ? 1 : 2),
-                'Z' + (limitRows ? limitRows : '')
+                'A' + (includeHeader ? '1' : '2'),
+                'Z' + (limitRows ? String(limitRows) : '')
             )
         );
         if (limitToHeaders.length) {
@@ -95,7 +96,7 @@ export class GoogleSheetService<T extends SpreadsheetDataModel> {
             );
 
             // now we make sure that there is no missing data! This should never happen
-            for (let i of indexList) {
+            for (const i of indexList) {
                 if (i < 0) {
                     throw new Error(
                         `We are missing a header value in ${limitToHeaders.join(
@@ -104,10 +105,13 @@ export class GoogleSheetService<T extends SpreadsheetDataModel> {
                     );
                 }
             }
-            dataList = dataList.reduce((all, row) => {
-                all.push(indexList.map((i) => row[i]));
-                return all;
-            }, [] as SpreadsheetDataValueModel[][]);
+            dataList = dataList.reduce<SpreadsheetDataValueModel[][]>(
+                (all, row) => {
+                    all.push(indexList.map((i) => row[i]));
+                    return all;
+                },
+                []
+            );
         }
 
         return dataList;
@@ -123,7 +127,7 @@ export class GoogleSheetService<T extends SpreadsheetDataModel> {
             limitRows = 0
         }: {
             includeHeader?: boolean;
-            limitToHeaders?: (keyof T)[];
+            limitToHeaders?: Array<keyof T>;
             limitRows?: number;
         } = { includeHeader: false, limitToHeaders: [], limitRows: 0 }
     ): Promise<T[]> {
@@ -135,16 +139,23 @@ export class GoogleSheetService<T extends SpreadsheetDataModel> {
         });
 
         return rows.map((r) => ({
-            ...r.reduce((a, b, i) => {
-                a[headerList[i] as string] = b as SpreadsheetDataValueModel;
-                return a;
-            }, {} as { [k in string]: SpreadsheetDataValueModel })
+            ...headerList.reduce<{ [k in string]: SpreadsheetDataValueModel }>(
+                (a, b, i) => {
+                    if (!b) return a;
+                    a[b as string] = r[i];
+                    return a;
+                },
+
+                {}
+            )
         })) as T[];
     }
 
     async getMapsByMatchAnyProperties(query: Partial<T>): Promise<T[]> {
         return (await this.getAllRowsAsMaps()).filter((map) => {
-            return Object.keys(map).some((k) => query[k] === map[k]);
+            return Object.keys(map).some(
+                (k) => query[k] && query[k] === map[k]
+            );
         });
     }
 
@@ -163,7 +174,7 @@ export class GoogleSheetService<T extends SpreadsheetDataModel> {
             .filter((a) => a > 0);
     }
 
-    async getIndexesByHeaderValues(a: (keyof T)[]) {
+    async getIndexesByHeaderValues(a: Array<keyof T>) {
         const headerList = await this.waitingForHeaderList;
         return a.map(headerList.indexOf);
     }
@@ -176,15 +187,18 @@ export class GoogleSheetService<T extends SpreadsheetDataModel> {
             columnStart && columnEnd ? ':' + columnEnd : ''
         }`;
     }
+
     // this is called in the constructor to populate the headers
     // if the headers have changed, this will update them in the sheet before populating
-    async getOrCreateHeaders(headerList?: (keyof T)[]): Promise<(keyof T)[]> {
+    async getOrCreateHeaders(
+        headerList?: Array<keyof T>
+    ): Promise<Array<keyof T>> {
         await this.waitingForSheetId;
         let list = ((
             await this.spreadsheetService.rangeGet(
-                this.getSheetRangeString('A', 'C')
+                this.getSheetRangeString('A', 'Z')
             )
-        )[0] || []) as (keyof T)[];
+        )[0] || []) as Array<keyof T>;
 
         // if we past a header list
 
@@ -192,7 +206,7 @@ export class GoogleSheetService<T extends SpreadsheetDataModel> {
             // the keys do NOT match, we throw an error
             if (
                 !list.every((a, i) => {
-                    list[i] === a;
+                    return headerList[i] === a;
                 })
             ) {
                 throw new Error(`header list mismatch! The spreadsheet is out of sync with the model:
@@ -203,7 +217,7 @@ export class GoogleSheetService<T extends SpreadsheetDataModel> {
                 `);
             }
             await this.spreadsheetService.rowsAppend(
-                [headerList as (string | number)[]],
+                [headerList as Array<string | number>],
                 this.getSheetRangeString('A', 'A')
             );
             list = headerList;

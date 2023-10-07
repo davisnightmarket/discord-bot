@@ -4,6 +4,6 @@ export * from './food-count-input.service';
 export * from './food-count-data.service';
 export * from './org-data.service';
 export * from './person-data.service';
-export * from './ops-data.service';
+export * from './night-data.service';
 export * from './google-spreadsheet.service';
 export * from './google-sheet.service';

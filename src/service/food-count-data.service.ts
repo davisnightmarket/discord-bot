@@ -1,4 +1,4 @@
-import { GoogleSheetService, SpreadsheetDataModel } from '.';
+import { GoogleSheetService, type SpreadsheetDataModel } from '.';
 
 interface FoodCountModel extends SpreadsheetDataModel {
     org: string;

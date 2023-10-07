@@ -1,17 +1,17 @@
-// import {
-//     roleMention,
-//     type Guild,
-//     bold,
-//     userMention,
-//     type ChatInputCommandInteraction,
-//     ActionRowBuilder,
-//     ButtonBuilder,
-//     ButtonStyle,
-//     type ButtonInteraction,
-//     type Interaction
-// } from 'discord.js';
-// import { type ConfigService } from '../service';
-// import { GetChannelByName } from '.';
+import {
+    roleMention,
+    type Guild,
+    bold,
+    userMention,
+    type ChatInputCommandInteraction,
+    ActionRowBuilder,
+    ButtonBuilder,
+    ButtonStyle,
+    type ButtonInteraction,
+    type Interaction
+} from 'discord.js';
+
+import { type NightModel } from '../service';
 
 import { DAYS_OF_WEEK } from '../nm-const';
 // import { type NmDayNameType, type GuildServiceModel } from '../model';
@@ -23,6 +23,40 @@ export const GetChannelDayToday = (date = new Date()) => {
 export const GetChannelDayYesterday = (date = new Date()) => {
     return DAYS_OF_WEEK[date.getDay() - 1] || DAYS_OF_WEEK[6];
 };
+
+// todo: use message service
+export function GetOpsAnnounceMessage(
+    roleId: string,
+    ops: NightModel[]
+): string {
+    return ops.reduce((message, o) => {
+        return (
+            message +
+            `${o.personList
+                .map((person) => {
+                    return `${bold(person.name)} ${
+                        person.discordId ? userMention(person.discordId) : ''
+                    }`;
+                })
+                .join(', ')}${bold(o.org)} at ${o.timeStart}\n`
+        );
+    }, `## ${roleMention(roleId)} pickups!\n`);
+}
+
+// todo: use message service
+export function GetOpsJoinMessage(
+    roleId: string,
+    { org, timeStart, personList }: NightModel
+): string {
+    return `## ${roleMention(roleId)} pickup:\n${personList
+        .map((person) => {
+            return `${bold(person.name)} ${
+                person.discordId ? userMention(person.discordId) : ''
+            }`;
+        })
+        .join(', ')} ${bold(org)} at ${timeStart}\n`;
+}
+
 // export const PickupsRefreshEvent =
 //     (sevicesConfig: ConfigService) => async (interaction: Interaction) => {
 //         // Is this our interaction to deal with?
@@ -41,7 +75,7 @@ export const GetChannelDayYesterday = (date = new Date()) => {
 //         const roleId = await getRoleByName(guild, day);
 //         let message = `## ${roleMention(roleId)} pickups!\n`;
 
-//         const pickups = await services.opsDataService.getOpsByDay(
+//         const pickups = await services.nightDataService.getNightByDay(
 //             day as NmDayNameType
 //         );
 //         for (const pickup of pickups) {
@@ -63,7 +97,7 @@ export const GetChannelDayYesterday = (date = new Date()) => {
 //     const roleId = await getRoleByName(guild, today());
 
 //     // list all the pick ups happening today
-//     const pickups = await services.opsDataService.getOpsByDay(today());
+//     const pickups = await services.nightDataService.getNightByDay(today());
 
 //     let message = `## ${roleMention(roleId)} pickups!\n`;
 

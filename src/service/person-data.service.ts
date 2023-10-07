@@ -1,5 +1,5 @@
 import { type NmActiveStateType } from '../model';
-import { GoogleSheetService, SpreadsheetDataModel } from '../service';
+import { GoogleSheetService, type SpreadsheetDataModel } from '../service';
 
 export interface PersonModel extends SpreadsheetDataModel {
     status: string;
@@ -58,7 +58,7 @@ export class NmPersonDataService {
         // otherwise we assume it is an email, and if that fails, then we assume it is a discord id
 
         const a =
-            (await emailOrDiscordId.split('@').length) !== 2
+            emailOrDiscordId.split('@').length !== 2
                 ? await this.getPersonListByMatchAnyProperties({
                       discordId: emailOrDiscordId
                   })
@@ -70,7 +70,9 @@ export class NmPersonDataService {
                   }));
 
         if (a.length > 1) {
-            throw new Error('We found multiple persons with that identifier!');
+            console.error(`We found multiple persons with that identifier!
+            ${a.map((a) => `${a.name} ${a.email}`).join(', ')}
+            `);
         }
         return a[0] || null;
     }

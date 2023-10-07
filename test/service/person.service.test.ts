@@ -7,9 +7,10 @@ describe('nm-person.service', () => {
     test('update a person active status in central spreadsheet', async () => {
         const { personCoreService } = await WaitForGuildServices;
         const email = 'christianco@gmail.com';
-
         await personCoreService.setActiveState(email, 'inactive');
+
         const pa = await personCoreService.getPersonByEmailOrDiscordId(email);
+        expect(pa?.email).toBe(email);
         expect(pa?.status).toBe('inactive');
 
         await personCoreService.setActiveState(email, 'active');

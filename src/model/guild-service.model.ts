@@ -3,7 +3,7 @@ import type {
     NmFoodCountInputService,
     NmOrgService,
     NmPersonDataService,
-    NmOpsDataService
+    NmNightDataService
 } from '../service';
 
 export interface GuildServiceModel {
@@ -11,5 +11,5 @@ export interface GuildServiceModel {
     foodCountInputService: NmFoodCountInputService;
     orgCoreService: NmOrgService;
     personCoreService: NmPersonDataService;
-    opsDataService: NmOpsDataService;
+    nightDataService: NmNightDataService;
 }
