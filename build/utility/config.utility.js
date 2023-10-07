@@ -10,7 +10,7 @@ if (!Env || !Object.keys(config_1.EnvConfig).includes(Env)) {
 }
 const coreConfigSheetService = new service_1.GoogleSheetService({
     spreadsheetId: config_1.EnvConfig[Env].GSPREAD_CORE_ID,
-    sheetName: 'config-instance'
+    sheetName: 'config-market'
 });
 async function GetConfigByGuildId(guildId) {
     // get the market id

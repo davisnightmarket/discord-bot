@@ -18,6 +18,8 @@ export interface PersonModel extends SpreadsheetDataModel {
     discordId: string;
 }
 
+export type PersonWithIdModel = PersonModel & { discordIdOrEmail: string };
+
 export class NmPersonDataService {
     personSheetService: GoogleSheetService<PersonModel>;
 
@@ -28,6 +30,49 @@ export class NmPersonDataService {
         });
     }
 
+    static createPersonWithQueryId(
+        discordIdOrEmail: string = '',
+        person: Partial<PersonModel>
+    ): PersonWithIdModel {
+        return {
+            ...NmPersonDataService.createPerson(person),
+            discordIdOrEmail
+        };
+    }
+
+    static createPerson({
+        status = '',
+        name = '',
+        email = '',
+        phone = '',
+        location = '',
+        bike = '',
+        bikeCart = '',
+        bikeCartAtNight = '',
+        skills = '',
+        bio = '',
+        pronouns = '',
+        interest = '',
+        reference = '',
+        discordId = ''
+    }: Partial<PersonModel>): PersonModel {
+        return {
+            status,
+            name,
+            email,
+            phone,
+            location,
+            bike,
+            bikeCart,
+            bikeCartAtNight,
+            skills,
+            bio,
+            pronouns,
+            interest,
+            reference,
+            discordId
+        };
+    }
     async getPersonList(): Promise<PersonModel[]> {
         return await this.personSheetService.getAllRowsAsMaps();
     }

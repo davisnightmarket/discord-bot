@@ -10,10 +10,11 @@ async function OpsListRequest({ nightDataService }, guild, interaction) {
     channelDay = nm_const_1.DAYS_OF_WEEK.includes(channelDay)
         ? channelDay
         : (0, utility_1.GetChannelDayToday)();
-    const { pickupsList } = await nightDataService.getNightByDay(channelDay);
+    const { pickupList } = await nightDataService.getNightByDay(channelDay);
     const roleId = await (0, utility_1.GetGuildRoleIdByName)(guild, channelDay);
-    for (const o of pickupsList) {
-        const content = (0, utility_1.GetOpsJoinMessage)(roleId, o);
+    for (const o of pickupList) {
+        // todo: create message per pickup
+        const content = 'GetOpsJoinMessage(roleId, o)';
         const joinOnceButton = new discord_js_1.ButtonBuilder()
             .setCustomId(`pickups-once--${channelDay}`)
             .setLabel('Join Once')

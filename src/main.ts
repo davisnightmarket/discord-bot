@@ -9,10 +9,10 @@ import { NmSecrets, GetGuildServices, ExecuteGuildCommand } from './utility';
 import {
     FoodCountInputEvent,
     FoodCountResponseEvent,
-    NightListEvent,
     OpsListResponseEvent
 } from './events';
 import { AddCron } from './utility/cron.utility';
+import { NightListJob } from './jobs';
 
 async function main() {
     // Start discord client
@@ -27,7 +27,7 @@ async function main() {
     });
 
     // Add cron jobs
-    AddCron('* * * * *', NightListEvent(client));
+    AddCron('* * * * *', NightListJob(client));
     // person meta data events
     // client.on(Events.MessageCreate, PersonMetaEvent(services));
     client.on(Events.ClientReady, async () => {

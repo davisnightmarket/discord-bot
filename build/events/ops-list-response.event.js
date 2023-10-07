@@ -11,8 +11,7 @@ async function OpsListResponseEvent({ nightDataService }, interaction, day) {
     channelDay = nm_const_1.DAYS_OF_WEEK.includes(channelDay)
         ? channelDay
         : (0, utility_1.GetChannelDayToday)();
-    const { pickupsList } = await nightDataService.getNightByDay(channelDay);
-    const content = (0, utility_1.GetOpsAnnounceMessage)(await (0, utility_1.GetGuildRoleIdByName)(interaction.guild, channelDay), pickupsList);
+    const content = (0, utility_1.GetPickupsMessage)(await nightDataService.getNightByDay(channelDay));
     // todo: not sure we need a button. I think it's more likely folks will simply hit the / command again
     // rather than scroll up and hit a button, especially if there's been a lot of conversation since.
     const joinOnceButton = new discord_js_1.ButtonBuilder()

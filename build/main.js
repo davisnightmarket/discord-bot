@@ -3,7 +3,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const discord_js_1 = require("discord.js");
 const utility_1 = require("./utility");
 const events_1 = require("./events");
-const cron_utility_1 = require("./utility/cron-utility");
+const cron_utility_1 = require("./utility/cron.utility");
+const jobs_1 = require("./jobs");
 async function main() {
     // Start discord client
     const client = new discord_js_1.Client({
@@ -15,11 +16,8 @@ async function main() {
         ],
         partials: [discord_js_1.Partials.Message, discord_js_1.Partials.Channel]
     });
-    (0, cron_utility_1.AddCron)('* * * * *', () => {
-        console.log('HI');
-    });
     // Add cron jobs
-    (0, cron_utility_1.AddCron)('* * * * *', (0, events_1.NightListEvent)(client));
+    (0, cron_utility_1.AddCron)('* * * * *', (0, jobs_1.NightListJob)(client));
     // person meta data events
     // client.on(Events.MessageCreate, PersonMetaEvent(services));
     client.on(discord_js_1.Events.ClientReady, async () => {

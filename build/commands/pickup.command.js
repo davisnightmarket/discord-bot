@@ -20,7 +20,6 @@ exports.default = {
     //     // )
     // )
     async execute(interaction, services) {
-        console.log('hi');
         if (!interaction.guild) {
             interaction.reply({
                 content: 'You can only use this command in a channel',

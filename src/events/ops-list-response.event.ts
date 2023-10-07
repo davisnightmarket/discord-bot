@@ -9,7 +9,7 @@ import {
 import {
     GetChannelDayToday,
     GetGuildRoleIdByName,
-    GetOpsAnnounceMessage
+    GetPickupsMessage
 } from '../utility';
 import { type NmDayNameType, type GuildServiceModel } from '../model';
 import { DAYS_OF_WEEK } from '../nm-const';
@@ -26,11 +26,8 @@ export async function OpsListResponseEvent(
         ? channelDay
         : GetChannelDayToday();
 
-    const { pickupsList } = await nightDataService.getNightByDay(channelDay);
-
-    const content = GetOpsAnnounceMessage(
-        await GetGuildRoleIdByName(interaction.guild as Guild, channelDay),
-        pickupsList
+    const content = GetPickupsMessage(
+        await nightDataService.getNightByDay(channelDay)
     );
 
     // todo: not sure we need a button. I think it's more likely folks will simply hit the / command again

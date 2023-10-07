@@ -12,10 +12,9 @@ import {
 } from 'discord.js';
 
 import {
-    GetChannelByName,
     GetChannelDayToday,
     GetGuildRoleIdByName,
-    GetOpsJoinMessage
+    GetPickupsMessage
 } from '../utility';
 import { type NmDayNameType, type GuildServiceModel } from '../model';
 import { DAYS_OF_WEEK } from '../nm-const';
@@ -33,11 +32,12 @@ export async function OpsListRequest(
         ? channelDay
         : GetChannelDayToday();
 
-    const { pickupsList } = await nightDataService.getNightByDay(channelDay);
+    const { pickupList } = await nightDataService.getNightByDay(channelDay);
 
     const roleId = await GetGuildRoleIdByName(guild, channelDay);
-    for (const o of pickupsList) {
-        const content = GetOpsJoinMessage(roleId, o);
+    for (const o of pickupList) {
+        // todo: create message per pickup
+        const content = 'GetOpsJoinMessage(roleId, o)';
         const joinOnceButton = new ButtonBuilder()
             .setCustomId(`pickups-once--${channelDay}`)
             .setLabel('Join Once')

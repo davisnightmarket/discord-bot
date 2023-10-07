@@ -15,4 +15,4 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 __exportStar(require("./food-count-reminder.job"), exports);
-__exportStar(require("../events/night-list.event"), exports);
+__exportStar(require("./night-list.job"), exports);

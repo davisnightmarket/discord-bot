@@ -9,6 +9,30 @@ class NmPersonDataService {
             sheetName: `person`
         });
     }
+    static createPersonWithQueryId(discordIdOrEmail = '', person) {
+        return {
+            ...NmPersonDataService.createPerson(person),
+            discordIdOrEmail
+        };
+    }
+    static createPerson({ status = '', name = '', email = '', phone = '', location = '', bike = '', bikeCart = '', bikeCartAtNight = '', skills = '', bio = '', pronouns = '', interest = '', reference = '', discordId = '' }) {
+        return {
+            status,
+            name,
+            email,
+            phone,
+            location,
+            bike,
+            bikeCart,
+            bikeCartAtNight,
+            skills,
+            bio,
+            pronouns,
+            interest,
+            reference,
+            discordId
+        };
+    }
     async getPersonList() {
         return await this.personSheetService.getAllRowsAsMaps();
     }
