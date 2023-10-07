@@ -13,7 +13,7 @@ class GoogleSheetService {
     }
     // TODO: test this
     async updateRowByIndex(index, value) {
-        return this.spreadsheetService.rowsWrite([[value]], this.getSheetRangeString(`A${index}`));
+        return await this.spreadsheetService.rowsWrite([[value]], this.getSheetRangeString(`A${index}`));
     }
     // TODO: test this
     async appendOneRow(row) {
@@ -40,11 +40,11 @@ class GoogleSheetService {
     // if there are values in this array, they correspond to headers and
     // therefore we return a data set with only the columns matching the header values in this array
     limitToHeaders = [], limitRows = 0 } = { includeHeader: false, limitToHeaders: [], limitRows: 0 }) {
-        let dataList = await this.spreadsheetService.rangeGet(this.getSheetRangeString('A' + (includeHeader ? 1 : 2), 'Z' + (limitRows ? limitRows : '')));
+        let dataList = await this.spreadsheetService.rangeGet(this.getSheetRangeString('A' + (includeHeader ? '1' : '2'), 'Z' + (limitRows ? String(limitRows) : '')));
         if (limitToHeaders.length) {
             const indexList = await this.getIndexesByHeaderValues(limitToHeaders);
             // now we make sure that there is no missing data! This should never happen
-            for (let i of indexList) {
+            for (const i of indexList) {
                 if (i < 0) {
                     throw new Error(`We are missing a header value in ${limitToHeaders.join(', ')}`);
                 }
@@ -69,15 +69,17 @@ class GoogleSheetService {
             limitRows
         });
         return rows.map((r) => ({
-            ...r.reduce((a, b, i) => {
-                a[headerList[i]] = b;
+            ...headerList.reduce((a, b, i) => {
+                if (!b)
+                    return a;
+                a[b] = r[i];
                 return a;
             }, {})
         }));
     }
     async getMapsByMatchAnyProperties(query) {
         return (await this.getAllRowsAsMaps()).filter((map) => {
-            return Object.keys(map).some((k) => query[k] === map[k]);
+            return Object.keys(map).some((k) => query[k] && query[k] === map[k]);
         });
     }
     // this returns a list of index number corresponding to rows that match the query
@@ -106,12 +108,12 @@ class GoogleSheetService {
     // if the headers have changed, this will update them in the sheet before populating
     async getOrCreateHeaders(headerList) {
         await this.waitingForSheetId;
-        let list = ((await this.spreadsheetService.rangeGet(this.getSheetRangeString('A', 'C')))[0] || []);
+        let list = ((await this.spreadsheetService.rangeGet(this.getSheetRangeString('A', 'Z')))[0] || []);
         // if we past a header list
         if (headerList) {
             // the keys do NOT match, we throw an error
             if (!list.every((a, i) => {
-                list[i] === a;
+                return headerList[i] === a;
             })) {
                 throw new Error(`header list mismatch! The spreadsheet is out of sync with the model:
 

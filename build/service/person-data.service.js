@@ -31,7 +31,7 @@ class NmPersonDataService {
     async getPersonByEmailOrDiscordId(emailOrDiscordId) {
         // ok, so we find out if there is an @, and if not we assume it is a discord id
         // otherwise we assume it is an email, and if that fails, then we assume it is a discord id
-        const a = (await emailOrDiscordId.split('@').length) !== 2
+        const a = emailOrDiscordId.split('@').length !== 2
             ? await this.getPersonListByMatchAnyProperties({
                 discordId: emailOrDiscordId
             })
@@ -42,7 +42,9 @@ class NmPersonDataService {
                     discordId: emailOrDiscordId
                 }));
         if (a.length > 1) {
-            throw new Error('We found multiple persons with that identifier!');
+            console.error(`We found multiple persons with that identifier!
+            ${a.map((a) => `${a.name} ${a.email}`).join(', ')}
+            `);
         }
         return a[0] || null;
     }

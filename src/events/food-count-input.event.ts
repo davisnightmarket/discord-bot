@@ -185,7 +185,7 @@ export const FoodCountInputEvent =
                         FoodCountInputCache.delete(cacheId);
                         await messageReply.delete();
                     } catch (e) {
-                        console.log(e);
+                        console.error(e);
                     }
                 },
                 // we give them a certain amount of time to hit cancel

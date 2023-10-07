@@ -3,7 +3,7 @@ import {
     ActionRowBuilder,
     ButtonBuilder,
     ButtonStyle,
-    type Interaction
+    type CommandInteraction
 } from 'discord.js';
 
 import {
@@ -18,7 +18,7 @@ import { DAYS_OF_WEEK } from '../nm-const';
 // allows someone to sign up for pickup or host
 export async function OpsListResponseEvent(
     { nightDataService }: GuildServiceModel,
-    interaction: Interaction,
+    interaction: CommandInteraction,
     day?: NmDayNameType
 ) {
     let channelDay = day ?? (interaction?.guild?.name as NmDayNameType);

@@ -1,20 +1,7 @@
 "use strict";
-// import {
-//     roleMention,
-//     type Guild,
-//     bold,
-//     userMention,
-//     type ChatInputCommandInteraction,
-//     ActionRowBuilder,
-//     ButtonBuilder,
-//     ButtonStyle,
-//     type ButtonInteraction,
-//     type Interaction
-// } from 'discord.js';
-// import { type ConfigService } from '../service';
-// import { GetChannelByName } from '.';
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.GetChannelDayYesterday = exports.GetChannelDayToday = void 0;
+exports.GetOpsJoinMessage = exports.GetOpsAnnounceMessage = exports.GetChannelDayYesterday = exports.GetChannelDayToday = void 0;
+const discord_js_1 = require("discord.js");
 const nm_const_1 = require("../nm-const");
 // import { type NmDayNameType, type GuildServiceModel } from '../model';
 // import { type PersonModel, type PickUp } from '../service';
@@ -26,6 +13,27 @@ const GetChannelDayYesterday = (date = new Date()) => {
     return nm_const_1.DAYS_OF_WEEK[date.getDay() - 1] || nm_const_1.DAYS_OF_WEEK[6];
 };
 exports.GetChannelDayYesterday = GetChannelDayYesterday;
+// todo: use message service
+function GetOpsAnnounceMessage(roleId, ops) {
+    return ops.reduce((message, o) => {
+        return (message +
+            `${o.personList
+                .map((person) => {
+                return `${(0, discord_js_1.bold)(person.name)} ${person.discordId ? (0, discord_js_1.userMention)(person.discordId) : ''}`;
+            })
+                .join(', ')}${(0, discord_js_1.bold)(o.org)} at ${o.timeStart}\n`);
+    }, `## ${(0, discord_js_1.roleMention)(roleId)} pickups!\n`);
+}
+exports.GetOpsAnnounceMessage = GetOpsAnnounceMessage;
+// todo: use message service
+function GetOpsJoinMessage(roleId, { org, timeStart, personList }) {
+    return `## ${(0, discord_js_1.roleMention)(roleId)} pickup:\n${personList
+        .map((person) => {
+        return `${(0, discord_js_1.bold)(person.name)} ${person.discordId ? (0, discord_js_1.userMention)(person.discordId) : ''}`;
+    })
+        .join(', ')} ${(0, discord_js_1.bold)(org)} at ${timeStart}\n`;
+}
+exports.GetOpsJoinMessage = GetOpsJoinMessage;
 // export const PickupsRefreshEvent =
 //     (sevicesConfig: ConfigService) => async (interaction: Interaction) => {
 //         // Is this our interaction to deal with?
@@ -41,7 +49,7 @@ exports.GetChannelDayYesterday = GetChannelDayYesterday;
 //         // regenerate the message
 //         const roleId = await getRoleByName(guild, day);
 //         let message = `## ${roleMention(roleId)} pickups!\n`;
-//         const pickups = await services.opsDataService.getOpsByDay(
+//         const pickups = await services.nightDataService.getNightByDay(
 //             day as NmDayNameType
 //         );
 //         for (const pickup of pickups) {
@@ -60,7 +68,7 @@ exports.GetChannelDayYesterday = GetChannelDayYesterday;
 //     // ping everyone signed up to help with today
 //     const roleId = await getRoleByName(guild, today());
 //     // list all the pick ups happening today
-//     const pickups = await services.opsDataService.getOpsByDay(today());
+//     const pickups = await services.nightDataService.getNightByDay(today());
 //     let message = `## ${roleMention(roleId)} pickups!\n`;
 //     for (const pickup of pickups) {
 //         message += `> ${bold(pickup.org)} at ${

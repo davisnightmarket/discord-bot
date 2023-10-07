@@ -21,7 +21,6 @@ const servicesByGuildId = new Map<
 export async function GetGuildServices(guildId: string) {
     if (!servicesByGuildId.has(guildId)) {
         const config = await GetConfigByGuildId(guildId);
-
         const orgCoreService = new NmOrgService(config.GSPREAD_ORG_ID);
         const personCoreService = new NmPersonDataService(
             config.GSPREAD_PERSON_ID

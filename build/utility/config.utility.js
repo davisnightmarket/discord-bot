@@ -9,7 +9,7 @@ if (!Env || !Object.keys(config_1.EnvConfig).includes(Env)) {
     throw new Error('Must set an environment');
 }
 const coreConfigSheetService = new service_1.GoogleSheetService({
-    spreadsheetId: config_1.EnvConfig[Env].GSPREAD_CORE_CONFIG_ID,
+    spreadsheetId: config_1.EnvConfig[Env].GSPREAD_CORE_ID,
     sheetName: 'config-instance'
 });
 async function GetConfigByGuildId(guildId) {
@@ -34,6 +34,6 @@ async function GetAllGuildIds() {
     const configRows = await coreConfigSheetService.getAllRowsAsMaps();
     return configRows
         .filter((a) => a.code === 'DISCORD_GUILD_ID')
-        .map((a) => a.marketId);
+        .map((a) => a.value);
 }
 exports.GetAllGuildIds = GetAllGuildIds;

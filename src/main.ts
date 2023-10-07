@@ -1,15 +1,20 @@
-import { Client, Events, GatewayIntentBits, Partials } from 'discord.js';
+import {
+    Client,
+    type CommandInteraction,
+    Events,
+    GatewayIntentBits,
+    Partials
+} from 'discord.js';
 import { NmSecrets, GetGuildServices, ExecuteGuildCommand } from './utility';
 import {
     FoodCountInputEvent,
     FoodCountResponseEvent,
+    NightListEvent,
     OpsListResponseEvent
 } from './events';
+import { AddCron } from './utility/cron.utility';
 
 async function main() {
-    // Add cron jobs
-    // AddCron('* * 9 * *', FoodCountReminder);
-
     // Start discord client
     const client = new Client({
         intents: [
@@ -21,6 +26,8 @@ async function main() {
         partials: [Partials.Message, Partials.Channel]
     });
 
+    // Add cron jobs
+    AddCron('* * * * *', NightListEvent(client));
     // person meta data events
     // client.on(Events.MessageCreate, PersonMetaEvent(services));
     client.on(Events.ClientReady, async () => {
@@ -36,7 +43,7 @@ async function main() {
         // food count response (cancel food count)
         const services = await GetGuildServices(interaction.guildId ?? '');
         FoodCountResponseEvent(interaction);
-        OpsListResponseEvent(services, interaction);
+        OpsListResponseEvent(services, interaction as CommandInteraction);
         // slash commands
         ExecuteGuildCommand(
             await GetGuildServices(interaction.guildId ?? ''),

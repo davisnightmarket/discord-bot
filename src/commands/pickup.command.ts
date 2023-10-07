@@ -4,7 +4,7 @@ import {
     Guild
 } from 'discord.js';
 import { type GuildServiceModel } from '../model';
-import { PickupsListEvent } from '../events';
+import { OpsListRequest } from '../events';
 import { DAYS_OF_WEEK } from '../nm-const';
 
 export default {
@@ -28,7 +28,6 @@ export default {
         interaction: ChatInputCommandInteraction,
         services: GuildServiceModel
     ) {
-        console.log('hi');
         if (!interaction.guild) {
             interaction.reply({
                 content: 'You can only use this command in a channel',
@@ -36,6 +35,6 @@ export default {
             });
             return;
         }
-        await PickupsListEvent(services, interaction.guild, interaction);
+        await OpsListRequest(services, interaction.guild, interaction);
     }
 };

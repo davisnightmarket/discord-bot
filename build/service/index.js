@@ -20,6 +20,6 @@ __exportStar(require("./food-count-input.service"), exports);
 __exportStar(require("./food-count-data.service"), exports);
 __exportStar(require("./org-data.service"), exports);
 __exportStar(require("./person-data.service"), exports);
-__exportStar(require("./ops-data.service"), exports);
+__exportStar(require("./night-data.service"), exports);
 __exportStar(require("./google-spreadsheet.service"), exports);
 __exportStar(require("./google-sheet.service"), exports);

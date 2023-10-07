@@ -21,41 +21,39 @@ exports.GetGuildRoleIdByName = GetGuildRoleIdByName;
 async function RegisterGuildCommand(guildId) {
     const { discordConfig } = await utility_1.NmSecrets;
     const rest = new discord_js_1.REST().setToken(discordConfig.appToken);
-    await rest.put(discord_js_1.Routes.applicationGuildCommands(discordConfig.appId, guildId), {
+    await rest.put(discord_js_1.Routes.applicationGuildCommands(discordConfig.clientId, guildId), {
         body: commands_1.default.map((command) => command.data.toJSON())
     });
 }
 exports.RegisterGuildCommand = RegisterGuildCommand;
-function ExecuteGuildCommand(services) {
-    return async (interaction) => {
-        if (!interaction.isChatInputCommand() || !interaction.guildId)
-            return;
-        if (!interaction.guild) {
-            // todo: this should be user frienldier
-            await interaction.reply('ony works in server');
-            return;
+async function ExecuteGuildCommand(services, interaction) {
+    if (!interaction.isChatInputCommand() || !interaction.guildId)
+        return;
+    if (!interaction.guild) {
+        // todo: this should be user frienldier
+        await interaction.reply('ony works in server');
+        return;
+    }
+    const command = commands_1.default.find((command) => command.data.name === interaction.commandName);
+    if (!command)
+        return;
+    try {
+        await command.execute(interaction, services);
+    }
+    catch (error) {
+        console.error(error);
+        if (interaction.replied || interaction.deferred) {
+            await interaction.followUp({
+                content: 'There was an error while executing this command!',
+                ephemeral: true
+            });
         }
-        const command = commands_1.default.find((command) => command.data.name === interaction.commandName);
-        if (!command)
-            return;
-        try {
-            await command.execute(interaction, services);
+        else {
+            await interaction.reply({
+                content: 'There was an error while executing this command!',
+                ephemeral: true
+            });
         }
-        catch (error) {
-            console.error(error);
-            if (interaction.replied || interaction.deferred) {
-                await interaction.followUp({
-                    content: 'There was an error while executing this command!',
-                    ephemeral: true
-                });
-            }
-            else {
-                await interaction.reply({
-                    content: 'There was an error while executing this command!',
-                    ephemeral: true
-                });
-            }
-        }
-    };
+    }
 }
 exports.ExecuteGuildCommand = ExecuteGuildCommand;

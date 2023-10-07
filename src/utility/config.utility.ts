@@ -15,8 +15,8 @@ interface ConfigItem extends SpreadsheetDataModel {
 }
 
 const coreConfigSheetService = new GoogleSheetService<ConfigItem>({
-    spreadsheetId: EnvConfig[Env].GSPREAD_CORE_CONFIG_ID,
-    sheetName: 'config-instance'
+    spreadsheetId: EnvConfig[Env].GSPREAD_CORE_ID,
+    sheetName: 'config-market'
 });
 
 export async function GetConfigByGuildId(

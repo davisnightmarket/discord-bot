@@ -1,15 +1,4 @@
-import {
-    roleMention,
-    type Guild,
-    bold,
-    userMention,
-    type ChatInputCommandInteraction,
-    ActionRowBuilder,
-    ButtonBuilder,
-    ButtonStyle,
-    type ButtonInteraction,
-    type Interaction
-} from 'discord.js';
+import { roleMention, bold, userMention } from 'discord.js';
 
 import { type NightModel } from '../service';
 
@@ -41,6 +30,21 @@ export function GetOpsAnnounceMessage(
                 .join(', ')}${bold(o.org)} at ${o.timeStart}\n`
         );
     }, `## ${roleMention(roleId)} pickups!\n`);
+}
+
+// todo: use message service
+export function GetAnnounceNightCapMessage({
+    personList,
+    day
+}: NightModel): string {
+    if (!personList.length) {
+        return 'Night Cap NEEDED! Talk to a CC';
+    }
+    return `### ${day} Night Captain${
+        personList.length > 1 ? 's' : ''
+    }:\n${personList
+        .map((p) => (p.discordId ? userMention(p.discordId) : p.name))
+        .join(', ')}`;
 }
 
 // todo: use message service
