@@ -9,8 +9,12 @@ export type NmDayNameType =
 
 export type NmActiveStateType = 'active' | 'inactive';
 
-export type NmRoleType =
+export type NmRoleType = NmNightRoleType | NmAdminRoleType;
+
+export type NmNightRoleType = 'night-host' | 'night-captain' | 'night-pickup';
+export type NmAdminRoleType =
     | 'community-coordinator'
-    | 'night-host'
-    | 'night-captain'
-    | 'night-pickup';
+    | 'community-treasurer'
+    | 'community-foodie';
+
+export type NmRolePeriodType = 'once' | 'every' | 'halt';

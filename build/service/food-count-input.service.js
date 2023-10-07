@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.NmFoodCountInputService = exports.NIGHT_CHANNEL_NAMES_MAP = exports.COUNT_CHANNEL_NAME = void 0;
 const service_1 = require("../service");
-const nm_const_1 = require("../nm-const");
+const const_1 = require("../const");
 // we only allow food count in one channel
 exports.COUNT_CHANNEL_NAME = 'food-count';
 // OR in a "night channel", which always corresponds to a day
@@ -219,7 +219,7 @@ Example:
     getDateStringFromDay(day) {
         // starting with the current date
         const d = new Date();
-        while (day !== nm_const_1.DAYS_OF_WEEK[d.getDay()]) {
+        while (day !== const_1.DAYS_OF_WEEK[d.getDay()]) {
             // count backwards until we have the right day
             d.setDate(d.getDate() - 1);
         }

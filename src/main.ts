@@ -3,13 +3,14 @@ import {
     type CommandInteraction,
     Events,
     GatewayIntentBits,
-    Partials
+    Partials,
+    Guild
 } from 'discord.js';
-import { NmSecrets, GetGuildServices, ExecuteGuildCommand } from './utility';
+import { NmSecrets, GetGuildServices } from './utility';
 import {
     FoodCountInputEvent,
     FoodCountResponseEvent,
-    OpsListResponseEvent
+    NightListRequestEvent
 } from './events';
 import { AddCron } from './utility/cron.utility';
 import { NightListJob } from './jobs';
@@ -27,7 +28,7 @@ async function main() {
     });
 
     // Add cron jobs
-    AddCron('* * * * *', NightListJob(client));
+    AddCron('30 7 * * *', NightListJob(client));
     // person meta data events
     // client.on(Events.MessageCreate, PersonMetaEvent(services));
     client.on(Events.ClientReady, async () => {
@@ -40,15 +41,11 @@ async function main() {
         FoodCountInputEvent(services);
     });
     client.on(Events.InteractionCreate, async (interaction) => {
-        // food count response (cancel food count)
         const services = await GetGuildServices(interaction.guildId ?? '');
+
+        // food count response (cancel food count)
         FoodCountResponseEvent(interaction);
-        OpsListResponseEvent(services, interaction as CommandInteraction);
-        // slash commands
-        ExecuteGuildCommand(
-            await GetGuildServices(interaction.guildId ?? ''),
-            interaction
-        );
+        NightListRequestEvent(services, interaction);
     });
 
     const {

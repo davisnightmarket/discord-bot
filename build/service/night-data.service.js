@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.NmNightDataService = exports.NightModel = exports.DayNightCacheModel = void 0;
-const nm_const_1 = require("../nm-const");
+const const_1 = require("../const");
 const utility_1 = require("../utility");
 const _1 = require(".");
 // each night operations organized by day
@@ -47,7 +47,7 @@ class NightModel {
         });
     }
     constructor({ day, org = '', timeStart = '', timeEnd = '', hostList = [], pickupList = [] }) {
-        if (!nm_const_1.DAYS_OF_WEEK.includes(day)) {
+        if (!const_1.DAYS_OF_WEEK.includes(day)) {
             throw new Error('Night must have a day!');
         }
         this.day = day;
@@ -104,13 +104,23 @@ class NmNightDataService {
         const nightData = Object.values(ops).map(this.toNightData).flat();
         // add the new data
         nightData.push(nightToUpdate);
+        console.log(nightData);
         // in here we sort by day
         const nightRows = nightData
-            .sort((a, b) => nm_const_1.DAYS_OF_WEEK.indexOf(a.day) - nm_const_1.DAYS_OF_WEEK.indexOf(b.day))
+            .sort((a, b) => const_1.DAYS_OF_WEEK.indexOf(a.day) - const_1.DAYS_OF_WEEK.indexOf(b.day))
             // in here we add blank lines
-            .reduce((a, b, i) => {
-            if (nightData[i + 1]?.day !== b.day) {
-                a?.push(null);
+            .reduce((a, { day, role, org, discordIdOrEmail, period, timeStart, timeEnd }, i) => {
+            a.push({
+                day,
+                role,
+                org,
+                discordIdOrEmail,
+                period,
+                timeStart,
+                timeEnd
+            });
+            if (nightData[i + 1]?.day !== day) {
+                a.push(null);
             }
             return a;
         }, [])
@@ -120,12 +130,13 @@ class NmNightDataService {
                 ? headerList.map((header) => op[header])
                 : headerList.map(() => '');
         });
-        await this.nightSheetService.replaceAllRowsExceptHeader(nightRows);
+        console.log(nightRows);
+        await this.nightSheetService.replaceAllRowsIncludingHeader(nightRows);
     }
     // turns an operation record into an ops sheet data record
-    toNightData({ day, org, timeStart, timeEnd, hostList, pickupList }) {
+    toNightData({ day, hostList, pickupList }) {
         return pickupList
-            .map(({ role, discordIdOrEmail, period }) => ({
+            .map(({ role, discordIdOrEmail, period, org, timeStart, timeEnd }) => ({
             role,
             discordIdOrEmail,
             period,
@@ -134,7 +145,7 @@ class NmNightDataService {
             timeStart,
             timeEnd
         }))
-            .concat(hostList.map(({ role, discordIdOrEmail, period }) => ({
+            .concat(hostList.map(({ role, discordIdOrEmail, period, org = '', timeStart = '', timeEnd = '' }) => ({
             role,
             discordIdOrEmail,
             period,
@@ -152,7 +163,7 @@ class NmNightDataService {
         const nightList = await this.nightSheetService.getAllRowsAsMaps();
         //const nightCache = DayNightCacheModel.fromData(nightList);
         // add persons to record
-        const personList = await this.getPersonList(nightList);
+        const personList = await this.getNightPersonList(nightList);
         // nightList.map(
         //     ({ timeStart, timeEnd, org, role, discordIdOrEmail, period }) => ({
         //         ...(personList.find(
@@ -192,14 +203,15 @@ class NmNightDataService {
                         personList: [],
                         noteList: []
                     };
-                }
-                if (p.role === 'night-pickup') {
-                    const person = personList.find((a) => a.discordIdOrEmail === p.discordIdOrEmail);
-                    if (person) {
-                        a[day + org + timeStart].personList.push({
-                            ...p,
-                            ...person
-                        });
+                    if (p.role === 'night-pickup') {
+                        const person = personList.find((a) => a.discordIdOrEmail ===
+                            p.discordIdOrEmail);
+                        if (person) {
+                            a[day + org + timeStart].personList.push({
+                                ...p,
+                                ...person
+                            });
+                        }
                     }
                 }
                 return a;
@@ -220,7 +232,7 @@ class NmNightDataService {
             return cache;
         }, {}));
     }
-    async getPersonList(nightList) {
+    async getNightPersonList(nightList) {
         const personIdList = nightList.map((a) => a.discordIdOrEmail);
         return await Promise.all(personIdList
             .filter((a, i) => personIdList.indexOf(a) === i)

@@ -9,7 +9,7 @@ const dbg = Dbg('Deploy');
         } = await NmSecrets;
         const rest = new REST().setToken(appToken);
         dbg(`Started refreshing ${commands.length} application (/) commands.`);
-        const body = commands.map((a) => a.data.toJSON());
+        const body = commands.map((a) => a.toJSON());
         // The put method is used to fully refresh all commands in the guild with the current set
         const guildIdList = await GetAllGuildIds();
 

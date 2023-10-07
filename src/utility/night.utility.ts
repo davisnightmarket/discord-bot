@@ -1,8 +1,8 @@
 import { roleMention, bold, userMention } from 'discord.js';
 
-import { type NightModel } from '../service';
+import { NightPickupModel, type NightModel } from '../service';
 
-import { DAYS_OF_WEEK } from '../nm-const';
+import { DAYS_OF_WEEK } from '../const';
 // import { type NmDayNameType, type GuildServiceModel } from '../model';
 // import { type PersonModel, type PickUp } from '../service';
 
@@ -12,6 +12,17 @@ export const GetChannelDayToday = (date = new Date()) => {
 export const GetChannelDayYesterday = (date = new Date()) => {
     return DAYS_OF_WEEK[date.getDay() - 1] || DAYS_OF_WEEK[6];
 };
+
+export function GetPickupJoinMessage(pickupList: NightPickupModel[]) {
+    return pickupList
+        .map(
+            ({ org, timeStart, personList }) =>
+                `## ${org} at ${timeStart} with ${personList
+                    .map((a) => a.name)
+                    .join(', ')} `
+        )
+        .join('\n');
+}
 
 export function GetAnnounceMessage(
     roleId: string,

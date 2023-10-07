@@ -33,43 +33,44 @@ export async function RegisterGuildCommand(guildId: string) {
     await rest.put(
         Routes.applicationGuildCommands(discordConfig.clientId, guildId),
         {
-            body: Commands.map((command) => command.data.toJSON())
+            body: Commands.map((command) => command.toJSON())
         }
     );
 }
 
-export async function ExecuteGuildCommand(
-    services: GuildServiceModel,
-    interaction: Interaction
-) {
-    if (!interaction.isChatInputCommand() || !interaction.guildId) return;
+// We can handle interactions individually?
+// export async function ExecuteGuildCommand(
+//     services: GuildServiceModel,
+//     interaction: Interaction
+// ) {
+//     if (!interaction.isChatInputCommand() || !interaction.guildId) return;
 
-    if (!interaction.guild) {
-        // todo: this should be user frienldier
-        await interaction.reply('ony works in server');
-        return;
-    }
+//     if (!interaction.guild) {
+//         // todo: this should be user frienldier
+//         await interaction.reply('ony works in server');
+//         return;
+//     }
 
-    const command = Commands.find(
-        (command) => command.data.name === interaction.commandName
-    );
+//     const command = Commands.find(
+//         (command) => command.data.name === interaction.commandName
+//     );
 
-    if (!command) return;
+//     if (!command) return;
 
-    try {
-        await command.execute(interaction, services);
-    } catch (error) {
-        console.error(error);
-        if (interaction.replied || interaction.deferred) {
-            await interaction.followUp({
-                content: 'There was an error while executing this command!',
-                ephemeral: true
-            });
-        } else {
-            await interaction.reply({
-                content: 'There was an error while executing this command!',
-                ephemeral: true
-            });
-        }
-    }
-}
+//     try {
+//         await command.execute(interaction, services);
+//     } catch (error) {
+//         console.error(error);
+//         if (interaction.replied || interaction.deferred) {
+//             await interaction.followUp({
+//                 content: 'There was an error while executing this command!',
+//                 ephemeral: true
+//             });
+//         } else {
+//             await interaction.reply({
+//                 content: 'There was an error while executing this command!',
+//                 ephemeral: true
+//             });
+//         }
+//     }
+// }

@@ -29,10 +29,14 @@ class GoogleSheetService {
     async prependOneRow(row) {
         await this.spreadsheetService.rowsAppend([row], this.getSheetRangeString('A'));
     }
-    async replaceAllRowsExceptHeader(rows) {
+    async replaceAllRowsIncludingHeader(rows) {
         await this.spreadsheetService.sheetClear(this.sheetName);
-        this.waitingForHeaderList = this.getOrCreateHeaders();
-        await Promise.all(rows.map(this.appendOneRow));
+        const headerList = await this.waitingForHeaderList;
+        rows.unshift(headerList);
+        for (const r of rows) {
+            console.log('appending row', r);
+            await this.appendOneRow(r);
+        }
     }
     async getAllRows({ 
     // if true, we get the first row as headers
@@ -54,7 +58,7 @@ class GoogleSheetService {
                 return all;
             }, []);
         }
-        return dataList;
+        return dataList || [];
     }
     async getAllRowsAsMaps({ 
     // if true, we get the first row as headers
@@ -108,7 +112,7 @@ class GoogleSheetService {
     // if the headers have changed, this will update them in the sheet before populating
     async getOrCreateHeaders(headerList) {
         await this.waitingForSheetId;
-        let list = ((await this.spreadsheetService.rangeGet(this.getSheetRangeString('A', 'Z')))[0] || []);
+        let list = ((await this.spreadsheetService.rangeGet(this.getSheetRangeString('A1', 'Z1')))[0] || []);
         // if we past a header list
         if (headerList) {
             // the keys do NOT match, we throw an error
@@ -122,7 +126,7 @@ class GoogleSheetService {
 
                 `);
             }
-            await this.spreadsheetService.rowsAppend([headerList], this.getSheetRangeString('A', 'A'));
+            await this.spreadsheetService.rowsAppend([headerList], this.getSheetRangeString('A1', 'Z1'));
             list = headerList;
         }
         return list;

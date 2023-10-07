@@ -23,11 +23,17 @@ export type PersonWithIdModel = PersonModel & { discordIdOrEmail: string };
 export class NmPersonDataService {
     personSheetService: GoogleSheetService<PersonModel>;
 
+    waitingForPersonListCache: Promise<PersonModel[]>;
     constructor(spreadsheetId: string) {
         this.personSheetService = new GoogleSheetService({
             spreadsheetId,
             sheetName: `person`
         });
+        this.waitingForPersonListCache = this.getPersonList();
+        // reset the cache ever 2 hour
+        setInterval(() => {
+            this.waitingForPersonListCache = this.getPersonList();
+        }, 1000 * 60 * 60 * 2);
     }
 
     static createPersonWithQueryId(
@@ -77,9 +83,27 @@ export class NmPersonDataService {
         return await this.personSheetService.getAllRowsAsMaps();
     }
 
+    async getPersonListCache(): Promise<PersonModel[]> {
+        return await this.waitingForPersonListCache;
+    }
+
     // if any of the propties of the query match the person
     async getPersonListByMatchAnyProperties(query: Partial<PersonModel>) {
-        return await this.personSheetService.getMapsByMatchAnyProperties(query);
+        // if we can find them on the cache ...
+        const list = (await this.waitingForPersonListCache).filter((map) => {
+            return Object.keys(map).some(
+                (k) => query[k] && query[k] === map[k]
+            );
+        });
+
+        // otherwise get direct from data
+        return list.length
+            ? list
+            : (await this.getPersonList()).filter((map) => {
+                  return Object.keys(map).some(
+                      (k) => query[k] && query[k] === map[k]
+                  );
+              });
     }
 
     async getNameList() {

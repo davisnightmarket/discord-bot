@@ -1,44 +1,64 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.OpsListRequest = void 0;
+exports.NightListRequestEvent = void 0;
 const discord_js_1 = require("discord.js");
 const utility_1 = require("../utility");
-const nm_const_1 = require("../nm-const");
+const const_1 = require("../const");
 // when a person requests a listing of
-async function OpsListRequest({ nightDataService }, guild, interaction) {
-    let channelDay = (await guild?.channels?.fetch(interaction?.channelId ?? ''))?.name;
-    channelDay = nm_const_1.DAYS_OF_WEEK.includes(channelDay)
-        ? channelDay
-        : (0, utility_1.GetChannelDayToday)();
-    const { pickupList } = await nightDataService.getNightByDay(channelDay);
-    const roleId = await (0, utility_1.GetGuildRoleIdByName)(guild, channelDay);
-    for (const o of pickupList) {
-        // todo: create message per pickup
-        const content = 'GetOpsJoinMessage(roleId, o)';
+async function NightListRequestEvent({ nightDataService }, guild, interaction) {
+    if (interaction.isCommand()) {
+        let channelDay = (await guild?.channels?.fetch(interaction?.channelId ?? ''))?.name;
+        channelDay = const_1.DAYS_OF_WEEK.includes(channelDay)
+            ? channelDay
+            : (0, utility_1.GetChannelDayToday)();
+        const { pickupList } = await nightDataService.getNightByDay(channelDay);
+        const components = [];
+        const content = (0, utility_1.GetPickupJoinMessage)(pickupList);
         const joinOnceButton = new discord_js_1.ButtonBuilder()
-            .setCustomId(`pickups-once--${channelDay}`)
-            .setLabel('Join Once')
+            .setCustomId(`pickup--${channelDay}--host`)
+            .setLabel(`Host Market`)
             .setStyle(discord_js_1.ButtonStyle.Secondary);
         const joinAlwaysButton = new discord_js_1.ButtonBuilder()
-            .setCustomId(`pickups-always--${channelDay}`)
-            .setLabel('Join Once')
+            .setCustomId(`pickup--${channelDay}--pickup`)
+            .setLabel('Pickup and Deliver Food')
             .setStyle(discord_js_1.ButtonStyle.Secondary);
-        // // t
+        components.push(new discord_js_1.ActionRowBuilder()
+            .addComponents(joinOnceButton)
+            .addComponents(joinAlwaysButton));
         interaction.reply({
             content,
-            components: [
-                new discord_js_1.ActionRowBuilder()
-                    .addComponents(joinOnceButton)
-                    .addComponents(joinAlwaysButton)
-            ],
-            // if this is an interaction then it's come from
-            // a slash command, so in that case we only want the
-            // person who issued the command to see it
-            // since we can have one or more cron based announcement for everyone else
-            // this will prevent people spamming everyone every time
-            // they want to see what the pickups are
-            ephemeral: true
+            components
         });
+        return;
+    }
+    // for (const { org, timeStart } of pickupList) {
+    //     // todo: create message per pickup
+    // }
+    if (interaction.isButton()) {
+        const [command, day, role] = interaction?.customId.split('--');
+        // some other button command
+        if (command !== 'pickup') {
+            return;
+        }
+        // there should always be a day
+        if (day && const_1.DAYS_OF_WEEK.includes(day)) {
+            console.error('Passed not a day');
+            return;
+        }
+        const { pickupList, hostList } = await nightDataService.getNightByDay(day);
+        if (role === 'night-pickup') {
+            interaction.reply({
+                content: 'pickup options'
+            });
+            return;
+        }
+        if (role === 'night-host') {
+            interaction.reply({
+                content: 'host options'
+            });
+            return;
+        }
+        return;
     }
 }
-exports.OpsListRequest = OpsListRequest;
+exports.NightListRequestEvent = NightListRequestEvent;

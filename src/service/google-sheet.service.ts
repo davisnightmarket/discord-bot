@@ -64,10 +64,15 @@ export class GoogleSheetService<T extends SpreadsheetDataModel> {
         );
     }
 
-    async replaceAllRowsExceptHeader(rows: string[][]) {
+    async replaceAllRowsIncludingHeader(rows: string[][]) {
         await this.spreadsheetService.sheetClear(this.sheetName);
-        this.waitingForHeaderList = this.getOrCreateHeaders();
-        await Promise.all(rows.map(this.appendOneRow));
+        const headerList = await this.waitingForHeaderList;
+        rows.unshift(headerList as string[]);
+
+        for (const r of rows) {
+            console.log('appending row', r);
+            await this.appendOneRow(r);
+        }
     }
 
     async getAllRows(
@@ -114,7 +119,7 @@ export class GoogleSheetService<T extends SpreadsheetDataModel> {
             );
         }
 
-        return dataList;
+        return dataList || [];
     }
 
     async getAllRowsAsMaps(
@@ -196,7 +201,7 @@ export class GoogleSheetService<T extends SpreadsheetDataModel> {
         await this.waitingForSheetId;
         let list = ((
             await this.spreadsheetService.rangeGet(
-                this.getSheetRangeString('A', 'Z')
+                this.getSheetRangeString('A1', 'Z1')
             )
         )[0] || []) as Array<keyof T>;
 
@@ -218,7 +223,7 @@ export class GoogleSheetService<T extends SpreadsheetDataModel> {
             }
             await this.spreadsheetService.rowsAppend(
                 [headerList as Array<string | number>],
-                this.getSheetRangeString('A', 'A')
+                this.getSheetRangeString('A1', 'Z1')
             );
             list = headerList;
         }

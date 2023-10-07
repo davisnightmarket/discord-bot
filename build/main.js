@@ -17,7 +17,7 @@ async function main() {
         partials: [discord_js_1.Partials.Message, discord_js_1.Partials.Channel]
     });
     // Add cron jobs
-    (0, cron_utility_1.AddCron)('* * * * *', (0, jobs_1.NightListJob)(client));
+    (0, cron_utility_1.AddCron)('30 7 * * *', (0, jobs_1.NightListJob)(client));
     // person meta data events
     // client.on(Events.MessageCreate, PersonMetaEvent(services));
     client.on(discord_js_1.Events.ClientReady, async () => {
@@ -30,12 +30,10 @@ async function main() {
         (0, events_1.FoodCountInputEvent)(services);
     });
     client.on(discord_js_1.Events.InteractionCreate, async (interaction) => {
-        // food count response (cancel food count)
         const services = await (0, utility_1.GetGuildServices)(interaction.guildId ?? '');
+        // food count response (cancel food count)
         (0, events_1.FoodCountResponseEvent)(interaction);
-        (0, events_1.OpsListResponseEvent)(services, interaction);
-        // slash commands
-        (0, utility_1.ExecuteGuildCommand)(await (0, utility_1.GetGuildServices)(interaction.guildId ?? ''), interaction);
+        (0, events_1.NightListRequestEvent)(services, interaction);
     });
     const { discordConfig: { appToken } } = await utility_1.NmSecrets;
     client.login(appToken);

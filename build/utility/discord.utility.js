@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ExecuteGuildCommand = exports.RegisterGuildCommand = exports.GetGuildRoleIdByName = exports.GetChannelByName = void 0;
+exports.RegisterGuildCommand = exports.GetGuildRoleIdByName = exports.GetChannelByName = void 0;
 const discord_js_1 = require("discord.js");
 const commands_1 = __importDefault(require("../commands"));
 const utility_1 = require("../utility");
@@ -22,38 +22,39 @@ async function RegisterGuildCommand(guildId) {
     const { discordConfig } = await utility_1.NmSecrets;
     const rest = new discord_js_1.REST().setToken(discordConfig.appToken);
     await rest.put(discord_js_1.Routes.applicationGuildCommands(discordConfig.clientId, guildId), {
-        body: commands_1.default.map((command) => command.data.toJSON())
+        body: commands_1.default.map((command) => command.toJSON())
     });
 }
 exports.RegisterGuildCommand = RegisterGuildCommand;
-async function ExecuteGuildCommand(services, interaction) {
-    if (!interaction.isChatInputCommand() || !interaction.guildId)
-        return;
-    if (!interaction.guild) {
-        // todo: this should be user frienldier
-        await interaction.reply('ony works in server');
-        return;
-    }
-    const command = commands_1.default.find((command) => command.data.name === interaction.commandName);
-    if (!command)
-        return;
-    try {
-        await command.execute(interaction, services);
-    }
-    catch (error) {
-        console.error(error);
-        if (interaction.replied || interaction.deferred) {
-            await interaction.followUp({
-                content: 'There was an error while executing this command!',
-                ephemeral: true
-            });
-        }
-        else {
-            await interaction.reply({
-                content: 'There was an error while executing this command!',
-                ephemeral: true
-            });
-        }
-    }
-}
-exports.ExecuteGuildCommand = ExecuteGuildCommand;
+// We can handle interactions individually?
+// export async function ExecuteGuildCommand(
+//     services: GuildServiceModel,
+//     interaction: Interaction
+// ) {
+//     if (!interaction.isChatInputCommand() || !interaction.guildId) return;
+//     if (!interaction.guild) {
+//         // todo: this should be user frienldier
+//         await interaction.reply('ony works in server');
+//         return;
+//     }
+//     const command = Commands.find(
+//         (command) => command.data.name === interaction.commandName
+//     );
+//     if (!command) return;
+//     try {
+//         await command.execute(interaction, services);
+//     } catch (error) {
+//         console.error(error);
+//         if (interaction.replied || interaction.deferred) {
+//             await interaction.followUp({
+//                 content: 'There was an error while executing this command!',
+//                 ephemeral: true
+//             });
+//         } else {
+//             await interaction.reply({
+//                 content: 'There was an error while executing this command!',
+//                 ephemeral: true
+//             });
+//         }
+//     }
+// }

@@ -19,6 +19,6 @@ __exportStar(require("./cache.utility"), exports);
 __exportStar(require("./google-secrets.utility"), exports);
 __exportStar(require("./secrets.utility"), exports);
 __exportStar(require("./discord.utility"), exports);
-__exportStar(require("./ops.utility"), exports);
+__exportStar(require("./night.utility"), exports);
 __exportStar(require("./service.utility"), exports);
 __exportStar(require("./config.utility"), exports);

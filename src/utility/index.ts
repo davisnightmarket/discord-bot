@@ -3,6 +3,6 @@ export * from './cache.utility';
 export * from './google-secrets.utility';
 export * from './secrets.utility';
 export * from './discord.utility';
-export * from './ops.utility';
+export * from './night.utility';
 export * from './service.utility';
 export * from './config.utility';

@@ -12,7 +12,7 @@ const dbg = (0, utility_1.Dbg)('Deploy');
         const { discordConfig: { clientId, appToken } } = await utility_1.NmSecrets;
         const rest = new discord_js_1.REST().setToken(appToken);
         dbg(`Started refreshing ${commands_1.default.length} application (/) commands.`);
-        const body = commands_1.default.map((a) => a.data.toJSON());
+        const body = commands_1.default.map((a) => a.toJSON());
         // The put method is used to fully refresh all commands in the guild with the current set
         const guildIdList = await (0, utility_1.GetAllGuildIds)();
         for (const guildId of guildIdList) {

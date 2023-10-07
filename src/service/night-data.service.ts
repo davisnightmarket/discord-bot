@@ -1,5 +1,5 @@
-import { type NmRoleType, type NmDayNameType } from '../model';
-import { DAYS_OF_WEEK } from '../nm-const';
+import { type NmNightRoleType, type NmDayNameType } from '../model';
+import { DAYS_OF_WEEK } from '../const';
 import { GetChannelDayToday } from '../utility';
 import {
     GoogleSheetService,
@@ -11,7 +11,7 @@ import {
 
 export interface NightDataModel extends SpreadsheetDataModel {
     day: NmDayNameType;
-    role: NmRoleType;
+    role: NmNightRoleType;
     org: string;
     discordIdOrEmail: string;
     period: string;
@@ -21,7 +21,7 @@ export interface NightDataModel extends SpreadsheetDataModel {
 
 export interface NightDataTimelineModel extends SpreadsheetDataModel {
     day: NmDayNameType;
-    role: NmRoleType;
+    role: NmNightRoleType;
     org: string;
     discordIdOrEmail: string;
     period: string;
@@ -38,12 +38,18 @@ export interface NightDataOrgPickupModel extends SpreadsheetDataModel {
     note: string;
 }
 
-type NightPersonModel = PersonModel &
+export type NightPersonModel = PersonModel &
     Pick<NightDataModel, 'role' | 'period' | 'discordIdOrEmail'>;
 
-type NightPickupModel = Pick<
+export type NightPickupModel = Pick<
     NightDataModel,
-    'day' | 'role' | 'org' | 'period' | 'discordIdOrEmail' | 'timeStart'
+    | 'day'
+    | 'role'
+    | 'org'
+    | 'period'
+    | 'discordIdOrEmail'
+    | 'timeStart'
+    | 'timeEnd'
 > & {
     personList: NightPersonModel[];
     noteList: string[];
@@ -224,6 +230,8 @@ export class NmNightDataService {
 
         // add the new data
         nightData.push(nightToUpdate);
+        console.log(nightData);
+
         // in here we sort by day
         const nightRows = nightData
             .sort(
@@ -231,12 +239,36 @@ export class NmNightDataService {
                     DAYS_OF_WEEK.indexOf(a.day) - DAYS_OF_WEEK.indexOf(b.day)
             )
             // in here we add blank lines
-            .reduce<Array<NightDataModel | null>>((a, b, i) => {
-                if (nightData[i + 1]?.day !== b.day) {
-                    a?.push(null);
-                }
-                return a;
-            }, [])
+            .reduce<Array<NightDataModel | null>>(
+                (
+                    a,
+                    {
+                        day,
+                        role,
+                        org,
+                        discordIdOrEmail,
+                        period,
+                        timeStart,
+                        timeEnd
+                    },
+                    i
+                ) => {
+                    a.push({
+                        day,
+                        role,
+                        org,
+                        discordIdOrEmail,
+                        period,
+                        timeStart,
+                        timeEnd
+                    });
+                    if (nightData[i + 1]?.day !== day) {
+                        a.push(null);
+                    }
+                    return a;
+                },
+                []
+            )
             // turn it into an array of data mapping to the headers
             .map((op) => {
                 return op
@@ -244,32 +276,25 @@ export class NmNightDataService {
                     : headerList.map(() => '');
             });
 
-        await this.nightSheetService.replaceAllRowsExceptHeader(
+        console.log(nightRows);
+
+        await this.nightSheetService.replaceAllRowsIncludingHeader(
             nightRows as string[][]
         );
     }
 
     // turns an operation record into an ops sheet data record
-    toNightData({
-        day,
-        org,
-        timeStart,
-        timeEnd,
-        hostList,
-        pickupList
-    }: NightModel): NightDataModel[] {
+    toNightData({ day, hostList, pickupList }: NightModel): NightDataModel[] {
         return pickupList
-            .map(({ role, discordIdOrEmail, period }) => ({
-                role,
-                discordIdOrEmail,
-                period,
-                day,
-                org,
-                timeStart,
-                timeEnd
-            }))
-            .concat(
-                hostList.map(({ role, discordIdOrEmail, period }) => ({
+            .map(
+                ({
+                    role,
+                    discordIdOrEmail,
+                    period,
+                    org,
+                    timeStart,
+                    timeEnd
+                }) => ({
                     role,
                     discordIdOrEmail,
                     period,
@@ -277,7 +302,28 @@ export class NmNightDataService {
                     org,
                     timeStart,
                     timeEnd
-                }))
+                })
+            )
+            .concat(
+                hostList.map(
+                    ({
+                        role,
+                        discordIdOrEmail,
+                        period,
+                        org = '',
+                        timeStart = '',
+                        timeEnd = ''
+                    }) =>
+                        ({
+                            role,
+                            discordIdOrEmail,
+                            period,
+                            day,
+                            org,
+                            timeStart,
+                            timeEnd
+                        } as NightDataModel)
+                )
             );
     }
 
@@ -291,7 +337,7 @@ export class NmNightDataService {
         const nightList = await this.nightSheetService.getAllRowsAsMaps();
         //const nightCache = DayNightCacheModel.fromData(nightList);
         // add persons to record
-        const personList = await this.getPersonList(nightList);
+        const personList = await this.getNightPersonList(nightList);
 
         // nightList.map(
         //     ({ timeStart, timeEnd, org, role, discordIdOrEmail, period }) => ({
@@ -312,6 +358,7 @@ export class NmNightDataService {
                 if (!cache[op.day]) {
                     cache[op.day] = night;
                 }
+
                 // here we make sure that we don't miss any data per day
                 // because a field is left blank on any one record
                 Object.keys(night).forEach((k) => {
@@ -339,16 +386,18 @@ export class NmNightDataService {
                                 personList: [],
                                 noteList: []
                             };
-                        }
-                        if (p.role === 'night-pickup') {
-                            const person = personList.find(
-                                (a) => a.discordIdOrEmail === p.discordIdOrEmail
-                            ) as PersonWithIdModel;
-                            if (person) {
-                                a[day + org + timeStart].personList.push({
-                                    ...p,
-                                    ...person
-                                });
+                            if (p.role === 'night-pickup') {
+                                const person = personList.find(
+                                    (a) =>
+                                        a.discordIdOrEmail ===
+                                        p.discordIdOrEmail
+                                ) as PersonWithIdModel;
+                                if (person) {
+                                    a[day + org + timeStart].personList.push({
+                                        ...p,
+                                        ...person
+                                    });
+                                }
                             }
                         }
 
@@ -378,7 +427,7 @@ export class NmNightDataService {
         );
     }
 
-    async getPersonList(
+    async getNightPersonList(
         nightList: NightDataModel[]
     ): Promise<PersonWithIdModel[]> {
         const personIdList = nightList.map((a) => a.discordIdOrEmail);

@@ -8,6 +8,11 @@ class NmPersonDataService {
             spreadsheetId,
             sheetName: `person`
         });
+        this.waitingForPersonListCache = this.getPersonList();
+        // reset the cache ever 2 hour
+        setInterval(() => {
+            this.waitingForPersonListCache = this.getPersonList();
+        }, 1000 * 60 * 60 * 2);
     }
     static createPersonWithQueryId(discordIdOrEmail = '', person) {
         return {
@@ -36,9 +41,21 @@ class NmPersonDataService {
     async getPersonList() {
         return await this.personSheetService.getAllRowsAsMaps();
     }
+    async getPersonListCache() {
+        return await this.waitingForPersonListCache;
+    }
     // if any of the propties of the query match the person
     async getPersonListByMatchAnyProperties(query) {
-        return await this.personSheetService.getMapsByMatchAnyProperties(query);
+        // if we can find them on the cache ...
+        const list = (await this.waitingForPersonListCache).filter((map) => {
+            return Object.keys(map).some((k) => query[k] && query[k] === map[k]);
+        });
+        // otherwise get direct from data
+        return list.length
+            ? list
+            : (await this.getPersonList()).filter((map) => {
+                return Object.keys(map).some((k) => query[k] && query[k] === map[k]);
+            });
     }
     async getNameList() {
         const people = await this.getPersonList();

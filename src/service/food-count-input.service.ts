@@ -1,7 +1,7 @@
 import { type NmDayNameType } from '../model/night-market.model';
 import type { NmOrgService } from './org-data.service';
 import { ParseContentService } from '../service';
-import { DAYS_OF_WEEK } from '../nm-const';
+import { DAYS_OF_WEEK } from '../const';
 
 // what type of channel are we in?
 type FoodCountChannelStatusType =

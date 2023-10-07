@@ -23,13 +23,16 @@ export const FoodCountResponseEvent = async (interaction: Interaction) => {
     // its not a custom id
     if (!customId) return;
     // we gave it an action name, and a cache id
+    // TODO: abstract this into a button response handler
     const [idName, idCache] = customId.split('--');
 
-    // this kills the interaction so it doesn't report a failure
-    await interaction.deferUpdate();
     // here we can use that first action name to do different stuff
     // depending on what button it is
+
     if (idName === 'food-count-cancel') {
+        // this kills the interaction so it doesn't report a failure
+        await interaction.deferUpdate();
+
         const m = (interaction.channel as TextChannel)?.messages;
         const cache = FoodCountInputCache.get(idCache);
 
