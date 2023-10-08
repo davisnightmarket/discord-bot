@@ -28,7 +28,11 @@ async function main() {
     });
 
     // Add cron jobs
-    AddCron('30 7 * * *', NightListJob(client));
+    AddCron(
+        //        '30 7 * * *'
+        '* * * * *',
+        NightListJob(client)
+    );
     // person meta data events
     // client.on(Events.MessageCreate, PersonMetaEvent(services));
     client.on(Events.ClientReady, async () => {
