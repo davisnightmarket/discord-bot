@@ -19,7 +19,10 @@ async function main() {
     // Add cron jobs
     (0, cron_utility_1.AddCron)(
     //        '30 7 * * *'
-    '* * * * *', (0, jobs_1.NightListJob)(client));
+    '* * * * *', (0, jobs_1.NightOpsJob)(client));
+    (0, cron_utility_1.AddCron)(
+    //        '30 7 * * *'
+    '* * * * *', (0, jobs_1.NightTimelineJob)(client));
     // person meta data events
     // client.on(Events.MessageCreate, PersonMetaEvent(services));
     client.on(discord_js_1.Events.ClientReady, async () => {

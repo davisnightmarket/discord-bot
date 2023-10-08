@@ -26,6 +26,9 @@ class GoogleSpreadsheetsService {
         }
         return n;
     }
+    letterFromColumnIndex(a) {
+        return exports.Alphabet[a];
+    }
     async rangeGet(range) {
         validate(range);
         const spreadsheetId = this.spreadsheetId;
@@ -86,13 +89,18 @@ class GoogleSpreadsheetsService {
         }
         const spreadsheetId = this.spreadsheetId;
         validate(range);
-        const [gspread] = await Gspread;
+        const [gspread, auth] = await Gspread;
         try {
             const result = await gspread.spreadsheets.values.update({
+                auth,
                 spreadsheetId,
-                valueInputOption: 'RAW',
                 range,
-                requestBody: { values }
+                valueInputOption: 'USER_ENTERED',
+                requestBody: {
+                    range,
+                    majorDimension: 'ROWS',
+                    values
+                }
             });
             dbg('%d cells updated.', result.data.updatedCells);
             return result.data.updatedRange;
@@ -129,21 +137,92 @@ class GoogleSpreadsheetsService {
             });
         });
     }
-    async sheetExists(title) {
+    async rowsPrepend(values, title, startColumn, startIndex) {
         const spreadsheetId = this.spreadsheetId;
+        validate(title);
+        const [gspread, auth] = await Gspread;
+        const endIndex = startIndex + values.length;
+        // insert blank rows
+        const request = {
+            spreadsheetId,
+            resource: {
+                requests: [
+                    {
+                        insertDimension: {
+                            range: {
+                                sheetId: await this.getSheetIdByTitle(title),
+                                dimension: 'ROWS',
+                                startIndex,
+                                endIndex
+                            },
+                            inheritFromBefore: false
+                        }
+                    }
+                ]
+            },
+            auth
+        };
         try {
-            const id = await this.getSheetIdByTitle(title);
-            const request = {
-                spreadsheetId,
-                ranges: [title],
-                includeGridData: false
-            };
-            // if we get a positive number the sheet exists
-            return id >= 0;
+            await gspread.spreadsheets.batchUpdate(request);
         }
         catch (e) {
-            // if we get an error the sheet does not exist
-            return false;
+            console.error(e);
+            return;
+        }
+        try {
+            const range = `${title}!${startColumn}${startIndex + 1}`;
+            gspread.spreadsheets.values.update({
+                auth,
+                spreadsheetId,
+                range,
+                valueInputOption: 'USER_ENTERED',
+                requestBody: {
+                    range,
+                    majorDimension: 'ROWS',
+                    values
+                }
+            });
+        }
+        catch (e) {
+            console.error(e);
+            return;
+        }
+    }
+    async sheetExists(title) {
+        return !!(await this.getSheetTitleList()).find((t) => t === title);
+    }
+    async getSheetIdList() {
+        const spreadsheetId = this.spreadsheetId;
+        try {
+            const request = {
+                spreadsheetId
+            };
+            const [gspread] = await Gspread;
+            const res = await gspread.spreadsheets.get(request);
+            return (res?.data?.sheets
+                ?.map((a) => a.properties?.sheetId)
+                .filter((a) => !!a) ?? []);
+        }
+        catch (err) {
+            console.error(err);
+            throw err;
+        }
+    }
+    async getSheetTitleList() {
+        const spreadsheetId = this.spreadsheetId;
+        try {
+            const request = {
+                spreadsheetId
+            };
+            const [gspread] = await Gspread;
+            const res = await gspread.spreadsheets.get(request);
+            return (res?.data?.sheets
+                ?.map((a) => a.properties?.title)
+                .filter((a) => !!a) ?? []);
+        }
+        catch (err) {
+            console.error(err);
+            throw err;
         }
     }
     async getSheetIdByTitle(title) {
@@ -197,7 +276,12 @@ class GoogleSpreadsheetsService {
                 },
                 auth
             };
-            await gspread.spreadsheets.batchUpdate(request);
+            try {
+                await gspread.spreadsheets.batchUpdate(request);
+            }
+            catch (e) {
+                console.error(e);
+            }
             return true;
         }
         catch (error) {

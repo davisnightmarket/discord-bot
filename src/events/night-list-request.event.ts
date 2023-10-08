@@ -95,17 +95,19 @@ export async function NightListRequestEvent(
     if (interaction.isStringSelectMenu()) {
         // TODO: save to DB
         const [org, timeStart, timeEnd] = interaction.values[0].split('---');
-        await nightDataService.updateNightData({
-            day,
-            org, // this should be Davis Night Market in Central Park
-            role,
-            discordIdOrEmail: interaction.user.id,
-            period,
+        await nightDataService.addNightData([
+            {
+                day,
+                org, // this should be Davis Night Market in Central Park
+                role,
+                discordIdOrEmail: interaction.user.id,
+                period,
 
-            timeStart,
-            // both of these should be got from core data
-            timeEnd: ''
-        });
+                timeStart,
+                // both of these should be got from core data
+                timeEnd: ''
+            }
+        ]);
         interaction.editReply({
             content: interaction.values[0]
         });
@@ -200,16 +202,18 @@ export async function NightListRequestEvent(
 
         if (role === 'night-host') {
             // TODO: save to DB
-            await nightDataService.updateNightData({
-                day,
-                org: '', // this should be Davis Night Market in Central Park
-                role,
-                discordIdOrEmail: interaction.user.id,
-                period,
-                // both of these should be got from core data
-                timeStart: '2100',
-                timeEnd: ''
-            });
+            await nightDataService.addNightData([
+                {
+                    day,
+                    org: '', // this should be Davis Night Market in Central Park
+                    role,
+                    discordIdOrEmail: interaction.user.id,
+                    period,
+                    // both of these should be got from core data
+                    timeStart: '2100',
+                    timeEnd: ''
+                }
+            ]);
             // succcess!
             interaction.editReply({
                 content: 'OK, all set!'

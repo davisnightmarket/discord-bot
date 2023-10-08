@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.GetHostMessage = exports.GetNightCapMessage = exports.GetPickupsMessage = exports.GetAnnounceMessage = exports.GetPickupJoinMessage = exports.GetChannelDayYesterday = exports.GetChannelDayToday = void 0;
+exports.GetHostMessage = exports.GetNightCapMessage = exports.GetPickupsMessage = exports.GetAfterMarketMessage = exports.GetAnnounceMessage = exports.GetPickupJoinMessage = exports.GetChannelDayYesterday = exports.GetChannelDayToday = void 0;
 const discord_js_1 = require("discord.js");
 const const_1 = require("../const");
 // import { type NmDayNameType, type GuildServiceModel } from '../model';
@@ -35,6 +35,22 @@ const saluteList = ['Hellooo', 'Holla', 'Dear', 'Dearest', 'Darling'];
 function getRandoSalute() {
     return saluteList[Math.floor(Math.random() * saluteList.length)];
 }
+// todo: use message service
+function GetAfterMarketMessage(roleId, { pickupList }) {
+    return `## ${(0, discord_js_1.roleMention)(roleId)}!\nNight herstory has been recorded! New night list: \n${pickupList
+        .map(({ org, timeStart, personList }) => {
+        return ('>> ' +
+            org +
+            ' ' +
+            timeStart +
+            ' ' +
+            personList
+                .map(({ name, discordId }) => `${(0, discord_js_1.bold)(name)} ${discordId ? (0, discord_js_1.userMention)(discordId) : ''}`)
+                .join(', '));
+    })
+        .join('\n')}`;
+}
+exports.GetAfterMarketMessage = GetAfterMarketMessage;
 // todo: use message service
 function GetPickupsMessage({ pickupList }) {
     return `Pickups\n${pickupList

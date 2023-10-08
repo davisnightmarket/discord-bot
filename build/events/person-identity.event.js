@@ -44,7 +44,7 @@ const MsgReply = message_service_1.MessageService.createMap({
 const UserGuildServiceMap = {};
 // store person info locally
 const personMetaCache = {};
-const PersonIdentityEvent = ({ personCoreService }) => async (message) => {
+const PersonIdentityEvent = ({ personDataService }) => async (message) => {
     const { channel, author } = message;
     const NOW_IN_SECONDS = Date.now() / 1000;
     /* STAGE 1: skip the message entirely in some cases */
@@ -58,7 +58,7 @@ const PersonIdentityEvent = ({ personCoreService }) => async (message) => {
     // }
     const { id, username } = message.author;
     // OK, now we figure out what their data status is
-    const personStore = await personCoreService.getPersonByEmailOrDiscordId(id);
+    const personStore = await personDataService.getPersonByEmailOrDiscordId(id);
     // we check if they are in the cache
     if (!personMetaCache[id]) {
         // if not, make sure to add them

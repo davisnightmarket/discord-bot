@@ -69,7 +69,7 @@ const personMetaCache: Record<
 > = {};
 
 export const PersonIdentityEvent =
-    ({ personCoreService }: GuildServiceModel) =>
+    ({ personDataService }: GuildServiceModel) =>
     async (message: Message) => {
         const { channel, author } = message as Message<true>;
 
@@ -87,11 +87,10 @@ export const PersonIdentityEvent =
         //         await guildServices.getServicesForGuildId(message.guild?.id);
         // }
 
-
         const { id, username } = message.author;
 
         // OK, now we figure out what their data status is
-        const personStore = await personCoreService.getPersonByEmailOrDiscordId(
+        const personStore = await personDataService.getPersonByEmailOrDiscordId(
             id
         );
 

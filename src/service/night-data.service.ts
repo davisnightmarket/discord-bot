@@ -255,30 +255,91 @@ export class NightDataService {
             headerList.map((header) => nightTimeline[header as string])
         );
     }
-    // send a new ops record to the sheet
-    // TODO: so, folks can update the sheet at the same time which will cause a mess
-    // we need to queue updates
-    updateNightDataQueue: Promise<void>[] = [];
-    async updateNightData(nightToUpdate: NightOpsDataModel) {
-        for (const p of this.updateNightDataQueue) {
-            await p;
-            this.updateNightDataQueue.splice(
-                this.updateNightDataQueue.indexOf(p),
+
+    // this is a queue of updates, so we can wait for multiple updates happenign at once
+    // without making a mess of our data sheet
+    nightDataUpdateQueue: Promise<void>[] = [];
+    async addToNightDataQueue(update: Promise<void>): Promise<void> {
+        for (const a of this.nightDataUpdateQueue) {
+            await a;
+            this.nightDataUpdateQueue.splice(
+                this.nightDataUpdateQueue.indexOf(a),
                 1
             );
         }
-        this.updateNightDataQueue.push(this.pushNightData(nightToUpdate));
+        this.nightDataUpdateQueue.push(update);
+        return update;
     }
 
-    async pushNightData(nightToUpdate: NightOpsDataModel) {
+    async addNightData(nightUpdateList: NightOpsDataModel[]) {
+        await this.addToNightDataQueue(
+            this.addNightDataRecords(nightUpdateList)
+        );
+    }
+
+    async removeNightData(nightUpdateList: NightOpsDataModel[]) {
+        await this.addToNightDataQueue(
+            this.removeNightDataRecords(nightUpdateList)
+        );
+    }
+
+    private async addNightDataRecords(nightUpdateList: NightOpsDataModel[]) {
         // updating data, always get fresh data
         // because we use the cache to update
         await this.refreshCache();
         const nightData = await this.waitingForNightCache;
-        const headerList = await this.nightSheetService.waitingForHeaderList;
 
         // add the new data
-        nightData.push(nightToUpdate);
+        nightData.push(
+            // make sure we have no repeats
+            ...nightUpdateList.filter((a) => {
+                // ! if we do NOT find a record, then we update
+                return !nightData.find(
+                    ({ day, org, discordIdOrEmail, timeStart }) => {
+                        return (
+                            a.day === day &&
+                            a.org === org &&
+                            a.discordIdOrEmail === discordIdOrEmail &&
+                            // todo: if there is no timeStart, what happens?
+                            a.timeStart === timeStart
+                        );
+                    }
+                );
+            })
+        );
+
+        await this.updateNightData(nightData);
+    }
+
+    private async removeNightDataRecords(nightRemoveList: NightOpsDataModel[]) {
+        // updating data, always get fresh data
+        // because we use the cache to update
+        await this.refreshCache();
+        const nightData = await this.waitingForNightCache;
+
+        for (const a of nightRemoveList) {
+            //! if we DO find a record, then we delete
+            const index = nightData.findIndex(
+                ({ day, org, discordIdOrEmail, timeStart }) => {
+                    return (
+                        a.day === day &&
+                        a.org === org &&
+                        a.discordIdOrEmail === discordIdOrEmail &&
+                        // todo: if there is no timeStart, what happens?
+                        a.timeStart === timeStart
+                    );
+                }
+            );
+            nightData.splice(index, 1);
+        }
+
+        await this.updateNightData(nightData);
+    }
+
+    // this function replaces the entire night ops data sheet with a new one
+    // used for both add and remove records
+    private async updateNightData(nightData: NightOpsDataModel[]) {
+        const headerList = await this.nightSheetService.waitingForHeaderList;
 
         // in here we sort by day
         const nightRows = nightData
@@ -289,8 +350,8 @@ export class NightDataService {
                 (a, b) =>
                     DAYS_OF_WEEK.indexOf(a.day) - DAYS_OF_WEEK.indexOf(b.day)
             )
-
-            // in here we add blank lines
+            //in here we add blank lines
+            //! NOT WORKING: we need to add a method to the sheet service
             .reduce<Array<NightOpsDataModel | null>>(
                 (
                     a,
@@ -333,6 +394,7 @@ export class NightDataService {
         );
         await this.refreshCache();
     }
+
     async refreshCache() {
         this.waitingForNightCache = this.nightSheetService.getAllRowsAsMaps();
     }

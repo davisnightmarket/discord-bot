@@ -1,6 +1,10 @@
-import { NmSecrets, GetAllGuildIds, Dbg } from './utility';
+import { CoreDataService } from './service';
+import { NmSecrets, Dbg } from './utility';
 import commands from './commands';
 import { REST, Routes } from 'discord.js';
+
+const coreDataService = new CoreDataService();
+
 const dbg = Dbg('Deploy');
 (async () => {
     try {
@@ -11,7 +15,7 @@ const dbg = Dbg('Deploy');
         dbg(`Started refreshing ${commands.length} application (/) commands.`);
         const body = commands.map((a) => a.toJSON());
         // The put method is used to fully refresh all commands in the guild with the current set
-        const guildIdList = await GetAllGuildIds();
+        const guildIdList = await coreDataService.getAllGuildIds();
 
         for (const guildId of guildIdList) {
             await rest.put(Routes.applicationGuildCommands(clientId, guildId), {

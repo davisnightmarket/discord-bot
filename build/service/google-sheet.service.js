@@ -26,8 +26,13 @@ class GoogleSheetService {
         await this.spreadsheetService.rowsAppend([row], this.getSheetRangeString());
     }
     // TODO: test this
-    async prependOneRow(row) {
-        await this.spreadsheetService.rowsAppend([row], this.getSheetRangeString('A'));
+    async prependOneRowAfterHeader(row) {
+        await this.spreadsheetService.rowsPrepend([row], this.sheetName, 'A', 1);
+    }
+    async prependOneMap(map) {
+        const headerList = await this.waitingForHeaderList;
+        const row = headerList.map((a) => map[a]);
+        this.prependOneRowAfterHeader(row);
     }
     async replaceAllRowsIncludingHeader(rows) {
         await this.spreadsheetService.sheetClear(this.sheetName);
@@ -92,7 +97,7 @@ class GoogleSheetService {
         const all = await this.getAllRowsAsMaps({ includeHeader: true });
         return all
             .map((map, i) => {
-            return Object.keys(map).some((k) => query[k] === map[k])
+            return Object.keys(map).some((k) => query[k] && query[k] === map[k])
                 ? i + 1
                 : 0;
         })
@@ -133,41 +138,3 @@ class GoogleSheetService {
     }
 }
 exports.GoogleSheetService = GoogleSheetService;
-function matchs(a) {
-    return (b) => !Object.keys(a).some((key) => a[key] !== b[key]);
-}
-function rowNameToModelKey(rowName) {
-    const [first, ...rest] = rowName.split(/[_-\s]/g);
-    return first + rest.map(capitlize).join('');
-}
-function capitlize(word) {
-    return word.charAt(0).toUpperCase() + word.substring(1).toLowerCase();
-}
-function empty(item) {
-    return Object.values(item).some((value) => !!value);
-}
-function gridRangeToA1Range(r) {
-    return `${r.sheet}!${r.a.col}${r.a.row ?? ''}:${r.b.col}${r.b.row ?? ''}`;
-}
-function a1RangeToGridRange(range) {
-    const [area, sheet] = range.split('!').reverse();
-    const [a, b] = area.split(':');
-    function parseCell(cell) {
-        if (!cell)
-            throw new Error(`Invalid a1range ${range}!`);
-        const matchs = cell.match(/([A-Z]+)(\d*)/);
-        const col = matchs?.at(1);
-        if (!col)
-            throw new Error(`Invalid a1range ${range}!`);
-        const row = matchs?.at(2);
-        return {
-            col,
-            row: row ? parseInt(row) : undefined
-        };
-    }
-    return {
-        sheet,
-        a: parseCell(a),
-        b: parseCell(b)
-    };
-}

@@ -34,7 +34,7 @@ exports.TIME_UNTIL_UPDATE = 60 * 1000; // one minute in milliseconds
 /**
  *
  */
-const FoodCountInputEvent = ({ personCoreService, foodCountInputService, foodCountDataService }) => async (message) => {
+const FoodCountInputEvent = ({ personDataService, foodCountInputService, foodCountDataService }) => async (message) => {
     const { channel, author } = message;
     /* STAGE 1: skip the message entirely in some cases */
     // if we are a bot, we do not want to process the message
@@ -166,7 +166,7 @@ const FoodCountInputEvent = ({ personCoreService, foodCountInputService, foodCou
             messageResponseId: messageReply.id
         });
         // get our reporter email address
-        const reporter = await personCoreService.getPersonByEmailOrDiscordId(author.id);
+        const reporter = await personDataService.getPersonByEmailOrDiscordId(author.id);
     }
     // loop over errors and post to channel
     for (const { status, lbs, org, orgFuzzy } of parsedInputErrorList) {

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.NmFoodCountInputService = exports.NIGHT_CHANNEL_NAMES_MAP = exports.COUNT_CHANNEL_NAME = void 0;
+exports.FoodCountInputService = exports.NIGHT_CHANNEL_NAMES_MAP = exports.COUNT_CHANNEL_NAME = void 0;
 const service_1 = require("../service");
 const const_1 = require("../const");
 // we only allow food count in one channel
@@ -19,7 +19,7 @@ exports.NIGHT_CHANNEL_NAMES_MAP = {
     // ? i guess saturday will work for weekends for now?
     weekends: 'saturday'
 };
-class NmFoodCountInputService {
+class FoodCountInputService {
     constructor(orgService) {
         this.orgService = orgService;
     }
@@ -275,4 +275,4 @@ Example:
         ];
     }
 }
-exports.NmFoodCountInputService = NmFoodCountInputService;
+exports.FoodCountInputService = FoodCountInputService;

@@ -21,4 +21,3 @@ __exportStar(require("./secrets.utility"), exports);
 __exportStar(require("./discord.utility"), exports);
 __exportStar(require("./night.utility"), exports);
 __exportStar(require("./service.utility"), exports);
-__exportStar(require("./config.utility"), exports);

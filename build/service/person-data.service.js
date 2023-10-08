@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.NmPersonDataService = void 0;
+exports.PersonDataService = void 0;
 const service_1 = require("../service");
-class NmPersonDataService {
+class PersonDataService {
     constructor(spreadsheetId) {
         this.personSheetService = new service_1.GoogleSheetService({
             spreadsheetId,
@@ -16,7 +16,7 @@ class NmPersonDataService {
     }
     static createPersonWithQueryId(discordIdOrEmail = '', person) {
         return {
-            ...NmPersonDataService.createPerson(person),
+            ...PersonDataService.createPerson(person),
             discordIdOrEmail
         };
     }
@@ -40,6 +40,9 @@ class NmPersonDataService {
     }
     async getPersonList() {
         return await this.personSheetService.getAllRowsAsMaps();
+    }
+    refreshPersonListCache() {
+        this.waitingForPersonListCache = this.getPersonList();
     }
     async getPersonListCache() {
         return await this.waitingForPersonListCache;
@@ -101,6 +104,7 @@ class NmPersonDataService {
             throw new Error('We found multiple persons with that email!');
         }
         await this.personSheetService.updateRowByIndex(indexList[0], status);
+        this.refreshPersonListCache();
     }
 }
-exports.NmPersonDataService = NmPersonDataService;
+exports.PersonDataService = PersonDataService;

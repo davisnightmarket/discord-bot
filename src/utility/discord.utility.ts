@@ -38,6 +38,7 @@ export async function RegisterGuildCommand(guildId: string) {
     );
 }
 
+
 // We can handle interactions individually?
 // export async function ExecuteGuildCommand(
 //     services: GuildServiceModel,

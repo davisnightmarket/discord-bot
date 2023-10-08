@@ -1,10 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.NmFoodCountDataService = exports.FOODCOUNT_HEADERS = void 0;
+exports.FoodCountDataService = exports.FOODCOUNT_HEADERS = void 0;
 const _1 = require(".");
 // collumns for a food count sheet in case we need to create a new one
 exports.FOODCOUNT_HEADERS = ['date', 'org', 'lbs', 'reporter', 'note'];
-class NmFoodCountDataService {
+class FoodCountDataService {
     constructor(spreadsheetId) {
         this.foodCountSheetMap = new Map();
         this.spreadsheetId = spreadsheetId;
@@ -28,4 +28,4 @@ class NmFoodCountDataService {
         await this.getSheetByCurrentYear(year).appendOneMap(foodCount);
     }
 }
-exports.NmFoodCountDataService = NmFoodCountDataService;
+exports.FoodCountDataService = FoodCountDataService;

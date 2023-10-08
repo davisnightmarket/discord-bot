@@ -43,7 +43,33 @@ const saluteList: string[] = ['Hellooo', 'Holla', 'Dear', 'Dearest', 'Darling'];
 function getRandoSalute() {
     return saluteList[Math.floor(Math.random() * saluteList.length)];
 }
-
+// todo: use message service
+export function GetAfterMarketMessage(
+    roleId: string,
+    { pickupList }: NightModel
+): string {
+    return `## ${roleMention(
+        roleId
+    )}!\nNight herstory has been recorded! New night list: \n${pickupList
+        .map(({ org, timeStart, personList }) => {
+            return (
+                '>> ' +
+                org +
+                ' ' +
+                timeStart +
+                ' ' +
+                personList
+                    .map(
+                        ({ name, discordId }) =>
+                            `${bold(name)} ${
+                                discordId ? userMention(discordId) : ''
+                            }`
+                    )
+                    .join(', ')
+            );
+        })
+        .join('\n')}`;
+}
 // todo: use message service
 export function GetPickupsMessage({ pickupList }: NightModel): string {
     return `Pickups\n${pickupList

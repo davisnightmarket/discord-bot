@@ -8,7 +8,7 @@ import {
 } from '../utility';
 
 // when a person requests a listing of
-export const NightListJob = (client: Client) => async () => {
+export const NightOpsJob = (client: Client) => async () => {
     // get the guild
     const guildList = client.guilds.cache.map((guild) => guild);
 

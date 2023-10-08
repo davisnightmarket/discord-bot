@@ -54,7 +54,7 @@ export const TIME_UNTIL_UPDATE = 60 * 1000; // one minute in milliseconds
  */
 export const FoodCountInputEvent =
     ({
-        personCoreService,
+        personDataService,
         foodCountInputService,
         foodCountDataService
     }: GuildServiceModel) =>
@@ -233,7 +233,7 @@ export const FoodCountInputEvent =
 
             // get our reporter email address
             const reporter =
-                await personCoreService.getPersonByEmailOrDiscordId(author.id);
+                await personDataService.getPersonByEmailOrDiscordId(author.id);
         }
 
         // loop over errors and post to channel

@@ -6,7 +6,7 @@ import {
     NightListRequestEvent
 } from './events';
 import { AddCron } from './utility/cron.utility';
-import { NightListJob } from './jobs';
+import { NightOpsJob, NightTimelineJob } from './jobs';
 
 async function main() {
     // Start discord client
@@ -24,8 +24,15 @@ async function main() {
     AddCron(
         //        '30 7 * * *'
         '* * * * *',
-        NightListJob(client)
+        NightOpsJob(client)
     );
+
+    AddCron(
+        //        '30 7 * * *'
+        '* * * * *',
+        NightTimelineJob(client)
+    );
+
     // person meta data events
     // client.on(Events.MessageCreate, PersonMetaEvent(services));
     client.on(Events.ClientReady, async () => {
