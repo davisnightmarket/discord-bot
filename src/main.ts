@@ -1,11 +1,4 @@
-import {
-    Client,
-    type CommandInteraction,
-    Events,
-    GatewayIntentBits,
-    Partials,
-    Guild
-} from 'discord.js';
+import { Client, Events, GatewayIntentBits, Partials } from 'discord.js';
 import { NmSecrets, GetGuildServices } from './utility';
 import {
     FoodCountInputEvent,

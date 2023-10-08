@@ -20,7 +20,7 @@ export interface PersonModel extends SpreadsheetDataModel {
 
 export type PersonWithIdModel = PersonModel & { discordIdOrEmail: string };
 
-export class NmPersonDataService {
+export class PersonDataService {
     personSheetService: GoogleSheetService<PersonModel>;
 
     waitingForPersonListCache: Promise<PersonModel[]>;
@@ -41,7 +41,7 @@ export class NmPersonDataService {
         person: Partial<PersonModel>
     ): PersonWithIdModel {
         return {
-            ...NmPersonDataService.createPerson(person),
+            ...PersonDataService.createPerson(person),
             discordIdOrEmail
         };
     }
@@ -81,6 +81,10 @@ export class NmPersonDataService {
     }
     async getPersonList(): Promise<PersonModel[]> {
         return await this.personSheetService.getAllRowsAsMaps();
+    }
+
+    refreshPersonListCache() {
+        this.waitingForPersonListCache = this.getPersonList();
     }
 
     async getPersonListCache(): Promise<PersonModel[]> {
@@ -161,5 +165,6 @@ export class NmPersonDataService {
         }
 
         await this.personSheetService.updateRowByIndex(indexList[0], status);
+        this.refreshPersonListCache();
     }
 }

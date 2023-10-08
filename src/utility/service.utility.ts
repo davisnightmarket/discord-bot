@@ -1,12 +1,14 @@
-import { GetConfigByGuildId } from '../utility';
 import { type GuildServiceModel, type ConfigModel } from '../model';
 import {
-    NmFoodCountDataService,
-    NmFoodCountInputService,
-    NmOrgService,
-    NmPersonDataService,
-    NmNightDataService
+    CoreDataService,
+    FoodCountDataService,
+    FoodCountInputService,
+    OrgDataService,
+    PersonDataService,
+    NightDataService
 } from '../service';
+
+const coreDataService = new CoreDataService();
 
 const servicesByGuildId = new Map<
     string,
@@ -20,23 +22,24 @@ const servicesByGuildId = new Map<
 // as well as services that are "core", meaning the same data source for all guilds
 export async function GetGuildServices(guildId: string) {
     if (!servicesByGuildId.has(guildId)) {
-        const config = await GetConfigByGuildId(guildId);
-        const orgCoreService = new NmOrgService(config.GSPREAD_ORG_ID);
-        const personCoreService = new NmPersonDataService(
+        const config = await coreDataService.getConfigByGuildId(guildId);
+        const orgDataService = new OrgDataService(config.GSPREAD_ORG_ID);
+        const personDataService = new PersonDataService(
             config.GSPREAD_PERSON_ID
         );
         servicesByGuildId.set(guildId, {
             config,
-            nightDataService: new NmNightDataService(
+            coreDataService,
+            nightDataService: new NightDataService(
                 config.GSPREAD_NIGHT_ID,
-                personCoreService
+                personDataService
             ),
-            foodCountDataService: new NmFoodCountDataService(
+            foodCountDataService: new FoodCountDataService(
                 config.GSPREAD_FOODCOUNT_ID
             ),
-            foodCountInputService: new NmFoodCountInputService(orgCoreService),
-            personCoreService,
-            orgCoreService
+            foodCountInputService: new FoodCountInputService(orgDataService),
+            personDataService,
+            orgDataService
         });
     }
 

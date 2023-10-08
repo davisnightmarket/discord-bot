@@ -1,15 +1,17 @@
 import type {
-    NmFoodCountDataService,
-    NmFoodCountInputService,
-    NmOrgService,
-    NmPersonDataService,
-    NmNightDataService
+    CoreDataService,
+    FoodCountDataService,
+    FoodCountInputService,
+    OrgDataService,
+    PersonDataService,
+    NightDataService
 } from '../service';
 
 export interface GuildServiceModel {
-    foodCountDataService: NmFoodCountDataService;
-    foodCountInputService: NmFoodCountInputService;
-    orgCoreService: NmOrgService;
-    personCoreService: NmPersonDataService;
-    nightDataService: NmNightDataService;
+    coreDataService: CoreDataService;
+    foodCountDataService: FoodCountDataService;
+    foodCountInputService: FoodCountInputService;
+    orgDataService: OrgDataService;
+    personDataService: PersonDataService;
+    nightDataService: NightDataService;
 }

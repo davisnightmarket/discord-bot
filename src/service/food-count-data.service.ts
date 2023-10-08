@@ -11,7 +11,7 @@ interface FoodCountModel extends SpreadsheetDataModel {
 // collumns for a food count sheet in case we need to create a new one
 export const FOODCOUNT_HEADERS = ['date', 'org', 'lbs', 'reporter', 'note'];
 
-export class NmFoodCountDataService {
+export class FoodCountDataService {
     private readonly foodCountSheetMap = new Map<
         number,
         GoogleSheetService<FoodCountModel>

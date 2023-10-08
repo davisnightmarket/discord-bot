@@ -39,7 +39,7 @@ export class GoogleSheetService<T extends SpreadsheetDataModel> {
     }
 
     // TODO: test this
-    async appendOneRow(row: string[]) {
+    async appendOneRow(row: SpreadsheetDataValueModel[]) {
         await this.spreadsheetService.rowsAppend(
             [row],
             this.getSheetRangeString()
@@ -57,14 +57,21 @@ export class GoogleSheetService<T extends SpreadsheetDataModel> {
     }
 
     // TODO: test this
-    async prependOneRow(row: string[]) {
-        await this.spreadsheetService.rowsAppend(
+    async prependOneRowAfterHeader(row: SpreadsheetDataValueModel[]) {
+        await this.spreadsheetService.rowsPrepend(
             [row],
-            this.getSheetRangeString('A')
+            this.sheetName,
+            'A',
+            1
         );
     }
+    async prependOneMap(map: T) {
+        const headerList = await this.waitingForHeaderList;
+        const row = headerList.map((a) => map[a]);
+        this.prependOneRowAfterHeader(row);
+    }
 
-    async replaceAllRowsIncludingHeader(rows: string[][]) {
+    async replaceAllRowsIncludingHeader(rows: SpreadsheetDataValueModel[][]) {
         await this.spreadsheetService.sheetClear(this.sheetName);
         const headerList = await this.waitingForHeaderList;
         rows.unshift(headerList as string[]);
@@ -170,9 +177,12 @@ export class GoogleSheetService<T extends SpreadsheetDataModel> {
         query: Partial<T>
     ): Promise<number[]> {
         const all = await this.getAllRowsAsMaps({ includeHeader: true });
+
         return all
             .map((map, i) => {
-                return Object.keys(map).some((k) => query[k] === map[k])
+                return Object.keys(map).some(
+                    (k) => query[k] && query[k] === map[k]
+                )
                     ? i + 1
                     : 0;
             })
@@ -229,142 +239,4 @@ export class GoogleSheetService<T extends SpreadsheetDataModel> {
         }
         return list;
     }
-
-    // async getRowsWhereValueMatches(Partial<T>)
-    // :DataValueType[][]
-    // {
-    //     return []
-    // };
-
-    // async search(partial: Partial<T>) {
-    //     const values = await this.get();
-    //     return values.find(matchs(partial));
-    // }
-
-    // async filter(partial: Partial<T>) {
-    //     const values = await this.get();
-    //     return values.filter(matchs(partial));
-    // }
-
-    // async searchIndex(partial: Partial<T>) {
-    //     const values = await this.get();
-    //     return values.findIndex(matchs(partial));
-    // }
-
-    // async update(source: Partial<T>, update: Partial<T>) {
-    //     // get complete item and update it
-    //     const full = await this.search(source);
-    //     if (!full) throw new Error('Can not find item to update');
-    //     const row = this.valueToRow({ ...full, ...update });
-
-    //     // get the range so that we can update it
-    //     const range = await this.getRangeForItem(source);
-
-    //     // update the spread sheet
-    //     const [gspread] = await Gspread;
-    //     await gspread.spreadsheets.values.update({
-    //         spreadsheetId: this.spreadsheetId,
-    //         valueInputOption: 'USER_ENTERED',
-    //         range,
-    //         requestBody: { values: [row] }
-    //     });
-
-    //     // update the cache
-    //     await this.updateCache();
-    // }
-
-    // async getRangeForItem(value: Partial<T>) {
-    //     // parse the range so the we can figure out the row for the element
-    //     const range = a1RangeToGridRange(this.range);
-
-    //     // if no start row is provided, then that means its 1
-    //     range.a.row = range.a.row ?? 1;
-
-    //     // move down to the row of the value
-    //     const index = await this.searchIndex(value);
-    //     range.a.row += index + 1; // move past header
-
-    //     // and make it the end row as well
-    //     range.b.row = range.a.row;
-
-    //     // convert back to a1 range and return
-    //     return gridRangeToA1Range(range);
-    // }
-
-    // valueToRow(value: T): any[] {
-    //     return this.header.map((name) => value[name] ?? '');
-    // }
-
-    // async append(values: T[]) {
-    //     // turn the models into rows
-    //     const rows = values.map((value) => this.valueToRow(value));
-
-    //     // append the rows to the sheet
-    //     const [gspread] = await Gspread;
-    //     await gspread.spreadsheets.values.append({
-    //         spreadsheetId: this.spreadsheetId,
-    //         range: this.range,
-    //         valueInputOption: 'USER_ENTERED',
-    //         requestBody: { values: rows }
-    //     });
-
-    //     // update the cache
-    //     await this.updateCache();
-    // }
-}
-
-function matchs<T extends Partial<Record<string, any>>>(a: Partial<T>) {
-    return (b: T) => !Object.keys(a).some((key) => a[key] !== b[key]);
-}
-
-function rowNameToModelKey(rowName: string): string {
-    const [first, ...rest] = rowName.split(/[_-\s]/g);
-    return first + rest.map(capitlize).join('');
-}
-
-function capitlize(word: string) {
-    return word.charAt(0).toUpperCase() + word.substring(1).toLowerCase();
-}
-
-function empty(item: Record<string, string>) {
-    return Object.values(item).some((value) => !!value);
-}
-
-interface GridRange {
-    sheet: string;
-    a: {
-        col: string;
-        row?: number;
-    };
-    b: {
-        col: string;
-        row?: number;
-    };
-}
-
-function gridRangeToA1Range(r: GridRange): string {
-    return `${r.sheet}!${r.a.col}${r.a.row ?? ''}:${r.b.col}${r.b.row ?? ''}`;
-}
-
-function a1RangeToGridRange(range: string): GridRange {
-    const [area, sheet] = range.split('!').reverse();
-    const [a, b] = area.split(':');
-
-    function parseCell(cell: string) {
-        if (!cell) throw new Error(`Invalid a1range ${range}!`);
-        const matchs = cell.match(/([A-Z]+)(\d*)/);
-        const col = matchs?.at(1);
-        if (!col) throw new Error(`Invalid a1range ${range}!`);
-        const row = matchs?.at(2);
-        return {
-            col,
-            row: row ? parseInt(row) : undefined
-        };
-    }
-
-    return {
-        sheet,
-        a: parseCell(a),
-        b: parseCell(b)
-    };
 }

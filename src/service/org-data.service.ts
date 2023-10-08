@@ -6,7 +6,7 @@ interface OrgModel extends SpreadsheetDataModel {
     nameAlt: string;
 }
 
-export class NmOrgService {
+export class OrgDataService {
     private readonly orgSheetService: GoogleSheetService<OrgModel>;
 
     constructor(spreadsheetId: string) {

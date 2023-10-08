@@ -30,6 +30,10 @@ exports.NM_NIGHT_ROLES = {
     'night-pickup': {
         name: 'Night Pickup',
         description: 'Pickup Food and Deliver to Market'
+    },
+    'night-pickup-shadow': {
+        name: 'Night Pickup Shadow',
+        description: 'Learn How to Food Pickup'
     }
 };
 exports.NN_NIGHT_ROLE_CODES = Object.keys(exports.NM_NIGHT_ROLES);

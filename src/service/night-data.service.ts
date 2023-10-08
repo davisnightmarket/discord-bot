@@ -4,12 +4,13 @@ import { GetChannelDayToday } from '../utility';
 import {
     GoogleSheetService,
     type SpreadsheetDataModel,
-    NmPersonDataService,
+    PersonDataService,
     type PersonModel,
     PersonWithIdModel
 } from '.';
 
-export interface NightDataModel extends SpreadsheetDataModel {
+// models what's in the "ops" sheet
+export interface NightOpsDataModel extends SpreadsheetDataModel {
     day: NmDayNameType;
     role: NmNightRoleType;
     org: string;
@@ -19,7 +20,8 @@ export interface NightDataModel extends SpreadsheetDataModel {
     timeEnd: string;
 }
 
-export interface NightDataTimelineModel extends SpreadsheetDataModel {
+// models what's in the "ops-timeline" sheet
+export interface NightOpsTimelineDataModel extends SpreadsheetDataModel {
     day: NmDayNameType;
     role: NmNightRoleType;
     org: string;
@@ -30,7 +32,8 @@ export interface NightDataTimelineModel extends SpreadsheetDataModel {
     stamp: string;
 }
 
-export interface NightDataOrgPickupModel extends SpreadsheetDataModel {
+// models what's in the "ops-pickup-notes" sheet
+export interface NightOpsPickupNotesDataModel extends SpreadsheetDataModel {
     day: string;
     org: string;
     contact: string;
@@ -39,10 +42,10 @@ export interface NightDataOrgPickupModel extends SpreadsheetDataModel {
 }
 
 export type NightPersonModel = PersonModel &
-    Pick<NightDataModel, 'role' | 'period' | 'discordIdOrEmail'>;
+    Pick<NightOpsDataModel, 'role' | 'period' | 'discordIdOrEmail'>;
 
 export type NightPickupModel = Pick<
-    NightDataModel,
+    NightOpsDataModel,
     | 'day'
     | 'role'
     | 'org'
@@ -56,119 +59,29 @@ export type NightPickupModel = Pick<
 };
 
 // the model for the market itself
-type Night = Pick<NightDataModel, 'day' | 'org' | 'timeStart' | 'timeEnd'> & {
+export type NightModel = Pick<
+    NightOpsDataModel,
+    'day' | 'org' | 'timeStart' | 'timeEnd'
+> & {
     // distro and captain
     hostList: NightPersonModel[];
     // the model for pickups
     pickupList: NightPickupModel[];
 };
 
-export type NightDataCache = NightDataModel[];
-// each night operations organized by day
-// export class DayNightCacheModel implements DayNightCache {
-//     monday: Night;
-//     tuesday: Night;
-//     wednesday: Night;
-//     thursday: Night;
-//     friday: Night;
-//     saturday: Night;
-//     sunday: Night;
+export type NightDataCache = NightOpsDataModel[];
 
-//     // static fromData(nightList: NightDataModel[]): DayNightCache {
-//     //     return new DayNightCacheModel(
-//     //         nightList.reduce((all, { day, org, timeStart, timeEnd }) => {
-//     //             if (!all[day]) {
-//     //                 all[day] = NightModel.create({
-//     //                     day,
-//     //                     // these should always be data about the market itself
-//     //                     org,
-//     //                     timeStart,
-//     //                     timeEnd,
-//     //                     hostList: [],
-//     //                     pickupList: []
-//     //                 });
-//     //             }
-//     //             return all;
-//     //         }, {} as Partial<DayNightCacheModel>)
-//     //     );
-//     // }
-
-//     constructor({
-//         monday = NightModel.create({}),
-//         tuesday = NightModel.create({}),
-//         wednesday = NightModel.create({}),
-//         thursday = NightModel.create({}),
-//         friday = NightModel.create({}),
-//         saturday = NightModel.create({}),
-//         sunday = NightModel.create({})
-//     }: Partial<DayNightCacheModel>) {
-//         this.monday = monday;
-//         this.tuesday = tuesday;
-//         this.wednesday = wednesday;
-//         this.thursday = thursday;
-//         this.friday = friday;
-//         this.saturday = saturday;
-//         this.sunday = sunday;
-//     }
-// }
-
-export class NightModel implements Night {
-    day: NmDayNameType;
-    org: string;
-    timeStart: string;
-    timeEnd: string;
-    hostList: NightPersonModel[];
-    // the model for pickups
-    pickupList: NightPickupModel[];
-
-    static create({
-        day = 'monday',
-        org = '',
-        timeStart = '',
-        timeEnd = '',
-        hostList = [],
-        pickupList = []
-    }: Partial<Night>) {
-        return new NightModel({
-            day,
-            org,
-            timeStart,
-            timeEnd,
-            hostList,
-            pickupList
-        });
-    }
-    constructor({
-        day,
-        org = '',
-        timeStart = '',
-        timeEnd = '',
-        hostList = [],
-        pickupList = []
-    }: Night) {
-        if (!DAYS_OF_WEEK.includes(day)) {
-            throw new Error('Night must have a day!');
-        }
-        this.day = day;
-        this.org = org;
-        this.timeStart = timeStart;
-        this.timeEnd = timeEnd;
-        this.hostList = hostList;
-        this.pickupList = pickupList;
-    }
-}
-
-export class NmNightDataService {
-    private readonly nightSheetService: GoogleSheetService<NightDataModel>;
-    private readonly opsTimelineSheetService: GoogleSheetService<NightDataTimelineModel>;
-    private readonly opsNotesSheetService: GoogleSheetService<NightDataOrgPickupModel>;
-    personCoreDataService: NmPersonDataService;
+export class NightDataService {
+    private readonly nightSheetService: GoogleSheetService<NightOpsDataModel>;
+    private readonly opsTimelineSheetService: GoogleSheetService<NightOpsTimelineDataModel>;
+    private readonly opsNotesSheetService: GoogleSheetService<NightOpsPickupNotesDataModel>;
+    private readonly personCoreDataService: PersonDataService;
 
     waitingForNightCache: Promise<NightDataCache> = Promise.resolve([]);
 
     constructor(
         spreadsheetId: string,
-        personCoreDataService: NmPersonDataService
+        personCoreDataService: PersonDataService
     ) {
         this.nightSheetService = new GoogleSheetService({
             spreadsheetId,
@@ -192,24 +105,56 @@ export class NmNightDataService {
         this.refreshCache();
     }
 
+    createNight({
+        // defaults to blank, because we should always get a day
+        day = '' as unknown as NmDayNameType,
+        org = '',
+        timeStart = '',
+        timeEnd = '',
+        hostList = [],
+        pickupList = []
+    }: Partial<NightModel>): NightModel {
+        if (!DAYS_OF_WEEK.includes(day)) {
+            throw new Error('Night must have a day!');
+        }
+        return {
+            day,
+            org,
+            timeStart,
+            timeEnd,
+            hostList,
+            pickupList
+        };
+    }
     async getNightTimelineList(
-        // we don't need more than 1000 records to figure out the timeline
+        // we probably don't need more than 1000 records by default
         limitRows = 1000
     ) {
-        this.opsTimelineSheetService.getAllRowsAsMaps({ limitRows });
+        return await this.opsTimelineSheetService.getAllRowsAsMaps({
+            limitRows
+        });
     }
 
     async getNightDataByDay(
         // defaults to today
         day: NmDayNameType = GetChannelDayToday()
-    ): Promise<NightDataModel[]> {
+    ): Promise<NightOpsDataModel[]> {
         return (await this.waitingForNightCache).filter((a) => a.day === day);
+    }
+
+    async getOpsNotesByDay(
+        day: NmDayNameType
+    ): Promise<NightOpsPickupNotesDataModel[]> {
+        return (await this.opsNotesSheetService.getAllRowsAsMaps()).filter(
+            (a) => a.day === day
+        );
     }
 
     async getPickupListByDay(day: NmDayNameType): Promise<NightPickupModel[]> {
         const nightList = await this.getNightDataByDay(day);
         const personList = await this.getNightPersonList(nightList);
-        // return a complete set of pickups, with personList
+        const noteList = await this.getOpsNotesByDay(day);
+        // return a complete set of pickups, with personList and noteList
         const pickupList = Object.values(
             nightList
                 .filter((a) => (a.role = 'night-pickup'))
@@ -218,9 +163,19 @@ export class NmNightDataService {
                     if (day && org && timeStart && !a[day + org + timeStart]) {
                         a[day + org + timeStart] = {
                             ...op,
+                            // this needs to happen for each op since that's where the discordIdOrEmail is
                             personList: [],
-                            noteList: []
+                            // this can happen once
+                            noteList: noteList
+                                .filter(
+                                    ({ org, timeStart }) =>
+                                        org === op.org &&
+                                        (!timeStart ||
+                                            timeStart === op.timeStart)
+                                )
+                                .map((a) => a.note)
                         };
+                        // get the single person in this op record
                         const person = personList.find(
                             (a) => a.discordIdOrEmail === op.discordIdOrEmail
                         ) as PersonWithIdModel;
@@ -259,8 +214,8 @@ export class NmNightDataService {
         return pickupList;
     }
 
-    async getNightByDay(day: NmDayNameType): Promise<Night> {
-        const night = (await this.getNightDataByDay(day)).reduce<Night>(
+    async getNightByDay(day: NmDayNameType): Promise<NightModel> {
+        const night = (await this.getNightDataByDay(day)).reduce<NightModel>(
             (a, b) => {
                 b.day = day;
                 // basically we want all the values with an actual value
@@ -277,8 +232,8 @@ export class NmNightDataService {
 
                 return a;
             },
-            NightModel.create({})
-        ) as Night;
+            this.createNight({})
+        ) as NightModel;
 
         const hostList = await this.getHostListByDay(day);
         const pickupList = await this.getPickupListByDay(day);
@@ -289,18 +244,33 @@ export class NmNightDataService {
             pickupList
         };
     }
+
+    // add a record to the top of the sheet
+
+    async addNightTimelineRecord(nightTimeline: NightOpsTimelineDataModel) {
+        const headerList = await this.opsTimelineSheetService
+            .waitingForHeaderList;
+        // todo: move the mapping of object to headers to sheetService
+        this.opsTimelineSheetService.prependOneRowAfterHeader(
+            headerList.map((header) => nightTimeline[header as string])
+        );
+    }
     // send a new ops record to the sheet
     // TODO: so, folks can update the sheet at the same time which will cause a mess
     // we need to queue updates
     updateNightDataQueue: Promise<void>[] = [];
-    async updateNightData(nightToUpdate: NightDataModel) {
+    async updateNightData(nightToUpdate: NightOpsDataModel) {
         for (const p of this.updateNightDataQueue) {
             await p;
+            this.updateNightDataQueue.splice(
+                this.updateNightDataQueue.indexOf(p),
+                1
+            );
         }
-        this.updateNightDataQueue = [this.pushNightData(nightToUpdate)];
+        this.updateNightDataQueue.push(this.pushNightData(nightToUpdate));
     }
 
-    async pushNightData(nightToUpdate: NightDataModel) {
+    async pushNightData(nightToUpdate: NightOpsDataModel) {
         // updating data, always get fresh data
         // because we use the cache to update
         await this.refreshCache();
@@ -321,7 +291,7 @@ export class NmNightDataService {
             )
 
             // in here we add blank lines
-            .reduce<Array<NightDataModel | null>>(
+            .reduce<Array<NightOpsDataModel | null>>(
                 (
                     a,
                     {
@@ -355,10 +325,8 @@ export class NmNightDataService {
             .map((op) => {
                 return op
                     ? headerList.map((header) => op[header])
-                    : headerList.map(() => '');
+                    : headerList.map(() => ' ');
             });
-
-        console.log(nightRows);
 
         await this.nightSheetService.replaceAllRowsIncludingHeader(
             nightRows as string[][]
@@ -366,15 +334,11 @@ export class NmNightDataService {
         await this.refreshCache();
     }
     async refreshCache() {
-        this.waitingForNightCache = this.getNightCache();
-    }
-
-    async getNightCache(): Promise<NightDataCache> {
-        return await this.nightSheetService.getAllRowsAsMaps();
+        this.waitingForNightCache = this.nightSheetService.getAllRowsAsMaps();
     }
 
     async getNightPersonList(
-        nightList: NightDataModel[]
+        nightList: NightOpsDataModel[]
     ): Promise<PersonWithIdModel[]> {
         const personIdList = nightList.map((a) => a.discordIdOrEmail);
         return await Promise.all(
@@ -386,7 +350,7 @@ export class NmNightDataService {
                         await this.personCoreDataService.getPersonByEmailOrDiscordId(
                             discordIdOrEmail
                         );
-                    return NmPersonDataService.createPersonWithQueryId(
+                    return PersonDataService.createPersonWithQueryId(
                         discordIdOrEmail,
                         p || {}
                     );

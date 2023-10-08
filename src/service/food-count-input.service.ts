@@ -1,5 +1,5 @@
 import { type NmDayNameType } from '../model/night-market.model';
-import type { NmOrgService } from './org-data.service';
+import type { OrgDataService } from './org-data.service';
 import { ParseContentService } from '../service';
 import { DAYS_OF_WEEK } from '../const';
 
@@ -77,9 +77,9 @@ export const NIGHT_CHANNEL_NAMES_MAP: {
     weekends: 'saturday'
 };
 
-export class NmFoodCountInputService {
-    orgService: NmOrgService;
-    constructor(orgService: NmOrgService) {
+export class FoodCountInputService {
+    orgService: OrgDataService;
+    constructor(orgService: OrgDataService) {
         this.orgService = orgService;
     }
 

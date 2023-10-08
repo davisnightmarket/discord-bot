@@ -7,3 +7,4 @@ export * from './person-data.service';
 export * from './night-data.service';
 export * from './google-spreadsheet.service';
 export * from './google-sheet.service';
+export * from './core-data.service';
