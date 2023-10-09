@@ -18,10 +18,10 @@ async function main() {
     });
     // Add cron jobs
     (0, cron_utility_1.AddCron)(
-    //        '30 7 * * *'
-    '* * * * *', (0, jobs_1.NightOpsJob)(client));
+    //        '0 0 9 * * *'
+    '0 0 7 * * *', (0, jobs_1.NightOpsJob)(client));
     (0, cron_utility_1.AddCron)(
-    //        '30 7 * * *'
+    //        '0 0 0 * * *'
     '* * * * *', (0, jobs_1.NightTimelineJob)(client));
     // person meta data events
     // client.on(Events.MessageCreate, PersonMetaEvent(services));

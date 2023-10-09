@@ -247,13 +247,17 @@ export class NightDataService {
 
     // add a record to the top of the sheet
 
-    async addNightTimelineRecord(nightTimeline: NightOpsTimelineDataModel) {
+    async addNightTimelineRecordList(
+        nightTimeline: NightOpsTimelineDataModel[]
+    ) {
         const headerList = await this.opsTimelineSheetService
             .waitingForHeaderList;
+        for (const n of nightTimeline) {
+            await this.opsTimelineSheetService.prependOneRowAfterHeader(
+                headerList.map((header) => n[header as string])
+            );
+        }
         // todo: move the mapping of object to headers to sheetService
-        this.opsTimelineSheetService.prependOneRowAfterHeader(
-            headerList.map((header) => nightTimeline[header as string])
-        );
     }
 
     // this is a queue of updates, so we can wait for multiple updates happenign at once

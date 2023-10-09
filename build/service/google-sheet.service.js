@@ -39,7 +39,6 @@ class GoogleSheetService {
         const headerList = await this.waitingForHeaderList;
         rows.unshift(headerList);
         for (const r of rows) {
-            console.log('appending row', r);
             await this.appendOneRow(r);
         }
     }

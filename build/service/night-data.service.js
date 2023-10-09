@@ -131,11 +131,13 @@ class NightDataService {
         };
     }
     // add a record to the top of the sheet
-    async addNightTimelineRecord(nightTimeline) {
+    async addNightTimelineRecordList(nightTimeline) {
         const headerList = await this.opsTimelineSheetService
             .waitingForHeaderList;
+        for (const n of nightTimeline) {
+            await this.opsTimelineSheetService.prependOneRowAfterHeader(headerList.map((header) => n[header]));
+        }
         // todo: move the mapping of object to headers to sheetService
-        this.opsTimelineSheetService.prependOneRowAfterHeader(headerList.map((header) => nightTimeline[header]));
     }
     async addToNightDataQueue(update) {
         for (const a of this.nightDataUpdateQueue) {

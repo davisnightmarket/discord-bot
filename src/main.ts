@@ -22,13 +22,13 @@ async function main() {
 
     // Add cron jobs
     AddCron(
-        //        '30 7 * * *'
-        '* * * * *',
+        //        '0 0 9 * * *'
+        '0 0 7 * * *',
         NightOpsJob(client)
     );
 
     AddCron(
-        //        '30 7 * * *'
+        //        '0 0 0 * * *'
         '* * * * *',
         NightTimelineJob(client)
     );

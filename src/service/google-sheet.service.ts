@@ -77,7 +77,6 @@ export class GoogleSheetService<T extends SpreadsheetDataModel> {
         rows.unshift(headerList as string[]);
 
         for (const r of rows) {
-            console.log('appending row', r);
             await this.appendOneRow(r);
         }
     }
