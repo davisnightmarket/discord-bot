@@ -1,27 +1,14 @@
+import { Client, Events, GatewayIntentBits, Partials } from 'discord.js';
+import { NmSecrets, GetGuildServices } from './utility';
 import {
     FoodCountInputEvent,
     FoodCountResponseEvent,
-    PersonMetaEvent
+    NightListRequestEvent
 } from './events';
-import {
-    Client,
-    Events,
-    GatewayIntentBits,
-    Partials
-} from 'discord.js';
-import { GetNmSecrets } from './utility/nm-secrets.utility';
-import { type GuildServiceMapModel } from './model';
-import { AddCron } from './utility/cron-utility';
-import { FoodCountReminder, DailyPickupsWithoutThread } from './jobs';
-import { CommandSerice, ConfigSerive } from './service';
+import { AddCron } from './utility/cron.utility';
+import { NightOpsJob, NightTimelineJob } from './jobs';
 
 async function main() {
-    const services = new ConfigSerive();
-    const commands = new CommandSerice();
-
-    // Add cron jobs
-    AddCron('* * 9 * *', FoodCountReminder);
-
     // Start discord client
     const client = new Client({
         intents: [
@@ -33,28 +20,41 @@ async function main() {
         partials: [Partials.Message, Partials.Channel]
     });
 
-    // build discord data
-    client.once(Events.ClientReady, async (c) => {
-        for (const guild of c.guilds.cache.values()) {
-            commands.register(guild)
-        }
-        
-        console.log(`Ready! Logged in as ${c.user.tag}`);
-    });
+    // Add cron jobs
+    AddCron(
+        //        '0 0 9 * * *'
+        '0 0 7 * * *',
+        NightOpsJob(client)
+    );
+
+    AddCron(
+        //        '0 0 0 * * *'
+        '* * * * *',
+        NightTimelineJob(client)
+    );
 
     // person meta data events
     // client.on(Events.MessageCreate, PersonMetaEvent(services));
+    client.on(Events.ClientReady, async () => {
+        // food count input
+        console.log('Crabapple READY!');
+    });
+    client.on(Events.MessageCreate, async (message) => {
+        const services = await GetGuildServices(message.guildId ?? '');
+        // food count input
+        FoodCountInputEvent(services);
+    });
+    client.on(Events.InteractionCreate, async (interaction) => {
+        const services = await GetGuildServices(interaction.guildId ?? '');
 
-    // food count events
-    client.on(Events.MessageCreate, FoodCountInputEvent(services));
-    client.on(Events.InteractionCreate, FoodCountResponseEvent);
-
-    // commands
-    client.on(Events.InteractionCreate, commands.execute(services))
+        // food count response (cancel food count)
+        FoodCountResponseEvent(interaction);
+        NightListRequestEvent(services, interaction);
+    });
 
     const {
         discordConfig: { appToken }
-    } = await GetNmSecrets();
+    } = await NmSecrets;
 
     client.login(appToken);
 }

@@ -5,12 +5,12 @@ import {
     type MessageReplyOptions,
     ButtonStyle
 } from 'discord.js';
-import { COUNT_CHANNEL_NAME } from '../nm-service';
+import { COUNT_CHANNEL_NAME } from '../service';
 import { v4 as uuidv4 } from 'uuid';
-import { type ConfigSerive, MessageService } from '../service/index';
+import { MessageService } from '../service';
 import { Dbg, CacheUtility } from '../utility';
-import { getChannelByName } from '../service/discord.service';
-import { type GuildServiceMapModel } from '../model';
+import { GetChannelByName } from '../utility';
+import { GuildServiceModel } from '../model';
 
 // status for each cached input: does it get inserted unless cancel? or does it require a confirmation?
 type CacheStatusType = 'INSERT_UNLESS_CANCEL' | 'DELETE_UNLESS_CONFIRM';
@@ -53,21 +53,13 @@ export const TIME_UNTIL_UPDATE = 60 * 1000; // one minute in milliseconds
  *
  */
 export const FoodCountInputEvent =
-    (guildServices: ConfigSerive) => async (message: Message) => {
+    ({
+        personDataService,
+        foodCountInputService,
+        foodCountDataService
+    }: GuildServiceModel) =>
+    async (message: Message) => {
         const { channel, author } = message as Message<true>;
-
-        if (!message.guild?.id) {
-            Dbg(
-                'FoodCountInputEvent does not happen outside of a guild channel'
-            );
-            return;
-        }
-
-        const {
-            personCoreService,
-            foodCountInputService,
-            foodCountDataService
-        } = await guildServices.getServicesForGuildId(message.guild?.id);
 
         /* STAGE 1: skip the message entirely in some cases */
         // if we are a bot, we do not want to process the message
@@ -164,20 +156,18 @@ export const FoodCountInputEvent =
                         return;
                     }
                     // todo: try/catch
-                    await foodCountDataService.appendFoodCount([
-                        {
-                            org,
-                            date,
-                            reporter: reporter?.email ?? '',
-                            lbs,
-                            note
-                        }
-                    ]);
+                    await foodCountDataService.appendFoodCount({
+                        org,
+                        date,
+                        reporter: reporter?.email ?? '',
+                        lbs,
+                        note
+                    });
 
                     // we want to post to food-count, always, so folks know what's in the db
-                    const countChannel = getChannelByName(
-                        message.guild,
-                        COUNT_CHANNEL_NAME
+                    const countChannel = GetChannelByName(
+                        COUNT_CHANNEL_NAME,
+                        message.guild
                     );
 
                     countChannel?.send(
@@ -195,7 +185,7 @@ export const FoodCountInputEvent =
                         FoodCountInputCache.delete(cacheId);
                         await messageReply.delete();
                     } catch (e) {
-                        console.log(e);
+                        console.error(e);
                     }
                 },
                 // we give them a certain amount of time to hit cancel
@@ -242,9 +232,8 @@ export const FoodCountInputEvent =
             });
 
             // get our reporter email address
-            const reporter = await personCoreService.getPerson({
-                discordId: author.id
-            });
+            const reporter =
+                await personDataService.getPersonByEmailOrDiscordId(author.id);
         }
 
         // loop over errors and post to channel

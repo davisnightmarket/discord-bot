@@ -7,6 +7,9 @@
     "start": "NODE_ENV=prod node build/main.js",
     "dev": "NODE_ENV=dev npm run watch",
     "test": "jest",
+    "test:test": "NODE_ENV=test jest",
+    "deploy:commands:test": "NODE_ENV=test ts-node src/deploy.ts",
+    "deploy:commands:prod": "NODE_ENV=prod ts-node src/deploy.ts",
     "build": "tsc -p .",
     "watch": "tsc -w -p . & nodemon",
     "format": "prettier --config .prettierrc 'src/**/*.ts' --write",
@@ -64,6 +67,6 @@
     "nodemon": "^2.0.20",
     "prettier": "^2.8.4",
     "ts-jest": "^29.0.5",
-    "typescript": "^4.9.5"
+    "typescript": "^5.2.2"
   }
 }
