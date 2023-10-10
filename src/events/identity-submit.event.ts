@@ -14,7 +14,7 @@ export async function IdentitySubmitEvent(
 
     interaction: ModalSubmitInteraction
 ) {
-    if (interaction.customId !== 'identity') {
+    if (interaction.customId !== 'identity-edit') {
         return;
     }
     dbg('ok');
@@ -34,18 +34,22 @@ export async function IdentitySubmitEvent(
         });
         return;
     }
-    // for (const k of Object.keys(person as PersonModel)) {
-    //     const value = interaction.fields.getTextInputValue(k).trim();
-    //     if (value) {
-    //         person[k] = value;
-    //     }
-    // }
-    const name = interaction.fields.getTextInputValue('identity--name').trim();
 
-    console.log(name);
+    for (const k of Object.keys(person)) {
+        let value: string = '';
+        try {
+            value = interaction.fields.getTextInputValue(k).trim();
+        } catch (e: any) {
+            console.log(e.message);
+        }
+
+        if (value) {
+            person[k] = value;
+        }
+    }
+
     await personDataService.updatePersonByDiscordId({
-        ...person,
-        name
+        ...person
     });
 
     interaction.editReply({

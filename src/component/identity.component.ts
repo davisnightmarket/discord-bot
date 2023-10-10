@@ -29,30 +29,36 @@ export const IdentityEditModalComponent = ({
     name,
     bio,
     phone,
-    email
+    email,
+    pronouns
 }: PersonModel) => {
-    dbg(discordId, name, bio, phone, email);
+    dbg(discordId, name, bio, phone, email, pronouns);
 
     const modal = new ModalBuilder()
-        .setCustomId(`identity`)
+        .setCustomId(`identity-edit`)
         .setTitle('Night Market Identity Edit');
 
     const nameInput = new TextInputBuilder()
-        .setCustomId(`identity--name`)
+        .setCustomId(`name`)
         .setLabel('What is your lived name?')
         .setValue(name)
         // Paragraph means multiple lines of text.
         .setStyle(TextInputStyle.Short);
-
+    const pronounsInput = new TextInputBuilder()
+        .setCustomId(`pronouns`)
+        .setLabel('Your pronouns:')
+        .setValue(pronouns)
+        // Paragraph means multiple lines of text.
+        .setStyle(TextInputStyle.Short);
     const bioInput = new TextInputBuilder()
-        .setCustomId(`identity--bio`)
+        .setCustomId(`bio`)
         .setLabel('Please tell us something biographical!')
         .setValue(bio)
         // Paragraph means multiple lines of text.
         .setStyle(TextInputStyle.Paragraph);
 
     const emailInput = new TextInputBuilder()
-        .setCustomId(`identity--email`)
+        .setCustomId(`email`)
         .setLabel('Your email address:')
 
         .setValue(email)
@@ -60,15 +66,21 @@ export const IdentityEditModalComponent = ({
         .setStyle(TextInputStyle.Short);
 
     const phoneInput = new TextInputBuilder()
-        .setCustomId(`identity--phone`)
+        .setCustomId(`phone`)
         .setLabel('Your phone number:')
         .setValue(phone)
         // Paragraph means multiple lines of text.
         .setStyle(TextInputStyle.Short);
+
     // Add inputs to the modal
     modal
         .addComponents(
             new ActionRowBuilder<TextInputBuilder>().addComponents(nameInput)
+        )
+        .addComponents(
+            new ActionRowBuilder<TextInputBuilder>().addComponents(
+                pronounsInput
+            )
         )
         .addComponents(
             new ActionRowBuilder<TextInputBuilder>().addComponents(bioInput)

@@ -4,7 +4,7 @@ exports.IdentitySubmitEvent = void 0;
 const utility_1 = require("../utility");
 const dbg = (0, utility_1.Dbg)('IdentityEditEvent');
 async function IdentitySubmitEvent({ personDataService }, interaction) {
-    if (interaction.customId !== 'identity') {
+    if (interaction.customId !== 'identity-edit') {
         return;
     }
     dbg('ok');
@@ -19,17 +19,20 @@ async function IdentitySubmitEvent({ personDataService }, interaction) {
         });
         return;
     }
-    // for (const k of Object.keys(person as PersonModel)) {
-    //     const value = interaction.fields.getTextInputValue(k).trim();
-    //     if (value) {
-    //         person[k] = value;
-    //     }
-    // }
-    const name = interaction.fields.getTextInputValue('identity--name').trim();
-    console.log(name);
+    for (const k of Object.keys(person)) {
+        let value = '';
+        try {
+            value = interaction.fields.getTextInputValue(k).trim();
+        }
+        catch (e) {
+            console.log(e.message);
+        }
+        if (value) {
+            person[k] = value;
+        }
+    }
     await personDataService.updatePersonByDiscordId({
-        ...person,
-        name
+        ...person
     });
     interaction.editReply({
         content: 'OK, all set!'
