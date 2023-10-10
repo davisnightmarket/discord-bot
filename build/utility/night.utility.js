@@ -6,11 +6,11 @@ const const_1 = require("../const");
 // import { type NmDayNameType, type GuildServiceModel } from '../model';
 // import { type PersonModel, type PickUp } from '../service';
 const GetChannelDayToday = (date = new Date()) => {
-    return const_1.DAYS_OF_WEEK[date.getDay()];
+    return const_1.DAYS_OF_WEEK_CODES[date.getDay()];
 };
 exports.GetChannelDayToday = GetChannelDayToday;
 const GetChannelDayYesterday = (date = new Date()) => {
-    return const_1.DAYS_OF_WEEK[date.getDay() - 1] || const_1.DAYS_OF_WEEK[6];
+    return const_1.DAYS_OF_WEEK_CODES[date.getDay() - 1] || const_1.DAYS_OF_WEEK_CODES[6];
 };
 exports.GetChannelDayYesterday = GetChannelDayYesterday;
 function GetPickupJoinMessage(pickupList) {

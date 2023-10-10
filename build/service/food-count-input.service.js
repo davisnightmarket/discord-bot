@@ -219,7 +219,7 @@ Example:
     getDateStringFromDay(day) {
         // starting with the current date
         const d = new Date();
-        while (day !== const_1.DAYS_OF_WEEK[d.getDay()]) {
+        while (day !== const_1.DAYS_OF_WEEK_CODES[d.getDay()]) {
             // count backwards until we have the right day
             d.setDate(d.getDate() - 1);
         }

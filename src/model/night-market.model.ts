@@ -7,6 +7,8 @@ export type NmDayNameType =
     | 'friday'
     | 'saturday';
 
+export type NmPartOfDayNameType = 'morning' | 'afternoon' | 'evening' | 'night';
+
 export type NmActiveStateType = 'active' | 'inactive';
 
 export type NmRoleType = NmNightRoleType | NmAdminRoleType;

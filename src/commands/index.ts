@@ -1,5 +1,5 @@
-import pickupCommand from "./pickup.command"
+import pickupCommand from './volunteer.command';
+import identityCommand from './identity.command';
+import nmCommand from './nm.command';
 
-export default [
-    pickupCommand
-]
+export default [nmCommand, pickupCommand, identityCommand];

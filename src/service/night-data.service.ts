@@ -1,5 +1,5 @@
 import { type NmNightRoleType, type NmDayNameType } from '../model';
-import { DAYS_OF_WEEK } from '../const';
+import { DAYS_OF_WEEK_CODES } from '../const';
 import { GetChannelDayToday } from '../utility';
 import {
     GoogleSheetService,
@@ -114,9 +114,6 @@ export class NightDataService {
         hostList = [],
         pickupList = []
     }: Partial<NightModel>): NightModel {
-        if (!DAYS_OF_WEEK.includes(day)) {
-            throw new Error('Night must have a day!');
-        }
         return {
             day,
             org,
@@ -352,7 +349,8 @@ export class NightDataService {
             })
             .sort(
                 (a, b) =>
-                    DAYS_OF_WEEK.indexOf(a.day) - DAYS_OF_WEEK.indexOf(b.day)
+                    DAYS_OF_WEEK_CODES.indexOf(a.day) -
+                    DAYS_OF_WEEK_CODES.indexOf(b.day)
             )
             //in here we add blank lines
             //! NOT WORKING: we need to add a method to the sheet service

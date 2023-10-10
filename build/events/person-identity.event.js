@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.PersonIdentityEvent = void 0;
 const message_service_1 = require("../service/message.service");
 const utility_1 = require("../utility");
-const person_input_service_1 = require("../service/person-input.service");
+const identity_input_utility_1 = require("../utility/identity-input.utility");
 const dbg = (0, utility_1.Dbg)('PersonIdentityEvent');
 const APPROPRIATE_TIME_TO_BUG_U_IN_SECS = 1; // 60 * 60 * 24 * 7,
 const A_BIT_OF_LAG_BEFORE_INTROS_IN_SECS = 1; // 60 * 60;
@@ -132,7 +132,7 @@ const PersonDmEvent = (metaStatus, message) => {
             return true;
             // we have no record of them, so start at the beginning
         }
-        const [contentStatus] = person_input_service_1.PersonInputService.parseDirectReply(content);
+        const [contentStatus] = identity_input_utility_1.PersonInputService.parseDirectReply(content);
         dbg(`DM to bot content ${contentStatus}`);
         if (contentStatus === 'DECLINE') {
             if (metaStatus === 'EMAIL_NONE') {

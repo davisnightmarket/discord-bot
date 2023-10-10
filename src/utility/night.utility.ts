@@ -2,15 +2,15 @@ import { roleMention, bold, userMention } from 'discord.js';
 
 import { NightPickupModel, type NightModel } from '../service';
 
-import { DAYS_OF_WEEK } from '../const';
+import { DAYS_OF_WEEK_CODES } from '../const';
 // import { type NmDayNameType, type GuildServiceModel } from '../model';
 // import { type PersonModel, type PickUp } from '../service';
 
 export const GetChannelDayToday = (date = new Date()) => {
-    return DAYS_OF_WEEK[date.getDay()];
+    return DAYS_OF_WEEK_CODES[date.getDay()];
 };
 export const GetChannelDayYesterday = (date = new Date()) => {
-    return DAYS_OF_WEEK[date.getDay() - 1] || DAYS_OF_WEEK[6];
+    return DAYS_OF_WEEK_CODES[date.getDay() - 1] || DAYS_OF_WEEK_CODES[6];
 };
 
 export function GetPickupJoinMessage(pickupList: NightPickupModel[]) {

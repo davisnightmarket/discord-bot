@@ -1,6 +1,6 @@
-import { CoreDataService } from './service';
 import { NmSecrets, Dbg } from './utility';
 import commands from './commands';
+import { CoreDataService } from './service';
 import { REST, Routes } from 'discord.js';
 
 const coreDataService = new CoreDataService();

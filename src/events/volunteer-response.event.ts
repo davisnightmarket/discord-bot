@@ -1,9 +1,4 @@
 import {
-    roleMention,
-    type Guild,
-    bold,
-    userMention,
-    type ChatInputCommandInteraction,
     ActionRowBuilder,
     ButtonBuilder,
     ButtonStyle,
@@ -13,88 +8,38 @@ import {
     StringSelectMenuBuilder
 } from 'discord.js';
 
-import { GetChannelDayToday, GetPickupJoinMessage } from '../utility';
 import {
     type NmDayNameType,
     type GuildServiceModel,
     NmNightRoleType,
     NmRolePeriodType
 } from '../model';
-import { DAYS_OF_WEEK, NM_NIGHT_ROLES } from '../const';
+import { DAYS_OF_WEEK_CODES, NM_NIGHT_ROLES } from '../const';
 
-// this tells us if
-let isUpdatingSheet: {
-    [k in number]: Promise<boolean>;
-} = {};
-
+// todo: split this into different events for clarity
 // when a person requests a listing of
-export async function NightListRequestEvent(
+export async function VolunteerResponseEvent(
     { nightDataService }: GuildServiceModel,
 
     interaction: Interaction
 ) {
-    if (!interaction.guild) {
-        (interaction as ChatInputCommandInteraction).reply(
-            'Hi, you can only do that on the server!'
-        );
-        return;
-    }
+    (interaction as ButtonInteraction).deferReply();
 
-    const guild = interaction.guild as Guild;
-
-    await (interaction as ChatInputCommandInteraction).deferReply();
-
-    if (interaction.isCommand()) {
-        interaction = interaction as ChatInputCommandInteraction;
-        let channelDay = (
-            await guild?.channels?.fetch(interaction?.channelId ?? '')
-        )?.name as NmDayNameType;
-        channelDay = DAYS_OF_WEEK.includes(channelDay)
-            ? channelDay
-            : GetChannelDayToday();
-
-        const { pickupList } = await nightDataService.getNightByDay(channelDay);
-
-        const components: ActionRowBuilder<ButtonBuilder>[] = [];
-        const content = GetPickupJoinMessage(pickupList);
-
-        const joinOnceButton = new ButtonBuilder()
-            .setCustomId(`volunteer--${channelDay}--night-host`)
-            .setLabel(NM_NIGHT_ROLES['night-host'].description)
-            .setStyle(ButtonStyle.Secondary);
-        const joinAlwaysButton = new ButtonBuilder()
-            .setCustomId(`volunteer--${channelDay}--night-pickup`)
-            .setLabel(NM_NIGHT_ROLES['night-pickup'].description)
-            .setStyle(ButtonStyle.Secondary);
-
-        components.push(
-            new ActionRowBuilder<ButtonBuilder>()
-                .addComponents(joinOnceButton)
-                .addComponents(joinAlwaysButton)
-        );
-        interaction.editReply({
-            content,
-            components
-        });
-        return;
-    }
-
-    const [command, day, role, period] = (
-        interaction as ButtonInteraction
-    )?.customId.split('--') as [
-        string,
-        NmDayNameType,
-        NmNightRoleType,
-        NmRolePeriodType
-    ];
-
+    console.log('HI');
+    const [command, day, role, period] =
+        ((interaction as ButtonInteraction)?.customId?.split('--') as [
+            string,
+            NmDayNameType,
+            NmNightRoleType,
+            NmRolePeriodType
+        ]) || [];
     if (command !== 'volunteer') {
         return;
     }
-
+    console.log(command, day, role, period);
     if (interaction.isStringSelectMenu()) {
         // TODO: save to DB
-        const [org, timeStart, timeEnd] = interaction.values[0].split('---');
+        const [org, timeStart] = interaction.values[0].split('---');
         await nightDataService.addNightData([
             {
                 day,
@@ -115,10 +60,9 @@ export async function NightListRequestEvent(
 
     // todo: replace all this with createMessageComponentCollector
     if (interaction.isButton()) {
-        // some other button command
-
+        interaction = interaction as ButtonInteraction;
         // there should always be a day
-        if (!day || !DAYS_OF_WEEK.includes(day as NmDayNameType)) {
+        if (!day || !DAYS_OF_WEEK_CODES.includes(day as NmDayNameType)) {
             interaction.editReply({
                 content:
                     'Sorry, something went wrong. We have notified the people!'

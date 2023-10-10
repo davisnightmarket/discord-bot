@@ -1,7 +1,7 @@
 import { type NmDayNameType } from '../model/night-market.model';
 import type { OrgDataService } from './org-data.service';
 import { ParseContentService } from '../service';
-import { DAYS_OF_WEEK } from '../const';
+import { DAYS_OF_WEEK_CODES } from '../const';
 
 // what type of channel are we in?
 type FoodCountChannelStatusType =
@@ -346,7 +346,7 @@ Example:
     getDateStringFromDay(day: NmDayNameType): string {
         // starting with the current date
         const d = new Date();
-        while (day !== DAYS_OF_WEEK[d.getDay()]) {
+        while (day !== DAYS_OF_WEEK_CODES[d.getDay()]) {
             // count backwards until we have the right day
             d.setDate(d.getDate() - 1);
         }

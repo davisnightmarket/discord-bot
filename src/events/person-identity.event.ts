@@ -1,7 +1,7 @@
 import { type Message } from 'discord.js';
 import { MessageService } from '../service/message.service';
 import { Dbg } from '../utility';
-import { PersonInputService } from '../service/person-input.service';
+import { PersonInputService } from '../utility/identity-input.utility';
 import { type GuildServiceModel } from '../model';
 import { type PersonModel } from '../service';
 

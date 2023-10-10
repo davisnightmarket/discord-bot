@@ -1,50 +1,21 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.NightListRequestEvent = void 0;
+exports.VolunteerResponseEvent = void 0;
 const discord_js_1 = require("discord.js");
-const utility_1 = require("../utility");
 const const_1 = require("../const");
 // todo: split this into different events for clarity
 // when a person requests a listing of
-async function NightListRequestEvent({ nightDataService }, interaction) {
-    if (!interaction.guild) {
-        interaction.reply('Hi, you can only do that on the server!');
-        return;
-    }
-    const guild = interaction.guild;
-    if (interaction.isCommand() &&
-        interaction.commandName === 'volunteer') {
-        interaction = interaction;
-        interaction.deferReply();
-        let channelDay = (await guild?.channels?.fetch(interaction?.channelId ?? ''))?.name;
-        channelDay = const_1.DAYS_OF_WEEK_CODES.includes(channelDay)
-            ? channelDay
-            : (0, utility_1.GetChannelDayToday)();
-        const { pickupList } = await nightDataService.getNightByDay(channelDay);
-        const components = [];
-        const content = (0, utility_1.GetPickupJoinMessage)(pickupList);
-        const joinOnceButton = new discord_js_1.ButtonBuilder()
-            .setCustomId(`volunteer--${channelDay}--night-host`)
-            .setLabel(const_1.NM_NIGHT_ROLES['night-host'].description)
-            .setStyle(discord_js_1.ButtonStyle.Secondary);
-        const joinAlwaysButton = new discord_js_1.ButtonBuilder()
-            .setCustomId(`volunteer--${channelDay}--night-pickup`)
-            .setLabel(const_1.NM_NIGHT_ROLES['night-pickup'].description)
-            .setStyle(discord_js_1.ButtonStyle.Secondary);
-        components.push(new discord_js_1.ActionRowBuilder()
-            .addComponents(joinOnceButton)
-            .addComponents(joinAlwaysButton));
-        interaction.editReply({
-            content,
-            components
-        });
-        return;
-    }
+async function VolunteerResponseEvent({ nightDataService }, interaction) {
+    interaction.deferReply();
+    console.log('HI');
     const [command, day, role, period] = interaction?.customId?.split('--') || [];
+    if (command !== 'volunteer-pickup') {
+        return;
+    }
+    console.log(command, day, role, period);
     if (interaction.isStringSelectMenu()) {
-        interaction.deferReply();
         // TODO: save to DB
-        const [org, timeStart, timeEnd] = interaction.values[0].split('---');
+        const [org, timeStart] = interaction.values[0].split('---');
         await nightDataService.addNightData([
             {
                 day,
@@ -63,8 +34,7 @@ async function NightListRequestEvent({ nightDataService }, interaction) {
     }
     // todo: replace all this with createMessageComponentCollector
     if (interaction.isButton()) {
-        interaction.deferReply();
-        // some other button command
+        interaction = interaction;
         // there should always be a day
         if (!day || !const_1.DAYS_OF_WEEK_CODES.includes(day)) {
             interaction.editReply({
@@ -146,4 +116,4 @@ async function NightListRequestEvent({ nightDataService }, interaction) {
         return;
     }
 }
-exports.NightListRequestEvent = NightListRequestEvent;
+exports.VolunteerResponseEvent = VolunteerResponseEvent;

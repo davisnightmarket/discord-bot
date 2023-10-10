@@ -30,9 +30,6 @@ class NightDataService {
     createNight({ 
     // defaults to blank, because we should always get a day
     day = '', org = '', timeStart = '', timeEnd = '', hostList = [], pickupList = [] }) {
-        if (!const_1.DAYS_OF_WEEK.includes(day)) {
-            throw new Error('Night must have a day!');
-        }
         return {
             day,
             org,
@@ -200,7 +197,8 @@ class NightDataService {
             .sort((a, b) => {
             return a.role < b.role ? -1 : a.role > b.role ? 1 : 0;
         })
-            .sort((a, b) => const_1.DAYS_OF_WEEK.indexOf(a.day) - const_1.DAYS_OF_WEEK.indexOf(b.day))
+            .sort((a, b) => const_1.DAYS_OF_WEEK_CODES.indexOf(a.day) -
+            const_1.DAYS_OF_WEEK_CODES.indexOf(b.day))
             //in here we add blank lines
             //! NOT WORKING: we need to add a method to the sheet service
             .reduce((a, { day, role, org, discordIdOrEmail, period, timeStart, timeEnd }, i) => {

@@ -32,7 +32,7 @@ export class PersonDataService {
         this.waitingForPersonListCache = this.getPersonList();
         // reset the cache ever 2 hour
         setInterval(() => {
-            this.waitingForPersonListCache = this.getPersonList();
+            this.refreshPersonListCache();
         }, 1000 * 60 * 60 * 2);
     }
 
@@ -44,6 +44,10 @@ export class PersonDataService {
             ...PersonDataService.createPerson(person),
             discordIdOrEmail
         };
+    }
+
+    createPerson(person: Partial<PersonModel> = {}): PersonModel {
+        return PersonDataService.createPerson(person);
     }
 
     static createPerson({
@@ -61,7 +65,7 @@ export class PersonDataService {
         interest = '',
         reference = '',
         discordId = ''
-    }: Partial<PersonModel>): PersonModel {
+    }: Partial<PersonModel> = {}): PersonModel {
         return {
             status,
             name,
@@ -96,7 +100,8 @@ export class PersonDataService {
         // if we can find them on the cache ...
         const list = (await this.waitingForPersonListCache).filter((map) => {
             return Object.keys(map).some(
-                (k) => query[k] && query[k] === map[k]
+                // note that we turn everything into strings
+                (k) => query[k] && '' + query[k] === '' + map[k]
             );
         });
 
@@ -105,7 +110,7 @@ export class PersonDataService {
             ? list
             : (await this.getPersonList()).filter((map) => {
                   return Object.keys(map).some(
-                      (k) => query[k] && query[k] === map[k]
+                      (k) => query[k] && '' + query[k] === '' + map[k]
                   );
               });
     }
@@ -123,31 +128,40 @@ export class PersonDataService {
             .map((person) => person.email)
             .filter((email) => email.trim());
     }
-
-    async getPersonByEmailOrDiscordId(
-        emailOrDiscordId: string
-    ): Promise<PersonModel | null> {
-        // ok, so we find out if there is an @, and if not we assume it is a discord id
-        // otherwise we assume it is an email, and if that fails, then we assume it is a discord id
-
-        const a =
-            emailOrDiscordId.split('@').length !== 2
-                ? await this.getPersonListByMatchAnyProperties({
-                      discordId: emailOrDiscordId
-                  })
-                : (await this.getPersonListByMatchAnyProperties({
-                      email: emailOrDiscordId
-                  })) ??
-                  (await this.getPersonListByMatchAnyProperties({
-                      discordId: emailOrDiscordId
-                  }));
-
+    async getPersonByDiscordId(
+        discordId: string
+    ): Promise<PersonModel | undefined> {
+        const a = await this.getPersonListByMatchAnyProperties({
+            discordId
+        });
         if (a.length > 1) {
-            console.error(`We found multiple persons with that identifier!
+            console.error(`We found multiple persons with that identidiscordId!
+            ${a.map((a) => `${a.name} ${a.email}`).join(', ')}
+            `);
+        }
+        return a[0];
+    }
+    async getPersonByEmail(email: string): Promise<PersonModel | null> {
+        const a = await this.getPersonListByMatchAnyProperties({
+            email
+        });
+        if (a.length > 1) {
+            console.error(`We found multiple persons with that email!
             ${a.map((a) => `${a.name} ${a.email}`).join(', ')}
             `);
         }
         return a[0] || null;
+    }
+    async getPersonByEmailOrDiscordId(
+        emailOrDiscordId: string
+    ): Promise<PersonModel | undefined> {
+        // ok, so we find out if there is an @, and if not we assume it is a discord id
+        // otherwise we assume it is an email, and if that fails, then we assume it is a discord id
+
+        return emailOrDiscordId.split('@').length !== 2
+            ? await this.getPersonByDiscordId(emailOrDiscordId)
+            : (await this.getPersonByEmail(emailOrDiscordId)) ??
+                  (await this.getPersonByDiscordId(emailOrDiscordId));
     }
 
     async setActiveState(email: string, status: NmActiveStateType) {
