@@ -7,6 +7,7 @@ import {
     ButtonStyle
 } from 'discord.js';
 import { PersonModel } from '../service';
+import { Dbg } from '../utility';
 
 // a button for deleting all identifying info frrom our db
 export const IdentityDeleteComponent = () => {
@@ -22,6 +23,7 @@ export const IdentityDeleteComponent = () => {
     };
 };
 
+const dbg = Dbg('identity.component');
 export const IdentityEditModalComponent = ({
     discordId,
     name,
@@ -29,36 +31,38 @@ export const IdentityEditModalComponent = ({
     phone,
     email
 }: PersonModel) => {
+    dbg(discordId, name, bio, phone, email);
+
     const modal = new ModalBuilder()
-        .setCustomId(`identity--${discordId}`)
+        .setCustomId(`identity`)
         .setTitle('Night Market Identity Edit');
 
     const nameInput = new TextInputBuilder()
-        .setCustomId(`identity--${discordId}--name`)
+        .setCustomId(`identity--name`)
         .setLabel('What is your lived name?')
-        .setPlaceholder(name)
+        .setValue(name)
         // Paragraph means multiple lines of text.
         .setStyle(TextInputStyle.Short);
 
     const bioInput = new TextInputBuilder()
-        .setCustomId(`identity--${discordId}--bio`)
+        .setCustomId(`identity--bio`)
         .setLabel('Please tell us something biographical!')
-        .setPlaceholder(bio)
+        .setValue(bio)
         // Paragraph means multiple lines of text.
         .setStyle(TextInputStyle.Paragraph);
 
     const emailInput = new TextInputBuilder()
-        .setCustomId(`identity--${discordId}--email`)
+        .setCustomId(`identity--email`)
         .setLabel('Your email address:')
 
-        .setPlaceholder(email)
+        .setValue(email)
         // Paragraph means multiple lines of text.
         .setStyle(TextInputStyle.Short);
 
     const phoneInput = new TextInputBuilder()
-        .setCustomId(`identity--${discordId}--phone`)
+        .setCustomId(`identity--phone`)
         .setLabel('Your phone number:')
-        .setPlaceholder(phone)
+        .setValue(phone)
         // Paragraph means multiple lines of text.
         .setStyle(TextInputStyle.Short);
     // Add inputs to the modal
@@ -79,22 +83,22 @@ export const IdentityEditModalComponent = ({
     return modal;
 };
 
-export const IdentityEditComponent = ({
-    discordId,
-    name,
-    bio,
-    phone,
-    email
-}: PersonModel) => {
-    const phoneInput = new TextInputBuilder()
-        .setCustomId(`identity--${discordId}--phone`)
-        .setLabel('Your phone number:')
-        .setPlaceholder(phone)
-        // Paragraph means multiple lines of text.
-        .setStyle(TextInputStyle.Short);
+// export const IdentityEditComponent = ({
+//     discordId,
+//     name,
+//     bio,
+//     phone,
+//     email
+// }: PersonModel) => {
+//     const phoneInput = new TextInputBuilder()
+//         .setCustomId(`identity--phone`)
+//         .setLabel('Your phone number:')
+//         .setValue(phone)
+//         // Paragraph means multiple lines of text.
+//         .setStyle(TextInputStyle.Short);
 
-    return [
-        new ActionRowBuilder().addComponents(phoneInput),
-        new ActionRowBuilder().addComponents(phoneInput)
-    ];
-};
+//     return [
+//         new ActionRowBuilder().addComponents(phoneInput),
+//         new ActionRowBuilder().addComponents(phoneInput)
+//     ];
+// };

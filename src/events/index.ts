@@ -4,3 +4,5 @@ export * from './volunteer-request.event';
 export * from './volunteer-response.event';
 export * from './availability-edit.event';
 export * from './welcome.event';
+export * from './identity-submit.event';
+export * from './identity-edit.event';

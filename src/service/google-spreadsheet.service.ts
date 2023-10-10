@@ -2,6 +2,8 @@ import { GoogleAuth } from 'google-auth-library';
 import { google, type sheets_v4 } from 'googleapis';
 import { Dbg } from '../utility';
 import { NmSecrets } from '../utility/secrets.utility';
+import { GaxiosPromise } from 'googleapis/build/src/apis/abusiveexperiencereport';
+import { GaxiosResponse } from 'gaxios';
 
 export type SpreadsheetDataValueModel = string | number | undefined;
 
@@ -59,24 +61,38 @@ export class GoogleSpreadsheetsService {
         return (result.data.values ?? []) as A;
     }
 
+    opsQueue: GaxiosPromise[] = [];
     async sheetClear(sheetName: string) {
+        await Promise.all(this.opsQueue);
         const spreadsheetId = this.spreadsheetId;
 
         const [gspread] = await Gspread;
 
         try {
-            await gspread.spreadsheets.values.batchClear({
+            const op = gspread.spreadsheets.values.batchClear({
                 spreadsheetId,
                 requestBody: {
                     ranges: [sheetName]
                 }
             });
+            this.opsQueue.push(
+                op.then((a) => {
+                    this.opsQueue.slice(
+                        this.opsQueue.findIndex((a) => a === op),
+                        1
+                    );
+                    return a as GaxiosResponse;
+                })
+            );
+            await op;
         } catch (err) {
             console.error(err);
             throw err;
         }
     }
+
     async rowsDelete(startIndex: number, endIndex: number, sheetId: number) {
+        await Promise.all(this.opsQueue);
         const spreadsheetId = this.spreadsheetId;
         const requestBody = {
             requests: [
@@ -101,11 +117,11 @@ export class GoogleSpreadsheetsService {
             });
         } catch (err) {
             console.error(err);
-            throw err;
         }
     }
-
     async rowsWrite(values: SpreadsheetDataValueModel[][], range: string) {
+        await Promise.all(this.opsQueue);
+
         if (!values || !(values instanceof Array) || values.length === 0) {
             throw new Error('Must pass a valid values');
         }
@@ -114,7 +130,7 @@ export class GoogleSpreadsheetsService {
         const [gspread, auth] = await Gspread;
 
         try {
-            const result = await gspread.spreadsheets.values.update({
+            const op = gspread.spreadsheets.values.update({
                 auth,
                 spreadsheetId,
                 range,
@@ -125,6 +141,16 @@ export class GoogleSpreadsheetsService {
                     values
                 }
             });
+            this.opsQueue.push(
+                op.then((a) => {
+                    this.opsQueue.slice(
+                        this.opsQueue.findIndex((a) => a === op),
+                        1
+                    );
+                    return a as GaxiosResponse;
+                })
+            );
+            const result = await op;
 
             dbg('%d cells updated.', result.data.updatedCells);
             return result.data.updatedRange;
@@ -140,32 +166,35 @@ export class GoogleSpreadsheetsService {
      * @param range where in the sheet to insert
      * @returns range that was affected
      */
+
     async rowsAppend(
         values: SpreadsheetDataValueModel[][],
         range: string
-    ): Promise<string> {
+    ): Promise<void> {
         if (!values || !(values instanceof Array) || values.length === 0) {
             throw new Error('Must pass a valid values');
         }
+        await Promise.all(this.opsQueue);
+
         const spreadsheetId = this.spreadsheetId;
         validate(range);
         const [gspread] = await Gspread;
-        return await new Promise((resolve, reject) => {
-            gspread.spreadsheets.values.append(
-                {
-                    spreadsheetId,
-                    range,
-                    valueInputOption: 'USER_ENTERED',
-                    requestBody: { values }
-                },
-                function (err: Error | null, response: any) {
-                    if (err != null) {
-                        reject(err);
-                    }
-                    resolve(response.data.updates.updatedRange);
-                }
-            );
+        const op = gspread.spreadsheets.values.append({
+            spreadsheetId,
+            range,
+            valueInputOption: 'USER_ENTERED',
+            requestBody: { values }
         });
+        this.opsQueue.push(
+            op.then((a) => {
+                this.opsQueue.slice(
+                    this.opsQueue.findIndex((a) => a === op),
+                    1
+                );
+                return a as GaxiosResponse;
+            })
+        );
+        await op;
     }
 
     async rowsPrepend(
@@ -174,6 +203,7 @@ export class GoogleSpreadsheetsService {
         startColumn: string,
         startIndex: number
     ) {
+        await Promise.all(this.opsQueue);
         const spreadsheetId = this.spreadsheetId;
         validate(title);
         const [gspread, auth] = await Gspread;
@@ -202,7 +232,17 @@ export class GoogleSpreadsheetsService {
         };
 
         try {
-            await gspread.spreadsheets.batchUpdate(request);
+            const op = gspread.spreadsheets.batchUpdate(request);
+            this.opsQueue.push(
+                op.then((a) => {
+                    this.opsQueue.slice(
+                        this.opsQueue.findIndex((a) => a === op),
+                        1
+                    );
+                    return a as GaxiosResponse;
+                })
+            );
+            await op;
         } catch (e) {
             console.error(e);
             return;

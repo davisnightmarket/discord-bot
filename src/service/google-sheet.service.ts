@@ -25,15 +25,29 @@ export class GoogleSheetService<T extends SpreadsheetDataModel> {
         this.waitingForSheetId = this.spreadsheetService.getSheetIdByTitle(
             this.sheetName
         );
-        this.waitingForHeaderList = this.getOrCreateHeaders(
+        this.waitingForHeaderList = this.getHeaders(
             headersList as Array<keyof T>
         );
     }
 
     // TODO: test this
-    async updateRowByIndex(index: number, value: SpreadsheetDataValueModel) {
-        return await this.spreadsheetService.rowsWrite(
-            [[value]],
+    async updateRowWithMapByRowNumber(index: number, map: T) {
+        const rows = (await this.waitingForHeaderList).map(
+            (header) => map[header] || ''
+        );
+        await this.spreadsheetService.rowsWrite(
+            [rows],
+            this.getSheetRangeString(`A${index}`)
+        );
+    }
+
+    // TODO: test this
+    async updateRowByRowNumber(
+        index: number,
+        row: SpreadsheetDataValueModel[]
+    ) {
+        await this.spreadsheetService.rowsWrite(
+            [row],
             this.getSheetRangeString(`A${index}`)
         );
     }
@@ -102,7 +116,7 @@ export class GoogleSheetService<T extends SpreadsheetDataModel> {
             )
         );
         if (limitToHeaders.length) {
-            const indexList = await this.getIndexesByHeaderValues(
+            const indexList = await this.getColumnIndexesByHeaderValues(
                 limitToHeaders
             );
 
@@ -172,7 +186,7 @@ export class GoogleSheetService<T extends SpreadsheetDataModel> {
 
     // this returns a list of index number corresponding to rows that match the query
     // inclusive of header! Starting with 1!
-    async getIndexListByMatchAnyProperties(
+    async getRowNumberListByMatchAnyProperties(
         query: Partial<T>
     ): Promise<number[]> {
         const all = await this.getAllRowsAsMaps({ includeHeader: true });
@@ -188,7 +202,7 @@ export class GoogleSheetService<T extends SpreadsheetDataModel> {
             .filter((a) => a > 0);
     }
 
-    async getIndexesByHeaderValues(a: Array<keyof T>) {
+    async getColumnIndexesByHeaderValues(a: Array<keyof T>) {
         const headerList = await this.waitingForHeaderList;
         return a.map(headerList.indexOf);
     }
@@ -201,12 +215,9 @@ export class GoogleSheetService<T extends SpreadsheetDataModel> {
             columnStart && columnEnd ? ':' + columnEnd : ''
         }`;
     }
-
-    // this is called in the constructor to populate the headers
+    // this is called in the constructor to get the headers
     // if the headers have changed, this will update them in the sheet before populating
-    async getOrCreateHeaders(
-        headerList?: Array<keyof T>
-    ): Promise<Array<keyof T>> {
+    async getHeaders(headerList?: Array<keyof T>): Promise<Array<keyof T>> {
         await this.waitingForSheetId;
         let list = ((
             await this.spreadsheetService.rangeGet(
@@ -214,8 +225,7 @@ export class GoogleSheetService<T extends SpreadsheetDataModel> {
             )
         )[0] || []) as Array<keyof T>;
 
-        // if we past a header list
-
+        // if we past a header list then we are replacing the
         if (headerList) {
             // the keys do NOT match, we throw an error
             if (
@@ -223,19 +233,49 @@ export class GoogleSheetService<T extends SpreadsheetDataModel> {
                     return headerList[i] === a;
                 })
             ) {
-                throw new Error(`header list mismatch! The spreadsheet is out of sync with the model:
+                console.error(`header list mismatch! The spreadsheet is out of sync with the model:
 
                 the spreadsheet: ${list.join(', ')}
                 the model:       ${headerList.join(', ')}
 
                 `);
             }
-            await this.spreadsheetService.rowsAppend(
+        }
+
+        return list;
+    }
+
+    // we should be careful here, because this can break a lot of data
+    async createHeaders(headerList?: Array<keyof T>): Promise<Array<keyof T>> {
+        await this.waitingForSheetId;
+        let list = ((
+            await this.spreadsheetService.rangeGet(
+                this.getSheetRangeString('A1', 'Z1')
+            )
+        )[0] || []) as Array<keyof T>;
+
+        // if we past a header list then we are replacing the
+        if (headerList) {
+            // the keys do NOT match, we throw an error
+            if (
+                !list.every((a, i) => {
+                    return headerList[i] === a;
+                })
+            ) {
+                console.error(`header list mismatch! The spreadsheet is out of sync with the model:
+
+                the spreadsheet: ${list.join(', ')}
+                the model:       ${headerList.join(', ')}
+
+                `);
+            }
+            await this.spreadsheetService.rowsWrite(
                 [headerList as Array<string | number>],
                 this.getSheetRangeString('A1', 'Z1')
             );
             list = headerList;
         }
+
         return list;
     }
 }

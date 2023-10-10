@@ -52,6 +52,9 @@ export const TIME_UNTIL_UPDATE = 60 * 1000; // one minute in milliseconds
 /**
  *
  */
+
+const dbg = Dbg('FoodCountInputEvent');
+
 export const FoodCountInputEvent =
     ({
         personDataService,
@@ -59,6 +62,7 @@ export const FoodCountInputEvent =
         foodCountDataService
     }: GuildServiceModel) =>
     async (message: Message) => {
+        dbg('ok');
         const { channel, author } = message as Message<true>;
 
         /* STAGE 1: skip the message entirely in some cases */

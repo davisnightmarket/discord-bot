@@ -4,8 +4,11 @@ exports.IdentityEditAvailabilityEvent = void 0;
 const component_1 = require("../component");
 const const_1 = require("../const");
 const service_1 = require("../service");
+const utility_1 = require("../utility");
 // in which user edits their availability
+const dbg = (0, utility_1.Dbg)('IdentityEditAvailabilityEvent');
 async function IdentityEditAvailabilityEvent({ personDataService, nightDataService }, interaction) {
+    dbg('ok');
     // get the person's data
     const person = await personDataService.getPersonByDiscordId(interaction.user.id);
     if (!person) {

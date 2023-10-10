@@ -41,11 +41,28 @@ class PersonDataService {
             discordId
         };
     }
+    async updatePersonByDiscordId(person) {
+        const { discordId } = person;
+        await this.refreshPersonListCache();
+        const personIdList = await this.personSheetService.getRowNumberListByMatchAnyProperties({
+            discordId
+        });
+        if (!personIdList.length) {
+            throw new Error('We should only have one person record per discordID. Updating all.');
+        }
+        if (personIdList.length > 1) {
+            console.error('We should only have one person record per discordID. Updating all.');
+        }
+        for (const id of personIdList) {
+            await this.personSheetService.updateRowWithMapByRowNumber(id, person);
+        }
+        await this.refreshPersonListCache();
+    }
     async getPersonList() {
         return await this.personSheetService.getAllRowsAsMaps();
     }
     refreshPersonListCache() {
-        this.waitingForPersonListCache = this.getPersonList();
+        return (this.waitingForPersonListCache = this.getPersonList());
     }
     async getPersonListCache() {
         return await this.waitingForPersonListCache;
@@ -58,21 +75,23 @@ class PersonDataService {
             // note that we turn everything into strings
             (k) => query[k] && '' + query[k] === '' + map[k]);
         });
-        // otherwise get direct from data
-        return list.length
-            ? list
-            : (await this.getPersonList()).filter((map) => {
-                return Object.keys(map).some((k) => query[k] && '' + query[k] === '' + map[k]);
-            });
+        return list;
+        // .length
+        //     ? list
+        //     : (await this.getPersonList()).filter((map) => {
+        //           return Object.keys(map).some(
+        //               (k) => query[k] && '' + query[k] === '' + map[k]
+        //           );
+        //       });
     }
     async getNameList() {
-        const people = await this.getPersonList();
+        const people = await this.waitingForPersonListCache;
         return people
             .map((person) => person.name)
             .filter((name) => name.trim());
     }
     async getEmailList() {
-        const people = await this.getPersonList();
+        const people = await this.waitingForPersonListCache;
         return people
             .map((person) => person.email)
             .filter((email) => email.trim());
@@ -109,7 +128,7 @@ class PersonDataService {
     }
     async setActiveState(email, status) {
         // todo: move this to a more generic get person index by email or id
-        const indexList = await this.personSheetService.getIndexListByMatchAnyProperties({
+        const indexList = await this.personSheetService.getRowNumberListByMatchAnyProperties({
             email
         });
         if (!indexList.length) {
@@ -118,7 +137,9 @@ class PersonDataService {
         if (indexList.length > 1) {
             throw new Error('We found multiple persons with that email!');
         }
-        await this.personSheetService.updateRowByIndex(indexList[0], status);
+        await this.personSheetService.updateRowByRowNumber(indexList[0], [
+            status
+        ]);
         this.refreshPersonListCache();
     }
 }

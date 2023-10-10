@@ -20,3 +20,5 @@ __exportStar(require("./volunteer-request.event"), exports);
 __exportStar(require("./volunteer-response.event"), exports);
 __exportStar(require("./availability-edit.event"), exports);
 __exportStar(require("./welcome.event"), exports);
+__exportStar(require("./identity-submit.event"), exports);
+__exportStar(require("./identity-edit.event"), exports);

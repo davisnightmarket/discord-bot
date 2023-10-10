@@ -10,6 +10,7 @@ const debug = (0, utility_1.Dbg)('FoodCountCancelEvent');
  *
  */
 const FoodCountResponseEvent = async (interaction) => {
+    debug('OK');
     // discord event listener does not like ButtonInteraction, but
     // it makes life easier below
     interaction = interaction;

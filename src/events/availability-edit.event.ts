@@ -6,14 +6,17 @@ import {
 } from '../component';
 import { DAYS_OF_WEEK } from '../const';
 import { ParseContentService } from '../service';
+import { Dbg } from '../utility';
 
 // in which user edits their availability
 
+const dbg = Dbg('IdentityEditAvailabilityEvent');
 export async function IdentityEditAvailabilityEvent(
     { personDataService, nightDataService }: GuildServiceModel,
 
     interaction: ChatInputCommandInteraction
 ) {
+    dbg('ok');
     // get the person's data
     const person = await personDataService.getPersonByDiscordId(
         interaction.user.id

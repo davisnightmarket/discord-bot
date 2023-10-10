@@ -40,15 +40,21 @@ class GoogleSpreadsheetsService {
         return (result.data.values ?? []);
     }
     async sheetClear(sheetName) {
+        await Promise.all(this.opsQueue);
         const spreadsheetId = this.spreadsheetId;
         const [gspread] = await Gspread;
         try {
-            await gspread.spreadsheets.values.batchClear({
+            const op = gspread.spreadsheets.values.batchClear({
                 spreadsheetId,
                 requestBody: {
                     ranges: [sheetName]
                 }
             });
+            this.opsQueue.push(op.then((a) => {
+                this.opsQueue.slice(this.opsQueue.findIndex((a) => a === op), 1);
+                return a;
+            }));
+            await op;
         }
         catch (err) {
             console.error(err);
@@ -56,6 +62,7 @@ class GoogleSpreadsheetsService {
         }
     }
     async rowsDelete(startIndex, endIndex, sheetId) {
+        await Promise.all(this.opsQueue);
         const spreadsheetId = this.spreadsheetId;
         const requestBody = {
             requests: [
@@ -80,10 +87,10 @@ class GoogleSpreadsheetsService {
         }
         catch (err) {
             console.error(err);
-            throw err;
         }
     }
     async rowsWrite(values, range) {
+        await Promise.all(this.opsQueue);
         if (!values || !(values instanceof Array) || values.length === 0) {
             throw new Error('Must pass a valid values');
         }
@@ -91,7 +98,7 @@ class GoogleSpreadsheetsService {
         validate(range);
         const [gspread, auth] = await Gspread;
         try {
-            const result = await gspread.spreadsheets.values.update({
+            const op = gspread.spreadsheets.values.update({
                 auth,
                 spreadsheetId,
                 range,
@@ -102,6 +109,11 @@ class GoogleSpreadsheetsService {
                     values
                 }
             });
+            this.opsQueue.push(op.then((a) => {
+                this.opsQueue.slice(this.opsQueue.findIndex((a) => a === op), 1);
+                return a;
+            }));
+            const result = await op;
             dbg('%d cells updated.', result.data.updatedCells);
             return result.data.updatedRange;
         }
@@ -120,24 +132,24 @@ class GoogleSpreadsheetsService {
         if (!values || !(values instanceof Array) || values.length === 0) {
             throw new Error('Must pass a valid values');
         }
+        await Promise.all(this.opsQueue);
         const spreadsheetId = this.spreadsheetId;
         validate(range);
         const [gspread] = await Gspread;
-        return await new Promise((resolve, reject) => {
-            gspread.spreadsheets.values.append({
-                spreadsheetId,
-                range,
-                valueInputOption: 'USER_ENTERED',
-                requestBody: { values }
-            }, function (err, response) {
-                if (err != null) {
-                    reject(err);
-                }
-                resolve(response.data.updates.updatedRange);
-            });
+        const op = gspread.spreadsheets.values.append({
+            spreadsheetId,
+            range,
+            valueInputOption: 'USER_ENTERED',
+            requestBody: { values }
         });
+        this.opsQueue.push(op.then((a) => {
+            this.opsQueue.slice(this.opsQueue.findIndex((a) => a === op), 1);
+            return a;
+        }));
+        await op;
     }
     async rowsPrepend(values, title, startColumn, startIndex) {
+        await Promise.all(this.opsQueue);
         const spreadsheetId = this.spreadsheetId;
         validate(title);
         const [gspread, auth] = await Gspread;
@@ -163,7 +175,12 @@ class GoogleSpreadsheetsService {
             auth
         };
         try {
-            await gspread.spreadsheets.batchUpdate(request);
+            const op = gspread.spreadsheets.batchUpdate(request);
+            this.opsQueue.push(op.then((a) => {
+                this.opsQueue.slice(this.opsQueue.findIndex((a) => a === op), 1);
+                return a;
+            }));
+            await op;
         }
         catch (e) {
             console.error(e);
@@ -317,6 +334,7 @@ class GoogleSpreadsheetsService {
         }
     }
     constructor(spreadsheetId) {
+        this.opsQueue = [];
         this.spreadsheetId = spreadsheetId;
     }
 }

@@ -5,18 +5,21 @@ import {
     GatewayIntentBits,
     Partials
 } from 'discord.js';
-import { NmSecrets, GetGuildServices } from './utility';
+import { NmSecrets, GetGuildServices, Dbg } from './utility';
 import {
     FoodCountInputEvent,
     FoodCountResponseEvent,
     IdentityEditAvailabilityEvent,
     VolunteerRequestEvent,
     VolunteerResponseEvent,
-    WelcomeEvent
+    WelcomeEvent,
+    IdentityEditEvent,
+    IdentitySubmitEvent
 } from './events';
 import { AddCron } from './utility/cron.utility';
 import { NightOpsJob, NightTimelineJob } from './jobs';
-import { IdentityEditEvent } from './events/identity-edit.event';
+
+const dbg = Dbg('main');
 
 async function main() {
     // Start discord client
@@ -66,10 +69,12 @@ async function main() {
 
     // this one is dedicated to the /nm command
     client.on(Events.InteractionCreate, async (interaction) => {
+        dbg(Events.InteractionCreate);
         interaction = interaction as ChatInputCommandInteraction;
 
         const services = await GetGuildServices(interaction.guildId ?? '');
         if (interaction?.commandName == 'nm') {
+            dbg('nm /Command');
             // if (interaction.options.getString('command') === 'volunteer') {
             //     VolunteerRequestEvent(services, interaction);
             // }
@@ -77,21 +82,28 @@ async function main() {
             if (
                 interaction.options.getString('command') === 'set-availability'
             ) {
-                console.log('Editing Availability');
+                dbg('Editing Availability');
                 IdentityEditAvailabilityEvent(services, interaction);
             }
             if (interaction.options.getString('command') === 'edit-identity') {
-                console.log('Editing identity');
+                dbg('Editing identity');
                 IdentityEditEvent(services, interaction);
             }
 
             if (interaction.options.getString('command') === 'help-and-docs') {
+                dbg('help-and-docs');
                 interaction.reply('Coming soon!');
             }
 
             return;
+        } else if (interaction.isModalSubmit()) {
+            dbg('isModalSubmit');
+            IdentitySubmitEvent(services, interaction);
         } else {
+            dbg('else');
             FoodCountResponseEvent(interaction);
+
+            // todo: these are redundant if we use /nm command
             VolunteerRequestEvent(services, interaction);
             VolunteerResponseEvent(services, interaction);
         }

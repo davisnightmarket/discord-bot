@@ -257,34 +257,7 @@ export class NightDataService {
         // todo: move the mapping of object to headers to sheetService
     }
 
-    // this is a queue of updates, so we can wait for multiple updates happenign at once
-    // without making a mess of our data sheet
-    nightDataUpdateQueue: Promise<void>[] = [];
-    async addToNightDataQueue(update: Promise<void>): Promise<void> {
-        for (const a of this.nightDataUpdateQueue) {
-            await a;
-            this.nightDataUpdateQueue.splice(
-                this.nightDataUpdateQueue.indexOf(a),
-                1
-            );
-        }
-        this.nightDataUpdateQueue.push(update);
-        return update;
-    }
-
     async addNightData(nightUpdateList: NightOpsDataModel[]) {
-        await this.addToNightDataQueue(
-            this.addNightDataRecords(nightUpdateList)
-        );
-    }
-
-    async removeNightData(nightUpdateList: NightOpsDataModel[]) {
-        await this.addToNightDataQueue(
-            this.removeNightDataRecords(nightUpdateList)
-        );
-    }
-
-    private async addNightDataRecords(nightUpdateList: NightOpsDataModel[]) {
         // updating data, always get fresh data
         // because we use the cache to update
         await this.refreshCache();
@@ -312,7 +285,7 @@ export class NightDataService {
         await this.updateNightData(nightData);
     }
 
-    private async removeNightDataRecords(nightRemoveList: NightOpsDataModel[]) {
+    async removeNightData(nightRemoveList: NightOpsDataModel[]) {
         // updating data, always get fresh data
         // because we use the cache to update
         await this.refreshCache();

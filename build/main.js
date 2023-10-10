@@ -5,7 +5,7 @@ const utility_1 = require("./utility");
 const events_1 = require("./events");
 const cron_utility_1 = require("./utility/cron.utility");
 const jobs_1 = require("./jobs");
-const identity_edit_event_1 = require("./events/identity-edit.event");
+const dbg = (0, utility_1.Dbg)('main');
 async function main() {
     // Start discord client
     const client = new discord_js_1.Client({
@@ -45,28 +45,37 @@ async function main() {
     // });
     // this one is dedicated to the /nm command
     client.on(discord_js_1.Events.InteractionCreate, async (interaction) => {
+        dbg(discord_js_1.Events.InteractionCreate);
         interaction = interaction;
         const services = await (0, utility_1.GetGuildServices)(interaction.guildId ?? '');
         if (interaction?.commandName == 'nm') {
+            dbg('nm /Command');
             // if (interaction.options.getString('command') === 'volunteer') {
             //     VolunteerRequestEvent(services, interaction);
             // }
             // ToDO: automate this
             if (interaction.options.getString('command') === 'set-availability') {
-                console.log('Editing Availability');
+                dbg('Editing Availability');
                 (0, events_1.IdentityEditAvailabilityEvent)(services, interaction);
             }
             if (interaction.options.getString('command') === 'edit-identity') {
-                console.log('Editing identity');
-                (0, identity_edit_event_1.IdentityEditEvent)(services, interaction);
+                dbg('Editing identity');
+                (0, events_1.IdentityEditEvent)(services, interaction);
             }
             if (interaction.options.getString('command') === 'help-and-docs') {
+                dbg('help-and-docs');
                 interaction.reply('Coming soon!');
             }
             return;
         }
+        else if (interaction.isModalSubmit()) {
+            dbg('isModalSubmit');
+            (0, events_1.IdentitySubmitEvent)(services, interaction);
+        }
         else {
+            dbg('else');
             (0, events_1.FoodCountResponseEvent)(interaction);
+            // todo: these are redundant if we use /nm command
             (0, events_1.VolunteerRequestEvent)(services, interaction);
             (0, events_1.VolunteerResponseEvent)(services, interaction);
         }

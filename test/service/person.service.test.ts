@@ -9,7 +9,6 @@ describe('nm-person.service', () => {
         const email = 'christianco@gmail.com';
         await personDataService.setActiveState(email, 'inactive');
 
-        
         const pa = await personDataService.getPersonByEmailOrDiscordId(email);
         expect(pa?.email).toBe(email);
         expect(pa?.status).toBe('inactive');

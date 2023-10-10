@@ -7,9 +7,6 @@ const _1 = require(".");
 class NightDataService {
     constructor(spreadsheetId, personCoreDataService) {
         this.waitingForNightCache = Promise.resolve([]);
-        // this is a queue of updates, so we can wait for multiple updates happenign at once
-        // without making a mess of our data sheet
-        this.nightDataUpdateQueue = [];
         this.nightSheetService = new _1.GoogleSheetService({
             spreadsheetId,
             // todo: we should store sheet names in const
@@ -136,21 +133,7 @@ class NightDataService {
         }
         // todo: move the mapping of object to headers to sheetService
     }
-    async addToNightDataQueue(update) {
-        for (const a of this.nightDataUpdateQueue) {
-            await a;
-            this.nightDataUpdateQueue.splice(this.nightDataUpdateQueue.indexOf(a), 1);
-        }
-        this.nightDataUpdateQueue.push(update);
-        return update;
-    }
     async addNightData(nightUpdateList) {
-        await this.addToNightDataQueue(this.addNightDataRecords(nightUpdateList));
-    }
-    async removeNightData(nightUpdateList) {
-        await this.addToNightDataQueue(this.removeNightDataRecords(nightUpdateList));
-    }
-    async addNightDataRecords(nightUpdateList) {
         // updating data, always get fresh data
         // because we use the cache to update
         await this.refreshCache();
@@ -170,7 +153,7 @@ class NightDataService {
         }));
         await this.updateNightData(nightData);
     }
-    async removeNightDataRecords(nightRemoveList) {
+    async removeNightData(nightRemoveList) {
         // updating data, always get fresh data
         // because we use the cache to update
         await this.refreshCache();
