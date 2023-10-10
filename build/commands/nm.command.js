@@ -9,15 +9,15 @@ exports.default = new discord_js_1.SlashCommandBuilder()
     .setDescription('different commands do different things')
     .setRequired(true)
     .addChoices({
-    name: 'Volunteer to Host',
-    value: 'volunteer-pickup'
+    name: 'Volunteer',
+    value: 'volunteer'
 }, {
-    name: 'Volunteer to Pickup',
-    value: 'volunteer-host'
-}, {
-    name: 'Edit Availability',
-    value: 'edit-availability'
+    name: 'Set Availability',
+    value: 'set-availability'
 }, {
     name: 'Edit Identity',
     value: 'edit-identity'
+}, {
+    name: 'Help & Docs',
+    value: 'help-and-docs'
 }));

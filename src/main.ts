@@ -73,22 +73,27 @@ async function main() {
             // if (interaction.options.getString('command') === 'volunteer') {
             //     VolunteerRequestEvent(services, interaction);
             // }
+            // ToDO: automate this
             if (
-                interaction.options.getString('command') === 'edit-availability'
+                interaction.options.getString('command') === 'set-availability'
             ) {
                 console.log('Editing Availability');
                 IdentityEditAvailabilityEvent(services, interaction);
             }
-            // if (interaction.options.getString('command') === 'edit-identity') {
-            //     console.log('Editing Identity');
-            //     IdentityEditEvent(services, interaction);
-            // }
+            if (interaction.options.getString('command') === 'edit-identity') {
+                console.log('Editing identity');
+                IdentityEditEvent(services, interaction);
+            }
+
+            if (interaction.options.getString('command') === 'help-and-docs') {
+                interaction.reply('Coming soon!');
+            }
 
             return;
         } else {
-            // FoodCountResponseEvent(interaction);
-            // VolunteerRequestEvent(services, interaction);
-            // VolunteerResponseEvent(services, interaction);
+            FoodCountResponseEvent(interaction);
+            VolunteerRequestEvent(services, interaction);
+            VolunteerResponseEvent(services, interaction);
         }
     });
 

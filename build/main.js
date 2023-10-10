@@ -5,6 +5,7 @@ const utility_1 = require("./utility");
 const events_1 = require("./events");
 const cron_utility_1 = require("./utility/cron.utility");
 const jobs_1 = require("./jobs");
+const identity_edit_event_1 = require("./events/identity-edit.event");
 async function main() {
     // Start discord client
     const client = new discord_js_1.Client({
@@ -50,20 +51,24 @@ async function main() {
             // if (interaction.options.getString('command') === 'volunteer') {
             //     VolunteerRequestEvent(services, interaction);
             // }
-            if (interaction.options.getString('command') === 'edit-availability') {
+            // ToDO: automate this
+            if (interaction.options.getString('command') === 'set-availability') {
                 console.log('Editing Availability');
                 (0, events_1.IdentityEditAvailabilityEvent)(services, interaction);
             }
-            // if (interaction.options.getString('command') === 'edit-identity') {
-            //     console.log('Editing Identity');
-            //     IdentityEditEvent(services, interaction);
-            // }
+            if (interaction.options.getString('command') === 'edit-identity') {
+                console.log('Editing identity');
+                (0, identity_edit_event_1.IdentityEditEvent)(services, interaction);
+            }
+            if (interaction.options.getString('command') === 'help-and-docs') {
+                interaction.reply('Coming soon!');
+            }
             return;
         }
         else {
-            // FoodCountResponseEvent(interaction);
-            // VolunteerRequestEvent(services, interaction);
-            // VolunteerResponseEvent(services, interaction);
+            (0, events_1.FoodCountResponseEvent)(interaction);
+            (0, events_1.VolunteerRequestEvent)(services, interaction);
+            (0, events_1.VolunteerResponseEvent)(services, interaction);
         }
     });
     client.on(discord_js_1.Events.GuildMemberAdd, (member) => {
