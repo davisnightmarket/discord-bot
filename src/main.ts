@@ -7,14 +7,15 @@ import {
 } from 'discord.js';
 import { NmSecrets, GetGuildServices, Dbg } from './utility';
 import {
-    FoodCountInputEvent,
-    FoodCountResponseEvent,
-    IdentityEditAvailabilityEvent,
-    VolunteerRequestEvent,
+    FoodCountDeleteButtonEvent,
+    FoodCountMessageEvent,
+    AvailabilityCommandEvent,
+    AvailabilitySelectEvent,
+    VolunteerCommandEvent,
     VolunteerResponseEvent,
     WelcomeEvent,
-    IdentityEditEvent,
-    IdentitySubmitEvent
+    IdentityCommandEvent,
+    IdentityEditModalEvent
 } from './events';
 import { AddCron } from './utility/cron.utility';
 import { NightOpsJob, NightTimelineJob } from './jobs';
@@ -57,7 +58,7 @@ async function main() {
     client.on(Events.MessageCreate, async (message) => {
         const services = await GetGuildServices(message.guildId ?? '');
         // food count input
-        FoodCountInputEvent(services);
+        FoodCountDeleteButtonEvent(services);
     });
 
     client.on(Events.InteractionCreate, async (interaction) => {
@@ -68,18 +69,18 @@ async function main() {
         if (interaction?.commandName == 'nm') {
             dbg('nm /Command');
             if (interaction.options.getString('command') === 'volunteer') {
-                VolunteerRequestEvent(services, interaction);
+                VolunteerCommandEvent(services, interaction);
             }
             // ToDO: automate this
             if (
                 interaction.options.getString('command') === 'set-availability'
             ) {
                 dbg('Editing Availability');
-                IdentityEditAvailabilityEvent(services, interaction);
+                AvailabilityCommandEvent(services, interaction);
             }
             if (interaction.options.getString('command') === 'edit-identity') {
                 dbg('Editing identity');
-                IdentityEditEvent(services, interaction);
+                IdentityCommandEvent(services, interaction);
             }
 
             if (interaction.options.getString('command') === 'help-and-docs') {
@@ -90,13 +91,16 @@ async function main() {
             return;
         } else if (interaction.isModalSubmit()) {
             dbg('isModalSubmit');
-            IdentitySubmitEvent(services, interaction);
+            IdentityEditModalEvent(services, interaction);
+        } else if (interaction.isStringSelectMenu()) {
+            dbg('isStringSelectMenu');
+            AvailabilitySelectEvent(services, interaction);
         } else {
-            dbg('else');
-            FoodCountResponseEvent(interaction);
+            dbg('otherwise this is a message content trigger');
+            FoodCountMessageEvent(interaction);
 
-            // todo: these are redundant if we use /nm command
-            VolunteerRequestEvent(services, interaction);
+            // todo: this should be split into different events
+            // uses buttons and selects to handle different volunteering steps
             VolunteerResponseEvent(services, interaction);
         }
     });

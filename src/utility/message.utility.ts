@@ -4,13 +4,16 @@ import { join } from 'path';
 import Handlebars from 'handlebars';
 
 type MessageCodeType =
+    | 'GENERIC_OK'
+    | 'GENERIC_NO_PERSON'
+    | 'GENERIC_SORRY'
+    | 'AVAILABILITY_TO_HOST'
+    | 'AVAILABILITY_TO_PICKUP'
     | 'VOLUNTEER_AS_ROLE'
     | 'VOLUNTEER_ONCE_OR_COMMIT'
-    | 'AVAILABILITY_PERIOD'
     | 'FOODCOUNT_INPUT_FAIL'
     | 'FOODCOUNT_INPUT_OK'
     | 'FOODCOUNT_INSERT'
-    | 'GENERIC_SORRY'
     | 'NIGHT_CAP_NEEDED'
     | 'PERSON_FIRST_CONTACT'
     | 'PERSON_REQUEST_EMAIL_AGAIN'
@@ -28,7 +31,7 @@ const dbg = Dbg('MessageUtility');
 
 const messageCache: Record<string, string> = {};
 
-const messagePath = join(__dirname, '/../message/md');
+const messagePath = join(__dirname, '/../message-md');
 
 function loadMessage(id: string, reload: boolean = false) {
     if (messageCache[id] && !reload) {

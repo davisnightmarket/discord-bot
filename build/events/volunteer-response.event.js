@@ -4,17 +4,18 @@ exports.VolunteerResponseEvent = void 0;
 const const_1 = require("../const");
 const volunteer_component_1 = require("../component/volunteer.component");
 const utility_1 = require("../utility");
-(0, utility_1.CreateMessageMap)({});
+const dbg = (0, utility_1.Dbg)('VolunteerResponseEvent');
 // todo: split this into different events for clarity
 // when a person requests a listing of
 async function VolunteerResponseEvent({ nightDataService, messageService }, interaction) {
     interaction.deferReply();
-    console.log('HI');
     const [command, day, role, period] = interaction?.customId?.split('--') || [];
+    dbg(command, day, role, period);
     if (command !== 'volunteer') {
         return;
     }
     console.log(command, day, role, period);
+    // in this case we are selecting the day (or days) for volunteering, which is the final step
     if (interaction.isStringSelectMenu()) {
         // TODO: save to DB
         const [org, timeStart] = interaction.values[0].split('---');

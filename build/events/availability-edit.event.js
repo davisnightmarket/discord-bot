@@ -1,40 +1,84 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.IdentityEditAvailabilityEvent = void 0;
+exports.AvailabilitySelectEvent = void 0;
 const component_1 = require("../component");
 const const_1 = require("../const");
-const service_1 = require("../service");
 const utility_1 = require("../utility");
 // in which user edits their availability
-const dbg = (0, utility_1.Dbg)('IdentityEditAvailabilityEvent');
-async function IdentityEditAvailabilityEvent({ personDataService, nightDataService }, interaction) {
+const dbg = (0, utility_1.Dbg)('AvailabilityEditEvent');
+async function AvailabilitySelectEvent({ personDataService, messageService }, interaction) {
     dbg('ok');
+    const [command, period, day] = interaction.customId?.split('--') || [];
+    if (command !== 'availability') {
+        return;
+    }
+    await interaction.deferReply();
     // get the person's data
     const person = await personDataService.getPersonByDiscordId(interaction.user.id);
     if (!person) {
         // show them their modal
-        interaction.showModal((0, component_1.IdentityEditModalComponent)(personDataService.createPerson(person)));
+        // we cannot show the identity model since we have deferred
+        interaction.editReply({
+            content: await messageService.getGenericNoPerson()
+        });
         return;
     }
-    await interaction.deferReply();
-    const dayTimes = await nightDataService.waitingForNightCache.then((nightOps) => {
-        const dayTimesMap = nightOps.reduce((a, b) => {
-            if (b.day && b.timeStart && !a[b.day + b.timeStart]) {
-                a[b.day + b.timeStart] = [
-                    `${b.day}||${b.timeStart}`,
-                    `${const_1.DAYS_OF_WEEK[b.day].name} ${service_1.ParseContentService.getAmPmTimeFrom24Hour(b.timeStart)}`
-                ];
-            }
-            return a;
-        }, {});
-        return Object.values(dayTimesMap);
-    });
-    // todo: show host then pickup, since we can't fit them all
-    const components = (0, component_1.AvailabilityHostComponent)(dayTimes, personDataService.createPerson(person));
-    // response
-    interaction.editReply({
-        content: 'Which days and times are you available to host Night Market?\n You can select multiple days and times.',
-        components
-    });
+    const daysOfWeekIdList = Object.values(const_1.DAYS_OF_WEEK).map((a) => a.id);
+    // todo: we probably should have a routing utility for routing different types of responses
+    // in this case we have selected our night-host availability so ...
+    if (period === 'night-host') {
+        // save it to the db ...
+        const [day, timeStart] = interaction.values[0].split('|||');
+        dbg(day, timeStart);
+        // TODO: edit person spread to allow for this value
+        //person.availabilityToHost = interaction.values.join(',');
+        // personDataService.updatePersonByDiscordId({
+        //     ...person,
+        //     availabilityToHost:interaction.values.join(',')
+        // })
+        // now display first night-pickup select
+        const currentDay = const_1.DAYS_OF_WEEK[daysOfWeekIdList[0]];
+        const components = (0, component_1.AvailabilityToPickupPerDayComponent)({
+            day: currentDay.id
+        });
+        interaction.editReply({
+            content: messageService.m.AVAILABILITY_TO_PICKUP({
+                dayName: currentDay.name
+            }),
+            components
+        });
+        return;
+    }
+    // in this case we are in the pickup section
+    if (period === 'night-pickup') {
+        // save the previous to the db ...
+        // TODO: edit person spread to allow for this value
+        // person.availabilityToPickup = interaction.values.join(',');
+        // personDataService.updatePersonByDiscordId({
+        //     ...person,
+        //     availabilityToPickup:interaction.values.join(',')
+        // })
+        // show the next step
+        const nextDayIndex = daysOfWeekIdList.indexOf(day) + 1;
+        // present night-pickup selects
+        if (nextDayIndex === daysOfWeekIdList.length) {
+            interaction.editReply({
+                content: messageService.m.GENERIC_OK({})
+            });
+            return;
+        }
+        const currentDay = Object.values(const_1.DAYS_OF_WEEK)[nextDayIndex];
+        // todo: show host then pickup, since we can't fit them all
+        const components = (0, component_1.AvailabilityToPickupPerDayComponent)({
+            day: currentDay.id
+        });
+        // response
+        interaction.editReply({
+            content: messageService.m.AVAILABILITY_TO_PICKUP({
+                dayName: currentDay.name
+            }),
+            components
+        });
+    }
 }
-exports.IdentityEditAvailabilityEvent = IdentityEditAvailabilityEvent;
+exports.AvailabilitySelectEvent = AvailabilitySelectEvent;

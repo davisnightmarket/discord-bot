@@ -3,25 +3,16 @@ import {
     type ChatInputCommandInteraction,
     ActionRowBuilder,
     ButtonBuilder,
-    ButtonStyle,
-    type ButtonInteraction,
-    Interaction,
-    StringSelectMenuOptionBuilder,
-    StringSelectMenuBuilder
+    ButtonStyle
 } from 'discord.js';
 
 import { GetChannelDayToday, GetPickupJoinMessage } from '../utility';
-import {
-    type NmDayNameType,
-    type GuildServiceModel,
-    NmNightRoleType,
-    NmRolePeriodType
-} from '../model';
+import { type NmDayNameType, type GuildServiceModel } from '../model';
 import { DAYS_OF_WEEK_CODES, NM_NIGHT_ROLES } from '../const';
 
 // todo: split this into different events for clarity
 // when a person requests a listing of
-export async function VolunteerRequestEvent(
+export async function VolunteerCommandEvent(
     { nightDataService }: GuildServiceModel,
 
     interaction: ChatInputCommandInteraction

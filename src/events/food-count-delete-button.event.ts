@@ -54,7 +54,7 @@ export const TIME_UNTIL_UPDATE = 60 * 1000; // one minute in milliseconds
 
 const dbg = Dbg('FoodCountInputEvent');
 
-export const FoodCountInputEvent =
+export const FoodCountDeleteButtonEvent =
     ({
         personDataService,
         foodCountInputService,

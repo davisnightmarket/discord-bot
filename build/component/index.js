@@ -15,5 +15,4 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 __exportStar(require("./identity.component"), exports);
-__exportStar(require("./availability-host.component"), exports);
-__exportStar(require("./availability-pickup.component"), exports);
+__exportStar(require("./availability.component"), exports);

@@ -3,27 +3,18 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.MessageService = void 0;
 const utility_1 = require("../utility");
 // TODO: make this simple to user from events
-// type MessageType =
-//     | 'AVAILABILITY_PERIOD'
-//     | 'FOODCOUNT_INPUT_FAIL'
-//     | 'FOODCOUNT_INPUT_OK'
-//     | 'FOODCOUNT_INSERT'
-//     | 'GENERIC_SORRY'
-//     | 'NIGHT_CAP_NEEDED'
-//     | 'PERSON_FIRST_CONTACT'
-//     | 'PERSON_REQUEST_EMAIL_AGAIN'
-//     | 'PERSON_REQUEST_EMAIL_DECLINE'
-//     | 'PERSON_REQUEST_EMAIL_FAIL'
-//     | 'PERSON_REQUEST_EMAIL_OK'
-//     | 'PERSON_REQUEST_EMAIL'
-//     | 'PERSON_REQUEST_PHONE_AGAIN'
-//     | 'PERSON_REQUEST_PHONE_OK'
-//     | 'PERSON_REQUEST_PHONE';
 const messageMap = {
+    GENERIC_OK: (0, utility_1.CreateMessage)('GENERIC_OK', {}),
     GENERIC_SORRY: (0, utility_1.CreateMessage)('GENERIC_SORRY', {
         techPhone: ''
     }),
-    AVAILABILITY_PERIOD: (0, utility_1.CreateMessage)('AVAILABILITY_PERIOD', { test: '' }),
+    GENERIC_NO_PERSON: (0, utility_1.CreateMessage)('GENERIC_NO_PERSON', {
+        techPhone: ''
+    }),
+    AVAILABILITY_TO_PICKUP: (0, utility_1.CreateMessage)('AVAILABILITY_TO_PICKUP', {
+        dayName: ''
+    }),
+    AVAILABILITY_TO_HOST: (0, utility_1.CreateMessage)('AVAILABILITY_TO_HOST', {}),
     VOLUNTEER_ONCE_OR_COMMIT: (0, utility_1.CreateMessage)('VOLUNTEER_ONCE_OR_COMMIT', {
         roleName: '',
         roleDescription: '',
@@ -35,7 +26,6 @@ const messageMap = {
         hostNames: ''
     })
 };
-messageMap.AVAILABILITY_PERIOD({ test: '' });
 // message service allows us to combine core data with event data to produce messages
 class MessageService {
     constructor(coreDataService) {
@@ -47,7 +37,14 @@ class MessageService {
         return this.m[k];
     }
     // or write a method per message so we can combine with core or market data etc.
-    getGenericSorry() {
+    async getGenericSorry() {
+        // here we can get data that goes on every message
+        // like tech phone from core
+        return this.m.GENERIC_SORRY({
+            techPhone: ''
+        });
+    }
+    async getGenericNoPerson() {
         // here we can get data that goes on every message
         // like tech phone from core
         return this.m.GENERIC_SORRY({

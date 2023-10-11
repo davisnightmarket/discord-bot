@@ -19,10 +19,9 @@ import {
     GetVolunteerPeriodComponent,
     GetVolunteerPickupComponent
 } from '../component/volunteer.component';
-import { CreateMessageMap } from '../utility';
+import { Dbg } from '../utility';
 
-CreateMessageMap({});
-
+const dbg = Dbg('VolunteerResponseEvent');
 // todo: split this into different events for clarity
 // when a person requests a listing of
 export async function VolunteerResponseEvent(
@@ -32,7 +31,6 @@ export async function VolunteerResponseEvent(
 ) {
     (interaction as ButtonInteraction).deferReply();
 
-    console.log('HI');
     const [command, day, role, period] =
         ((interaction as ButtonInteraction)?.customId?.split('--') as [
             string,
@@ -40,10 +38,15 @@ export async function VolunteerResponseEvent(
             NmNightRoleType,
             NmRolePeriodType
         ]) || [];
+
+    dbg(command, day, role, period);
+
     if (command !== 'volunteer') {
         return;
     }
     console.log(command, day, role, period);
+
+    // in this case we are selecting the day (or days) for volunteering, which is the final step
     if (interaction.isStringSelectMenu()) {
         // TODO: save to DB
         const [org, timeStart] = interaction.values[0].split('---');

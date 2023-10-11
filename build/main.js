@@ -35,7 +35,7 @@ async function main() {
     client.on(discord_js_1.Events.MessageCreate, async (message) => {
         const services = await (0, utility_1.GetGuildServices)(message.guildId ?? '');
         // food count input
-        (0, events_1.FoodCountInputEvent)(services);
+        (0, events_1.FoodCountDeleteButtonEvent)(services);
     });
     client.on(discord_js_1.Events.InteractionCreate, async (interaction) => {
         dbg(discord_js_1.Events.InteractionCreate);
@@ -44,16 +44,16 @@ async function main() {
         if (interaction?.commandName == 'nm') {
             dbg('nm /Command');
             if (interaction.options.getString('command') === 'volunteer') {
-                (0, events_1.VolunteerRequestEvent)(services, interaction);
+                (0, events_1.VolunteerCommandEvent)(services, interaction);
             }
             // ToDO: automate this
             if (interaction.options.getString('command') === 'set-availability') {
                 dbg('Editing Availability');
-                (0, events_1.IdentityEditAvailabilityEvent)(services, interaction);
+                (0, events_1.AvailabilityCommandEvent)(services, interaction);
             }
             if (interaction.options.getString('command') === 'edit-identity') {
                 dbg('Editing identity');
-                (0, events_1.IdentityEditEvent)(services, interaction);
+                (0, events_1.IdentityCommandEvent)(services, interaction);
             }
             if (interaction.options.getString('command') === 'help-and-docs') {
                 dbg('help-and-docs');
@@ -63,13 +63,17 @@ async function main() {
         }
         else if (interaction.isModalSubmit()) {
             dbg('isModalSubmit');
-            (0, events_1.IdentitySubmitEvent)(services, interaction);
+            (0, events_1.IdentityEditModalEvent)(services, interaction);
+        }
+        else if (interaction.isStringSelectMenu()) {
+            dbg('isStringSelectMenu');
+            (0, events_1.AvailabilitySelectEvent)(services, interaction);
         }
         else {
-            dbg('else');
-            (0, events_1.FoodCountResponseEvent)(interaction);
-            // todo: these are redundant if we use /nm command
-            (0, events_1.VolunteerRequestEvent)(services, interaction);
+            dbg('otherwise this is a message content trigger');
+            (0, events_1.FoodCountMessageEvent)(interaction);
+            // todo: this should be split into different events
+            // uses buttons and selects to handle different volunteering steps
             (0, events_1.VolunteerResponseEvent)(services, interaction);
         }
     });

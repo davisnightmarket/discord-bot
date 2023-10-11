@@ -10,7 +10,7 @@ const path_1 = require("path");
 const handlebars_1 = __importDefault(require("handlebars"));
 const dbg = (0, debug_utility_1.Dbg)('MessageUtility');
 const messageCache = {};
-const messagePath = (0, path_1.join)(__dirname, '/../message/md');
+const messagePath = (0, path_1.join)(__dirname, '/../message-md');
 function loadMessage(id, reload = false) {
     if (messageCache[id] && !reload) {
         return messageCache[id];

@@ -1,58 +1,41 @@
-import {
-    Interaction,
-    ChatInputCommandInteraction,
-    ModalSubmitInteraction
-} from 'discord.js';
-import { GuildServiceModel } from '../model';
-import { PersonModel } from '../service';
-import { Dbg } from '../utility';
-
-const dbg = Dbg('IdentityEditEvent');
-
-export async function IdentitySubmitEvent(
-    { personDataService }: GuildServiceModel,
-
-    interaction: ModalSubmitInteraction
-) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.IdentityEditModalEvent = void 0;
+const utility_1 = require("../utility");
+const dbg = (0, utility_1.Dbg)('IdentityEditEvent');
+async function IdentityEditModalEvent({ personDataService }, interaction) {
     if (interaction.customId !== 'identity-edit') {
         return;
     }
     dbg('ok');
-
     interaction.deferReply({
         ephemeral: true
     });
-
     // get the person's data
-    const person = await personDataService.getPersonByDiscordId(
-        interaction.user.id
-    );
-
+    const person = await personDataService.getPersonByDiscordId(interaction.user.id);
     if (!person) {
         interaction.editReply({
             content: 'Sorry, we cannot find that!'
         });
         return;
     }
-
     for (const k of Object.keys(person)) {
-        let value: string = '';
+        let value = '';
         try {
             value = interaction.fields.getTextInputValue(k).trim();
-        } catch (e: any) {
+        }
+        catch (e) {
             console.log(e.message);
         }
-
         if (value) {
             person[k] = value;
         }
     }
-
     await personDataService.updatePersonByDiscordId({
         ...person
     });
-
     interaction.editReply({
         content: 'OK, all set!'
     });
 }
+exports.IdentityEditModalEvent = IdentityEditModalEvent;

@@ -4,7 +4,7 @@ import {
     type ButtonInteraction,
     type Interaction
 } from 'discord.js';
-import { FoodCountInputCache } from './food-count-input.event';
+import { FoodCountInputCache } from './food-count-delete-button.event';
 
 import { COUNT_CHANNEL_NAME } from '../service';
 import { Dbg } from '../utility';
@@ -14,7 +14,7 @@ const debug = Dbg('FoodCountCancelEvent');
 /**
  *
  */
-export const FoodCountResponseEvent = async (interaction: Interaction) => {
+export const FoodCountMessageEvent = async (interaction: Interaction) => {
     debug('OK');
     // discord event listener does not like ButtonInteraction, but
     // it makes life easier below

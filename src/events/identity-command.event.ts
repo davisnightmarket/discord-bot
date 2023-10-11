@@ -5,7 +5,7 @@ import { Dbg } from '../utility';
 
 const dbg = Dbg('IdentityEditEvent');
 
-export async function IdentityEditEvent(
+export async function IdentityCommandEvent(
     { personDataService }: GuildServiceModel,
 
     interaction: ChatInputCommandInteraction
@@ -19,7 +19,9 @@ export async function IdentityEditEvent(
         return;
     }
 
-    // ! for some reason this is taking too long. Why? It is cached data at times
+    // ! for some reason this is taking too long sometimes. Why? It is cached data
+    // i think this is because when the cache is reloading, the reply has to wait for more
+    // than three seconds, which discord doesn't allow. We will have to live with this.
     const person = await personDataService.getPersonByDiscordId(
         interaction.user.id
     );
@@ -32,8 +34,4 @@ export async function IdentityEditEvent(
     } catch (e) {
         console.error(e);
     }
-
-    // interaction.showModal(
-    //     IdentityEditModalComponent(personDataService.createPerson({}))
-    // );
 }

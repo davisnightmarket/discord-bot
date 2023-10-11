@@ -1,10 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.IdentityEditEvent = void 0;
+exports.IdentityCommandEvent = void 0;
 const component_1 = require("../component");
 const utility_1 = require("../utility");
 const dbg = (0, utility_1.Dbg)('IdentityEditEvent');
-async function IdentityEditEvent({ personDataService }, interaction) {
+async function IdentityCommandEvent({ personDataService }, interaction) {
     dbg('ok');
     if (!interaction.guild) {
         interaction.reply('Hi, you can only do that on the server!');
@@ -22,4 +22,4 @@ async function IdentityEditEvent({ personDataService }, interaction) {
         console.error(e);
     }
 }
-exports.IdentityEditEvent = IdentityEditEvent;
+exports.IdentityCommandEvent = IdentityCommandEvent;
