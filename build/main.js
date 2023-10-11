@@ -24,8 +24,13 @@ async function main() {
     // at 7:30am '0 30 7 * * *'
     '0 30 7 * * *', (0, jobs_1.NightOpsJob)(client));
     (0, cron_utility_1.AddCron)(
-    // at midnight:30am '0 1 1 * * *'
-    '0 1 1 * *', (0, jobs_1.NightTimelineJob)(client));
+    // at 11:30pm '0 30 23 * * *'
+    '0 30 23 * * *', (0, jobs_1.NightTimelineJob)(client));
+    // reminds us to enter food count IF none has been entered
+    // AND pickups are scheduled
+    (0, cron_utility_1.AddCron)(
+    // at high noon '0 12 1 * * *'
+    '0 0 12 * * *', (0, jobs_1.FoodCountReminderJob)(client));
     // person meta data events
     // client.on(Events.MessageCreate, PersonMetaEvent(services));
     client.on(discord_js_1.Events.ClientReady, async () => {

@@ -24,6 +24,16 @@ const messageMap = {
         roleName: '',
         roleDescription: '',
         hostNames: ''
+    }),
+    FOODCOUNT_HOWTO: CreateMessage('FOODCOUNT_HOWTO', {
+        nightChannelNameList: '',
+        foodcountExample: ''
+    }),
+    FOODCOUNT_REMINDER: CreateMessage('FOODCOUNT_REMINDER', {
+        randoSalutation: '',
+        dayName: '',
+        pickupOrgList: '',
+        tagUserList: ''
     })
 };
 

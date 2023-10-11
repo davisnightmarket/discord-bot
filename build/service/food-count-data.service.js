@@ -9,7 +9,12 @@ class FoodCountDataService {
         this.foodCountSheetMap = new Map();
         this.spreadsheetId = spreadsheetId;
     }
-    createSheet(year) {
+    async getFoodCountByDate(date) {
+        // todo: this will fail on January first
+        const rows = await (await this.getSheetByCurrentYear()).getAllRowsAsMaps({ limitRows: 500 });
+        return rows.filter((a) => new Date(a.date) === date);
+    }
+    async createSheet(year) {
         // create the new sheet wraper
         const sheet = new _1.GoogleSheetService({
             spreadsheetId: this.spreadsheetId,
@@ -21,11 +26,11 @@ class FoodCountDataService {
         // return
         return sheet;
     }
-    getSheetByCurrentYear(year = new Date().getFullYear()) {
-        return this.foodCountSheetMap.get(year) ?? this.createSheet(year);
+    async getSheetByCurrentYear(year = new Date().getFullYear()) {
+        return (this.foodCountSheetMap.get(year) ?? (await this.createSheet(year)));
     }
     async appendFoodCount(foodCount, year) {
-        await this.getSheetByCurrentYear(year).appendOneMap(foodCount);
+        await (await this.getSheetByCurrentYear(year)).appendOneMap(foodCount);
     }
 }
 exports.FoodCountDataService = FoodCountDataService;

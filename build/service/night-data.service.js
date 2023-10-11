@@ -43,6 +43,9 @@ class NightDataService {
             limitRows
         });
     }
+    async getNightTimelineListByDate(date) {
+        return (await this.getNightTimelineList()).filter((a) => new Date(a.stamp) === date);
+    }
     async getNightDataByDay(
     // defaults to today
     day = (0, utility_1.GetChannelDayToday)()) {

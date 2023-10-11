@@ -1,4 +1,5 @@
 import { GoogleSheetService, type SpreadsheetDataModel } from '.';
+import { NmDayNameType } from '../model';
 
 interface FoodCountModel extends SpreadsheetDataModel {
     org: string;
@@ -23,7 +24,16 @@ export class FoodCountDataService {
         this.spreadsheetId = spreadsheetId;
     }
 
-    createSheet(year: number) {
+    async getFoodCountByDate(date: Date): Promise<FoodCountModel[]> {
+        // todo: this will fail on January first
+        const rows = await (
+            await this.getSheetByCurrentYear()
+        ).getAllRowsAsMaps({ limitRows: 500 });
+
+        return rows.filter((a) => new Date(a.date) === date);
+    }
+
+    async createSheet(year: number) {
         // create the new sheet wraper
         const sheet = new GoogleSheetService<FoodCountModel>({
             spreadsheetId: this.spreadsheetId,
@@ -38,13 +48,15 @@ export class FoodCountDataService {
         return sheet;
     }
 
-    getSheetByCurrentYear(
+    async getSheetByCurrentYear(
         year: number = new Date().getFullYear()
-    ): GoogleSheetService<FoodCountModel> {
-        return this.foodCountSheetMap.get(year) ?? this.createSheet(year);
+    ): Promise<GoogleSheetService<FoodCountModel>> {
+        return (
+            this.foodCountSheetMap.get(year) ?? (await this.createSheet(year))
+        );
     }
 
     async appendFoodCount(foodCount: FoodCountModel, year?: number) {
-        await this.getSheetByCurrentYear(year).appendOneMap(foodCount);
+        await (await this.getSheetByCurrentYear(year)).appendOneMap(foodCount);
     }
 }

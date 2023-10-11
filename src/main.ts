@@ -18,7 +18,7 @@ import {
     IdentityEditModalEvent
 } from './events';
 import { AddCron } from './utility/cron.utility';
-import { NightOpsJob, NightTimelineJob } from './jobs';
+import { FoodCountReminderJob, NightOpsJob, NightTimelineJob } from './jobs';
 
 const dbg = Dbg('main');
 
@@ -44,9 +44,17 @@ async function main() {
     );
 
     AddCron(
-        // at midnight:30am '0 1 1 * * *'
-        '0 1 1 * *',
+        // at 11:30pm '0 30 23 * * *'
+        '0 30 23 * * *',
         NightTimelineJob(client)
+    );
+
+    // reminds us to enter food count IF none has been entered
+    // AND pickups are scheduled
+    AddCron(
+        // at high noon '0 12 1 * * *'
+        '0 0 12 * * *',
+        FoodCountReminderJob(client)
     );
 
     // person meta data events

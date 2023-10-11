@@ -1,6 +1,6 @@
 import cron from 'node-cron';
 
-export const AddCron = (exp: string, f: () => void) => {
+export const AddCron = (exp: string, f: () => void | Promise<void>) => {
     cron.schedule(exp, f);
 };
 

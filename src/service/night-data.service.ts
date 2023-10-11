@@ -132,6 +132,12 @@ export class NightDataService {
         });
     }
 
+    async getNightTimelineListByDate(date: Date) {
+        return (await this.getNightTimelineList()).filter(
+            (a) => new Date(a.stamp) === date
+        );
+    }
+
     async getNightDataByDay(
         // defaults to today
         day: NmDayNameType = GetChannelDayToday()

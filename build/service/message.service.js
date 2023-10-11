@@ -24,6 +24,16 @@ const messageMap = {
         roleName: '',
         roleDescription: '',
         hostNames: ''
+    }),
+    FOODCOUNT_HOWTO: (0, utility_1.CreateMessage)('FOODCOUNT_HOWTO', {
+        nightChannelNameList: '',
+        foodcountExample: ''
+    }),
+    FOODCOUNT_REMINDER: (0, utility_1.CreateMessage)('FOODCOUNT_REMINDER', {
+        randoSalutation: '',
+        dayName: '',
+        pickupOrgList: '',
+        tagUserList: ''
     })
 };
 // message service allows us to combine core data with event data to produce messages
