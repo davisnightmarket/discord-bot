@@ -7,7 +7,7 @@ const const_1 = require("../const");
 const AvailabilityToHostComponent = (dayTimeList, {}) => {
     return [
         new discord_js_1.ActionRowBuilder().addComponents(new discord_js_1.StringSelectMenuBuilder()
-            .setCustomId(`availability--night-host}`)
+            .setCustomId(`availability--night-host`)
             .setMinValues(0)
             .setMaxValues(dayTimeList.length)
             .addOptions(...dayTimeList.map((dayTime) => {
@@ -27,12 +27,12 @@ const AvailabilityToPickupPerDayComponent = ({ day }) => {
     return [
         new discord_js_1.ActionRowBuilder().addComponents(new discord_js_1.StringSelectMenuBuilder()
             .setCustomId(`availability--night-pickup--${day}`)
-            .setMinValues(1)
-            .setMaxValues(7)
+            .setMinValues(0)
+            .setMaxValues(Object.values(const_1.PARTS_OF_DAY).length)
             .addOptions(...Object.values(const_1.PARTS_OF_DAY).map((partOfDay) => new discord_js_1.StringSelectMenuOptionBuilder()
             .setLabel(`${const_1.DAYS_OF_WEEK[day].name} ${partOfDay.name}`)
             .setDescription(const_1.DAYS_OF_WEEK[day].description)
-            .setValue(partOfDay.id))))
+            .setValue(`${day}|||${partOfDay.id}`))))
     ];
 };
 exports.AvailabilityToPickupPerDayComponent = AvailabilityToPickupPerDayComponent;

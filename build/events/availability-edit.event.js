@@ -9,6 +9,8 @@ const dbg = (0, utility_1.Dbg)('AvailabilityEditEvent');
 async function AvailabilitySelectEvent({ personDataService, messageService }, interaction) {
     dbg('ok');
     const [command, period, day] = interaction.customId?.split('--') || [];
+    dbg(command, period, day);
+    // todo: handle this higher up
     if (command !== 'availability') {
         return;
     }
@@ -16,7 +18,7 @@ async function AvailabilitySelectEvent({ personDataService, messageService }, in
     // get the person's data
     const person = await personDataService.getPersonByDiscordId(interaction.user.id);
     if (!person) {
-        // show them their modal
+        //! we would like to show them their modal
         // we cannot show the identity model since we have deferred
         interaction.editReply({
             content: await messageService.getGenericNoPerson()
@@ -30,12 +32,10 @@ async function AvailabilitySelectEvent({ personDataService, messageService }, in
         // save it to the db ...
         const [day, timeStart] = interaction.values[0].split('|||');
         dbg(day, timeStart);
-        // TODO: edit person spread to allow for this value
-        //person.availabilityToHost = interaction.values.join(',');
-        // personDataService.updatePersonByDiscordId({
-        //     ...person,
-        //     availabilityToHost:interaction.values.join(',')
-        // })
+        personDataService.updatePersonByDiscordId({
+            ...person,
+            availabilityHost: interaction.values.join(',')
+        });
         // now display first night-pickup select
         const currentDay = const_1.DAYS_OF_WEEK[daysOfWeekIdList[0]];
         const components = (0, component_1.AvailabilityToPickupPerDayComponent)({
@@ -52,12 +52,18 @@ async function AvailabilitySelectEvent({ personDataService, messageService }, in
     // in this case we are in the pickup section
     if (period === 'night-pickup') {
         // save the previous to the db ...
-        // TODO: edit person spread to allow for this value
-        // person.availabilityToPickup = interaction.values.join(',');
-        // personDataService.updatePersonByDiscordId({
-        //     ...person,
-        //     availabilityToPickup:interaction.values.join(',')
-        // })
+        // if we are on the first day, reset
+        let availabilityPickup = '';
+        if (!daysOfWeekIdList.indexOf(day)) {
+            availabilityPickup = interaction.values.join(',');
+        }
+        else {
+            availabilityPickup += interaction.values.join(',');
+        }
+        personDataService.updatePersonByDiscordId({
+            ...person,
+            availabilityPickup
+        });
         // show the next step
         const nextDayIndex = daysOfWeekIdList.indexOf(day) + 1;
         // present night-pickup selects

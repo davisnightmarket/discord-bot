@@ -7,11 +7,6 @@ exports.NN_ADMIN_ROLE_CODES = exports.NM_ADMIN_ROLES = exports.NN_NIGHT_ROLE_COD
 // across our data model, these strings are used to identify if a resource is active or not
 exports.ACTIVE_STATE_LIST = ['active', 'inactive'];
 exports.DAYS_OF_WEEK = {
-    sunday: {
-        id: 'sunday',
-        name: 'Sunday',
-        description: 'Day for Sinners and Saints'
-    },
     monday: {
         id: 'monday',
         name: 'Monday',
@@ -41,6 +36,11 @@ exports.DAYS_OF_WEEK = {
         id: 'saturday',
         name: 'Saturday',
         description: 'Party party'
+    },
+    sunday: {
+        id: 'sunday',
+        name: 'Sunday',
+        description: 'Day for Sinners and Saints'
     }
 };
 exports.PARTS_OF_DAY = {

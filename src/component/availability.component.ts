@@ -15,7 +15,7 @@ export const AvailabilityToHostComponent = (
     return [
         new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
             new StringSelectMenuBuilder()
-                .setCustomId(`availability--night-host}`)
+                .setCustomId(`availability--night-host`)
 
                 .setMinValues(0)
                 .setMaxValues(dayTimeList.length)
@@ -46,9 +46,8 @@ export const AvailabilityToPickupPerDayComponent = ({
         new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
             new StringSelectMenuBuilder()
                 .setCustomId(`availability--night-pickup--${day}`)
-
-                .setMinValues(1)
-                .setMaxValues(7)
+                .setMinValues(0)
+                .setMaxValues(Object.values(PARTS_OF_DAY).length)
                 .addOptions(
                     ...Object.values(PARTS_OF_DAY).map((partOfDay) =>
                         new StringSelectMenuOptionBuilder()
@@ -60,7 +59,7 @@ export const AvailabilityToPickupPerDayComponent = ({
                             .setDescription(
                                 DAYS_OF_WEEK[day as NmDayNameType].description
                             )
-                            .setValue(partOfDay.id)
+                            .setValue(`${day}|||${partOfDay.id}`)
                     )
                 )
         )

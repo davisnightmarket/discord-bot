@@ -20,11 +20,6 @@ export const DAYS_OF_WEEK: {
         description: string;
     };
 } = {
-    sunday: {
-        id: 'sunday',
-        name: 'Sunday',
-        description: 'Day for Sinners and Saints'
-    },
     monday: {
         id: 'monday',
         name: 'Monday',
@@ -54,6 +49,11 @@ export const DAYS_OF_WEEK: {
         id: 'saturday',
         name: 'Saturday',
         description: 'Party party'
+    },
+    sunday: {
+        id: 'sunday',
+        name: 'Sunday',
+        description: 'Day for Sinners and Saints'
     }
 };
 
