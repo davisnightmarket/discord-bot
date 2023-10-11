@@ -1,8 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.VolunteerResponseEvent = void 0;
-const discord_js_1 = require("discord.js");
 const const_1 = require("../const");
+const volunteer_component_1 = require("../component/volunteer.component");
+const utility_1 = require("../utility");
+(0, utility_1.CreateMessageMap)({});
 // todo: split this into different events for clarity
 // when a person requests a listing of
 async function VolunteerResponseEvent({ nightDataService, messageService }, interaction) {
@@ -52,44 +54,30 @@ async function VolunteerResponseEvent({ nightDataService, messageService }, inte
             console.error('Passed not a role.');
             return;
         }
-        const roleDescription = const_1.NM_NIGHT_ROLES[role].description;
         if (!period) {
-            const joinOnceButton = new discord_js_1.ButtonBuilder()
-                .setCustomId(`volunteer--${day}--${role}--once`)
-                .setLabel(`${const_1.NM_NIGHT_ROLES[role].name} just this ${day}`)
-                .setStyle(discord_js_1.ButtonStyle.Secondary);
-            const joinAlwaysButton = new discord_js_1.ButtonBuilder()
-                .setCustomId(`volunteer--${day}--${role}--every`)
-                .setLabel(`${const_1.NM_NIGHT_ROLES[role].name}  every ${day}`)
-                .setStyle(discord_js_1.ButtonStyle.Secondary);
+            const components = (0, volunteer_component_1.GetVolunteerPeriodComponent)({ day, role });
             interaction.editReply({
-                content: `${roleDescription} with ${hostList
-                    .map((a) => a.name)
-                    .join(', ')}\nWould you like to ${const_1.NM_NIGHT_ROLES[role].description} just once, or commit to a night?\n(you can decide to commit later)`,
-                components: [
-                    new discord_js_1.ActionRowBuilder()
-                        .addComponents(joinOnceButton)
-                        .addComponents(joinAlwaysButton)
-                ]
+                content: await messageService.m.VOLUNTEER_ONCE_OR_COMMIT({
+                    roleName: const_1.NM_NIGHT_ROLES[role].name,
+                    roleDescription: const_1.NM_NIGHT_ROLES[role].description,
+                    hostNames: hostList.map((a) => a.name).join(', ')
+                }),
+                components
             });
             return;
         }
         // the successful select is handled above by isStringSelectMenu
         if (role === 'night-pickup') {
             console.log('NIGHT PICKUP', pickupList);
+            const components = (0, volunteer_component_1.GetVolunteerPickupComponent)({
+                day,
+                role,
+                period
+            }, pickupList);
             // TODO: we can only select 25 at a time, so slice em up
-            const select = new discord_js_1.StringSelectMenuBuilder()
-                .setCustomId(`volunteer--${day}--${role}--${period}--org`)
-                .setPlaceholder('Make a selection!')
-                .addOptions(pickupList.map(({ org, timeStart, timeEnd, personList }) => new discord_js_1.StringSelectMenuOptionBuilder()
-                .setLabel(org)
-                .setDescription(`at ${timeStart}${personList.length ? ' with ' : ''}${personList.map((a) => a.name).join(', ')}`)
-                .setValue(`${org}---${timeStart}---${timeEnd || '0000'}`)));
             interaction.editReply({
                 content: 'OK, all set!',
-                components: [
-                    new discord_js_1.ActionRowBuilder().addComponents(select)
-                ]
+                components
             });
             return;
         }

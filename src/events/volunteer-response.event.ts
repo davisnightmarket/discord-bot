@@ -15,6 +15,13 @@ import {
     NmRolePeriodType
 } from '../model';
 import { DAYS_OF_WEEK_CODES, NM_NIGHT_ROLES } from '../const';
+import {
+    GetVolunteerPeriodComponent,
+    GetVolunteerPickupComponent
+} from '../component/volunteer.component';
+import { CreateMessageMap } from '../utility';
+
+CreateMessageMap({});
 
 // todo: split this into different events for clarity
 // when a person requests a listing of
@@ -81,28 +88,16 @@ export async function VolunteerResponseEvent(
             return;
         }
 
-        const roleDescription = NM_NIGHT_ROLES[role].description;
         if (!period) {
-            const joinOnceButton = new ButtonBuilder()
-                .setCustomId(`volunteer--${day}--${role}--once`)
-                .setLabel(`${NM_NIGHT_ROLES[role].name} just this ${day}`)
-                .setStyle(ButtonStyle.Secondary);
-            const joinAlwaysButton = new ButtonBuilder()
-                .setCustomId(`volunteer--${day}--${role}--every`)
-                .setLabel(`${NM_NIGHT_ROLES[role].name}  every ${day}`)
-                .setStyle(ButtonStyle.Secondary);
+            const components = GetVolunteerPeriodComponent({ day, role });
 
             interaction.editReply({
-                content: `${roleDescription} with ${hostList
-                    .map((a) => a.name)
-                    .join(', ')}\nWould you like to ${
-                    NM_NIGHT_ROLES[role].description
-                } just once, or commit to a night?\n(you can decide to commit later)`,
-                components: [
-                    new ActionRowBuilder<ButtonBuilder>()
-                        .addComponents(joinOnceButton)
-                        .addComponents(joinAlwaysButton)
-                ]
+                content: await messageService.m.VOLUNTEER_ONCE_OR_COMMIT({
+                    roleName: NM_NIGHT_ROLES[role].name,
+                    roleDescription: NM_NIGHT_ROLES[role].description,
+                    hostNames: hostList.map((a) => a.name).join(', ')
+                }),
+                components
             });
 
             return;
@@ -111,32 +106,19 @@ export async function VolunteerResponseEvent(
         // the successful select is handled above by isStringSelectMenu
         if (role === 'night-pickup') {
             console.log('NIGHT PICKUP', pickupList);
+            const components = GetVolunteerPickupComponent(
+                {
+                    day,
+                    role,
+                    period
+                },
+                pickupList
+            );
             // TODO: we can only select 25 at a time, so slice em up
-            const select = new StringSelectMenuBuilder()
-                .setCustomId(`volunteer--${day}--${role}--${period}--org`)
-                .setPlaceholder('Make a selection!')
-                .addOptions(
-                    pickupList.map(({ org, timeStart, timeEnd, personList }) =>
-                        new StringSelectMenuOptionBuilder()
-                            .setLabel(org)
-                            .setDescription(
-                                `at ${timeStart}${
-                                    personList.length ? ' with ' : ''
-                                }${personList.map((a) => a.name).join(', ')}`
-                            )
-                            .setValue(
-                                `${org}---${timeStart}---${timeEnd || '0000'}`
-                            )
-                    )
-                );
 
             interaction.editReply({
                 content: 'OK, all set!',
-                components: [
-                    new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
-                        select
-                    )
-                ]
+                components
             });
 
             return;

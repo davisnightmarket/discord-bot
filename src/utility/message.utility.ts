@@ -1,9 +1,30 @@
+import { Dbg } from './debug.utility';
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import { Dbg } from './debug.utility';
 import Handlebars from 'handlebars';
 
-const dbg = Dbg('MessageService');
+type MessageCodeType =
+    | 'VOLUNTEER_AS_ROLE'
+    | 'VOLUNTEER_ONCE_OR_COMMIT'
+    | 'AVAILABILITY_PERIOD'
+    | 'FOODCOUNT_INPUT_FAIL'
+    | 'FOODCOUNT_INPUT_OK'
+    | 'FOODCOUNT_INSERT'
+    | 'GENERIC_SORRY'
+    | 'NIGHT_CAP_NEEDED'
+    | 'PERSON_FIRST_CONTACT'
+    | 'PERSON_REQUEST_EMAIL_AGAIN'
+    | 'PERSON_REQUEST_EMAIL_DECLINE'
+    | 'PERSON_REQUEST_EMAIL_FAIL'
+    | 'PERSON_REQUEST_EMAIL_OK'
+    | 'PERSON_REQUEST_EMAIL'
+    | 'PERSON_REQUEST_PHONE_AGAIN'
+    | 'PERSON_REQUEST_PHONE_OK'
+    | 'PERSON_REQUEST_PHONE';
+
+type MessageCoreParamType = {};
+
+const dbg = Dbg('MessageUtility');
 
 const messageCache: Record<string, string> = {};
 
@@ -41,6 +62,31 @@ function loadAllMessage(
         dbg(e);
     }
     return c;
+}
+
+export function CreateMessage<
+    T extends MessageCodeType,
+    U extends MessageCoreParamType
+>(messageCode: T, coreParams: U): (a: U) => string {
+    const message = loadMessage(messageCode) as Record<keyof U, string>;
+    // because we do not want a message compile error to break teh app
+    let d: HandlebarsTemplateDelegate;
+    try {
+        d = Handlebars.compile(message ?? '');
+    } catch (e) {
+        d = Handlebars.compile('');
+        console.error(e);
+    }
+
+    return (c: U) => {
+        let msg = '';
+        try {
+            msg = d({ ...coreParams, ...c });
+        } catch (e) {
+            console.error(e);
+        }
+        return msg;
+    };
 }
 
 export function CreateMessageMap<
