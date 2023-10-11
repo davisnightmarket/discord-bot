@@ -5,3 +5,4 @@ export * from './secrets.utility';
 export * from './discord.utility';
 export * from './night.utility';
 export * from './service.utility';
+export * from './message.utility';

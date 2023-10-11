@@ -15,7 +15,6 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 __exportStar(require("./parse-content.service"), exports);
-__exportStar(require("./message.service"), exports);
 __exportStar(require("./food-count-input.service"), exports);
 __exportStar(require("./food-count-data.service"), exports);
 __exportStar(require("./org-data.service"), exports);
@@ -24,3 +23,4 @@ __exportStar(require("./night-data.service"), exports);
 __exportStar(require("./google-spreadsheet.service"), exports);
 __exportStar(require("./google-sheet.service"), exports);
 __exportStar(require("./core-data.service"), exports);
+__exportStar(require("./message.service"), exports);

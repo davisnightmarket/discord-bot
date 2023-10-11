@@ -37,22 +37,15 @@ async function main() {
         // food count input
         (0, events_1.FoodCountInputEvent)(services);
     });
-    // client.on(Events.InteractionCreate, async (interaction) => {
-    //     const services = await GetGuildServices(interaction.guildId ?? '');
-    //     // food count response (cancel food count)
-    //     FoodCountResponseEvent(interaction);
-    //     NightListRequestEvent(services, interaction);
-    // });
-    // this one is dedicated to the /nm command
     client.on(discord_js_1.Events.InteractionCreate, async (interaction) => {
         dbg(discord_js_1.Events.InteractionCreate);
         interaction = interaction;
         const services = await (0, utility_1.GetGuildServices)(interaction.guildId ?? '');
         if (interaction?.commandName == 'nm') {
             dbg('nm /Command');
-            // if (interaction.options.getString('command') === 'volunteer') {
-            //     VolunteerRequestEvent(services, interaction);
-            // }
+            if (interaction.options.getString('command') === 'volunteer') {
+                (0, events_1.VolunteerRequestEvent)(services, interaction);
+            }
             // ToDO: automate this
             if (interaction.options.getString('command') === 'set-availability') {
                 dbg('Editing Availability');

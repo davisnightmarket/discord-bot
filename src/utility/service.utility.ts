@@ -5,7 +5,8 @@ import {
     FoodCountInputService,
     OrgDataService,
     PersonDataService,
-    NightDataService
+    NightDataService,
+    MessageService
 } from '../service';
 
 const coreDataService = new CoreDataService();
@@ -27,8 +28,11 @@ export async function GetGuildServices(guildId: string) {
         const personDataService = new PersonDataService(
             config.GSPREAD_PERSON_ID
         );
+
+        const messageService = new MessageService(coreDataService);
         servicesByGuildId.set(guildId, {
             config,
+            messageService,
             coreDataService,
             nightDataService: new NightDataService(
                 config.GSPREAD_NIGHT_ID,

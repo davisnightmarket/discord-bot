@@ -312,7 +312,7 @@ export class NightDataService {
 
     // this function replaces the entire night ops data sheet with a new one
     // used for both add and remove records
-    private async updateNightData(nightData: NightOpsDataModel[]) {
+    async updateNightData(nightData: NightOpsDataModel[]) {
         const headerList = await this.nightSheetService.waitingForHeaderList;
 
         // in here we sort by day

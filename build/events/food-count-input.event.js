@@ -4,10 +4,9 @@ exports.FoodCountInputEvent = exports.TIME_UNTIL_UPDATE = exports.FoodCountInput
 const discord_js_1 = require("discord.js");
 const service_1 = require("../service");
 const uuid_1 = require("uuid");
-const service_2 = require("../service");
 const utility_1 = require("../utility");
 const utility_2 = require("../utility");
-const MsgReply = service_2.MessageService.createMap({
+const MsgReply = (0, utility_2.CreateMessageMap)({
     // message sent when someone posts a food count event
     FOODCOUNT_INSERT: {
         lbs: '',

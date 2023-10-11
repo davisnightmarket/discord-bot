@@ -59,15 +59,7 @@ async function main() {
         // food count input
         FoodCountInputEvent(services);
     });
-    // client.on(Events.InteractionCreate, async (interaction) => {
-    //     const services = await GetGuildServices(interaction.guildId ?? '');
 
-    //     // food count response (cancel food count)
-    //     FoodCountResponseEvent(interaction);
-    //     NightListRequestEvent(services, interaction);
-    // });
-
-    // this one is dedicated to the /nm command
     client.on(Events.InteractionCreate, async (interaction) => {
         dbg(Events.InteractionCreate);
         interaction = interaction as ChatInputCommandInteraction;
@@ -75,9 +67,9 @@ async function main() {
         const services = await GetGuildServices(interaction.guildId ?? '');
         if (interaction?.commandName == 'nm') {
             dbg('nm /Command');
-            // if (interaction.options.getString('command') === 'volunteer') {
-            //     VolunteerRequestEvent(services, interaction);
-            // }
+            if (interaction.options.getString('command') === 'volunteer') {
+                VolunteerRequestEvent(services, interaction);
+            }
             // ToDO: automate this
             if (
                 interaction.options.getString('command') === 'set-availability'

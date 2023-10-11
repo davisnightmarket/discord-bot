@@ -7,15 +7,14 @@ import {
 } from 'discord.js';
 import { COUNT_CHANNEL_NAME } from '../service';
 import { v4 as uuidv4 } from 'uuid';
-import { MessageService } from '../service';
 import { Dbg, CacheUtility } from '../utility';
-import { GetChannelByName } from '../utility';
+import { GetChannelByName, CreateMessageMap } from '../utility';
 import { GuildServiceModel } from '../model';
 
 // status for each cached input: does it get inserted unless cancel? or does it require a confirmation?
 type CacheStatusType = 'INSERT_UNLESS_CANCEL' | 'DELETE_UNLESS_CONFIRM';
 
-const MsgReply = MessageService.createMap({
+const MsgReply = CreateMessageMap({
     // message sent when someone posts a food count event
     FOODCOUNT_INSERT: {
         lbs: '',

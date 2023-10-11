@@ -1,82 +1,39 @@
-import { readFileSync } from 'fs';
-import { join } from 'path';
-import { Dbg } from '../utility/debug.utility';
-import Handlebars from 'handlebars';
+import { CreateMessageMap } from '../utility';
+import { CoreDataService } from '.';
 
-const dbg = Dbg('MessageService');
+// TODO: make this simple to user from events
 
-const messageCache: Record<string, string> = {};
+type MessageType =
+    | 'AVAILABILITY_PERIOD'
+    | 'FOODCOUNT_INPUT_FAIL'
+    | 'FOODCOUNT_INPUT_OK'
+    | 'FOODCOUNT_INSERT'
+    | 'GENERIC_SORRY'
+    | 'NIGHT_CAP_NEEDED'
+    | 'PERSON_FIRST_CONTACT'
+    | 'PERSON_REQUEST_EMAIL_AGAIN'
+    | 'PERSON_REQUEST_EMAIL_DECLINE'
+    | 'PERSON_REQUEST_EMAIL_FAIL'
+    | 'PERSON_REQUEST_EMAIL_OK'
+    | 'PERSON_REQUEST_EMAIL'
+    | 'PERSON_REQUEST_PHONE_AGAIN'
+    | 'PERSON_REQUEST_PHONE_OK'
+    | 'PERSON_REQUEST_PHONE';
 
-const messagePath = join(__dirname, '/../message-md');
-
-// TODO: do we want massage service to get it's messages from a google drive folder?
-// if so, then we want this to be a service that takes the id of the folder in the constructor
+const messageMap = CreateMessageMap({
+    GENERIC_SORRY: {
+        techPhone: ''
+    }
+});
 
 export class MessageService {
-    static loadMessage(id: string, reload: boolean = false) {
-        if (messageCache[id] && !reload) {
-            return messageCache[id];
-        }
+    coreDataService: CoreDataService;
 
-        try {
-            // todo, we want to process with markdown
-            messageCache[id] = readFileSync(
-                join(messagePath, id + '.md'),
-                'utf-8'
-            );
-        } catch (e) {
-            // todo: set up a proper logger and send notifications in prod
-            if (process.env.NODE_ENV === 'prod') {
-                console.error(e);
-            } else {
-                dbg(e);
-            }
-        }
-        return messageCache[id];
+    constructor(coreDataService: CoreDataService) {
+        this.coreDataService = coreDataService;
     }
-
-    static loadAllMessage(
-        a: string[],
-        reload: boolean = false
-    ): Record<string, string> {
-        const c: Record<string, string> = {};
-        try {
-            for (const b of a) {
-                c[b] = this.loadMessage(b, reload);
-            }
-        } catch (e) {
-            dbg(e);
-        }
-        return c;
-    }
-
-    static createMap<U extends Record<string, Record<string, string>>>(map: U) {
-        const messageMap = MessageService.loadAllMessage(
-            Object.keys(map)
-        ) as Record<keyof U, string>;
-
-        // todo: parse with HBS
-        return Object.keys(messageMap).reduce<
-            Partial<Record<keyof U, (a: U[keyof U]) => string>>
-        >((a, b: keyof U) => {
-            // because we do not want a message compile error to break teh app
-            let d = Handlebars.compile('');
-            try {
-                d = Handlebars.compile(messageMap[b] ?? '');
-            } catch (e) {
-                console.error(e);
-            }
-
-            a[b] = (c: U[typeof b]) => {
-                let msg = '';
-                try {
-                    msg = d({ ...map[b], ...c });
-                } catch (e) {
-                    console.error(e);
-                }
-                return msg;
-            };
-            return a;
-        }, {}) as Record<keyof U, (a: U[keyof U]) => string>;
+    getGenericSorry() {
+        // TODO: figure out how to do this
+        return messageMap.GENERIC_SORRY({ techPhone: '' });
     }
 }

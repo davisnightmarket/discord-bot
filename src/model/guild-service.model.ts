@@ -4,7 +4,8 @@ import type {
     FoodCountInputService,
     OrgDataService,
     PersonDataService,
-    NightDataService
+    NightDataService,
+    MessageService
 } from '../service';
 
 export interface GuildServiceModel {
@@ -14,4 +15,5 @@ export interface GuildServiceModel {
     orgDataService: OrgDataService;
     personDataService: PersonDataService;
     nightDataService: NightDataService;
+    messageService: MessageService;
 }

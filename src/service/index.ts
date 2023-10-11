@@ -1,5 +1,4 @@
 export * from './parse-content.service';
-export * from './message.service';
 export * from './food-count-input.service';
 export * from './food-count-data.service';
 export * from './org-data.service';
@@ -8,3 +7,4 @@ export * from './night-data.service';
 export * from './google-spreadsheet.service';
 export * from './google-sheet.service';
 export * from './core-data.service';
+export * from './message.service';

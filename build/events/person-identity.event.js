@@ -1,13 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PersonIdentityEvent = void 0;
-const message_service_1 = require("../service/message.service");
+const message_utility_1 = require("../utility/message.utility");
 const utility_1 = require("../utility");
 const identity_input_utility_1 = require("../utility/identity-input.utility");
 const dbg = (0, utility_1.Dbg)('PersonIdentityEvent');
 const APPROPRIATE_TIME_TO_BUG_U_IN_SECS = 1; // 60 * 60 * 24 * 7,
 const A_BIT_OF_LAG_BEFORE_INTROS_IN_SECS = 1; // 60 * 60;
-const MsgReply = message_service_1.MessageService.createMap({
+const MsgReply = message_utility_1.MessageService.createMap({
     PERSON_FIRST_CONTACT: {
         username: ''
     },

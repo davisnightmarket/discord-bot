@@ -5,7 +5,7 @@ const discord_js_1 = require("discord.js");
 const const_1 = require("../const");
 // todo: split this into different events for clarity
 // when a person requests a listing of
-async function VolunteerResponseEvent({ nightDataService }, interaction) {
+async function VolunteerResponseEvent({ nightDataService, messageService }, interaction) {
     interaction.deferReply();
     console.log('HI');
     const [command, day, role, period] = interaction?.customId?.split('--') || [];
@@ -38,7 +38,7 @@ async function VolunteerResponseEvent({ nightDataService }, interaction) {
         // there should always be a day
         if (!day || !const_1.DAYS_OF_WEEK_CODES.includes(day)) {
             interaction.editReply({
-                content: 'Sorry, something went wrong. We have notified the people!'
+                content: await messageService.getGenericSorry()
             });
             console.error('Passed not a day');
             return;
@@ -47,7 +47,7 @@ async function VolunteerResponseEvent({ nightDataService }, interaction) {
         // role is selected in the first interaction
         if (!role) {
             interaction.editReply({
-                content: 'Sorry, something went wrong. We have notified the people!'
+                content: await messageService.getGenericSorry()
             });
             console.error('Passed not a role.');
             return;
@@ -56,11 +56,11 @@ async function VolunteerResponseEvent({ nightDataService }, interaction) {
         if (!period) {
             const joinOnceButton = new discord_js_1.ButtonBuilder()
                 .setCustomId(`volunteer--${day}--${role}--once`)
-                .setLabel(`${role} just this ${day}`)
+                .setLabel(`${const_1.NM_NIGHT_ROLES[role].name} just this ${day}`)
                 .setStyle(discord_js_1.ButtonStyle.Secondary);
             const joinAlwaysButton = new discord_js_1.ButtonBuilder()
                 .setCustomId(`volunteer--${day}--${role}--every`)
-                .setLabel(`${role}  every ${day}`)
+                .setLabel(`${const_1.NM_NIGHT_ROLES[role].name}  every ${day}`)
                 .setStyle(discord_js_1.ButtonStyle.Secondary);
             interaction.editReply({
                 content: `${roleDescription} with ${hostList

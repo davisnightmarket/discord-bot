@@ -19,7 +19,7 @@ import { DAYS_OF_WEEK_CODES, NM_NIGHT_ROLES } from '../const';
 // todo: split this into different events for clarity
 // when a person requests a listing of
 export async function VolunteerResponseEvent(
-    { nightDataService }: GuildServiceModel,
+    { nightDataService, messageService }: GuildServiceModel,
 
     interaction: Interaction
 ) {
@@ -64,8 +64,7 @@ export async function VolunteerResponseEvent(
         // there should always be a day
         if (!day || !DAYS_OF_WEEK_CODES.includes(day as NmDayNameType)) {
             interaction.editReply({
-                content:
-                    'Sorry, something went wrong. We have notified the people!'
+                content: await messageService.getGenericSorry()
             });
             console.error('Passed not a day');
             return;
@@ -76,8 +75,7 @@ export async function VolunteerResponseEvent(
         // role is selected in the first interaction
         if (!role) {
             interaction.editReply({
-                content:
-                    'Sorry, something went wrong. We have notified the people!'
+                content: await messageService.getGenericSorry()
             });
             console.error('Passed not a role.');
             return;
@@ -87,11 +85,11 @@ export async function VolunteerResponseEvent(
         if (!period) {
             const joinOnceButton = new ButtonBuilder()
                 .setCustomId(`volunteer--${day}--${role}--once`)
-                .setLabel(`${role} just this ${day}`)
+                .setLabel(`${NM_NIGHT_ROLES[role].name} just this ${day}`)
                 .setStyle(ButtonStyle.Secondary);
             const joinAlwaysButton = new ButtonBuilder()
                 .setCustomId(`volunteer--${day}--${role}--every`)
-                .setLabel(`${role}  every ${day}`)
+                .setLabel(`${NM_NIGHT_ROLES[role].name}  every ${day}`)
                 .setStyle(ButtonStyle.Secondary);
 
             interaction.editReply({
