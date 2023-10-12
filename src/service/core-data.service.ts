@@ -25,14 +25,16 @@ export class CoreDataService {
     configMarketSheetService: GoogleSheetService<ConfigDataModel>;
     coreTypeSheetService: GoogleSheetService<TypeDataModel>;
 
-    // todo: this is a stub
-    driveConfigService: GoogleDriveService<'Config'>;
+    // todo: this is a stub: this is prep for using a single folder for spreadsheets by name ...
+    // todo: and one for markdown by name
+    driveCoreDataService: GoogleDriveService<'Config'>;
     // todo: we can replace the many records pointing to docs in config with a call to the drive service to get the folder
 
     // the constructor gets the core id which points to the core google spreadsheet by default
     // you can pass in a different id for testing purposes, but this should work in test and prod
     constructor(spreadsheetId: string = EnvConfig[Env].GSPREAD_CORE_ID) {
-        this.driveConfigService = new GoogleDriveService(
+        this.driveCoreDataService = new GoogleDriveService(
+            // todo: this should be the core data folder
             EnvConfig[Env].GSPREAD_CORE_ID
         );
 

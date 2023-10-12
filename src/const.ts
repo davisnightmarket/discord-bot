@@ -9,6 +9,120 @@ import {
 /**
  * CORE DATA
  */
+// todo: move this whole file to coreDataService
+
+// CONTACT
+
+export type PermissionToContactTextType =
+    | 'VOLUNTEER_PICKUP_REMINDER'
+    | 'VOLUNTEER_HOST_REMINDER'
+    | 'AVAILABILITY_REQUEST';
+
+export const PERMISSION_TO_CONTACT_TEXT_MAP: {
+    [k in PermissionToContactTextType]: {
+        id: k;
+        name: string;
+        description: string;
+    };
+} = {
+    VOLUNTEER_PICKUP_REMINDER: {
+        id: 'VOLUNTEER_PICKUP_REMINDER',
+        name: 'Contact By Text Message with Pickup Deets',
+        description:
+            'A text message reminder that a person is signed up to pickup.'
+    },
+    VOLUNTEER_HOST_REMINDER: {
+        id: 'VOLUNTEER_HOST_REMINDER',
+        name: 'Contact By Text Message on day of Night Hosting',
+        description:
+            'A text message reminder that a person is signed up to host.'
+    },
+    AVAILABILITY_REQUEST: {
+        id: 'AVAILABILITY_REQUEST',
+        name: 'Contact By Text Message about Availability',
+        description:
+            'Based on our record of availability, a text message request for volunteer support.'
+    }
+};
+
+export const PERMISSION_TO_CONTACT_TEXT_LIST = Object.keys(
+    PERMISSION_TO_CONTACT_TEXT_MAP
+);
+
+export type PermissionToContactEmailType = 'AVAILABILITY_REQUEST';
+
+// contactTextOn	contactEmailOn
+export const PERMISSION_TO_CONTACT_EMAIL_MAP: {
+    [k in PermissionToContactEmailType]: {
+        id: k;
+        name: string;
+        description: string;
+    };
+} = {
+    AVAILABILITY_REQUEST: {
+        id: 'AVAILABILITY_REQUEST',
+        name: 'Contact by Email about Availability',
+        description:
+            'Based on our record of availability, an email request for volunteer support.'
+    }
+};
+
+export const PERMISSION_TO_CONTACT_EMAIL_LIST = Object.keys(
+    PERMISSION_TO_CONTACT_EMAIL_MAP
+);
+
+// SHARE
+
+export type PermissionToSharePhoneType = 'NIGHT_CAP' | 'COMMUNITY_COORDINATOR';
+
+export const PERMISSION_TO_SHARE_PHONE_MAP: {
+    [k in PermissionToSharePhoneType]: {
+        id: k;
+        name: string;
+        description: string;
+    };
+} = {
+    NIGHT_CAP: {
+        id: 'NIGHT_CAP',
+        name: 'Share with Night Cap',
+        description:
+            'Share your phone number with Night Captains on nights when you are scheduled to volunteer.'
+    },
+    COMMUNITY_COORDINATOR: {
+        id: 'COMMUNITY_COORDINATOR',
+        name: 'Share with Night Cap',
+        description:
+            'Share your phone number with Night Captains on nights when you are scheduled to volunteer.'
+    }
+};
+
+export const PERMISSION_TO_SHARE_PHONE_LIST = Object.keys(
+    PERMISSION_TO_SHARE_PHONE_MAP
+);
+
+export type PermissionToShareEmailType = 'COMMUNITY_COORDINATOR';
+
+// contactTextOn	contactEmailOn
+export const PERMISSION_TO_SHARE_EMAIL_MAP: {
+    [k in PermissionToShareEmailType]: {
+        id: k;
+        name: string;
+        description: string;
+    };
+} = {
+    COMMUNITY_COORDINATOR: {
+        id: 'COMMUNITY_COORDINATOR',
+        name: 'Share with Community Coordinators',
+        description:
+            'Share with Community Coordinators, for example when you have availabilty that matches need.'
+    }
+};
+
+export const PERMISSION_TO_SHARE_EMAIL_LIST = Object.keys(
+    PERMISSION_TO_SHARE_EMAIL_MAP
+);
+
+export const YES_NO_STATE_LIST = ['yes', 'no'];
 
 // across our data model, these strings are used to identify if a resource is active or not
 export const ACTIVE_STATE_LIST: NmActiveStateType[] = ['active', 'inactive'];

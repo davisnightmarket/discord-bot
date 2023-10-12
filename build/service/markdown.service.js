@@ -21,6 +21,13 @@ const messageMap = {
     GENERIC_NO_PERSON: (0, utility_1.CreateMdMessage)('GENERIC_NO_PERSON', {
         techPhone: ''
     }),
+    PERMISSION_LIST: (0, utility_1.CreateMdMessage)('PERMISSION_LIST', {
+        contactTextOnList: '',
+        contactEmailOnList: '',
+        sharePhoneOnList: '',
+        shareEmailOnList: ''
+    }),
+    PERMISSION_EDIT: (0, utility_1.CreateMdMessage)('PERMISSION_EDIT', {}),
     AVAILABILITY_LIST: (0, utility_1.CreateMdMessage)('AVAILABILITY_LIST', {
         availabilityHostList: '',
         availabilityPickupList: ''
@@ -99,6 +106,7 @@ class MarkdownService {
             .map(({ name, phone }) => `  - ${name} ${phone}`)
             .join('\n');
     }
+    // turns person availability strings from spreadsheet into a md list of readable day and time
     getAvailabilityListsFromPerson(person) {
         return [
             person.availabilityHost
@@ -115,7 +123,7 @@ class MarkdownService {
                 .trim()
                 .split('|||')
                 .map((a) => a.trim()))
-                .map((a) => `${const_1.DAYS_OF_WEEK[a[0]].name} ${const_1.PARTS_OF_DAY[a[1]].name}`)
+                .map((a) => `  - ${const_1.DAYS_OF_WEEK[a[0]].name} ${const_1.PARTS_OF_DAY[a[1]].name}`)
                 .join('\n')
         ];
     }

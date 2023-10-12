@@ -13,6 +13,7 @@ import {
     FoodCountMessageEvent,
     AvailabilityCommandEvent,
     AvailabilityEditButtonEvent,
+    PermissionEditButtonEvent,
     VolunteerCommandEvent,
     VolunteerEditButtonEvent,
     WelcomeEvent,
@@ -84,7 +85,8 @@ async function main() {
             }
             // ToDO: automate this
             if (
-                interaction.options.getString('command') === 'set-availability'
+                interaction.options.getString('command') ===
+                'et-availability-and-permissons'
             ) {
                 dbg('Editing Availability');
                 AvailabilityCommandEvent(services, interaction);
@@ -113,6 +115,11 @@ async function main() {
             );
 
             AvailabilityEditButtonEvent(
+                services,
+                interaction,
+                (interaction as ButtonInteraction)?.customId || ''
+            );
+            PermissionEditButtonEvent(
                 services,
                 interaction,
                 (interaction as ButtonInteraction)?.customId || ''

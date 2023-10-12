@@ -31,7 +31,7 @@ async function VolunteerEditButtonEvent({ nightDataService, markdownService }, i
             }
         ]);
         interaction.editReply({
-            content: interaction.values[0]
+            content: markdownService.md.GENERIC_OK({})
         });
     }
     // todo: replace all this with createMessageComponentCollector

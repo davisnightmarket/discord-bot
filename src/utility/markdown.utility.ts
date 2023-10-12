@@ -6,6 +6,8 @@ import Handlebars from 'handlebars';
 type MessageCodeType =
     | 'START_HOWTO'
     | 'AVAILABILITY_LIST'
+    | 'PERMISSION_LIST'
+    | 'PERMISSION_EDIT'
     | 'GENERIC_OK'
     | 'GENERIC_NO_PERSON'
     | 'GENERIC_SORRY'

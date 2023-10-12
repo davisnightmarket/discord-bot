@@ -21,6 +21,13 @@ const messageMap = {
     GENERIC_NO_PERSON: CreateMdMessage('GENERIC_NO_PERSON', {
         techPhone: ''
     }),
+    PERMISSION_LIST: CreateMdMessage('PERMISSION_LIST', {
+        contactTextOnList: '',
+        contactEmailOnList: '',
+        sharePhoneOnList: '',
+        shareEmailOnList: ''
+    }),
+    PERMISSION_EDIT: CreateMdMessage('PERMISSION_EDIT', {}),
     AVAILABILITY_LIST: CreateMdMessage('AVAILABILITY_LIST', {
         availabilityHostList: '',
         availabilityPickupList: ''

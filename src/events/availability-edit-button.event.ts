@@ -3,27 +3,28 @@ import { GuildServiceModel, NmDayNameType, NmNightRoleType } from '../model';
 import {
     AvailabilityToHostComponent,
     AvailabilityToPickupPerDayComponent,
-    IdentityEditModalComponent
+    IdentityEditModalComponent,
+    PermissionStartComponent
 } from '../component';
 import { DAYS_OF_WEEK } from '../const';
 import { Dbg } from '../utility';
 
 // in which user edits their availability
 
-const dbg = Dbg('AvailabilityEditEvent');
+const dbg = Dbg('AvailabilityEditButtonEvent');
 export async function AvailabilityEditButtonEvent(
     { personDataService, nightDataService, markdownService }: GuildServiceModel,
 
     interaction: StringSelectMenuInteraction,
     args: string
 ) {
-    const [command, period, day] = args.split('--') as [
+    const [command, step, day] = args.split('--') as [
         string,
         NmNightRoleType | 'night-list',
         NmDayNameType
     ];
 
-    dbg(command, period, day);
+    dbg(command, step, day);
 
     // todo: handle this higher up
     if (command !== 'availability') {
@@ -47,7 +48,7 @@ export async function AvailabilityEditButtonEvent(
     }
     await interaction.deferReply();
 
-    if (period === 'night-list') {
+    if (step === 'night-list') {
         if (!person) {
             // show them their modal
             interaction.showModal(
@@ -77,7 +78,7 @@ export async function AvailabilityEditButtonEvent(
 
     // todo: we probably should have a routing utility for routing different types of responses
     // in this case we have selected our night-host availability so ...
-    if (period === 'night-host') {
+    if (step === 'night-host') {
         // save it to the db ...
         // const [day, timeStart] = interaction.values[0].split('|||');
         // dbg(day, timeStart);
@@ -103,7 +104,7 @@ export async function AvailabilityEditButtonEvent(
         return;
     }
     // in this case we are in the pickup section
-    if (period === 'night-pickup') {
+    if (step === 'night-pickup') {
         // save the previous to the db ...
         // if we are on the first day, reset
         let availabilityPickup: string = '';
@@ -119,10 +120,21 @@ export async function AvailabilityEditButtonEvent(
 
         // show the next step
         const nextDayIndex = daysOfWeekIdList.indexOf(day) + 1;
-        // present night-pickup selects
+        // in this case we are done with the pickups, want to show permissions
         if (nextDayIndex === daysOfWeekIdList.length) {
+            // todo get these and build them
+            const contactTextOnList = '',
+                contactEmailOnList = '',
+                sharePhoneOnList = '',
+                shareEmailOnList = '';
             interaction.editReply({
-                content: markdownService.md.GENERIC_OK({})
+                content: markdownService.md.PERMISSION_LIST({
+                    contactTextOnList,
+                    contactEmailOnList,
+                    sharePhoneOnList,
+                    shareEmailOnList
+                }),
+                components: PermissionStartComponent()
             });
             return;
         }

@@ -4,6 +4,7 @@ export * from './volunteer-command.event';
 export * from './volunteer-edit-button.event';
 export * from './availability-command.event';
 export * from './availability-edit-button.event';
+export * from './permission-edit-button.event';
 export * from './welcome.event';
 export * from './identity-edit-modal.event';
 export * from './identity-command.event';

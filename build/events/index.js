@@ -20,6 +20,7 @@ __exportStar(require("./volunteer-command.event"), exports);
 __exportStar(require("./volunteer-edit-button.event"), exports);
 __exportStar(require("./availability-command.event"), exports);
 __exportStar(require("./availability-edit-button.event"), exports);
+__exportStar(require("./permission-edit-button.event"), exports);
 __exportStar(require("./welcome.event"), exports);
 __exportStar(require("./identity-edit-modal.event"), exports);
 __exportStar(require("./identity-command.event"), exports);

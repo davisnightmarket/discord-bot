@@ -52,7 +52,8 @@ async function main() {
                 (0, events_1.VolunteerCommandEvent)(services, interaction);
             }
             // ToDO: automate this
-            if (interaction.options.getString('command') === 'set-availability') {
+            if (interaction.options.getString('command') ===
+                'et-availability-and-permissons') {
                 dbg('Editing Availability');
                 (0, events_1.AvailabilityCommandEvent)(services, interaction);
             }
@@ -75,6 +76,7 @@ async function main() {
                 ? 'isStringSelectMenu'
                 : 'isButton');
             (0, events_1.AvailabilityEditButtonEvent)(services, interaction, interaction?.customId || '');
+            (0, events_1.PermissionEditButtonEvent)(services, interaction, interaction?.customId || '');
             (0, events_1.VolunteerEditButtonEvent)(services, interaction, interaction?.customId || '');
         }
         else {

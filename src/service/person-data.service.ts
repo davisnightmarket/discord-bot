@@ -19,6 +19,9 @@ export interface PersonModel extends SpreadsheetDataModel {
     availabilityHost: string;
     availabilityPickup: string;
     teamInterest: string;
+    contactTextOn: string;
+    contactEmailOn: string;
+    stampCreate: string;
 }
 
 export type PersonWithIdModel = PersonModel & { discordIdOrEmail: string };
@@ -70,7 +73,10 @@ export class PersonDataService {
         discordId = '',
         availabilityHost = '',
         availabilityPickup = '',
-        teamInterest = ''
+        teamInterest = '',
+        contactTextOn = '',
+        contactEmailOn = '',
+        stampCreate = ''
     }: Partial<PersonModel> = {}): PersonModel {
         return {
             status,
@@ -89,7 +95,10 @@ export class PersonDataService {
             discordId,
             availabilityHost,
             availabilityPickup,
-            teamInterest
+            teamInterest,
+            contactTextOn,
+            contactEmailOn,
+            stampCreate
         };
     }
 

@@ -1,12 +1,4 @@
-import {
-    ActionRowBuilder,
-    ButtonBuilder,
-    ButtonStyle,
-    type ButtonInteraction,
-    Interaction,
-    StringSelectMenuOptionBuilder,
-    StringSelectMenuBuilder
-} from 'discord.js';
+import { type ButtonInteraction, Interaction } from 'discord.js';
 
 import {
     type NmDayNameType,
@@ -61,7 +53,7 @@ export async function VolunteerEditButtonEvent(
             }
         ]);
         interaction.editReply({
-            content: interaction.values[0]
+            content: markdownService.md.GENERIC_OK({})
         });
     }
 

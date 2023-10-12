@@ -9,9 +9,13 @@ if (!Env || !Object.keys(config_1.EnvConfig).includes(Env)) {
     throw new Error('Must set an environment');
 }
 class CoreDataService {
+    // todo: we can replace the many records pointing to docs in config with a call to the drive service to get the folder
     // the constructor gets the core id which points to the core google spreadsheet by default
     // you can pass in a different id for testing purposes, but this should work in test and prod
     constructor(spreadsheetId = config_1.EnvConfig[Env].GSPREAD_CORE_ID) {
+        this.driveCoreDataService = new _1.GoogleDriveService(
+        // todo: this should be the core data folder
+        config_1.EnvConfig[Env].GSPREAD_CORE_ID);
         this.configSheetService = new _1.GoogleSheetService({
             spreadsheetId,
             // todo: we should store sheet names in const

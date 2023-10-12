@@ -23,7 +23,7 @@ class PersonDataService {
     createPerson(person = {}) {
         return PersonDataService.createPerson(person);
     }
-    static createPerson({ status = '', name = '', email = '', phone = '', location = '', bike = '', bikeCart = '', bikeCartAtNight = '', skills = '', bio = '', pronouns = '', interest = '', reference = '', discordId = '', availabilityHost = '', availabilityPickup = '', teamInterest = '' } = {}) {
+    static createPerson({ status = '', name = '', email = '', phone = '', location = '', bike = '', bikeCart = '', bikeCartAtNight = '', skills = '', bio = '', pronouns = '', interest = '', reference = '', discordId = '', availabilityHost = '', availabilityPickup = '', teamInterest = '', contactTextOn = '', contactEmailOn = '', stampCreate = '' } = {}) {
         return {
             status,
             name,
@@ -41,7 +41,10 @@ class PersonDataService {
             discordId,
             availabilityHost,
             availabilityPickup,
-            teamInterest
+            teamInterest,
+            contactTextOn,
+            contactEmailOn,
+            stampCreate
         };
     }
     async updatePersonByDiscordId(person) {

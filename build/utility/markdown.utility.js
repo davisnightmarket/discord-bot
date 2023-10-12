@@ -22,10 +22,10 @@ function loadMessage(id, reload = false) {
     catch (e) {
         // todo: set up a proper logger and send notifications in prod
         if (process.env.NODE_ENV === 'prod') {
-            console.error(e);
+            console.error(`No .md file for ${(0, path_1.join)(messagePath, id + '.md')}`);
         }
         else {
-            dbg(e);
+            dbg(`No .md file for ${(0, path_1.join)(messagePath, id + '.md')}`);
         }
     }
     try {
@@ -36,25 +36,18 @@ function loadMessage(id, reload = false) {
     catch (e) {
         // todo: set up a proper logger and send notifications in prod
         if (process.env.NODE_ENV === 'prod') {
-            console.error(e);
+            console.error(`No .hbs file for ${(0, path_1.join)(messagePath, id + '.hbs')}`);
         }
         else {
-            dbg(e);
+            dbg(`No .hbs file for ${(0, path_1.join)(messagePath, id + '.hbs')}`);
         }
     }
-    return messageCache[id];
-}
-function loadAllMessage(a, reload = false) {
-    const c = {};
-    try {
-        for (const b of a) {
-            c[b] = loadMessage(b, reload);
-        }
+    // TODO: also look for core and market markdown files from google drive
+    if (!messageCache[id]) {
+        // todo: send this to the logger for letting devs know
+        console.error(`Missing content for ${(0, path_1.join)(messagePath, id + '.hbs')}`);
     }
-    catch (e) {
-        dbg(e);
-    }
-    return c;
+    return messageCache[id] || '';
 }
 function CreateMdMessage(messageCode, coreParams) {
     const message = loadMessage(messageCode);
@@ -79,34 +72,3 @@ function CreateMdMessage(messageCode, coreParams) {
     };
 }
 exports.CreateMdMessage = CreateMdMessage;
-// deprecated because we can't get the props typed
-// export function CreateMessageMap<
-//     U extends Record<string, Record<string, string>>
-// >(map: Partial<U>) {
-//     const messageMap = loadAllMessage(Object.keys(map)) as Record<
-//         keyof U,
-//         string
-//     >;
-//     // todo: parse with HBS
-//     return Object.keys(messageMap).reduce<
-//         Partial<Record<keyof U, (a: U[keyof U]) => string>>
-//     >((a, b: keyof U) => {
-//         // because we do not want a message compile error to break teh app
-//         let d = Handlebars.compile('');
-//         try {
-//             d = Handlebars.compile(messageMap[b] ?? '');
-//         } catch (e) {
-//             console.error(e);
-//         }
-//         a[b] = (c: U[typeof b]) => {
-//             let msg = '';
-//             try {
-//                 msg = d({ ...map[b], ...c });
-//             } catch (e) {
-//                 console.error(e);
-//             }
-//             return msg;
-//         };
-//         return a;
-//     }, {}) as Record<keyof U, (a: U[keyof U]) => string>;
-// }
