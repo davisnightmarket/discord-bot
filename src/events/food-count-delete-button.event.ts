@@ -163,8 +163,6 @@ export const FoodCountDeleteButtonEvent =
                             org,
                             date
                         })
-                        //                     `*OK, posted to db:*
-                        // ${lbs} lbs ${note ? `(${note})` : ''} from ${org} on  ${date}.`
                     );
 
                     try {

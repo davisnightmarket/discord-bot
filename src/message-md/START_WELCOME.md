@@ -1,3 +1,6 @@
+Hello Marketeer {{username}},
+I am {{botname}}, a Discord bot whose job it is to welcome you to {{marketLocation}} Night Market, get you oriented, and help you do stuff.
+
 First off, we would like to collect some contact information for you, so that our Community Coordinators and Night Captains can be in touch.
 
 We will start by asking for your email address.
