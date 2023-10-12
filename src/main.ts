@@ -3,7 +3,8 @@ import {
     Client,
     Events,
     GatewayIntentBits,
-    Partials
+    Partials,
+    StringSelectMenuInteraction
 } from 'discord.js';
 import { NmSecrets, GetGuildServices, Dbg } from './utility';
 import {
@@ -95,16 +96,19 @@ async function main() {
                 dbg('help-and-docs');
                 interaction.reply('Coming soon!');
             }
-
-            return;
         } else if (interaction.isModalSubmit()) {
             dbg('isModalSubmit');
             IdentityEditModalEvent(services, interaction);
-        } else if (interaction.isStringSelectMenu()) {
-            dbg('isStringSelectMenu');
-            AvailabilitySelectEvent(services, interaction);
-        } else if (interaction.isButton()) {
-            dbg('isButton');
+        }
+        // we can lump these two together since they are both routed by customId
+        else if (interaction.isStringSelectMenu() || interaction.isButton()) {
+            dbg(
+                (
+                    interaction as StringSelectMenuInteraction
+                ).isStringSelectMenu()
+                    ? 'isStringSelectMenu'
+                    : 'isButton'
+            );
             AvailabilitySelectEvent(services, interaction);
         } else {
             dbg('otherwise this is a message content trigger');
