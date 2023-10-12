@@ -1,6 +1,10 @@
 import { EnvConfig } from '../config';
 import { ConfigModel, type EnvType } from '../model';
-import { GoogleSheetService, SpreadsheetDataModel } from '.';
+import {
+    GoogleSheetService,
+    SpreadsheetDataModel,
+    GoogleDriveService
+} from '.';
 
 const Env = process.env.NODE_ENV as EnvType;
 
@@ -21,9 +25,17 @@ export class CoreDataService {
     configMarketSheetService: GoogleSheetService<ConfigDataModel>;
     coreTypeSheetService: GoogleSheetService<TypeDataModel>;
 
+    // todo: this is a stub
+    driveConfigService: GoogleDriveService<'Config'>;
+    // todo: we can replace the many records pointing to docs in config with a call to the drive service to get the folder
+
     // the constructor gets the core id which points to the core google spreadsheet by default
     // you can pass in a different id for testing purposes, but this should work in test and prod
     constructor(spreadsheetId: string = EnvConfig[Env].GSPREAD_CORE_ID) {
+        this.driveConfigService = new GoogleDriveService(
+            EnvConfig[Env].GSPREAD_CORE_ID
+        );
+
         this.configSheetService = new GoogleSheetService({
             spreadsheetId,
             // todo: we should store sheet names in const
