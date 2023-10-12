@@ -103,6 +103,9 @@ async function main() {
         } else if (interaction.isStringSelectMenu()) {
             dbg('isStringSelectMenu');
             AvailabilitySelectEvent(services, interaction);
+        } else if (interaction.isButton()) {
+            dbg('isButton');
+            AvailabilitySelectEvent(services, interaction);
         } else {
             dbg('otherwise this is a message content trigger');
             FoodCountMessageEvent(interaction);

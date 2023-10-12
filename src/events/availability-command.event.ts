@@ -1,12 +1,16 @@
 import { ChatInputCommandInteraction } from 'discord.js';
-import { GuildServiceModel } from '../model';
 import {
-    AvailabilityToHostComponent,
+    GuildServiceModel,
+    NmDayNameType,
+    NmPartOfDayNameType
+} from '../model';
+import {
+    AvailabilityEditButtonComponent,
     IdentityEditModalComponent
 } from '../component';
-import { DAYS_OF_WEEK } from '../const';
-import { ParseContentService } from '../service';
 import { Dbg } from '../utility';
+import { DAYS_OF_WEEK, PARTS_OF_DAY } from '../const';
+import { ParseContentService } from '../service';
 
 // in which user edits their availability
 
@@ -30,36 +34,63 @@ export async function AvailabilityCommandEvent(
         return;
     }
 
+    // todo: mover to person service
+    const availabilityHostList = person.availabilityHost
+        .split(',')
+        .map((a) =>
+            a
+                .trim()
+                .split('|||')
+                .map((a) => a.trim())
+        )
+        .map(
+            (a) =>
+                `${
+                    DAYS_OF_WEEK[a[0] as NmDayNameType].name
+                } ${ParseContentService.getAmPmTimeFrom24Hour(a[1])}`
+        );
+    const availabilityPickupList = person.availabilityPickup
+        .split(',')
+        .map((a) =>
+            a
+                .trim()
+                .split('|||')
+                .map((a) => a.trim())
+        )
+        .map(
+            (a) =>
+                `${DAYS_OF_WEEK[a[0] as NmDayNameType].name} ${
+                    PARTS_OF_DAY[a[1] as NmPartOfDayNameType].name
+                }`
+        );
+
+    console.log(
+        person.availabilityHost.split(',').map((a) =>
+            a
+                .trim()
+                .split('|||')
+                .map((a) => a.trim())
+        )
+    );
+    console.log(
+        person.availabilityPickup.split(',').map((a) =>
+            a
+                .trim()
+                .split('|||')
+                .map((a) => a.trim())
+        )
+    );
     await interaction.deferReply();
 
-    const dayTimes = await nightDataService.waitingForNightCache.then(
-        (nightOps) => {
-            const dayTimesMap = nightOps.reduce<{
-                [k in string]: [string, string];
-            }>((a, b) => {
-                if (b.day && b.timeStart && !a[b.day + b.timeStart]) {
-                    a[b.day + b.timeStart] = [
-                        `${b.day}|||${b.timeStart}`,
-                        `${
-                            DAYS_OF_WEEK[b.day].name
-                        } ${ParseContentService.getAmPmTimeFrom24Hour(
-                            b.timeStart
-                        )}`
-                    ];
-                }
-                return a;
-            }, {});
-            return Object.values(dayTimesMap);
-        }
-    );
     // todo: show host then pickup, since we can't fit them all
-    const components = AvailabilityToHostComponent(
-        dayTimes,
-        personDataService.createPerson(person)
-    );
+    const components = AvailabilityEditButtonComponent();
+    const content = messageService.m.AVAILABILITY_LIST({
+        availabilityHostList,
+        availabilityPickupList
+    });
     // response
     interaction.editReply({
-        content: messageService.m.AVAILABILITY_TO_HOST({}),
+        content,
         components
     });
 }

@@ -1,11 +1,24 @@
 import {
     ActionRowBuilder,
     StringSelectMenuOptionBuilder,
-    StringSelectMenuBuilder
+    StringSelectMenuBuilder,
+    ButtonBuilder,
+    ButtonStyle
 } from 'discord.js';
 import { PersonModel } from '../service';
 import { DAYS_OF_WEEK, PARTS_OF_DAY } from '../const';
 import { NmDayNameType } from '../model';
+
+export const AvailabilityEditButtonComponent = () => {
+    return [
+        new ActionRowBuilder<ButtonBuilder>().addComponents(
+            new ButtonBuilder()
+                .setCustomId(`availability--night-list`)
+                .setLabel('Edit availability?')
+                .setStyle(ButtonStyle.Secondary)
+        )
+    ];
+};
 
 // selects to identify your availability for night ops
 export const AvailabilityToHostComponent = (

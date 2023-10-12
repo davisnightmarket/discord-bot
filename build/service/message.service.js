@@ -11,6 +11,10 @@ const messageMap = {
     GENERIC_NO_PERSON: (0, utility_1.CreateMessage)('GENERIC_NO_PERSON', {
         techPhone: ''
     }),
+    AVAILABILITY_LIST: (0, utility_1.CreateMessage)('AVAILABILITY_LIST', {
+        availabilityHostList: [],
+        availabilityPickupList: []
+    }),
     AVAILABILITY_TO_PICKUP: (0, utility_1.CreateMessage)('AVAILABILITY_TO_PICKUP', {
         dayName: ''
     }),

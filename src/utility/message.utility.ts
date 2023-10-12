@@ -4,6 +4,7 @@ import { join } from 'path';
 import Handlebars from 'handlebars';
 
 type MessageCodeType =
+    | 'AVAILABILITY_LIST'
     | 'GENERIC_OK'
     | 'GENERIC_NO_PERSON'
     | 'GENERIC_SORRY'
@@ -43,6 +44,21 @@ function loadMessage(id: string, reload: boolean = false) {
     try {
         // todo, we want to process with markdown
         messageCache[id] = readFileSync(join(messagePath, id + '.md'), 'utf-8');
+    } catch (e) {
+        // todo: set up a proper logger and send notifications in prod
+        if (process.env.NODE_ENV === 'prod') {
+            console.error(e);
+        } else {
+            dbg(e);
+        }
+    }
+    try {
+        if (!messageCache[id]) {
+            messageCache[id] = readFileSync(
+                join(messagePath, id + '.hbs'),
+                'utf-8'
+            );
+        }
     } catch (e) {
         // todo: set up a proper logger and send notifications in prod
         if (process.env.NODE_ENV === 'prod') {

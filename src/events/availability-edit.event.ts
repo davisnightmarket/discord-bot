@@ -1,14 +1,19 @@
-import { ButtonInteraction, StringSelectMenuInteraction } from 'discord.js';
+import { StringSelectMenuInteraction } from 'discord.js';
 import { GuildServiceModel, NmDayNameType, NmNightRoleType } from '../model';
-import { AvailabilityToPickupPerDayComponent } from '../component';
+import {
+    AvailabilityToHostComponent,
+    AvailabilityToPickupPerDayComponent,
+    IdentityEditModalComponent
+} from '../component';
 import { DAYS_OF_WEEK } from '../const';
 import { Dbg } from '../utility';
+import { ParseContentService } from '../service';
 
 // in which user edits their availability
 
 const dbg = Dbg('AvailabilityEditEvent');
 export async function AvailabilitySelectEvent(
-    { personDataService, messageService }: GuildServiceModel,
+    { personDataService, nightDataService, messageService }: GuildServiceModel,
 
     interaction: StringSelectMenuInteraction
 ) {
@@ -17,7 +22,7 @@ export async function AvailabilitySelectEvent(
     const [command, period, day] =
         (interaction.customId?.split('--') as [
             string,
-            NmNightRoleType,
+            NmNightRoleType | 'night-list',
             NmDayNameType
         ]) || [];
     dbg(command, period, day);
@@ -27,19 +32,64 @@ export async function AvailabilitySelectEvent(
         return;
     }
 
-    await interaction.deferReply();
-
     // get the person's data
     const person = await personDataService.getPersonByDiscordId(
         interaction.user.id
     );
     if (!person) {
         //! we would like to show them their modal
-        // we cannot show the identity model since we have deferred
-        interaction.editReply({
-            content: await messageService.getGenericNoPerson()
-        });
+        // // we cannot show the identity model since we have deferred
+        // interaction.editReply({
+        //     content: await messageService.getGenericNoPerson()
+        // });
+        interaction.showModal(
+            IdentityEditModalComponent(personDataService.createPerson(person))
+        );
         return;
+    }
+    await interaction.deferReply();
+
+    if (period === 'night-list') {
+        if (!person) {
+            // show them their modal
+            interaction.showModal(
+                IdentityEditModalComponent(
+                    personDataService.createPerson(person)
+                )
+            );
+            return;
+        }
+
+        const dayTimes = await nightDataService.waitingForNightCache.then(
+            (nightOps) => {
+                const dayTimesMap = nightOps.reduce<{
+                    [k in string]: [string, string];
+                }>((a, b) => {
+                    if (b.day && b.timeStart && !a[b.day + b.timeStart]) {
+                        a[b.day + b.timeStart] = [
+                            `${b.day}|||${b.timeStart}`,
+                            `${
+                                DAYS_OF_WEEK[b.day].name
+                            } ${ParseContentService.getAmPmTimeFrom24Hour(
+                                b.timeStart
+                            )}`
+                        ];
+                    }
+                    return a;
+                }, {});
+                return Object.values(dayTimesMap);
+            }
+        );
+        // todo: show host then pickup, since we can't fit them all
+        const components = AvailabilityToHostComponent(
+            dayTimes,
+            personDataService.createPerson(person)
+        );
+        // response
+        interaction.editReply({
+            content: messageService.m.AVAILABILITY_TO_HOST({}),
+            components
+        });
     }
 
     const daysOfWeekIdList = Object.values(DAYS_OF_WEEK).map((a) => a.id);

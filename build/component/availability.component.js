@@ -1,8 +1,17 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AvailabilityToPickupPerDayComponent = exports.AvailabilityToHostComponent = void 0;
+exports.AvailabilityToPickupPerDayComponent = exports.AvailabilityToHostComponent = exports.AvailabilityEditButtonComponent = void 0;
 const discord_js_1 = require("discord.js");
 const const_1 = require("../const");
+const AvailabilityEditButtonComponent = () => {
+    return [
+        new discord_js_1.ActionRowBuilder().addComponents(new discord_js_1.ButtonBuilder()
+            .setCustomId(`availability--night-list`)
+            .setLabel('Edit availability?')
+            .setStyle(discord_js_1.ButtonStyle.Secondary))
+    ];
+};
+exports.AvailabilityEditButtonComponent = AvailabilityEditButtonComponent;
 // selects to identify your availability for night ops
 const AvailabilityToHostComponent = (dayTimeList, {}) => {
     return [

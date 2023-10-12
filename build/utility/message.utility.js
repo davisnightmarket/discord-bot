@@ -28,6 +28,20 @@ function loadMessage(id, reload = false) {
             dbg(e);
         }
     }
+    try {
+        if (!messageCache[id]) {
+            messageCache[id] = (0, fs_1.readFileSync)((0, path_1.join)(messagePath, id + '.hbs'), 'utf-8');
+        }
+    }
+    catch (e) {
+        // todo: set up a proper logger and send notifications in prod
+        if (process.env.NODE_ENV === 'prod') {
+            console.error(e);
+        }
+        else {
+            dbg(e);
+        }
+    }
     return messageCache[id];
 }
 function loadAllMessage(a, reload = false) {
