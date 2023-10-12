@@ -1,4 +1,4 @@
-## Here are permissions you have given:
+## Current Permissions Granted:
 
 Permission to text message:
 {{contactTextOnList}}

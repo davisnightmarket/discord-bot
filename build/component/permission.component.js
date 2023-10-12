@@ -15,44 +15,32 @@ exports.PermissionStartComponent = PermissionStartComponent;
 const PermissionToSelectComponent = () => {
     return [
         new discord_js_1.ActionRowBuilder().addComponents(new discord_js_1.StringSelectMenuBuilder()
-            .setCustomId(`permission--contact-text-on`)
+            .setCustomId(`permission--edit`)
             .setMinValues(0)
-            .setMaxValues(const_1.PERMISSION_TO_CONTACT_EMAIL_LIST.length)
-            .addOptions(...const_1.PERMISSION_TO_CONTACT_EMAIL_LIST.map((code) => {
-            return new discord_js_1.StringSelectMenuOptionBuilder()
-                .setLabel(const_1.PERMISSION_TO_CONTACT_EMAIL_MAP[code].name)
-                .setDescription(const_1.PERMISSION_TO_CONTACT_EMAIL_MAP[code].description)
-                .setValue(code);
-        }))),
-        new discord_js_1.ActionRowBuilder().addComponents(new discord_js_1.StringSelectMenuBuilder()
-            .setCustomId(`permission--contact-email-on`)
-            .setMinValues(0)
-            .setMaxValues(const_1.PERMISSION_TO_CONTACT_TEXT_LIST.length)
+            .setMaxValues(const_1.PERMISSION_TO_CONTACT_TEXT_LIST.length +
+            const_1.PERMISSION_TO_SHARE_PHONE_LIST.length +
+            const_1.PERMISSION_TO_CONTACT_EMAIL_LIST.length +
+            const_1.PERMISSION_TO_SHARE_EMAIL_LIST.length)
             .addOptions(...const_1.PERMISSION_TO_CONTACT_TEXT_LIST.map((code) => {
             return new discord_js_1.StringSelectMenuOptionBuilder()
                 .setLabel(const_1.PERMISSION_TO_CONTACT_TEXT_MAP[code].name)
                 .setDescription(const_1.PERMISSION_TO_CONTACT_TEXT_MAP[code].description)
-                .setValue(code);
-        }))),
-        new discord_js_1.ActionRowBuilder().addComponents(new discord_js_1.StringSelectMenuBuilder()
-            .setCustomId(`permission--share-email-on`)
-            .setMinValues(0)
-            .setMaxValues(const_1.PERMISSION_TO_SHARE_PHONE_LIST.length)
-            .addOptions(...const_1.PERMISSION_TO_SHARE_PHONE_LIST.map((code) => {
+                .setValue(`contact-text---${code}`);
+        }), ...const_1.PERMISSION_TO_SHARE_PHONE_LIST.map((code) => {
             return new discord_js_1.StringSelectMenuOptionBuilder()
                 .setLabel(const_1.PERMISSION_TO_SHARE_PHONE_MAP[code].name)
                 .setDescription(const_1.PERMISSION_TO_SHARE_PHONE_MAP[code].description)
-                .setValue(code);
-        }))),
-        new discord_js_1.ActionRowBuilder().addComponents(new discord_js_1.StringSelectMenuBuilder()
-            .setCustomId(`permission--share-phone-on`)
-            .setMinValues(0)
-            .setMaxValues(const_1.PERMISSION_TO_SHARE_EMAIL_LIST.length)
-            .addOptions(...const_1.PERMISSION_TO_SHARE_EMAIL_LIST.map((code) => {
+                .setValue(`share-phone---${code}`);
+        }), ...const_1.PERMISSION_TO_CONTACT_EMAIL_LIST.map((code) => {
+            return new discord_js_1.StringSelectMenuOptionBuilder()
+                .setLabel(const_1.PERMISSION_TO_CONTACT_EMAIL_MAP[code].name)
+                .setDescription(const_1.PERMISSION_TO_CONTACT_EMAIL_MAP[code].description)
+                .setValue(`contact-email---${code}`);
+        }), ...const_1.PERMISSION_TO_SHARE_EMAIL_LIST.map((code) => {
             return new discord_js_1.StringSelectMenuOptionBuilder()
                 .setLabel(const_1.PERMISSION_TO_SHARE_EMAIL_MAP[code].name)
                 .setDescription(const_1.PERMISSION_TO_SHARE_EMAIL_MAP[code].description)
-                .setValue(code);
+                .setValue(`share-email---${code}`);
         })))
     ];
 };

@@ -8,7 +8,7 @@ class PersonDataService {
             spreadsheetId,
             sheetName: `person`
         });
-        this.waitingForPersonListCache = this.getPersonList();
+        this.waitingForPersonListCache = this.getPersonList().then((a) => a.map(this.createPerson));
         // reset the cache ever 2 hour
         setInterval(() => {
             this.refreshPersonListCache();
@@ -23,7 +23,7 @@ class PersonDataService {
     createPerson(person = {}) {
         return PersonDataService.createPerson(person);
     }
-    static createPerson({ status = '', name = '', email = '', phone = '', location = '', bike = '', bikeCart = '', bikeCartAtNight = '', skills = '', bio = '', pronouns = '', interest = '', reference = '', discordId = '', availabilityHost = '', availabilityPickup = '', teamInterest = '', contactTextOn = '', contactEmailOn = '', stampCreate = '' } = {}) {
+    static createPerson({ status = '', name = '', email = '', phone = '', location = '', bike = '', bikeCart = '', bikeCartAtNight = '', skills = '', bio = '', pronouns = '', interest = '', reference = '', discordId = '', availabilityHost = '', availabilityPickup = '', teamInterest = '', contactTextOn = '', contactEmailOn = '', sharePhoneOn = '', shareEmailOn = '', stampCreate = '' } = {}) {
         return {
             status,
             name,
@@ -44,6 +44,8 @@ class PersonDataService {
             teamInterest,
             contactTextOn,
             contactEmailOn,
+            sharePhoneOn,
+            shareEmailOn,
             stampCreate
         };
     }

@@ -13,7 +13,7 @@ async function VolunteerCommandEvent({ nightDataService }, interaction) {
     }
     const guild = interaction.guild;
     interaction = interaction;
-    interaction.deferReply();
+    interaction.deferReply({ ephemeral: true });
     let channelDay = (await guild?.channels?.fetch(interaction?.channelId ?? ''))?.name;
     channelDay = const_1.DAYS_OF_WEEK_CODES.includes(channelDay)
         ? channelDay

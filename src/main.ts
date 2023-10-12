@@ -11,7 +11,7 @@ import { NmSecrets, GetGuildServices, Dbg } from './utility';
 import {
     FoodCountDeleteButtonEvent,
     FoodCountMessageEvent,
-    AvailabilityCommandEvent,
+    AvailabilityAndPermissionCommandEvent,
     AvailabilityEditButtonEvent,
     PermissionEditButtonEvent,
     VolunteerCommandEvent,
@@ -85,11 +85,10 @@ async function main() {
             }
             // ToDO: automate this
             if (
-                interaction.options.getString('command') ===
-                'et-availability-and-permissons'
+                interaction.options.getString('command') === 'set-availability'
             ) {
                 dbg('Editing Availability');
-                AvailabilityCommandEvent(services, interaction);
+                AvailabilityAndPermissionCommandEvent(services, interaction);
             }
             if (interaction.options.getString('command') === 'edit-identity') {
                 dbg('Editing identity');

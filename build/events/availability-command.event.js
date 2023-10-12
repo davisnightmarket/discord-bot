@@ -14,7 +14,7 @@ async function AvailabilityCommandEvent({ personDataService, markdownService }, 
         interaction.showModal((0, component_1.IdentityEditModalComponent)(personDataService.createPerson(person)));
         return;
     }
-    await interaction.deferReply();
+    await interaction.deferReply({ ephemeral: true });
     const [availabilityHostList, availabilityPickupList] = markdownService.getAvailabilityListsFromPerson(person);
     const components = (0, component_1.AvailabilityEditButtonComponent)();
     const content = markdownService.md.AVAILABILITY_LIST({

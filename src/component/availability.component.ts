@@ -9,12 +9,16 @@ import { PersonModel } from '../service';
 import { DAYS_OF_WEEK, PARTS_OF_DAY } from '../const';
 import { NmDayNameType } from '../model';
 
-export const AvailabilityEditButtonComponent = () => {
+export const AvailabilityAndPermissionEditButtonComponent = () => {
     return [
         new ActionRowBuilder<ButtonBuilder>().addComponents(
             new ButtonBuilder()
                 .setCustomId(`availability--night-list`)
                 .setLabel('Edit availability?')
+                .setStyle(ButtonStyle.Secondary),
+            new ButtonBuilder()
+                .setCustomId(`permission--start`)
+                .setLabel('Edit permission?')
                 .setStyle(ButtonStyle.Secondary)
         )
     ];

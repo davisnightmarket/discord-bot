@@ -46,7 +46,7 @@ export async function AvailabilityEditButtonEvent(
         );
         return;
     }
-    await interaction.deferReply();
+    await interaction.deferReply({ ephemeral: true });
 
     if (step === 'night-list') {
         if (!person) {
@@ -122,19 +122,8 @@ export async function AvailabilityEditButtonEvent(
         const nextDayIndex = daysOfWeekIdList.indexOf(day) + 1;
         // in this case we are done with the pickups, want to show permissions
         if (nextDayIndex === daysOfWeekIdList.length) {
-            // todo get these and build them
-            const contactTextOnList = '',
-                contactEmailOnList = '',
-                sharePhoneOnList = '',
-                shareEmailOnList = '';
             interaction.editReply({
-                content: markdownService.md.PERMISSION_LIST({
-                    contactTextOnList,
-                    contactEmailOnList,
-                    sharePhoneOnList,
-                    shareEmailOnList
-                }),
-                components: PermissionStartComponent()
+                content: markdownService.md.GENERIC_OK({})
             });
             return;
         }

@@ -8,12 +8,12 @@ const dbg = (0, utility_1.Dbg)('VolunteerResponseEvent');
 // todo: split this into different events for clarity
 // when a person requests a listing of
 async function VolunteerEditButtonEvent({ nightDataService, markdownService }, interaction, args) {
-    interaction.deferReply();
     const [command, day, role, period] = args.split('--');
     dbg(command, day, role, period);
     if (command !== 'volunteer') {
         return;
     }
+    interaction.deferReply({ ephemeral: true });
     // in this case we are selecting the day (or days) for volunteering, which is the final step
     if (interaction.isStringSelectMenu()) {
         // TODO: save to DB

@@ -21,7 +21,6 @@ export async function VolunteerEditButtonEvent(
     interaction: Interaction,
     args: string
 ) {
-    (interaction as ButtonInteraction).deferReply();
     const [command, day, role, period] = args.split('--') as [
         string,
         NmDayNameType,
@@ -34,6 +33,8 @@ export async function VolunteerEditButtonEvent(
     if (command !== 'volunteer') {
         return;
     }
+
+    (interaction as ButtonInteraction).deferReply({ ephemeral: true });
 
     // in this case we are selecting the day (or days) for volunteering, which is the final step
     if (interaction.isStringSelectMenu()) {

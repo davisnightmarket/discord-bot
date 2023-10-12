@@ -27,21 +27,20 @@ export const PERMISSION_TO_CONTACT_TEXT_MAP: {
 } = {
     VOLUNTEER_PICKUP_REMINDER: {
         id: 'VOLUNTEER_PICKUP_REMINDER',
-        name: 'Contact By Text Message with Pickup Deets',
+        name: 'Contact By Text Message about a Pickup',
         description:
-            'A text message reminder that a person is signed up to pickup.'
+            'ie: with details about a pickup that you have volunteered for.'
     },
     VOLUNTEER_HOST_REMINDER: {
         id: 'VOLUNTEER_HOST_REMINDER',
         name: 'Contact By Text Message on day of Night Hosting',
-        description:
-            'A text message reminder that a person is signed up to host.'
+        description: 'ie: if you are hosting or doing a pick-up that day.'
     },
     AVAILABILITY_REQUEST: {
         id: 'AVAILABILITY_REQUEST',
         name: 'Contact By Text Message about Availability',
         description:
-            'Based on our record of availability, a text message request for volunteer support.'
+            'ie: you have Tuesday afternoon availability and we need someone that week.'
     }
 };
 
@@ -63,7 +62,7 @@ export const PERMISSION_TO_CONTACT_EMAIL_MAP: {
         id: 'AVAILABILITY_REQUEST',
         name: 'Contact by Email about Availability',
         description:
-            'Based on our record of availability, an email request for volunteer support.'
+            'ie: you have Tuesday afternoon availability and someone is leaving.'
     }
 };
 
@@ -84,15 +83,13 @@ export const PERMISSION_TO_SHARE_PHONE_MAP: {
 } = {
     NIGHT_CAP: {
         id: 'NIGHT_CAP',
-        name: 'Share with Night Cap',
-        description:
-            'Share your phone number with Night Captains on nights when you are scheduled to volunteer.'
+        name: 'Share Phone Number with Night Cap',
+        description: 'ie: if you are hosting or doing a pick-up that day.'
     },
     COMMUNITY_COORDINATOR: {
         id: 'COMMUNITY_COORDINATOR',
-        name: 'Share with Night Cap',
-        description:
-            'Share your phone number with Night Captains on nights when you are scheduled to volunteer.'
+        name: 'Share Phone Number with Community Coordinator',
+        description: 'ie: if you have interest in bike building.'
     }
 };
 
@@ -112,9 +109,8 @@ export const PERMISSION_TO_SHARE_EMAIL_MAP: {
 } = {
     COMMUNITY_COORDINATOR: {
         id: 'COMMUNITY_COORDINATOR',
-        name: 'Share with Community Coordinators',
-        description:
-            'Share with Community Coordinators, for example when you have availabilty that matches need.'
+        name: 'Share Email Address with Community Coordinators',
+        description: 'ie: when you have availabilty that matches need.'
     }
 };
 

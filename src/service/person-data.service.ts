@@ -21,6 +21,8 @@ export interface PersonModel extends SpreadsheetDataModel {
     teamInterest: string;
     contactTextOn: string;
     contactEmailOn: string;
+    sharePhoneOn: string;
+    shareEmailOn: string;
     stampCreate: string;
 }
 
@@ -35,7 +37,9 @@ export class PersonDataService {
             spreadsheetId,
             sheetName: `person`
         });
-        this.waitingForPersonListCache = this.getPersonList();
+        this.waitingForPersonListCache = this.getPersonList().then((a) =>
+            a.map(this.createPerson)
+        );
         // reset the cache ever 2 hour
         setInterval(() => {
             this.refreshPersonListCache();
@@ -76,6 +80,8 @@ export class PersonDataService {
         teamInterest = '',
         contactTextOn = '',
         contactEmailOn = '',
+        sharePhoneOn = '',
+        shareEmailOn = '',
         stampCreate = ''
     }: Partial<PersonModel> = {}): PersonModel {
         return {
@@ -98,6 +104,8 @@ export class PersonDataService {
             teamInterest,
             contactTextOn,
             contactEmailOn,
+            sharePhoneOn,
+            shareEmailOn,
             stampCreate
         };
     }

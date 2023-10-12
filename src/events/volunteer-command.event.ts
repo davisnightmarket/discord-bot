@@ -25,7 +25,7 @@ export async function VolunteerCommandEvent(
     const guild = interaction.guild as Guild;
 
     interaction = interaction as ChatInputCommandInteraction;
-    interaction.deferReply();
+    interaction.deferReply({ephemeral:true});
     let channelDay = (
         await guild?.channels?.fetch(interaction?.channelId ?? '')
     )?.name as NmDayNameType;

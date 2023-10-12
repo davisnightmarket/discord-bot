@@ -14,13 +14,7 @@ export async function PermissionEditButtonEvent(
 ) {
     const [command, step, day] = args.split('--') as [
         string,
-        (
-            | 'start'
-            | 'contact-text-on'
-            | 'contact-email-on'
-            | 'share-phone-on'
-            | 'share-email-on'
-        ),
+        'start' | 'edit',
         NmDayNameType
     ];
 
@@ -31,28 +25,58 @@ export async function PermissionEditButtonEvent(
         return;
     }
 
-    await interaction.deferReply();
+    await interaction.deferReply({ ephemeral: true });
 
     if (step === 'start') {
         interaction.editReply({
             content: markdownService.md.PERMISSION_EDIT({}),
             components: PermissionToSelectComponent()
         });
+        return;
     }
 
-    if (step === 'contact-text-on') {
-        interaction.editReply(interaction.values.join(','));
-    }
+    if (step === 'edit') {
+        const person = await personDataService.getPersonByDiscordId(
+            interaction.user.id
+        );
 
-    if (step === 'contact-email-on') {
-        interaction.editReply(interaction.values.join(','));
-    }
+        if (!person) {
+            //! we would like to show them their modal
+            // // we cannot show the identity model since we have deferred
+            // interaction.editReply({
+            //     content: await markdownService.getGenericNoPerson()
+            // });
+            interaction.editReply(
+                markdownService.md.GENERIC_SORRY({
+                    techPhone: ''
+                })
+            );
+            return;
+        }
 
-    if (step === 'share-phone-on') {
-        interaction.editReply(interaction.values.join(','));
-    }
+        person.contactTextOn = interaction.values
+            .map((a) => a.split('---'))
+            .filter((a) => a[0] === 'contact-text')
+            .map((a) => a[1])
+            .join(',');
+        person.sharePhoneOn = interaction.values
+            .map((a) => a.split('---'))
+            .filter((a) => a[0] === 'share-phone')
+            .map((a) => a[1])
+            .join(',');
+        person.contactEmailOn = interaction.values
+            .map((a) => a.split('---'))
+            .filter((a) => a[0] === 'contact-email')
+            .map((a) => a[1])
+            .join(',');
+        person.shareEmailOn = interaction.values
+            .map((a) => a.split('---'))
+            .filter((a) => a[0] === 'share-email')
+            .map((a) => a[1])
+            .join(',');
 
-    if (step === 'share-email-on') {
-        interaction.editReply(interaction.values.join(','));
+        await personDataService.updatePersonByDiscordId(person);
+
+        interaction.editReply(markdownService.md.GENERIC_OK({}));
     }
 }

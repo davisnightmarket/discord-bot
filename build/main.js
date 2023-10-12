@@ -52,10 +52,9 @@ async function main() {
                 (0, events_1.VolunteerCommandEvent)(services, interaction);
             }
             // ToDO: automate this
-            if (interaction.options.getString('command') ===
-                'et-availability-and-permissons') {
+            if (interaction.options.getString('command') === 'set-availability') {
                 dbg('Editing Availability');
-                (0, events_1.AvailabilityCommandEvent)(services, interaction);
+                (0, events_1.AvailabilityAndPermissionCommandEvent)(services, interaction);
             }
             if (interaction.options.getString('command') === 'edit-identity') {
                 dbg('Editing identity');
