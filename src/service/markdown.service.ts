@@ -108,6 +108,7 @@ export class MarkdownService {
             .join('\n');
     }
 
+    // turns person availability strings from spreadsheet into a md list of readable day and time
     getAvailabilityListsFromPerson(person: PersonModel): [string, string] {
         return [
             person.availabilityHost
@@ -135,7 +136,7 @@ export class MarkdownService {
                 )
                 .map(
                     (a) =>
-                        `${DAYS_OF_WEEK[a[0] as NmDayNameType].name} ${
+                        `  - ${DAYS_OF_WEEK[a[0] as NmDayNameType].name} ${
                             PARTS_OF_DAY[a[1] as NmPartOfDayNameType].name
                         }`
                 )
