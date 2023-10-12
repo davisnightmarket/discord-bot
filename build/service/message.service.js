@@ -4,6 +4,10 @@ exports.MessageService = void 0;
 const utility_1 = require("../utility");
 // TODO: make this simple to user from events
 const messageMap = {
+    START_HOWTO: (0, utility_1.CreateMessage)('START_HOWTO', {
+        coreLinkList: [],
+        marketLinkList: []
+    }),
     GENERIC_OK: (0, utility_1.CreateMessage)('GENERIC_OK', {}),
     GENERIC_SORRY: (0, utility_1.CreateMessage)('GENERIC_SORRY', {
         techPhone: ''

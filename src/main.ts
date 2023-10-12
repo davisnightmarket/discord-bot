@@ -16,7 +16,8 @@ import {
     VolunteerResponseEvent,
     WelcomeEvent,
     IdentityCommandEvent,
-    IdentityEditModalEvent
+    IdentityEditModalEvent,
+    HelpAndDocsCommandEvent
 } from './events';
 import { AddCron } from './utility/cron.utility';
 import { FoodCountReminderJob, NightOpsJob, NightTimelineJob } from './jobs';
@@ -94,7 +95,7 @@ async function main() {
 
             if (interaction.options.getString('command') === 'help-and-docs') {
                 dbg('help-and-docs');
-                interaction.reply('Coming soon!');
+                HelpAndDocsCommandEvent(services, interaction);
             }
         } else if (interaction.isModalSubmit()) {
             dbg('isModalSubmit');

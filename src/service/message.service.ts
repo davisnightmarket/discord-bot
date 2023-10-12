@@ -4,6 +4,16 @@ import { CreateMessage } from '../utility';
 // TODO: make this simple to user from events
 
 const messageMap = {
+    START_HOWTO: CreateMessage<
+        'START_HOWTO',
+        {
+            coreLinkList: string[];
+            marketLinkList: string[];
+        }
+    >('START_HOWTO', {
+        coreLinkList: [],
+        marketLinkList: []
+    }),
     GENERIC_OK: CreateMessage('GENERIC_OK', {}),
     GENERIC_SORRY: CreateMessage('GENERIC_SORRY', {
         techPhone: ''

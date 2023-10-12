@@ -62,20 +62,18 @@ async function main() {
             }
             if (interaction.options.getString('command') === 'help-and-docs') {
                 dbg('help-and-docs');
-                interaction.reply('Coming soon!');
+                (0, events_1.HelpAndDocsCommandEvent)(services, interaction);
             }
-            return;
         }
         else if (interaction.isModalSubmit()) {
             dbg('isModalSubmit');
             (0, events_1.IdentityEditModalEvent)(services, interaction);
         }
-        else if (interaction.isStringSelectMenu()) {
-            dbg('isStringSelectMenu');
-            (0, events_1.AvailabilitySelectEvent)(services, interaction);
-        }
-        else if (interaction.isButton()) {
-            dbg('isButton');
+        // we can lump these two together since they are both routed by customId
+        else if (interaction.isStringSelectMenu() || interaction.isButton()) {
+            dbg(interaction.isStringSelectMenu()
+                ? 'isStringSelectMenu'
+                : 'isButton');
             (0, events_1.AvailabilitySelectEvent)(services, interaction);
         }
         else {

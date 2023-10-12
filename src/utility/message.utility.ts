@@ -4,6 +4,7 @@ import { join } from 'path';
 import Handlebars from 'handlebars';
 
 type MessageCodeType =
+    | 'START_HOWTO'
     | 'AVAILABILITY_LIST'
     | 'GENERIC_OK'
     | 'GENERIC_NO_PERSON'

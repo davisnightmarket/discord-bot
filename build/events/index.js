@@ -23,3 +23,4 @@ __exportStar(require("./availability-edit.event"), exports);
 __exportStar(require("./welcome.event"), exports);
 __exportStar(require("./identity-edit-modal.event"), exports);
 __exportStar(require("./identity-command.event"), exports);
+__exportStar(require("./help-and-docs-command.event"), exports);

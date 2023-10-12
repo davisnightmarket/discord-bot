@@ -7,3 +7,4 @@ export * from './availability-edit.event';
 export * from './welcome.event';
 export * from './identity-edit-modal.event';
 export * from './identity-command.event';
+export * from './help-and-docs-command.event';
