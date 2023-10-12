@@ -86,7 +86,7 @@ function loadAllMessage(
     return c;
 }
 
-export function CreateMessage<
+export function CreateMdMessage<
     T extends MessageCodeType,
     U extends MessageCoreParamType
 >(messageCode: T, coreParams: U): (a: U) => string {
@@ -111,35 +111,36 @@ export function CreateMessage<
     };
 }
 
-export function CreateMessageMap<
-    U extends Record<string, Record<string, string>>
->(map: Partial<U>) {
-    const messageMap = loadAllMessage(Object.keys(map)) as Record<
-        keyof U,
-        string
-    >;
+// deprecated because we can't get the props typed
+// export function CreateMessageMap<
+//     U extends Record<string, Record<string, string>>
+// >(map: Partial<U>) {
+//     const messageMap = loadAllMessage(Object.keys(map)) as Record<
+//         keyof U,
+//         string
+//     >;
 
-    // todo: parse with HBS
-    return Object.keys(messageMap).reduce<
-        Partial<Record<keyof U, (a: U[keyof U]) => string>>
-    >((a, b: keyof U) => {
-        // because we do not want a message compile error to break teh app
-        let d = Handlebars.compile('');
-        try {
-            d = Handlebars.compile(messageMap[b] ?? '');
-        } catch (e) {
-            console.error(e);
-        }
+//     // todo: parse with HBS
+//     return Object.keys(messageMap).reduce<
+//         Partial<Record<keyof U, (a: U[keyof U]) => string>>
+//     >((a, b: keyof U) => {
+//         // because we do not want a message compile error to break teh app
+//         let d = Handlebars.compile('');
+//         try {
+//             d = Handlebars.compile(messageMap[b] ?? '');
+//         } catch (e) {
+//             console.error(e);
+//         }
 
-        a[b] = (c: U[typeof b]) => {
-            let msg = '';
-            try {
-                msg = d({ ...map[b], ...c });
-            } catch (e) {
-                console.error(e);
-            }
-            return msg;
-        };
-        return a;
-    }, {}) as Record<keyof U, (a: U[keyof U]) => string>;
-}
+//         a[b] = (c: U[typeof b]) => {
+//             let msg = '';
+//             try {
+//                 msg = d({ ...map[b], ...c });
+//             } catch (e) {
+//                 console.error(e);
+//             }
+//             return msg;
+//         };
+//         return a;
+//     }, {}) as Record<keyof U, (a: U[keyof U]) => string>;
+// }

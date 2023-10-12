@@ -74,14 +74,14 @@ async function main() {
             dbg(interaction.isStringSelectMenu()
                 ? 'isStringSelectMenu'
                 : 'isButton');
-            (0, events_1.AvailabilitySelectEvent)(services, interaction);
+            (0, events_1.AvailabilityEditButtonEvent)(services, interaction, interaction?.customId || '');
+            (0, events_1.VolunteerEditButtonEvent)(services, interaction, interaction?.customId || '');
         }
         else {
             dbg('otherwise this is a message content trigger');
             (0, events_1.FoodCountMessageEvent)(interaction);
             // todo: this should be split into different events
             // uses buttons and selects to handle different volunteering steps
-            (0, events_1.VolunteerResponseEvent)(services, interaction);
         }
     });
     client.on(discord_js_1.Events.GuildMemberAdd, (member) => {

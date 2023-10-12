@@ -1,4 +1,5 @@
 import {
+    ButtonInteraction,
     ChatInputCommandInteraction,
     Client,
     Events,
@@ -11,9 +12,9 @@ import {
     FoodCountDeleteButtonEvent,
     FoodCountMessageEvent,
     AvailabilityCommandEvent,
-    AvailabilitySelectEvent,
+    AvailabilityEditButtonEvent,
     VolunteerCommandEvent,
-    VolunteerResponseEvent,
+    VolunteerEditButtonEvent,
     WelcomeEvent,
     IdentityCommandEvent,
     IdentityEditModalEvent,
@@ -110,14 +111,23 @@ async function main() {
                     ? 'isStringSelectMenu'
                     : 'isButton'
             );
-            AvailabilitySelectEvent(services, interaction);
+
+            AvailabilityEditButtonEvent(
+                services,
+                interaction,
+                (interaction as ButtonInteraction)?.customId || ''
+            );
+            VolunteerEditButtonEvent(
+                services,
+                interaction,
+                (interaction as ButtonInteraction)?.customId || ''
+            );
         } else {
             dbg('otherwise this is a message content trigger');
             FoodCountMessageEvent(interaction);
 
             // todo: this should be split into different events
             // uses buttons and selects to handle different volunteering steps
-            VolunteerResponseEvent(services, interaction);
         }
     });
 

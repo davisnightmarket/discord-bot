@@ -7,24 +7,22 @@ import {
 } from '../component';
 import { DAYS_OF_WEEK } from '../const';
 import { Dbg } from '../utility';
-import { ParseContentService } from '../service';
 
 // in which user edits their availability
 
 const dbg = Dbg('AvailabilityEditEvent');
-export async function AvailabilitySelectEvent(
-    { personDataService, nightDataService, messageService }: GuildServiceModel,
+export async function AvailabilityEditButtonEvent(
+    { personDataService, nightDataService, markdownService }: GuildServiceModel,
 
-    interaction: StringSelectMenuInteraction
+    interaction: StringSelectMenuInteraction,
+    args: string
 ) {
-    dbg('ok');
+    const [command, period, day] = args.split('--') as [
+        string,
+        NmNightRoleType | 'night-list',
+        NmDayNameType
+    ];
 
-    const [command, period, day] =
-        (interaction.customId?.split('--') as [
-            string,
-            NmNightRoleType | 'night-list',
-            NmDayNameType
-        ]) || [];
     dbg(command, period, day);
 
     // todo: handle this higher up
@@ -40,7 +38,7 @@ export async function AvailabilitySelectEvent(
         //! we would like to show them their modal
         // // we cannot show the identity model since we have deferred
         // interaction.editReply({
-        //     content: await messageService.getGenericNoPerson()
+        //     content: await markdownService.getGenericNoPerson()
         // });
         interaction.showModal(
             IdentityEditModalComponent(personDataService.createPerson(person))
@@ -60,26 +58,9 @@ export async function AvailabilitySelectEvent(
             return;
         }
 
-        const dayTimes = await nightDataService.waitingForNightCache.then(
-            (nightOps) => {
-                const dayTimesMap = nightOps.reduce<{
-                    [k in string]: [string, string];
-                }>((a, b) => {
-                    if (b.day && b.timeStart && !a[b.day + b.timeStart]) {
-                        a[b.day + b.timeStart] = [
-                            `${b.day}|||${b.timeStart}`,
-                            `${
-                                DAYS_OF_WEEK[b.day].name
-                            } ${ParseContentService.getAmPmTimeFrom24Hour(
-                                b.timeStart
-                            )}`
-                        ];
-                    }
-                    return a;
-                }, {});
-                return Object.values(dayTimesMap);
-            }
-        );
+        const dayTimes =
+            await nightDataService.getDayTimeIdAndReadableByDayAsTupleList();
+
         // todo: show host then pickup, since we can't fit them all
         const components = AvailabilityToHostComponent(
             dayTimes,
@@ -87,7 +68,7 @@ export async function AvailabilitySelectEvent(
         );
         // response
         interaction.editReply({
-            content: messageService.m.AVAILABILITY_TO_HOST({}),
+            content: markdownService.md.AVAILABILITY_TO_HOST({}),
             components
         });
     }
@@ -98,8 +79,9 @@ export async function AvailabilitySelectEvent(
     // in this case we have selected our night-host availability so ...
     if (period === 'night-host') {
         // save it to the db ...
-        const [day, timeStart] = interaction.values[0].split('|||');
-        dbg(day, timeStart);
+        // const [day, timeStart] = interaction.values[0].split('|||');
+        // dbg(day, timeStart);
+
         personDataService.updatePersonByDiscordId({
             ...person,
             availabilityHost: interaction.values.join(',')
@@ -112,7 +94,7 @@ export async function AvailabilitySelectEvent(
         });
 
         interaction.editReply({
-            content: messageService.m.AVAILABILITY_TO_PICKUP({
+            content: markdownService.md.AVAILABILITY_TO_PICKUP({
                 dayName: currentDay.name
             }),
 
@@ -140,7 +122,7 @@ export async function AvailabilitySelectEvent(
         // present night-pickup selects
         if (nextDayIndex === daysOfWeekIdList.length) {
             interaction.editReply({
-                content: messageService.m.GENERIC_OK({})
+                content: markdownService.md.GENERIC_OK({})
             });
             return;
         }
@@ -153,7 +135,7 @@ export async function AvailabilitySelectEvent(
 
         // response
         interaction.editReply({
-            content: messageService.m.AVAILABILITY_TO_PICKUP({
+            content: markdownService.md.AVAILABILITY_TO_PICKUP({
                 dayName: currentDay.name
             }),
 

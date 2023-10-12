@@ -51,6 +51,20 @@ class NightDataService {
     day = (0, utility_1.GetChannelDayToday)()) {
         return (await this.waitingForNightCache).filter((a) => a.day === day);
     }
+    async getDayTimeIdAndReadableByDayAsTupleList() {
+        return this.waitingForNightCache.then((nightOps) => {
+            const dayTimesMap = nightOps.reduce((a, b) => {
+                if (b.day && b.timeStart && !a[b.day + b.timeStart]) {
+                    a[b.day + b.timeStart] = [
+                        `${b.day}|||${b.timeStart}`,
+                        `${const_1.DAYS_OF_WEEK[b.day].name} ${_1.ParseContentService.getAmPmTimeFrom24Hour(b.timeStart)}`
+                    ];
+                }
+                return a;
+            }, {});
+            return Object.values(dayTimesMap);
+        });
+    }
     async getOpsNotesByDay(day) {
         return (await this.opsNotesSheetService.getAllRowsAsMaps()).filter((a) => a.day === day);
     }

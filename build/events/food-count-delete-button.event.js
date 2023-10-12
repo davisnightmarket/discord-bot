@@ -6,23 +6,6 @@ const service_1 = require("../service");
 const uuid_1 = require("uuid");
 const utility_1 = require("../utility");
 const utility_2 = require("../utility");
-const MsgReply = (0, utility_2.CreateMessageMap)({
-    // message sent when someone posts a food count event
-    FOODCOUNT_INSERT: {
-        lbs: '',
-        note: '',
-        org: '',
-        date: ''
-    },
-    // message sent when a food count gets stuck in the db successfully
-    FOODCOUNT_INPUT_OK: {
-        lbs: '',
-        note: '',
-        org: '',
-        date: '',
-        seconds: ''
-    }
-});
 // this is a cache for food-count input so that we can
 // give user a set period of time to cancel
 // if the user cancels, this cache is deleted
@@ -34,7 +17,7 @@ exports.TIME_UNTIL_UPDATE = 60 * 1000; // one minute in milliseconds
  *
  */
 const dbg = (0, utility_1.Dbg)('FoodCountInputEvent');
-const FoodCountDeleteButtonEvent = ({ personDataService, foodCountInputService, foodCountDataService }) => async (message) => {
+const FoodCountDeleteButtonEvent = ({ personDataService, foodCountInputService, foodCountDataService, markdownService }) => async (message) => {
     dbg('ok');
     const { channel, author } = message;
     /* STAGE 1: skip the message entirely in some cases */
@@ -114,7 +97,7 @@ const FoodCountDeleteButtonEvent = ({ personDataService, foodCountInputService, 
             });
             // we want to post to food-count, always, so folks know what's in the db
             const countChannel = (0, utility_2.GetChannelByName)(service_1.COUNT_CHANNEL_NAME, message.guild);
-            countChannel?.send(MsgReply.FOODCOUNT_INSERT({
+            countChannel?.send(markdownService.md.FOODCOUNT_INSERT({
                 lbs: lbs.toString(),
                 note,
                 org,
@@ -144,7 +127,7 @@ const FoodCountDeleteButtonEvent = ({ personDataService, foodCountInputService, 
         });
         // our success message
         const reply = {
-            content: MsgReply.FOODCOUNT_INPUT_OK({
+            content: markdownService.md.FOODCOUNT_INPUT_OK({
                 lbs: `${lbs}`,
                 note,
                 org,

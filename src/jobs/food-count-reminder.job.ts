@@ -25,7 +25,7 @@ export const FoodCountReminderJob = (client: Client) => async () => {
     // now we send a message to each channel in each guild
     for (const guild of guildList) {
         const {
-            messageService,
+            markdownService,
             nightDataService,
             foodCountDataService,
             personDataService
@@ -80,14 +80,14 @@ export const FoodCountReminderJob = (client: Client) => async () => {
             }
             channel.send({
                 content: [
-                    await messageService.m.FOODCOUNT_REMINDER({
+                    await markdownService.md.FOODCOUNT_REMINDER({
                         randoSalutation: 'Helloo!',
                         dayName: DAYS_OF_WEEK[yesterday].name,
                         pickupOrgList,
                         tagUserList
                     }),
                     'Reminder:',
-                    await messageService.m.FOODCOUNT_HOWTO({
+                    await markdownService.md.FOODCOUNT_HOWTO({
                         nightChannelNameList: Object.keys(
                             NIGHT_CHANNEL_NAMES_MAP
                         ).join(', '),

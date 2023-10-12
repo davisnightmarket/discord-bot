@@ -5,7 +5,7 @@ import type {
     OrgDataService,
     PersonDataService,
     NightDataService,
-    MessageService
+    MarkdownService
 } from '../service';
 
 export interface GuildServiceModel {
@@ -15,5 +15,5 @@ export interface GuildServiceModel {
     orgDataService: OrgDataService;
     personDataService: PersonDataService;
     nightDataService: NightDataService;
-    messageService: MessageService;
+    markdownService: MarkdownService;
 }

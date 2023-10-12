@@ -24,27 +24,24 @@ import { Dbg } from '../utility';
 const dbg = Dbg('VolunteerResponseEvent');
 // todo: split this into different events for clarity
 // when a person requests a listing of
-export async function VolunteerResponseEvent(
-    { nightDataService, messageService }: GuildServiceModel,
-
-    interaction: Interaction
+export async function VolunteerEditButtonEvent(
+    { nightDataService, markdownService }: GuildServiceModel,
+    interaction: Interaction,
+    args: string
 ) {
     (interaction as ButtonInteraction).deferReply();
-
-    const [command, day, role, period] =
-        ((interaction as ButtonInteraction)?.customId?.split('--') as [
-            string,
-            NmDayNameType,
-            NmNightRoleType,
-            NmRolePeriodType
-        ]) || [];
+    const [command, day, role, period] = args.split('--') as [
+        string,
+        NmDayNameType,
+        NmNightRoleType,
+        NmRolePeriodType
+    ];
 
     dbg(command, day, role, period);
 
     if (command !== 'volunteer') {
         return;
     }
-    console.log(command, day, role, period);
 
     // in this case we are selecting the day (or days) for volunteering, which is the final step
     if (interaction.isStringSelectMenu()) {
@@ -74,7 +71,7 @@ export async function VolunteerResponseEvent(
         // there should always be a day
         if (!day || !DAYS_OF_WEEK_CODES.includes(day as NmDayNameType)) {
             interaction.editReply({
-                content: await messageService.getGenericSorry()
+                content: await markdownService.getGenericSorry()
             });
             console.error('Passed not a day');
             return;
@@ -85,7 +82,7 @@ export async function VolunteerResponseEvent(
         // role is selected in the first interaction
         if (!role) {
             interaction.editReply({
-                content: await messageService.getGenericSorry()
+                content: await markdownService.getGenericSorry()
             });
             console.error('Passed not a role.');
             return;
@@ -95,7 +92,7 @@ export async function VolunteerResponseEvent(
             const components = GetVolunteerPeriodComponent({ day, role });
 
             interaction.editReply({
-                content: await messageService.m.VOLUNTEER_ONCE_OR_COMMIT({
+                content: await markdownService.md.VOLUNTEER_ONCE_OR_COMMIT({
                     roleName: NM_NIGHT_ROLES[role].name,
                     roleDescription: NM_NIGHT_ROLES[role].description,
                     hostNames: hostList.map((a) => a.name).join(', ')

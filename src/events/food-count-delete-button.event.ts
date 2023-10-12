@@ -8,29 +8,11 @@ import {
 import { COUNT_CHANNEL_NAME } from '../service';
 import { v4 as uuidv4 } from 'uuid';
 import { Dbg, CacheUtility } from '../utility';
-import { GetChannelByName, CreateMessageMap } from '../utility';
+import { GetChannelByName } from '../utility';
 import { GuildServiceModel } from '../model';
 
 // status for each cached input: does it get inserted unless cancel? or does it require a confirmation?
 type CacheStatusType = 'INSERT_UNLESS_CANCEL' | 'DELETE_UNLESS_CONFIRM';
-
-const MsgReply = CreateMessageMap({
-    // message sent when someone posts a food count event
-    FOODCOUNT_INSERT: {
-        lbs: '',
-        note: '',
-        org: '',
-        date: ''
-    },
-    // message sent when a food count gets stuck in the db successfully
-    FOODCOUNT_INPUT_OK: {
-        lbs: '',
-        note: '',
-        org: '',
-        date: '',
-        seconds: ''
-    }
-});
 
 // this is a cache for food-count input so that we can
 // give user a set period of time to cancel
@@ -58,7 +40,8 @@ export const FoodCountDeleteButtonEvent =
     ({
         personDataService,
         foodCountInputService,
-        foodCountDataService
+        foodCountDataService,
+        markdownService
     }: GuildServiceModel) =>
     async (message: Message) => {
         dbg('ok');
@@ -174,7 +157,7 @@ export const FoodCountDeleteButtonEvent =
                     );
 
                     countChannel?.send(
-                        MsgReply.FOODCOUNT_INSERT({
+                        markdownService.md.FOODCOUNT_INSERT({
                             lbs: lbs.toString(),
                             note,
                             org,
@@ -207,7 +190,7 @@ export const FoodCountDeleteButtonEvent =
 
             // our success message
             const reply: MessageReplyOptions = {
-                content: MsgReply.FOODCOUNT_INPUT_OK({
+                content: markdownService.md.FOODCOUNT_INPUT_OK({
                     lbs: `${lbs}`,
                     note,
                     org,

@@ -1,12 +1,13 @@
 import { type NmNightRoleType, type NmDayNameType } from '../model';
-import { DAYS_OF_WEEK_CODES } from '../const';
+import { DAYS_OF_WEEK, DAYS_OF_WEEK_CODES } from '../const';
 import { GetChannelDayToday } from '../utility';
 import {
     GoogleSheetService,
     type SpreadsheetDataModel,
     PersonDataService,
     type PersonModel,
-    PersonWithIdModel
+    PersonWithIdModel,
+    ParseContentService
 } from '.';
 
 // models what's in the "ops" sheet
@@ -145,6 +146,28 @@ export class NightDataService {
         return (await this.waitingForNightCache).filter((a) => a.day === day);
     }
 
+    async getDayTimeIdAndReadableByDayAsTupleList(): Promise<
+        [string, string][]
+    > {
+        return this.waitingForNightCache.then((nightOps) => {
+            const dayTimesMap = nightOps.reduce<{
+                [k in string]: [string, string];
+            }>((a, b) => {
+                if (b.day && b.timeStart && !a[b.day + b.timeStart]) {
+                    a[b.day + b.timeStart] = [
+                        `${b.day}|||${b.timeStart}`,
+                        `${
+                            DAYS_OF_WEEK[b.day].name
+                        } ${ParseContentService.getAmPmTimeFrom24Hour(
+                            b.timeStart
+                        )}`
+                    ];
+                }
+                return a;
+            }, {});
+            return Object.values(dayTimesMap);
+        });
+    }
     async getOpsNotesByDay(
         day: NmDayNameType
     ): Promise<NightOpsPickupNotesDataModel[]> {

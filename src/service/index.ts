@@ -7,4 +7,4 @@ export * from './night-data.service';
 export * from './google-spreadsheet.service';
 export * from './google-sheet.service';
 export * from './core-data.service';
-export * from './message.service';
+export * from './markdown.service';

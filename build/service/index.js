@@ -23,4 +23,4 @@ __exportStar(require("./night-data.service"), exports);
 __exportStar(require("./google-spreadsheet.service"), exports);
 __exportStar(require("./google-sheet.service"), exports);
 __exportStar(require("./core-data.service"), exports);
-__exportStar(require("./message.service"), exports);
+__exportStar(require("./markdown.service"), exports);
