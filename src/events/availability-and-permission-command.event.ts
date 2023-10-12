@@ -44,6 +44,7 @@ export async function AvailabilityAndPermissionCommandEvent(
         markdownService.getAvailabilityListsFromPerson(person);
 
     const components = AvailabilityAndPermissionEditButtonComponent();
+
     // todo: move to markdown service
 
     console.log(person);
@@ -101,18 +102,19 @@ export async function AvailabilityAndPermissionCommandEvent(
                 .join('\n') || '  - NO PERMISSIONS GRANTED';
 
     dbg(shareEmailOnList, contactTextOnList);
-    const content = [
-        markdownService.md.AVAILABILITY_LIST({
-            availabilityHostList,
-            availabilityPickupList
-        }),
-        markdownService.md.PERMISSION_LIST({
-            contactTextOnList,
-            contactEmailOnList,
-            sharePhoneOnList,
-            shareEmailOnList
-        })
-    ].join('\n');
+    const content =
+        [
+            markdownService.md.AVAILABILITY_LIST({
+                availabilityHostList,
+                availabilityPickupList
+            }),
+            markdownService.md.PERMISSION_LIST({
+                contactTextOnList,
+                contactEmailOnList,
+                sharePhoneOnList,
+                shareEmailOnList
+            })
+        ].join('\n') + '\n';
     // response
     interaction.editReply({
         content,

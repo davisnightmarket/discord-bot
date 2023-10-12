@@ -128,7 +128,7 @@ export class MarkdownService {
                 )
                 .map(
                     (a) =>
-                        `  - ${
+                        `  - Host ${
                             DAYS_OF_WEEK[a[0] as NmDayNameType].name
                         } ${ParseContentService.getAmPmTimeFrom24Hour(a[1])}`
                 )
@@ -143,9 +143,9 @@ export class MarkdownService {
                 )
                 .map(
                     (a) =>
-                        `  - ${DAYS_OF_WEEK[a[0] as NmDayNameType].name} ${
-                            PARTS_OF_DAY[a[1] as NmPartOfDayNameType].name
-                        }`
+                        `  - Pick-up ${
+                            DAYS_OF_WEEK[a[0] as NmDayNameType].name
+                        } ${PARTS_OF_DAY[a[1] as NmPartOfDayNameType].name}`
                 )
                 .join('\n')
         ];

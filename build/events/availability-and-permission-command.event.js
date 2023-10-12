@@ -49,7 +49,7 @@ async function AvailabilityAndPermissionCommandEvent({ personDataService, markdo
             sharePhoneOnList,
             shareEmailOnList
         })
-    ].join('\n');
+    ].join('\n') + '\n';
     // response
     interaction.editReply({
         content,

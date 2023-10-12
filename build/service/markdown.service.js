@@ -115,7 +115,7 @@ class MarkdownService {
                 .trim()
                 .split('|||')
                 .map((a) => a.trim()))
-                .map((a) => `  - ${const_1.DAYS_OF_WEEK[a[0]].name} ${_1.ParseContentService.getAmPmTimeFrom24Hour(a[1])}`)
+                .map((a) => `  - Host ${const_1.DAYS_OF_WEEK[a[0]].name} ${_1.ParseContentService.getAmPmTimeFrom24Hour(a[1])}`)
                 .join('\n'),
             person.availabilityPickup
                 .split(',')
@@ -123,7 +123,7 @@ class MarkdownService {
                 .trim()
                 .split('|||')
                 .map((a) => a.trim()))
-                .map((a) => `  - ${const_1.DAYS_OF_WEEK[a[0]].name} ${const_1.PARTS_OF_DAY[a[1]].name}`)
+                .map((a) => `  - Pick-up ${const_1.DAYS_OF_WEEK[a[0]].name} ${const_1.PARTS_OF_DAY[a[1]].name}`)
                 .join('\n')
         ];
     }
