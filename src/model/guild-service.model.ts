@@ -5,7 +5,9 @@ import type {
     OrgDataService,
     PersonDataService,
     NightDataService,
-    MarkdownService
+    MarkdownService,
+    ProcessEventService,
+    DiscordReplyService
 } from '../service';
 
 export interface GuildServiceModel {
@@ -16,4 +18,6 @@ export interface GuildServiceModel {
     personDataService: PersonDataService;
     nightDataService: NightDataService;
     markdownService: MarkdownService;
+    processEventService: ProcessEventService;
+    discordReplyService: DiscordReplyService;
 }

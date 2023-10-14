@@ -10,7 +10,15 @@ import Commands from '../commands';
 import { NmSecrets } from '../utility';
 
 import {} from 'discord.js';
-import { type GuildServiceModel } from '../model';
+import { NmDayNameType } from '../model';
+
+export async function GetChannelDayNameFromInteraction(
+    interaction: Interaction
+): Promise<NmDayNameType | undefined> {
+    return (
+        await interaction?.guild?.channels?.fetch(interaction?.channelId ?? '')
+    )?.name as NmDayNameType;
+}
 
 export function GetChannelByName(name: string, guild: Guild | null) {
     return guild?.channels.cache.find(
@@ -37,7 +45,6 @@ export async function RegisterGuildCommand(guildId: string) {
         }
     );
 }
-
 
 // We can handle interactions individually?
 // export async function ExecuteGuildCommand(

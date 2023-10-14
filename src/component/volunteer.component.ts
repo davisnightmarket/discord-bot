@@ -8,16 +8,41 @@ import {
 import { NightPersonModel, NightPickupModel } from '../service';
 import { NM_NIGHT_ROLES } from '../const';
 
+export function GetVolunteerRoleComponent({
+    day,
+    discordId
+}: Pick<NightPersonModel, 'day' | 'discordId'>) {
+    const components: ActionRowBuilder<ButtonBuilder>[] = [];
+
+    const joinOnceButton = new ButtonBuilder()
+        .setCustomId(`volunteer-role--${day}--night-host--${discordId}`)
+        .setLabel(NM_NIGHT_ROLES['night-host'].description)
+        .setStyle(ButtonStyle.Secondary);
+    const joinAlwaysButton = new ButtonBuilder()
+        .setCustomId(`volunteer-role--${day}--night-pickup--${discordId}`)
+        .setLabel(NM_NIGHT_ROLES['night-pickup'].description)
+        .setStyle(ButtonStyle.Secondary);
+
+    components.push(
+        new ActionRowBuilder<ButtonBuilder>()
+            .addComponents(joinOnceButton)
+            .addComponents(joinAlwaysButton)
+    );
+
+    return components;
+}
+
 export function GetVolunteerPeriodComponent({
     day,
-    role
-}: Pick<NightPersonModel, 'day' | 'role'>) {
+    role,
+    discordId
+}: Pick<NightPersonModel, 'day' | 'role' | 'discordId'>) {
     const joinOnceButton = new ButtonBuilder()
-        .setCustomId(`volunteer--${day}--${role}--once`)
+        .setCustomId(`volunteer-period--${day}--${role}--once--${discordId}`)
         .setLabel(`${NM_NIGHT_ROLES[role].name} just this ${day}`)
         .setStyle(ButtonStyle.Secondary);
     const joinAlwaysButton = new ButtonBuilder()
-        .setCustomId(`volunteer--${day}--${role}--every`)
+        .setCustomId(`volunteer--${day}--${role}--every--${discordId}`)
         .setLabel(`${NM_NIGHT_ROLES[role].name}  every ${day}`)
         .setStyle(ButtonStyle.Secondary);
 
@@ -32,12 +57,17 @@ export function GetVolunteerPickupComponent(
     {
         day,
         role,
-        period
-    }: Required<Pick<NightPersonModel, 'day' | 'role' | 'period'>>,
+        period,
+        discordId
+    }: Required<
+        Pick<NightPersonModel, 'day' | 'role' | 'period' | 'discordId'>
+    >,
     pickupList: NightPickupModel[]
 ) {
     const select = new StringSelectMenuBuilder()
-        .setCustomId(`volunteer--${day}--${role}--${period}--org`)
+        .setCustomId(
+            `volunteer-pickup--${day}--${role}--${period}--org--${discordId}`
+        )
         .setPlaceholder('Make a selection!')
         .addOptions(
             pickupList.map(({ org, timeStart, timeEnd, personList }) =>

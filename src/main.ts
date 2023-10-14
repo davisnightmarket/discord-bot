@@ -78,26 +78,47 @@ async function main() {
         interaction = interaction as ChatInputCommandInteraction;
 
         const services = await GetGuildServices(interaction.guildId ?? '');
-        if (interaction?.commandName == 'nm') {
-            dbg('nm /Command');
-            if (interaction.options.getString('command') === 'volunteer') {
-                VolunteerCommandEvent(services, interaction);
-            }
-            // ToDO: automate this
-            if (
-                interaction.options.getString('command') === 'set-availability'
-            ) {
-                dbg('Editing Availability');
-                AvailabilityAndPermissionCommandEvent(services, interaction);
-            }
-            if (interaction.options.getString('command') === 'edit-identity') {
-                dbg('Editing identity');
-                IdentityCommandEvent(services, interaction);
-            }
+        if (interaction?.isCommand()) {
+            if (interaction?.commandName == 'nm') {
+                dbg('/nm Command');
+                if (interaction.options.getString('command') === 'volunteer') {
+                    VolunteerCommandEvent(services, interaction);
+                }
+                // ToDO: automate this
+                if (
+                    interaction.options.getString('command') ===
+                    'set-availability'
+                ) {
+                    dbg('Editing Availability');
+                    AvailabilityAndPermissionCommandEvent(
+                        services,
+                        interaction
+                    );
+                }
+                if (
+                    interaction.options.getString('command') === 'edit-identity'
+                ) {
+                    dbg('Editing identity');
+                    IdentityCommandEvent(services, interaction);
+                }
 
-            if (interaction.options.getString('command') === 'help-and-docs') {
-                dbg('help-and-docs');
-                HelpAndDocsCommandEvent(services, interaction);
+                if (
+                    interaction.options.getString('command') === 'help-and-docs'
+                ) {
+                    dbg('help-and-docs');
+                    HelpAndDocsCommandEvent(services, interaction);
+                }
+            }
+            dbg(interaction?.commandName, 'command name');
+            if (interaction?.commandName == 'cc') {
+                dbg('/cc Command');
+                // todo: make sure they are a CC
+                // todo: we don't want to rely on discord role records, we want to geth from the admin sheet of the night spreadsheet
+                interaction.reply(
+                    ((interaction.options.getString('command') || '') +
+                        interaction.options.getUser('target')?.id || '') +
+                        ' coming soon!'
+                );
             }
         } else if (interaction.isModalSubmit()) {
             dbg('isModalSubmit');

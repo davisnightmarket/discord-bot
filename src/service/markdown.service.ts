@@ -39,7 +39,7 @@ const messageMap = {
     VOLUNTEER_ONCE_OR_COMMIT: CreateMdMessage('VOLUNTEER_ONCE_OR_COMMIT', {
         roleName: '',
         roleDescription: '',
-        hostNames: ''
+        hostList: ''
     }),
     VOLUNTEER_AS_ROLE: CreateMdMessage('VOLUNTEER_AS_ROLE', {
         roleName: '',

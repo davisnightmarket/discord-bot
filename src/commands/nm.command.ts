@@ -10,7 +10,7 @@ export default new SlashCommandBuilder()
             .setRequired(true)
             .addChoices(
                 {
-                    name: 'Volunteer or Shadow',
+                    name: 'Volunteer',
                     value: 'volunteer'
                 },
                 {
@@ -18,7 +18,7 @@ export default new SlashCommandBuilder()
                     value: 'set-availability-and-permissons'
                 },
                 {
-                    name: 'Edit Identity & Contact Info',
+                    name: 'Edit Identity',
                     value: 'edit-identity'
                 },
                 {

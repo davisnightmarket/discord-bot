@@ -45,62 +45,15 @@ export async function AvailabilityAndPermissionCommandEvent(
 
     const components = AvailabilityAndPermissionEditButtonComponent();
 
-    // todo: move to markdown service
-
-    console.log(person);
     const contactTextOnList =
-            person.contactTextOn
-                .split(',')
-                .filter((a) => a)
-                .map(
-                    (a) =>
-                        `  - ${
-                            PERMISSION_TO_CONTACT_TEXT_MAP[
-                                a as PermissionToContactTextType
-                            ].name
-                        }`
-                )
-                .join('\n') || '  - NO PERMISSIONS GRANTED',
+            personDataService.getContactTextPermissionListMd(person),
         contactEmailOnList =
-            person.contactEmailOn
-                .split(',')
-                .filter((a) => a)
-                .map(
-                    (a) =>
-                        `  - ${
-                            PERMISSION_TO_CONTACT_EMAIL_MAP[
-                                a as PermissionToContactEmailType
-                            ].name
-                        }`
-                )
-                .join('\n') || '  - NO PERMISSIONS GRANTED',
+            personDataService.getContactEmailPermissionListMd(person),
         sharePhoneOnList =
-            person.sharePhoneOn
-                .split(',')
-                .filter((a) => a)
-                .map(
-                    (a) =>
-                        `  - ${
-                            PERMISSION_TO_SHARE_PHONE_MAP[
-                                a as PermissionToSharePhoneType
-                            ].name
-                        }`
-                )
-                .join('\n') || '  - NO PERMISSIONS GRANTED',
+            personDataService.getSharePhonePermissionListMd(person),
         shareEmailOnList =
-            person.shareEmailOn
-                .split(',')
-                .filter((a) => a)
-                .map(
-                    (a) =>
-                        `  - ${
-                            PERMISSION_TO_SHARE_EMAIL_MAP[
-                                a as PermissionToShareEmailType
-                            ].name
-                        }`
-                )
-                .join('\n') || '  - NO PERMISSIONS GRANTED';
-
+            personDataService.getShareEmailPermissionListMd(person);
+        
     dbg(shareEmailOnList, contactTextOnList);
     const content =
         [
@@ -115,7 +68,7 @@ export async function AvailabilityAndPermissionCommandEvent(
                 shareEmailOnList
             })
         ].join('\n') + '\n';
-    // response
+    
     interaction.editReply({
         content,
         components

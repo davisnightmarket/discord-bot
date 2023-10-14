@@ -7,7 +7,7 @@ import { Dbg } from '../utility';
 
 const dbg = Dbg('PermissionEditButtonEvent');
 export async function PermissionEditButtonEvent(
-    { personDataService, nightDataService, markdownService }: GuildServiceModel,
+    { personDataService, markdownService }: GuildServiceModel,
 
     interaction: StringSelectMenuInteraction,
     args: string
