@@ -15,6 +15,7 @@ export type NmRoleType = NmNightRoleType | NmAdminRoleType;
 
 export type NmNightRoleType =
     | 'night-host'
+    | 'night-host-shadow'
     | 'night-captain'
     | 'night-pickup'
     | 'night-pickup-shadow';

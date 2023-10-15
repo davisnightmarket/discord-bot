@@ -20,7 +20,7 @@ const dbg = (0, utility_1.Dbg)('identity.component');
 const IdentityEditModalComponent = ({ discordId, name, bio, phone, email, pronouns }) => {
     dbg(discordId, name, bio, phone, email, pronouns);
     const modal = new discord_js_1.ModalBuilder()
-        .setCustomId(`identity-edit`)
+        .setCustomId(`identity-edit--${discordId}`)
         .setTitle('Night Market Identity Edit');
     const nameInput = new discord_js_1.TextInputBuilder()
         .setCustomId(`name`)
@@ -62,21 +62,3 @@ const IdentityEditModalComponent = ({ discordId, name, bio, phone, email, pronou
     return modal;
 };
 exports.IdentityEditModalComponent = IdentityEditModalComponent;
-// export const IdentityEditComponent = ({
-//     discordId,
-//     name,
-//     bio,
-//     phone,
-//     email
-// }: PersonModel) => {
-//     const phoneInput = new TextInputBuilder()
-//         .setCustomId(`identity--phone`)
-//         .setLabel('Your phone number:')
-//         .setValue(phone)
-//         // Paragraph means multiple lines of text.
-//         .setStyle(TextInputStyle.Short);
-//     return [
-//         new ActionRowBuilder().addComponents(phoneInput),
-//         new ActionRowBuilder().addComponents(phoneInput)
-//     ];
-// };

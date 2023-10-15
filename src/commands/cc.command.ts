@@ -2,16 +2,17 @@ import { SlashCommandBuilder } from 'discord.js';
 
 export default new SlashCommandBuilder()
     .setName('cc')
-    .setDescription('Do stuff with Night Market!')
+    .setDescription('Edit Night Market')
     .addSubcommand((subcommand) =>
         subcommand
             .setName('user')
-            .setDescription('Select a User')
+            .setDescription('Select a Person')
+
             .addUserOption((option) =>
-                option.setName('Target').setDescription('The Marketeer')
+                option.setName('target').setDescription('The Person')
             )
             .addStringOption((option) =>
-                option.setName('Command').setDescription('Edit').addChoices(
+                option.setName('command').setDescription('Edit').addChoices(
                     {
                         name: 'Schedule',
                         value: 'volunteer'
@@ -25,7 +26,7 @@ export default new SlashCommandBuilder()
                         value: 'availability'
                     },
                     {
-                        name: 'Identity & Contact Info',
+                        name: 'Identity and Contact Info',
                         value: 'identity'
                     }
                 )

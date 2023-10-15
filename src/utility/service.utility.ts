@@ -1,4 +1,4 @@
-import { type GuildServiceModel, type ConfigModel } from '../model';
+import { type ConfigModel } from '../model';
 import {
     CoreDataService,
     FoodCountDataService,
@@ -6,8 +6,7 @@ import {
     OrgDataService,
     PersonDataService,
     NightDataService,
-    MarkdownService,
-    ProcessEventService
+    MarkdownService
 } from '../service';
 
 const coreDataService = new CoreDataService();
@@ -19,6 +18,16 @@ const servicesByGuildId = new Map<
         config: ConfigModel;
     }
 >();
+
+export interface GuildServiceModel {
+    coreDataService: CoreDataService;
+    foodCountDataService: FoodCountDataService;
+    foodCountInputService: FoodCountInputService;
+    orgDataService: OrgDataService;
+    personDataService: PersonDataService;
+    nightDataService: NightDataService;
+    markdownService: MarkdownService;
+}
 
 // because we need to build a set of services that are connected to data per guild
 // as well as services that are "core", meaning the same data source for all guilds
@@ -37,8 +46,6 @@ export async function GetGuildServices(guildId: string) {
             personDataService
         );
 
-        const processEventService = new ProcessEventService(nightDataService);
-
         const markdownService = new MarkdownService(coreDataService);
 
         servicesByGuildId.set(guildId, {
@@ -51,8 +58,7 @@ export async function GetGuildServices(guildId: string) {
             ),
             foodCountInputService: new FoodCountInputService(orgDataService),
             personDataService,
-            orgDataService,
-            processEventService
+            orgDataService
         });
     }
 

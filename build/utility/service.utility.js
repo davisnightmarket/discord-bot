@@ -11,12 +11,13 @@ async function GetGuildServices(guildId) {
         const config = await coreDataService.getConfigByGuildId(guildId);
         const orgDataService = new service_1.OrgDataService(config.GSPREAD_ORG_ID);
         const personDataService = new service_1.PersonDataService(config.GSPREAD_PERSON_ID);
+        const nightDataService = new service_1.NightDataService(config.GSPREAD_NIGHT_ID, personDataService);
         const markdownService = new service_1.MarkdownService(coreDataService);
         servicesByGuildId.set(guildId, {
             config,
             markdownService,
             coreDataService,
-            nightDataService: new service_1.NightDataService(config.GSPREAD_NIGHT_ID, personDataService),
+            nightDataService,
             foodCountDataService: new service_1.FoodCountDataService(config.GSPREAD_FOODCOUNT_ID),
             foodCountInputService: new service_1.FoodCountInputService(orgDataService),
             personDataService,

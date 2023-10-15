@@ -1,7 +1,16 @@
-import { PersonModel, type CoreDataService, ParseContentService } from '.';
+import {
+    PersonModel,
+    type CoreDataService,
+    ParseContentService,
+    NightModel
+} from '.';
 import { DAYS_OF_WEEK, PARTS_OF_DAY } from '../const';
 import { NmDayNameType, NmPartOfDayNameType } from '../model';
 import { CreateMdMessage } from '../utility';
+
+import { roleMention, bold, userMention } from 'discord.js';
+
+import { NightPickupModel } from '../service';
 
 // TODO: make this simple to user from events
 
@@ -22,10 +31,7 @@ const messageMap = {
         techPhone: ''
     }),
     PERMISSION_LIST: CreateMdMessage('PERMISSION_LIST', {
-        contactTextOnList: '',
-        contactEmailOnList: '',
-        sharePhoneOnList: '',
-        shareEmailOnList: ''
+        permissionList: ''
     }),
     PERMISSION_EDIT: CreateMdMessage('PERMISSION_EDIT', {}),
     AVAILABILITY_LIST: CreateMdMessage('AVAILABILITY_LIST', {
@@ -154,5 +160,110 @@ export class MarkdownService {
                 )
                 .join('\n')
         ];
+    }
+
+    getPickupJoinMessage(pickupList: NightPickupModel[]) {
+        return pickupList
+            .map(
+                ({ org, timeStart, personList }) =>
+                    `## ${org} at ${timeStart} with ${personList
+                        .map((a) => a.name)
+                        .join(', ')} `
+            )
+            .join('\n');
+    }
+
+    getAnnounceMessage(roleId: string, nightMap: NightModel): string {
+        return (
+            `## ${this.getRandoSalute()} ${roleMention(roleId)}!\n` +
+            '\n' +
+            this.getNightCapMessage(nightMap) +
+            '\n' +
+            this.getHostMessage(nightMap) +
+            '\n' +
+            this.getPickupsMessage(nightMap)
+        );
+    }
+
+    getRandoSalute() {
+        const saluteList: string[] = [
+            'Hellooo',
+            'Holla',
+            'Dear',
+            'Dearest',
+            'Darling'
+        ];
+
+        return saluteList[Math.floor(Math.random() * saluteList.length)];
+    }
+    // todo: use message service
+    getAfterMarketMessage(roleId: string, { pickupList }: NightModel): string {
+        return `## ${roleMention(
+            roleId
+        )}!\nNight herstory has been recorded! New night list: \n${pickupList
+            .map(({ org, timeStart, personList }) => {
+                return (
+                    '>> ' +
+                    org +
+                    ' ' +
+                    timeStart +
+                    ' ' +
+                    personList
+                        .map(
+                            ({ name, discordId }) =>
+                                `${bold(name)} ${
+                                    discordId ? userMention(discordId) : ''
+                                }`
+                        )
+                        .join(', ')
+                );
+            })
+            .join('\n')}`;
+    }
+    // todo: use message service
+    getPickupsMessage({ pickupList }: NightModel): string {
+        return `Pickups\n${pickupList
+            .map(({ org, timeStart, personList }) => {
+                return (
+                    '>> ' +
+                    org +
+                    ' ' +
+                    timeStart +
+                    ' ' +
+                    personList
+                        .map(
+                            ({ name, discordId }) =>
+                                `${bold(name)} ${
+                                    discordId ? userMention(discordId) : ''
+                                }`
+                        )
+                        .join(', ')
+                );
+            })
+            .join('\n')}`;
+    }
+
+    // todo: use message service
+    getNightCapMessage({ day, hostList }: NightModel): string {
+        const nightCapList = hostList.filter((a) => a.role === 'night-captain');
+        if (!nightCapList.length) {
+            return 'Night Cap NEEDED! Talk to a CC';
+        }
+        return `Night Captain${
+            nightCapList.length > 1 ? 's' : ''
+        }: ${nightCapList
+            .map((p) => (p.discordId ? userMention(p.discordId) : p.name))
+            .join(', ')}`;
+    }
+
+    // todo: use message service
+    getHostMessage({ hostList }: NightModel): string {
+        const a = hostList.filter((a) => a.role === 'night-host');
+        return `Host${a.length > 1 ? 's' : ''}: ${a
+            .map(
+                ({ name, discordId }) =>
+                    `${bold(name)} ${discordId ? userMention(discordId) : ''}`
+            )
+            .join(', ')} `;
     }
 }

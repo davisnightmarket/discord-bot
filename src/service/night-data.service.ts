@@ -218,14 +218,14 @@ export class NightDataService {
 
         return pickupList;
     }
-
-    // nightcap and host
     async getHostListByDay(day: NmDayNameType): Promise<NightPersonModel[]> {
         const opList = await this.getNightDataByDay(day);
         const personList = await this.personCoreDataService.getPersonList();
         // return a complete set of pickups, with personList
         const pickupList = opList
-            .filter((a) => (a.role = 'night-pickup'))
+            .filter(
+                (a) => a.role === 'night-host' || a.role === 'night-captain'
+            )
             .map((a) => {
                 const person = personList.find(
                     (p) => p.discordIdOrEmail === a.discordIdOrEmail
@@ -239,6 +239,63 @@ export class NightDataService {
 
         return pickupList;
     }
+    // // nightcap and host
+    // async getHostListByDay(day: NmDayNameType): Promise<NightHostModel[]> {
+    //     const opList = await this.getNightDataByDay(day);
+    //     const personList = await this.personCoreDataService.getPersonList();
+    //     // return a complete set of pickups, with personList
+    //     const hostMap = opList
+    //         .filter((a) => (a.role === 'night-host'||a.role==='night-captain'))
+    //         .reduce<
+    //             Partial<{
+    //                 [k in NmDayNameType]: NightHostModel;
+    //             }>
+    //         >(
+    //             (
+    //                 a,
+    //                 {
+    //                     day,
+    //                     org,
+    //                     timeStart,
+    //                     timeEnd,
+    //                     discordIdOrEmail,
+    //                     period,
+    //                     role
+    //                 }
+    //             ) => {
+    //                 if (!a[day]) {
+    //                     a[day] = {
+    //                         day,
+    //                         org,
+    //                         timeStart,
+    //                         timeEnd,
+    //                         personList: [],
+    //                         noteList: []
+    //                     };
+    //                 }
+
+    //                 (a[day] as NightHostModel).personList = personList
+    //                     .filter((p) => p.discordIdOrEmail === discordIdOrEmail)
+    //                     .map((a) => ({
+    //                         day,
+    //                         org,
+    //                         timeStart,
+    //                         timeEnd,
+    //                         period,
+    //                         role,
+    //                         discordIdOrEmail,
+    //                         ...a
+    //                     }));
+
+    //                 return a;
+    //             },
+    //             {}
+    //         ) as {
+    //         [k in NmDayNameType]: NightHostModel;
+    //     };
+
+    //     return Object.values(hostMap);
+    // }
 
     async getNightByDay(day: NmDayNameType): Promise<NightModel> {
         const night = (await this.getNightDataByDay(day)).reduce<NightModel>(
@@ -266,6 +323,7 @@ export class NightDataService {
 
         return {
             ...night,
+
             hostList,
             pickupList
         };
@@ -422,5 +480,17 @@ export class NightDataService {
                     );
                 })
         );
+    }
+    getPickupListMd(pickupList: NightPickupModel[]) {
+        return pickupList.reduce((a, { day, org, timeStart, personList }) => {
+            return (a += `${day} ${org} ${timeStart} with ${personList
+                .map((b) => b.name)
+                .join(', ')}\n`);
+        }, '');
+    }
+    getHostListMd({ day, org, timeStart, hostList }: NightModel) {
+        return `${day} ${org} ${timeStart} with ${hostList
+            .map((b) => b.name)
+            .join(', ')}`;
     }
 }

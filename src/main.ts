@@ -1,30 +1,9 @@
-import {
-    ButtonInteraction,
-    ChatInputCommandInteraction,
-    Client,
-    Events,
-    GatewayIntentBits,
-    ModalSubmitInteraction,
-    Partials,
-    StringSelectMenuInteraction
-} from 'discord.js';
+import { Client, Events, GatewayIntentBits, Partials } from 'discord.js';
 import { NmSecrets, GetGuildServices, Dbg } from './utility';
-import {
-    FoodCountDeleteButtonEvent,
-    FoodCountMessageEvent,
-    AvailabilityAndPermissionCommandEvent,
-    AvailabilityEditButtonEvent,
-    PermissionEditButtonEvent,
-    VolunteerCommandEvent,
-    VolunteerEditButtonEvent,
-    WelcomeEvent,
-    IdentityCommandEvent,
-    IdentityEditModalEvent,
-    HelpAndDocsCommandEvent
-} from './events';
 import { AddCron } from './utility/cron.utility';
 import { FoodCountReminderJob, NightOpsJob, NightTimelineJob } from './jobs';
-import { NmDayNameType } from './model';
+import { FoodCountMessageEvent, WelcomeEvent } from './events';
+import { RouteInteraction } from './route';
 
 const dbg = Dbg('main');
 
@@ -72,117 +51,12 @@ async function main() {
     client.on(Events.MessageCreate, async (message) => {
         const services = await GetGuildServices(message.guildId ?? '');
         // food count input
-        FoodCountDeleteButtonEvent(services);
+        FoodCountMessageEvent(services);
     });
 
-    client.on(Events.InteractionCreate, async (interaction) => {
-        dbg(Events.InteractionCreate);
-        interaction = interaction as ChatInputCommandInteraction;
-
-        const services = await GetGuildServices(interaction.guildId ?? '');
-        if (interaction?.isCommand()) {
-            if (interaction?.commandName == 'cc') {
-            }
-            if (interaction?.commandName == 'nm') {
-                dbg('/nm Command');
-                if (interaction.options.getString('command') === 'volunteer') {
-                    VolunteerCommandEvent(
-                        services,
-                        interaction,
-                        interaction.user.id,
-                        interaction.commandName.split('--') as [string]
-                    );
-                }
-                // ToDO: automate this
-                if (
-                    interaction.options.getString('command') ===
-                    'set-availability'
-                ) {
-                    dbg('Editing Availability');
-                    AvailabilityAndPermissionCommandEvent(
-                        services,
-                        interaction
-                    );
-                }
-                if (
-                    interaction.options.getString('command') === 'edit-identity'
-                ) {
-                    dbg('Editing identity');
-                    IdentityCommandEvent(
-                        services,
-                        interaction,
-                        interaction.user.id
-                    );
-                }
-
-                if (
-                    interaction.options.getString('command') === 'help-and-docs'
-                ) {
-                    dbg('help-and-docs');
-                    HelpAndDocsCommandEvent(services, interaction);
-                }
-            }
-            dbg(interaction?.commandName, 'command name');
-            if (interaction?.commandName == 'cc') {
-                dbg('/cc Command');
-                // todo: make sure they are a CC
-                // todo: we don't want to rely on discord role records, we want to geth from the admin sheet of the night spreadsheet
-                interaction.reply(
-                    ((interaction.options.getString('command') || '') +
-                        interaction.options.getUser('target')?.id || '') +
-                        ' coming soon!'
-                );
-            }
-        } else if (interaction.isModalSubmit()) {
-            dbg('isModalSubmit');
-            const args = (interaction as ModalSubmitInteraction).customId.split(
-                '--'
-            );
-            // by convention, the last arg is the discordId
-            // todo: throw an error if this is not set
-            const discordId = args.pop() as string;
-            IdentityEditModalEvent(services, interaction, discordId);
-        }
-        // we can lump these two together since they are both routed by customId
-        else if (interaction.isStringSelectMenu() || interaction.isButton()) {
-            const args = (interaction as ButtonInteraction).customId.split(
-                '--'
-            );
-            // by convention, the last arg is the discordId
-            const discordId = args.pop() as string;
-            dbg(
-                (
-                    interaction as StringSelectMenuInteraction
-                ).isStringSelectMenu()
-                    ? 'isStringSelectMenu'
-                    : 'isButton'
-            );
-
-            AvailabilityEditButtonEvent(
-                services,
-                interaction,
-                (interaction as ButtonInteraction)?.customId || ''
-            );
-            PermissionEditButtonEvent(
-                services,
-                interaction,
-                ((interaction as ButtonInteraction)?.customId || '').split(
-                    '--'
-                ) as [string, 'edit' | 'start', NmDayNameType]
-            );
-            VolunteerEditButtonEvent(
-                services,
-                interaction,
-                (interaction as ButtonInteraction)?.customId || ''
-            );
-        } else {
-            dbg('otherwise this is a message content trigger');
-            FoodCountMessageEvent(interaction);
-
-            // todo: this should be split into different events
-            // uses buttons and selects to handle different volunteering steps
-        }
-    });
+    client.on(Events.InteractionCreate, async (interaction) =>
+        RouteInteraction(interaction)
+    );
 
     client.on(Events.GuildMemberAdd, (member) => {
         setTimeout(async () => {

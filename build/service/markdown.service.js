@@ -4,6 +4,7 @@ exports.MarkdownService = void 0;
 const _1 = require(".");
 const const_1 = require("../const");
 const utility_1 = require("../utility");
+const discord_js_1 = require("discord.js");
 // TODO: make this simple to user from events
 const messageMap = {
     START_HOWTO: (0, utility_1.CreateMdMessage)('START_HOWTO', {
@@ -22,10 +23,7 @@ const messageMap = {
         techPhone: ''
     }),
     PERMISSION_LIST: (0, utility_1.CreateMdMessage)('PERMISSION_LIST', {
-        contactTextOnList: '',
-        contactEmailOnList: '',
-        sharePhoneOnList: '',
-        shareEmailOnList: ''
+        permissionList: ''
     }),
     PERMISSION_EDIT: (0, utility_1.CreateMdMessage)('PERMISSION_EDIT', {}),
     AVAILABILITY_LIST: (0, utility_1.CreateMdMessage)('AVAILABILITY_LIST', {
@@ -36,16 +34,20 @@ const messageMap = {
         dayName: ''
     }),
     AVAILABILITY_TO_HOST: (0, utility_1.CreateMdMessage)('AVAILABILITY_TO_HOST', {}),
-    VOLUNTEER_ONCE_OR_COMMIT: (0, utility_1.CreateMdMessage)('VOLUNTEER_ONCE_OR_COMMIT', {
+    VOLUNTEER_LIST: (0, utility_1.CreateMdMessage)('VOLUNTEER_LIST', {
+        pickupList: '',
+        hostList: ''
+    }),
+    VOLUNTEER_EDIT_ROLE: (0, utility_1.CreateMdMessage)('VOLUNTEER_EDIT_ROLE', {
         roleName: '',
         roleDescription: '',
-        hostNames: ''
+        hostList: ''
     }),
-    VOLUNTEER_AS_ROLE: (0, utility_1.CreateMdMessage)('VOLUNTEER_AS_ROLE', {
-        roleName: '',
-        roleDescription: '',
-        hostNames: ''
-    }),
+    // VOLUNTEER_EDIT_ROLE: CreateMdMessage('VOLUNTEER_EDIT_ROLE', {
+    //     roleName: '',
+    //     roleDescription: '',
+    //     hostNames: ''
+    // }),
     FOODCOUNT_INSERT: (0, utility_1.CreateMdMessage)('FOODCOUNT_INSERT', {
         lbs: '',
         note: '',
@@ -126,6 +128,79 @@ class MarkdownService {
                 .map((a) => `  - Pick-up ${const_1.DAYS_OF_WEEK[a[0]].name} ${const_1.PARTS_OF_DAY[a[1]].name}`)
                 .join('\n')
         ];
+    }
+    getPickupJoinMessage(pickupList) {
+        return pickupList
+            .map(({ org, timeStart, personList }) => `## ${org} at ${timeStart} with ${personList
+            .map((a) => a.name)
+            .join(', ')} `)
+            .join('\n');
+    }
+    getAnnounceMessage(roleId, nightMap) {
+        return (`## ${this.getRandoSalute()} ${(0, discord_js_1.roleMention)(roleId)}!\n` +
+            '\n' +
+            this.getNightCapMessage(nightMap) +
+            '\n' +
+            this.getHostMessage(nightMap) +
+            '\n' +
+            this.getPickupsMessage(nightMap));
+    }
+    getRandoSalute() {
+        const saluteList = [
+            'Hellooo',
+            'Holla',
+            'Dear',
+            'Dearest',
+            'Darling'
+        ];
+        return saluteList[Math.floor(Math.random() * saluteList.length)];
+    }
+    // todo: use message service
+    getAfterMarketMessage(roleId, { pickupList }) {
+        return `## ${(0, discord_js_1.roleMention)(roleId)}!\nNight herstory has been recorded! New night list: \n${pickupList
+            .map(({ org, timeStart, personList }) => {
+            return ('>> ' +
+                org +
+                ' ' +
+                timeStart +
+                ' ' +
+                personList
+                    .map(({ name, discordId }) => `${(0, discord_js_1.bold)(name)} ${discordId ? (0, discord_js_1.userMention)(discordId) : ''}`)
+                    .join(', '));
+        })
+            .join('\n')}`;
+    }
+    // todo: use message service
+    getPickupsMessage({ pickupList }) {
+        return `Pickups\n${pickupList
+            .map(({ org, timeStart, personList }) => {
+            return ('>> ' +
+                org +
+                ' ' +
+                timeStart +
+                ' ' +
+                personList
+                    .map(({ name, discordId }) => `${(0, discord_js_1.bold)(name)} ${discordId ? (0, discord_js_1.userMention)(discordId) : ''}`)
+                    .join(', '));
+        })
+            .join('\n')}`;
+    }
+    // todo: use message service
+    getNightCapMessage({ day, hostList }) {
+        const nightCapList = hostList.filter((a) => a.role === 'night-captain');
+        if (!nightCapList.length) {
+            return 'Night Cap NEEDED! Talk to a CC';
+        }
+        return `Night Captain${nightCapList.length > 1 ? 's' : ''}: ${nightCapList
+            .map((p) => (p.discordId ? (0, discord_js_1.userMention)(p.discordId) : p.name))
+            .join(', ')}`;
+    }
+    // todo: use message service
+    getHostMessage({ hostList }) {
+        const a = hostList.filter((a) => a.role === 'night-host');
+        return `Host${a.length > 1 ? 's' : ''}: ${a
+            .map(({ name, discordId }) => `${(0, discord_js_1.bold)(name)} ${discordId ? (0, discord_js_1.userMention)(discordId) : ''}`)
+            .join(', ')} `;
     }
 }
 exports.MarkdownService = MarkdownService;

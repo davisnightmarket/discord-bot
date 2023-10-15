@@ -9,7 +9,6 @@ import {
 import Commands from '../commands';
 import { NmSecrets } from '../utility';
 
-import {} from 'discord.js';
 import { NmDayNameType } from '../model';
 
 export async function GetChannelDayNameFromInteraction(

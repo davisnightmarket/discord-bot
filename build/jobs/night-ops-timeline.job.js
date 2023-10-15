@@ -14,7 +14,7 @@ const NightTimelineJob = (client) => async () => {
         // get the channel by today name
         const channelDay = (0, utility_1.GetChannelDayToday)();
         // get the guild service
-        const { nightDataService } = await (0, utility_1.GetGuildServices)(guild.id);
+        const { nightDataService, markdownService } = await (0, utility_1.GetGuildServices)(guild.id);
         // get the current state of ops
         const nightOpsList = await nightDataService.getNightDataByDay(channelDay);
         dbg(`NIGHT OPS ${nightOpsList.length}`);
@@ -120,7 +120,7 @@ const NightTimelineJob = (client) => async () => {
         // }
         console.log('QUITTER', quitterList.length);
         await nightDataService.removeNightData(quitterList);
-        const content = (0, utility_1.GetAfterMarketMessage)(await (0, utility_1.GetGuildRoleIdByName)(guild, channelDay), await nightDataService.getNightByDay(channelDay));
+        const content = markdownService.getAfterMarketMessage(await (0, utility_1.GetGuildRoleIdByName)(guild, channelDay), await nightDataService.getNightByDay(channelDay));
         (await guild.channels.cache.find((channel) => channel.name === channelDay))?.send({
             content
         });

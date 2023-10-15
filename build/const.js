@@ -1,55 +1,44 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.NN_ADMIN_ROLE_CODES = exports.NM_ADMIN_ROLES = exports.NN_NIGHT_ROLE_CODES = exports.NM_NIGHT_ROLES = exports.DAYS_OF_WEEK_CODES = exports.PARTS_OF_DAY = exports.DAYS_OF_WEEK = exports.ACTIVE_STATE_LIST = exports.YES_NO_STATE_LIST = exports.PERMISSION_TO_SHARE_EMAIL_LIST = exports.PERMISSION_TO_SHARE_EMAIL_MAP = exports.PERMISSION_TO_SHARE_PHONE_LIST = exports.PERMISSION_TO_SHARE_PHONE_MAP = exports.PERMISSION_TO_CONTACT_EMAIL_LIST = exports.PERMISSION_TO_CONTACT_EMAIL_MAP = exports.PERMISSION_TO_CONTACT_TEXT_LIST = exports.PERMISSION_TO_CONTACT_TEXT_MAP = void 0;
-exports.PERMISSION_TO_CONTACT_TEXT_MAP = {
-    VOLUNTEER_PICKUP_REMINDER: {
-        id: 'VOLUNTEER_PICKUP_REMINDER',
+exports.NN_ADMIN_ROLE_CODES = exports.NM_ADMIN_ROLES = exports.NN_NIGHT_ROLE_CODES = exports.NM_NIGHT_ROLES = exports.DAYS_OF_WEEK_CODES = exports.PARTS_OF_DAY = exports.DAYS_OF_WEEK = exports.ACTIVE_STATE_LIST = exports.YES_NO_STATE_LIST = exports.PERMISSION_CODE_LIST = exports.PERMISSION_MAP = void 0;
+exports.PERMISSION_MAP = {
+    CONTACT_TEXT_ON_VOLUNTEER_PICKUP_REMINDER: {
+        id: 'CONTACT_TEXT_ON_VOLUNTEER_PICKUP_REMINDER',
         name: 'Contact By Text Message about a Pickup',
         description: 'ie: with details about a pickup that you have volunteered for.'
     },
-    VOLUNTEER_HOST_REMINDER: {
-        id: 'VOLUNTEER_HOST_REMINDER',
+    CONTACT_TEXT_ON_VOLUNTEER_HOST_REMINDER: {
+        id: 'CONTACT_TEXT_ON_VOLUNTEER_HOST_REMINDER',
         name: 'Contact By Text Message on day of Night Hosting',
         description: 'ie: if you are hosting or doing a pick-up that day.'
     },
-    AVAILABILITY_REQUEST: {
-        id: 'AVAILABILITY_REQUEST',
+    CONTACT_TEXT_ON_AVAILABILITY_REQUEST: {
+        id: 'CONTACT_TEXT_ON_AVAILABILITY_REQUEST',
         name: 'Contact By Text Message about Availability',
         description: 'ie: you have Tuesday afternoon availability and we need someone that week.'
-    }
-};
-exports.PERMISSION_TO_CONTACT_TEXT_LIST = Object.keys(exports.PERMISSION_TO_CONTACT_TEXT_MAP);
-// contactTextOn	contactEmailOn
-exports.PERMISSION_TO_CONTACT_EMAIL_MAP = {
-    AVAILABILITY_REQUEST: {
-        id: 'AVAILABILITY_REQUEST',
+    },
+    CONTACT_EMAIL_ON_AVAILABILITY_REQUEST: {
+        id: 'CONTACT_EMAIL_ON_AVAILABILITY_REQUEST',
         name: 'Contact by Email about Availability',
         description: 'ie: you have Tuesday afternoon availability and someone is leaving.'
-    }
-};
-exports.PERMISSION_TO_CONTACT_EMAIL_LIST = Object.keys(exports.PERMISSION_TO_CONTACT_EMAIL_MAP);
-exports.PERMISSION_TO_SHARE_PHONE_MAP = {
-    NIGHT_CAP: {
-        id: 'NIGHT_CAP',
+    },
+    SHARE_PHONE_WITH_NIGHT_CAP: {
+        id: 'SHARE_PHONE_WITH_NIGHT_CAP',
         name: 'Share Phone Number with Night Cap',
         description: 'ie: if you are hosting or doing a pick-up that day.'
     },
-    COMMUNITY_COORDINATOR: {
-        id: 'COMMUNITY_COORDINATOR',
+    SHARE_PHONE_WITH_COMMUNITY_COORDINATOR: {
+        id: 'SHARE_PHONE_WITH_COMMUNITY_COORDINATOR',
         name: 'Share Phone Number with Community Coordinator',
         description: 'ie: if you have interest in bike building.'
-    }
-};
-exports.PERMISSION_TO_SHARE_PHONE_LIST = Object.keys(exports.PERMISSION_TO_SHARE_PHONE_MAP);
-// contactTextOn	contactEmailOn
-exports.PERMISSION_TO_SHARE_EMAIL_MAP = {
-    COMMUNITY_COORDINATOR: {
-        id: 'COMMUNITY_COORDINATOR',
+    },
+    SHARE_EMAIL_WITH_COMMUNITY_COORDINATOR: {
+        id: 'SHARE_EMAIL_WITH_COMMUNITY_COORDINATOR',
         name: 'Share Email Address with Community Coordinators',
         description: 'ie: when you have availabilty that matches need.'
     }
 };
-exports.PERMISSION_TO_SHARE_EMAIL_LIST = Object.keys(exports.PERMISSION_TO_SHARE_EMAIL_MAP);
+exports.PERMISSION_CODE_LIST = Object.keys(exports.PERMISSION_MAP);
 exports.YES_NO_STATE_LIST = ['yes', 'no'];
 // across our data model, these strings are used to identify if a resource is active or not
 exports.ACTIVE_STATE_LIST = ['active', 'inactive'];
@@ -119,6 +108,11 @@ exports.NM_NIGHT_ROLES = {
         id: 'night-host',
         name: 'Night Host',
         description: 'Host Market with Friends'
+    },
+    'night-host-shadow': {
+        id: 'night-host-shadow',
+        name: 'Night Host Shadow',
+        description: 'Learn to Host Market'
     },
     'night-pickup': {
         id: 'night-pickup',

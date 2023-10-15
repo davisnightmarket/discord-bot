@@ -1,13 +1,4 @@
-import {
-    PERMISSION_TO_CONTACT_EMAIL_MAP,
-    PERMISSION_TO_CONTACT_TEXT_MAP,
-    PERMISSION_TO_SHARE_EMAIL_MAP,
-    PERMISSION_TO_SHARE_PHONE_MAP,
-    PermissionToContactEmailType,
-    PermissionToContactTextType,
-    PermissionToShareEmailType,
-    PermissionToSharePhoneType
-} from '../const';
+import { PERMISSION_MAP, PermissionType } from '../const';
 import { type NmActiveStateType } from '../model';
 import { GoogleSheetService, type SpreadsheetDataModel } from '../service';
 
@@ -29,10 +20,7 @@ export interface PersonModel extends SpreadsheetDataModel {
     availabilityHost: string;
     availabilityPickup: string;
     teamInterest: string;
-    contactTextOn: string;
-    contactEmailOn: string;
-    sharePhoneOn: string;
-    shareEmailOn: string;
+    permissionList: string;
     stampCreate: string;
 }
 
@@ -88,10 +76,7 @@ export class PersonDataService {
         availabilityHost = '',
         availabilityPickup = '',
         teamInterest = '',
-        contactTextOn = '',
-        contactEmailOn = '',
-        sharePhoneOn = '',
-        shareEmailOn = '',
+        permissionList = '',
         stampCreate = ''
     }: Partial<PersonModel> = {}): PersonModel {
         return {
@@ -112,10 +97,7 @@ export class PersonDataService {
             availabilityHost,
             availabilityPickup,
             teamInterest,
-            contactTextOn,
-            contactEmailOn,
-            sharePhoneOn,
-            shareEmailOn,
+            permissionList,
             stampCreate
         };
     }
@@ -250,68 +232,12 @@ export class PersonDataService {
     }
 
     // methods return markdown person info
-    getContactTextPermissionListMd(person: PersonModel) {
+    getPermissionListMd(person: PersonModel) {
         return (
-            person?.contactTextOn
-                .split(',')
+            person?.permissionList
+                ?.split(',')
                 .filter((a) => a)
-                .map(
-                    (a) =>
-                        `  - ${
-                            PERMISSION_TO_CONTACT_TEXT_MAP[
-                                a as PermissionToContactTextType
-                            ].name
-                        }`
-                )
-                .join('\n') || '  - NO PERMISSIONS GRANTED'
-        );
-    }
-
-    getContactEmailPermissionListMd(person: PersonModel) {
-        return (
-            person.contactEmailOn
-                .split(',')
-                .filter((a) => a)
-                .map(
-                    (a) =>
-                        `  - ${
-                            PERMISSION_TO_CONTACT_EMAIL_MAP[
-                                a as PermissionToContactEmailType
-                            ].name
-                        }`
-                )
-                .join('\n') || '  - NO PERMISSIONS GRANTED'
-        );
-    }
-    getSharePhonePermissionListMd(person: PersonModel) {
-        return (
-            person.sharePhoneOn
-                .split(',')
-                .filter((a) => a)
-                .map(
-                    (a) =>
-                        `  - ${
-                            PERMISSION_TO_SHARE_PHONE_MAP[
-                                a as PermissionToSharePhoneType
-                            ].name
-                        }`
-                )
-                .join('\n') || '  - NO PERMISSIONS GRANTED'
-        );
-    }
-    getShareEmailPermissionListMd(person: PersonModel) {
-        return (
-            person.shareEmailOn
-                .split(',')
-                .filter((a) => a)
-                .map(
-                    (a) =>
-                        `  - ${
-                            PERMISSION_TO_SHARE_EMAIL_MAP[
-                                a as PermissionToShareEmailType
-                            ].name
-                        }`
-                )
+                .map((a) => `  - ${PERMISSION_MAP[a as PermissionType].name}`)
                 .join('\n') || '  - NO PERMISSIONS GRANTED'
         );
     }

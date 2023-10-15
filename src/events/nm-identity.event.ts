@@ -1,10 +1,9 @@
-import { GuildServiceModel } from '../model';
 import { IdentityEditModalComponent } from '../component';
 import {
     ChatInputCommandInteraction,
     ModalSubmitInteraction
 } from 'discord.js';
-import { Dbg } from '../utility';
+import { type GuildServiceModel, Dbg } from '../utility';
 
 const dbg = Dbg('IdentityEvent');
 
@@ -13,9 +12,6 @@ export async function IdentityCommandEvent(
     interaction: ChatInputCommandInteraction,
     discordId: string
 ) {
-    if (interaction.commandName !== 'identity') {
-        return;
-    }
     dbg('IdentityCommandEvent');
 
     // ! for some reason this is taking too long sometimes. Why? It is cached data
@@ -37,9 +33,10 @@ export async function IdentityEditModalEvent(
     { personDataService }: GuildServiceModel,
 
     interaction: ModalSubmitInteraction,
-    discordId: string
+    discordId: string,
+    [command]: [string]
 ) {
-    if (interaction.customId !== 'identity-edit') {
+    if (command !== 'identity-edit') {
         return;
     }
     dbg('IdentityEditModalEvent');

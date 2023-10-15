@@ -1,15 +1,57 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.GetVolunteerPickupComponent = exports.GetVolunteerPeriodComponent = void 0;
+exports.GetVolunteerPickupComponent = exports.GetVolunteerPeriodComponent = exports.GetVolunteerRoleShadowComponent = exports.GetVolunteerRoleComponent = exports.GetVolunteerEditComponent = void 0;
 const discord_js_1 = require("discord.js");
 const const_1 = require("../const");
-function GetVolunteerPeriodComponent({ day, role }) {
+function GetVolunteerEditComponent({ discordId, day }) {
+    const editButton = new discord_js_1.ButtonBuilder()
+        .setCustomId(`volunteer-init--${day}--${discordId}`)
+        .setLabel(`Edit Volunteer Commitment`)
+        .setStyle(discord_js_1.ButtonStyle.Secondary);
+    return [new discord_js_1.ActionRowBuilder().addComponents(editButton)];
+}
+exports.GetVolunteerEditComponent = GetVolunteerEditComponent;
+function GetVolunteerRoleComponent({ day, discordId }) {
+    const components = [];
+    const hostButton = new discord_js_1.ButtonBuilder()
+        .setCustomId(`volunteer-init--${day}--night-host--${discordId}`)
+        .setLabel(const_1.NM_NIGHT_ROLES['night-host'].description)
+        .setStyle(discord_js_1.ButtonStyle.Secondary);
+    const pickupButton = new discord_js_1.ButtonBuilder()
+        .setCustomId(`volunteer-init--${day}--night-pickup--${discordId}`)
+        .setLabel(const_1.NM_NIGHT_ROLES['night-pickup'].description)
+        .setStyle(discord_js_1.ButtonStyle.Secondary);
+    return [
+        new discord_js_1.ActionRowBuilder()
+            .addComponents(hostButton)
+            .addComponents(pickupButton)
+    ];
+}
+exports.GetVolunteerRoleComponent = GetVolunteerRoleComponent;
+function GetVolunteerRoleShadowComponent({ day, discordId }) {
+    const components = [];
+    const shadowHostButton = new discord_js_1.ButtonBuilder()
+        .setCustomId(`volunteer-init--${day}--night-host-shadow--${discordId}`)
+        .setLabel(const_1.NM_NIGHT_ROLES['night-host-shadow'].description)
+        .setStyle(discord_js_1.ButtonStyle.Secondary);
+    const shadowPickupButton = new discord_js_1.ButtonBuilder()
+        .setCustomId(`volunteer-init--${day}--night-pickup-shaddow--${discordId}`)
+        .setLabel(const_1.NM_NIGHT_ROLES['night-pickup-shadow'].description)
+        .setStyle(discord_js_1.ButtonStyle.Secondary);
+    return [
+        new discord_js_1.ActionRowBuilder()
+            .addComponents(shadowHostButton)
+            .addComponents(shadowPickupButton)
+    ];
+}
+exports.GetVolunteerRoleShadowComponent = GetVolunteerRoleShadowComponent;
+function GetVolunteerPeriodComponent({ day, role, discordId }) {
     const joinOnceButton = new discord_js_1.ButtonBuilder()
-        .setCustomId(`volunteer--${day}--${role}--once`)
+        .setCustomId(`volunteer-period--${day}--${role}--once--${discordId}`)
         .setLabel(`${const_1.NM_NIGHT_ROLES[role].name} just this ${day}`)
         .setStyle(discord_js_1.ButtonStyle.Secondary);
     const joinAlwaysButton = new discord_js_1.ButtonBuilder()
-        .setCustomId(`volunteer--${day}--${role}--every`)
+        .setCustomId(`volunteer--${day}--${role}--every--${discordId}`)
         .setLabel(`${const_1.NM_NIGHT_ROLES[role].name}  every ${day}`)
         .setStyle(discord_js_1.ButtonStyle.Secondary);
     return [
@@ -19,9 +61,9 @@ function GetVolunteerPeriodComponent({ day, role }) {
     ];
 }
 exports.GetVolunteerPeriodComponent = GetVolunteerPeriodComponent;
-function GetVolunteerPickupComponent({ day, role, period }, pickupList) {
+function GetVolunteerPickupComponent({ day, role, discordId }, pickupList) {
     const select = new discord_js_1.StringSelectMenuBuilder()
-        .setCustomId(`volunteer--${day}--${role}--${period}--org`)
+        .setCustomId(`volunteer-pickup-org---${day}--${role}--org--${discordId}`)
         .setPlaceholder('Make a selection!')
         .addOptions(pickupList.map(({ org, timeStart, timeEnd, personList }) => new discord_js_1.StringSelectMenuOptionBuilder()
         .setLabel(org)

@@ -4,20 +4,16 @@ import {
     ChatInputCommandInteraction
 } from 'discord.js';
 
+import { type NmDayNameType, NmNightRoleType } from '../model';
 import {
-    type NmDayNameType,
-    type GuildServiceModel,
-    NmNightRoleType
-} from '../model';
-import {
-    GetVolunteerEditComponent,
     GetVolunteerPickupComponent,
     GetVolunteerRoleComponent
 } from '../component/volunteer.component';
 import {
     Dbg,
     GetChannelDayNameFromInteraction,
-    GetChannelDayToday
+    GetChannelDayToday,
+    type GuildServiceModel
 } from '../utility';
 
 const dbg = Dbg('VolunteerResponseEvent');
@@ -28,13 +24,8 @@ export async function VolunteerCommandEvent(
     { nightDataService, markdownService }: GuildServiceModel,
 
     interaction: ChatInputCommandInteraction,
-    discordId: string,
-    [command]: [string]
+    discordId: string
 ) {
-    if (interaction.commandName !== 'volunteer') {
-        return;
-    }
-
     // make sure crabapple doesn't choke while waiting for data
     interaction.deferReply({ ephemeral: true });
 
@@ -42,68 +33,54 @@ export async function VolunteerCommandEvent(
         (await GetChannelDayNameFromInteraction(interaction)) ||
         GetChannelDayToday();
 
-    const { pickupList, hostList } = await nightDataService.getNightByDay(day);
-    pickupList.find((a) => a.personList.find((b) => b.discordId === discordId));
-    // figure out their commitments, if any
-    // if they have commitments, show them with a button
-    if (
-        pickupList.find((a) =>
-            a.personList.find((b) => b.discordId === discordId)
-        ) ||
-        hostList.find((a) => a.discordId === discordId)
-    ) {
-        interaction.editReply({
-            content: markdownService.md.VOLUNTEER_LIST({
-                //todo turn these arrays into markdown
-                pickupList: '',
-                hostList: ''
-            }),
-            components: GetVolunteerEditComponent({ day, discordId })
-        });
-        return;
-    }
+    const night = await nightDataService.getNightByDay(day);
+    const { pickupList } = night;
 
-    // otherwise, straight to the volunteering ...
-    const content = markdownService.md.VOLUNTEER_EDIT_ROLE({
-        roleDescription: '',
-        roleName: '',
-        hostList: ''
-    });
-    const components = GetVolunteerRoleComponent({ day, discordId });
+    // todo: we need some logic here to decide if they need to shadow or not
 
     interaction.editReply({
-        content,
-        components
+        content: markdownService.md.VOLUNTEER_LIST({
+            //todo turn these arrays into markdown
+            pickupList: nightDataService.getPickupListMd(pickupList),
+            hostList: nightDataService.getHostListMd(night)
+        }),
+
+        components: GetVolunteerRoleComponent({ day, discordId })
     });
 }
 
 // when they hit the edit button,  the editing begins, same as a above
 export async function VolunteerInitButtonEvent(
     { nightDataService, markdownService }: GuildServiceModel,
-
     interaction: ButtonInteraction,
     discordId: string,
-    [command]: [string]
+    [command, day, role]: [string, NmDayNameType, NmNightRoleType, string]
 ) {
     if (command !== 'volunteer-init') {
         return;
     }
+    dbg('volunteer-init', command);
     interaction.deferReply({ ephemeral: true });
-    const day =
-        (await GetChannelDayNameFromInteraction(interaction)) ||
-        GetChannelDayToday();
-    const { pickupList, hostList } = await nightDataService.getNightByDay(day);
-    pickupList.find((a) => a.personList.find((b) => b.discordId === discordId));
-    // figure out their commitments, if any
-    // if they have commitments, show them with a button
+    
 
+    const { pickupList } = await nightDataService.getNightByDay(day);
+    //     console.log('NIGHT PICKUP', pickupList);
+    const components = GetVolunteerPickupComponent(
+        {
+            day,
+            role,
+
+            discordId
+        },
+        pickupList
+    );
     interaction.editReply({
         content: markdownService.md.VOLUNTEER_LIST({
             //todo turn these arrays into markdown
             pickupList: '',
             hostList: ''
         }),
-        components: GetVolunteerRoleComponent({ day, discordId })
+        components
     });
     return;
 }

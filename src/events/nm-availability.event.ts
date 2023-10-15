@@ -1,12 +1,12 @@
-import { ChatInputCommandInteraction } from 'discord.js';
+import { ButtonInteraction, ChatInputCommandInteraction } from 'discord.js';
 import {
-    AvailabilityAndPermissionEditButtonComponent,
+    AvailabilityEditButtonComponent,
     IdentityEditModalComponent
 } from '../component';
-import { Dbg } from '../utility';
+import { type GuildServiceModel, Dbg } from '../utility';
 
 import { StringSelectMenuInteraction } from 'discord.js';
-import { GuildServiceModel, NmDayNameType, NmNightRoleType } from '../model';
+import { NmDayNameType, NmNightRoleType } from '../model';
 import {
     AvailabilityToHostComponent,
     AvailabilityToPickupPerDayComponent
@@ -19,13 +19,13 @@ const dbg = Dbg('AvailabilityEvent');
 export async function AvailabilityCommandEvent(
     { personDataService, markdownService }: GuildServiceModel,
 
-    interaction: ChatInputCommandInteraction
+    interaction: ChatInputCommandInteraction,
+    discordId: string
 ) {
-    if (interaction.commandName !== 'availability') {
-        return;
-    }
-
     dbg('ok');
+
+    await interaction.deferReply({ ephemeral: true });
+
     // get the person's data
     const person = await personDataService.getPersonByDiscordId(
         interaction.user.id
@@ -33,40 +33,20 @@ export async function AvailabilityCommandEvent(
 
     if (!person) {
         // show them their modal
-        interaction.showModal(
-            IdentityEditModalComponent(personDataService.createPerson(person))
-        );
+        interaction.editReply(await markdownService.getGenericSorry());
         return;
     }
-
-    await interaction.deferReply({ ephemeral: true });
 
     const [availabilityHostList, availabilityPickupList] =
         markdownService.getAvailabilityListsFromPerson(person);
 
-    const components = AvailabilityAndPermissionEditButtonComponent();
+    const components = AvailabilityEditButtonComponent(discordId);
 
-    const contactTextOnList =
-            personDataService.getContactTextPermissionListMd(person),
-        contactEmailOnList =
-            personDataService.getContactEmailPermissionListMd(person),
-        sharePhoneOnList =
-            personDataService.getSharePhonePermissionListMd(person),
-        shareEmailOnList =
-            personDataService.getShareEmailPermissionListMd(person);
-
-    dbg(shareEmailOnList, contactTextOnList);
     const content =
         [
             markdownService.md.AVAILABILITY_LIST({
                 availabilityHostList,
                 availabilityPickupList
-            }),
-            markdownService.md.PERMISSION_LIST({
-                contactTextOnList,
-                contactEmailOnList,
-                sharePhoneOnList,
-                shareEmailOnList
             })
         ].join('\n') + '\n';
 
@@ -80,68 +60,90 @@ export async function AvailabilityCommandEvent(
 export async function AvailabilityEditButtonEvent(
     { personDataService, nightDataService, markdownService }: GuildServiceModel,
 
-    interaction: StringSelectMenuInteraction,
-    args: string
+    interaction: ButtonInteraction,
+    discordId: string,
+    [command, step, day]: [string, NmNightRoleType | 'init', NmDayNameType]
 ) {
-    const [command, step, day] = args.split('--') as [
-        string,
-        NmNightRoleType | 'night-list',
-        NmDayNameType
-    ];
-
-    dbg(command, step, day);
-
     // todo: handle this higher up
     if (command !== 'availability') {
         return;
     }
 
+    dbg(command, step, day);
+    await interaction.deferReply({ ephemeral: true });
+
     // get the person's data
     const person = await personDataService.getPersonByDiscordId(
         interaction.user.id
     );
+
     if (!person) {
         //! we would like to show them their modal
         // // we cannot show the identity model since we have deferred
-        // interaction.editReply({
-        //     content: await markdownService.getGenericNoPerson()
-        // });
-        interaction.showModal(
-            IdentityEditModalComponent(personDataService.createPerson(person))
-        );
+        interaction.editReply(await markdownService.getGenericNoPerson());
+        // interaction.showModal(
+        //     IdentityEditModalComponent(personDataService.createPerson(person))
+        // );
         return;
     }
-    await interaction.deferReply({ ephemeral: true });
 
-    if (step === 'night-list') {
-        if (!person) {
-            // show them their modal
-            interaction.showModal(
-                IdentityEditModalComponent(
-                    personDataService.createPerson(person)
-                )
-            );
-            return;
-        }
+    if (step === 'init') {
+        // if (!person) {
+        //     // show them their modal
+        //     interaction.showModal(
+        //         IdentityEditModalComponent(
+        //             personDataService.createPerson(person)
+        //         )
+        //     );
+        //     return;
+        // }
 
         const dayTimes =
             await nightDataService.getDayTimeIdAndReadableByDayAsTupleList();
 
         // todo: show host then pickup, since we can't fit them all
-        const components = AvailabilityToHostComponent(
-            dayTimes,
-            personDataService.createPerson(person)
-        );
+        const components = AvailabilityToHostComponent(dayTimes, discordId, []);
         // response
         interaction.editReply({
             content: markdownService.md.AVAILABILITY_TO_HOST({}),
             components
         });
     }
+}
+
+// in which user edits their availability
+export async function AvailabilityEditSelectEvent(
+    { personDataService, markdownService }: GuildServiceModel,
+
+    interaction: StringSelectMenuInteraction,
+    discordId: string,
+    [command, step, day]: [string, NmNightRoleType | 'init', NmDayNameType]
+) {
+    // todo: handle this higher up
+    if (command !== 'availability') {
+        return;
+    }
+
+    dbg(command, step, day);
+    await interaction.deferReply({ ephemeral: true });
+
+    // get the person's data
+    const person = await personDataService.getPersonByDiscordId(
+        interaction.user.id
+    );
+
+    if (!person) {
+        //! we would like to show them their modal
+        // // we cannot show the identity model since we have deferred
+        interaction.editReply(await markdownService.getGenericNoPerson());
+        // interaction.showModal(
+        //     IdentityEditModalComponent(personDataService.createPerson(person))
+        // );
+        return;
+    }
 
     const daysOfWeekIdList = Object.values(DAYS_OF_WEEK).map((a) => a.id);
 
-    // todo: we probably should have a routing utility for routing different types of responses
     // in this case we have selected our night-host availability so ...
     if (step === 'night-host') {
         // save it to the db ...
@@ -156,7 +158,9 @@ export async function AvailabilityEditButtonEvent(
         // now display first night-pickup select
         const currentDay = DAYS_OF_WEEK[daysOfWeekIdList[0]];
         const components = AvailabilityToPickupPerDayComponent({
-            day: currentDay.id
+            day: currentDay.id,
+            discordId,
+            defaultList: []
         });
 
         interaction.editReply({
@@ -168,6 +172,7 @@ export async function AvailabilityEditButtonEvent(
         });
         return;
     }
+
     // in this case we are in the pickup section
     if (step === 'night-pickup') {
         // save the previous to the db ...
@@ -196,7 +201,9 @@ export async function AvailabilityEditButtonEvent(
         const currentDay = Object.values(DAYS_OF_WEEK)[nextDayIndex];
         // todo: show host then pickup, since we can't fit them all
         const components = AvailabilityToPickupPerDayComponent({
-            day: currentDay.id
+            day: currentDay.id,
+            discordId,
+            defaultList: []
         });
 
         // response

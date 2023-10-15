@@ -4,8 +4,7 @@ import {
     GetChannelDayToday,
     GetGuildRoleIdByName,
     GetGuildServices,
-    Dbg,
-    GetAfterMarketMessage
+    Dbg
 } from '../utility';
 import { NightOpsDataModel, NightOpsTimelineDataModel } from '../service';
 
@@ -22,7 +21,7 @@ export const NightTimelineJob = (client: Client) => async () => {
         // get the channel by today name
         const channelDay = GetChannelDayToday();
         // get the guild service
-        const { nightDataService } = await GetGuildServices(guild.id);
+        const { nightDataService,markdownService } = await GetGuildServices(guild.id);
         // get the current state of ops
         const nightOpsList = await nightDataService.getNightDataByDay(
             channelDay
@@ -194,7 +193,7 @@ export const NightTimelineJob = (client: Client) => async () => {
         console.log('QUITTER', quitterList.length);
         await nightDataService.removeNightData(quitterList);
 
-        const content = GetAfterMarketMessage(
+        const content = markdownService.getAfterMarketMessage(
             await GetGuildRoleIdByName(guild, channelDay),
             await nightDataService.getNightByDay(channelDay)
         );

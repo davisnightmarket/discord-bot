@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PersonDataService = void 0;
+const const_1 = require("../const");
 const service_1 = require("../service");
 class PersonDataService {
     constructor(spreadsheetId) {
@@ -23,7 +24,7 @@ class PersonDataService {
     createPerson(person = {}) {
         return PersonDataService.createPerson(person);
     }
-    static createPerson({ status = '', name = '', email = '', phone = '', location = '', bike = '', bikeCart = '', bikeCartAtNight = '', skills = '', bio = '', pronouns = '', interest = '', reference = '', discordId = '', availabilityHost = '', availabilityPickup = '', teamInterest = '', contactTextOn = '', contactEmailOn = '', sharePhoneOn = '', shareEmailOn = '', stampCreate = '' } = {}) {
+    static createPerson({ status = '', name = '', email = '', phone = '', location = '', bike = '', bikeCart = '', bikeCartAtNight = '', skills = '', bio = '', pronouns = '', interest = '', reference = '', discordId = '', availabilityHost = '', availabilityPickup = '', teamInterest = '', permissionList = '', stampCreate = '' } = {}) {
         return {
             status,
             name,
@@ -42,10 +43,7 @@ class PersonDataService {
             availabilityHost,
             availabilityPickup,
             teamInterest,
-            contactTextOn,
-            contactEmailOn,
-            sharePhoneOn,
-            shareEmailOn,
+            permissionList,
             stampCreate
         };
     }
@@ -149,6 +147,14 @@ class PersonDataService {
             status
         ]);
         this.refreshPersonListCache();
+    }
+    // methods return markdown person info
+    getPermissionListMd(person) {
+        return (person?.permissionList
+            ?.split(',')
+            .filter((a) => a)
+            .map((a) => `  - ${const_1.PERMISSION_MAP[a].name}`)
+            .join('\n') || '  - NO PERMISSIONS GRANTED');
     }
 }
 exports.PersonDataService = PersonDataService;

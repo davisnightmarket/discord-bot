@@ -1,50 +1,53 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AvailabilityToPickupPerDayComponent = exports.AvailabilityToHostComponent = exports.AvailabilityAndPermissionEditButtonComponent = void 0;
+exports.AvailabilityToPickupPerDayComponent = exports.AvailabilityToHostComponent = exports.AvailabilityEditButtonComponent = void 0;
 const discord_js_1 = require("discord.js");
 const const_1 = require("../const");
-const AvailabilityAndPermissionEditButtonComponent = () => {
+const AvailabilityEditButtonComponent = (discordId) => {
     return [
         new discord_js_1.ActionRowBuilder().addComponents(new discord_js_1.ButtonBuilder()
-            .setCustomId(`availability--night-list`)
+            .setCustomId(`availability--init--${discordId}`)
             .setLabel('Edit availability?')
-            .setStyle(discord_js_1.ButtonStyle.Secondary), new discord_js_1.ButtonBuilder()
-            .setCustomId(`permission--start`)
-            .setLabel('Edit permission?')
             .setStyle(discord_js_1.ButtonStyle.Secondary))
     ];
 };
-exports.AvailabilityAndPermissionEditButtonComponent = AvailabilityAndPermissionEditButtonComponent;
+exports.AvailabilityEditButtonComponent = AvailabilityEditButtonComponent;
 // selects to identify your availability for night ops
-const AvailabilityToHostComponent = (dayTimeList, {}) => {
+const AvailabilityToHostComponent = (dayTimeList, discordId, defaultDayTimeList) => {
     return [
         new discord_js_1.ActionRowBuilder().addComponents(new discord_js_1.StringSelectMenuBuilder()
-            .setCustomId(`availability--night-host`)
+            .setCustomId(`availability--night-host--${discordId}`)
             .setMinValues(0)
             .setMaxValues(dayTimeList.length)
             .addOptions(...dayTimeList.map((dayTime) => {
-            return (new discord_js_1.StringSelectMenuOptionBuilder()
+            return new discord_js_1.StringSelectMenuOptionBuilder()
                 .setLabel(dayTime[1])
-                // .setDescription(
-                //     DAYS_OF_WEEK[day as NmDayNameType]
-                //         .description
-                // )
-                .setValue(dayTime[0]));
-        })))
+                .setDefault(defaultDayTimeList.includes(dayTime[0]))
+                .setValue(dayTime[0]);
+        }))),
+        new discord_js_1.ActionRowBuilder().addComponents(new discord_js_1.ButtonBuilder()
+            .setCustomId(`availability--night-host-none--${discordId}`)
+            .setLabel('No availability')
+            .setStyle(discord_js_1.ButtonStyle.Secondary))
     ];
 };
 exports.AvailabilityToHostComponent = AvailabilityToHostComponent;
 // selects to identify your availability for night ops
-const AvailabilityToPickupPerDayComponent = ({ day }) => {
+const AvailabilityToPickupPerDayComponent = ({ day, discordId, defaultList }) => {
     return [
         new discord_js_1.ActionRowBuilder().addComponents(new discord_js_1.StringSelectMenuBuilder()
-            .setCustomId(`availability--night-pickup--${day}`)
+            .setCustomId(`availability--night-pickup--${day}--${discordId}`)
             .setMinValues(0)
             .setMaxValues(Object.values(const_1.PARTS_OF_DAY).length)
             .addOptions(...Object.values(const_1.PARTS_OF_DAY).map((partOfDay) => new discord_js_1.StringSelectMenuOptionBuilder()
             .setLabel(`${const_1.DAYS_OF_WEEK[day].name} ${partOfDay.name}`)
+            .setDefault(defaultList.includes(partOfDay.id))
             .setDescription(const_1.DAYS_OF_WEEK[day].description)
-            .setValue(`${day}|||${partOfDay.id}`))))
+            .setValue(`${day}|||${partOfDay.id}`)))),
+        new discord_js_1.ActionRowBuilder().addComponents(new discord_js_1.ButtonBuilder()
+            .setCustomId(`availability--night-pickup-none--${day}--${discordId}`)
+            .setLabel('No availability')
+            .setStyle(discord_js_1.ButtonStyle.Secondary))
     ];
 };
 exports.AvailabilityToPickupPerDayComponent = AvailabilityToPickupPerDayComponent;

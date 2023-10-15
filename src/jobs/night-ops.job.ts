@@ -3,8 +3,7 @@ import { type Client, type TextChannel } from 'discord.js';
 import {
     GetChannelDayToday,
     GetGuildRoleIdByName,
-    GetGuildServices,
-    GetAnnounceMessage
+    GetGuildServices
 } from '../utility';
 
 // when a person requests a listing of
@@ -14,11 +13,13 @@ export const NightOpsJob = (client: Client) => async () => {
 
     for (const guild of guildList) {
         // get the guild service
-        const { nightDataService } = await GetGuildServices(guild.id);
+        const { nightDataService, markdownService } = await GetGuildServices(
+            guild.id
+        );
         // get the channel by today name
         const channelDay = GetChannelDayToday();
 
-        const content = GetAnnounceMessage(
+        const content = markdownService.getAnnounceMessage(
             await GetGuildRoleIdByName(guild, channelDay),
             await nightDataService.getNightByDay(channelDay)
         );

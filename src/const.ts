@@ -13,110 +13,63 @@ import {
 
 // CONTACT
 
-export type PermissionToContactTextType =
-    | 'VOLUNTEER_PICKUP_REMINDER'
-    | 'VOLUNTEER_HOST_REMINDER'
-    | 'AVAILABILITY_REQUEST';
+export type PermissionType =
+    | 'CONTACT_TEXT_ON_VOLUNTEER_PICKUP_REMINDER'
+    | 'CONTACT_TEXT_ON_VOLUNTEER_HOST_REMINDER'
+    | 'CONTACT_TEXT_ON_AVAILABILITY_REQUEST'
+    | 'CONTACT_EMAIL_ON_AVAILABILITY_REQUEST'
+    | 'SHARE_PHONE_WITH_NIGHT_CAP'
+    | 'SHARE_PHONE_WITH_COMMUNITY_COORDINATOR'
+    | 'SHARE_EMAIL_WITH_COMMUNITY_COORDINATOR';
 
-export const PERMISSION_TO_CONTACT_TEXT_MAP: {
-    [k in PermissionToContactTextType]: {
+export const PERMISSION_MAP: {
+    [k in PermissionType]: {
         id: k;
         name: string;
         description: string;
     };
 } = {
-    VOLUNTEER_PICKUP_REMINDER: {
-        id: 'VOLUNTEER_PICKUP_REMINDER',
+    CONTACT_TEXT_ON_VOLUNTEER_PICKUP_REMINDER: {
+        id: 'CONTACT_TEXT_ON_VOLUNTEER_PICKUP_REMINDER',
         name: 'Contact By Text Message about a Pickup',
         description:
             'ie: with details about a pickup that you have volunteered for.'
     },
-    VOLUNTEER_HOST_REMINDER: {
-        id: 'VOLUNTEER_HOST_REMINDER',
+    CONTACT_TEXT_ON_VOLUNTEER_HOST_REMINDER: {
+        id: 'CONTACT_TEXT_ON_VOLUNTEER_HOST_REMINDER',
         name: 'Contact By Text Message on day of Night Hosting',
         description: 'ie: if you are hosting or doing a pick-up that day.'
     },
-    AVAILABILITY_REQUEST: {
-        id: 'AVAILABILITY_REQUEST',
+    CONTACT_TEXT_ON_AVAILABILITY_REQUEST: {
+        id: 'CONTACT_TEXT_ON_AVAILABILITY_REQUEST',
         name: 'Contact By Text Message about Availability',
         description:
             'ie: you have Tuesday afternoon availability and we need someone that week.'
-    }
-};
-
-export const PERMISSION_TO_CONTACT_TEXT_LIST = Object.keys(
-    PERMISSION_TO_CONTACT_TEXT_MAP
-);
-
-export type PermissionToContactEmailType = 'AVAILABILITY_REQUEST';
-
-// contactTextOn	contactEmailOn
-export const PERMISSION_TO_CONTACT_EMAIL_MAP: {
-    [k in PermissionToContactEmailType]: {
-        id: k;
-        name: string;
-        description: string;
-    };
-} = {
-    AVAILABILITY_REQUEST: {
-        id: 'AVAILABILITY_REQUEST',
+    },
+    CONTACT_EMAIL_ON_AVAILABILITY_REQUEST: {
+        id: 'CONTACT_EMAIL_ON_AVAILABILITY_REQUEST',
         name: 'Contact by Email about Availability',
         description:
             'ie: you have Tuesday afternoon availability and someone is leaving.'
-    }
-};
-
-export const PERMISSION_TO_CONTACT_EMAIL_LIST = Object.keys(
-    PERMISSION_TO_CONTACT_EMAIL_MAP
-);
-
-// SHARE
-
-export type PermissionToSharePhoneType = 'NIGHT_CAP' | 'COMMUNITY_COORDINATOR';
-
-export const PERMISSION_TO_SHARE_PHONE_MAP: {
-    [k in PermissionToSharePhoneType]: {
-        id: k;
-        name: string;
-        description: string;
-    };
-} = {
-    NIGHT_CAP: {
-        id: 'NIGHT_CAP',
+    },
+    SHARE_PHONE_WITH_NIGHT_CAP: {
+        id: 'SHARE_PHONE_WITH_NIGHT_CAP',
         name: 'Share Phone Number with Night Cap',
         description: 'ie: if you are hosting or doing a pick-up that day.'
     },
-    COMMUNITY_COORDINATOR: {
-        id: 'COMMUNITY_COORDINATOR',
+    SHARE_PHONE_WITH_COMMUNITY_COORDINATOR: {
+        id: 'SHARE_PHONE_WITH_COMMUNITY_COORDINATOR',
         name: 'Share Phone Number with Community Coordinator',
         description: 'ie: if you have interest in bike building.'
-    }
-};
-
-export const PERMISSION_TO_SHARE_PHONE_LIST = Object.keys(
-    PERMISSION_TO_SHARE_PHONE_MAP
-);
-
-export type PermissionToShareEmailType = 'COMMUNITY_COORDINATOR';
-
-// contactTextOn	contactEmailOn
-export const PERMISSION_TO_SHARE_EMAIL_MAP: {
-    [k in PermissionToShareEmailType]: {
-        id: k;
-        name: string;
-        description: string;
-    };
-} = {
-    COMMUNITY_COORDINATOR: {
-        id: 'COMMUNITY_COORDINATOR',
+    },
+    SHARE_EMAIL_WITH_COMMUNITY_COORDINATOR: {
+        id: 'SHARE_EMAIL_WITH_COMMUNITY_COORDINATOR',
         name: 'Share Email Address with Community Coordinators',
         description: 'ie: when you have availabilty that matches need.'
     }
 };
 
-export const PERMISSION_TO_SHARE_EMAIL_LIST = Object.keys(
-    PERMISSION_TO_SHARE_EMAIL_MAP
-);
+export const PERMISSION_CODE_LIST = Object.keys(PERMISSION_MAP);
 
 export const YES_NO_STATE_LIST = ['yes', 'no'];
 
@@ -210,6 +163,11 @@ export const NM_NIGHT_ROLES: {
         id: 'night-host',
         name: 'Night Host',
         description: 'Host Market with Friends'
+    },
+    'night-host-shadow': {
+        id: 'night-host-shadow',
+        name: 'Night Host Shadow',
+        description: 'Learn to Host Market'
     },
     'night-pickup': {
         id: 'night-pickup',

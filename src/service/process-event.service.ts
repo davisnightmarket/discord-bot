@@ -82,6 +82,4 @@ export class ProcessEventService {
     userVolunteerEdit() {
         return {};
     }
-
-    argsToNightDataService();
 }

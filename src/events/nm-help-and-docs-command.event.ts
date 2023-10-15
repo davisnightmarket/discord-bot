@@ -1,6 +1,5 @@
 import { ChatInputCommandInteraction } from 'discord.js';
-import { GuildServiceModel } from '../model';
-import { Dbg } from '../utility';
+import { Dbg, GuildServiceModel } from '../utility';
 
 const dbg = Dbg('HelpAndDocsCommandEvent');
 
