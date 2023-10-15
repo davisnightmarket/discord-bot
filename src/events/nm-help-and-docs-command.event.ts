@@ -9,6 +9,9 @@ export async function HelpAndDocsCommandEvent(
 
     interaction: ChatInputCommandInteraction
 ) {
+    if (interaction.commandName !== 'help-and-docs') {
+        return;
+    }
     dbg('ok');
 
     interaction.reply({

@@ -1,29 +1,30 @@
 import { ChatInputCommandInteraction } from 'discord.js';
-import { GuildServiceModel } from '../model';
 import {
     AvailabilityAndPermissionEditButtonComponent,
     IdentityEditModalComponent
 } from '../component';
 import { Dbg } from '../utility';
-import {
-    PERMISSION_TO_CONTACT_EMAIL_MAP,
-    PERMISSION_TO_CONTACT_TEXT_MAP,
-    PERMISSION_TO_SHARE_EMAIL_MAP,
-    PERMISSION_TO_SHARE_PHONE_MAP,
-    PermissionToContactEmailType,
-    PermissionToContactTextType,
-    PermissionToShareEmailType,
-    PermissionToSharePhoneType
-} from '../const';
 
+import { StringSelectMenuInteraction } from 'discord.js';
+import { GuildServiceModel, NmDayNameType, NmNightRoleType } from '../model';
+import {
+    AvailabilityToHostComponent,
+    AvailabilityToPickupPerDayComponent
+} from '../component';
+import { DAYS_OF_WEEK } from '../const';
 // in which user edits their availability
 
-const dbg = Dbg('AvailabilityCommandEvent');
-export async function AvailabilityAndPermissionCommandEvent(
+const dbg = Dbg('AvailabilityEvent');
+
+export async function AvailabilityCommandEvent(
     { personDataService, markdownService }: GuildServiceModel,
 
     interaction: ChatInputCommandInteraction
 ) {
+    if (interaction.commandName !== 'availability') {
+        return;
+    }
+
     dbg('ok');
     // get the person's data
     const person = await personDataService.getPersonByDiscordId(
@@ -75,20 +76,7 @@ export async function AvailabilityAndPermissionCommandEvent(
     });
 }
 
-import { StringSelectMenuInteraction } from 'discord.js';
-import { GuildServiceModel, NmDayNameType, NmNightRoleType } from '../model';
-import {
-    AvailabilityToHostComponent,
-    AvailabilityToPickupPerDayComponent,
-    IdentityEditModalComponent,
-    PermissionStartComponent
-} from '../component';
-import { DAYS_OF_WEEK } from '../const';
-import { Dbg } from '../utility';
-
 // in which user edits their availability
-
-const dbg = Dbg('AvailabilityEditButtonEvent');
 export async function AvailabilityEditButtonEvent(
     { personDataService, nightDataService, markdownService }: GuildServiceModel,
 

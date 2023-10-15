@@ -5,35 +5,33 @@ export async function CcEvent({
 }: {
     interaction: CommandInteraction;
 }) {
-    if (interaction.commandName !== 'cc') {
+    if (interaction.commandName === 'volunteer') {
         return;
     }
-    interaction.reply('About cc command ...');
+    if (interaction.commandName === 'availability') {
+        return;
+    }
+    if (interaction.commandName === 'permisson') {
+        return;
+    }
+    if (interaction.commandName === 'identity') {
+        interaction.reply('About cc role ...');
+        return;
+    }
 }
 
-export async function CcUserAvailabilityListEvent({
-    interaction
-}: {
-    interaction: CommandInteraction;
-}) {
-    interaction.reply('About cc role ...');
-}
+// export async function CcUserContactListEvent({
+//     interaction
+// }: {
+//     interaction: CommandInteraction;
+// }) {
+//     interaction.reply('About cc role ...');
+// }
 
-// responds with an ephemeral message listing the user contact infor
-// as long as they have given permission
-
-export async function CcUserContactListEvent({
-    interaction
-}: {
-    interaction: CommandInteraction;
-}) {
-    interaction.reply('About cc role ...');
-}
-
-export async function CcUserVolunteerListEvent({
-    interaction
-}: {
-    interaction: CommandInteraction;
-}) {
-    interaction.reply('About cc role ...');
-}
+// export async function CcUserVolunteerListEvent({
+//     interaction
+// }: {
+//     interaction: CommandInteraction;
+// }) {
+//     interaction.reply('About cc role ...');
+// }

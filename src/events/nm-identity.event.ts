@@ -13,14 +13,10 @@ export async function IdentityCommandEvent(
     interaction: ChatInputCommandInteraction,
     discordId: string
 ) {
-    dbg('ok');
-
-    if (!interaction.guild) {
-        (interaction as ChatInputCommandInteraction).reply(
-            'Hi, you can only do that on the server!'
-        );
+    if (interaction.commandName !== 'identity') {
         return;
     }
+    dbg('IdentityCommandEvent');
 
     // ! for some reason this is taking too long sometimes. Why? It is cached data
     // i think this is because when the cache is reloading, the reply has to wait for more
@@ -46,7 +42,7 @@ export async function IdentityEditModalEvent(
     if (interaction.customId !== 'identity-edit') {
         return;
     }
-    dbg('ok');
+    dbg('IdentityEditModalEvent');
 
     interaction.deferReply({
         ephemeral: true

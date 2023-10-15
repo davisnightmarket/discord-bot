@@ -7,13 +7,10 @@ import {
 import {
     type NmDayNameType,
     type GuildServiceModel,
-    NmNightRoleType,
-    NmRolePeriodType
+    NmNightRoleType
 } from '../model';
-import { DAYS_OF_WEEK_CODES, NM_NIGHT_ROLES } from '../const';
 import {
     GetVolunteerEditComponent,
-    GetVolunteerPeriodComponent,
     GetVolunteerPickupComponent,
     GetVolunteerRoleComponent
 } from '../component/volunteer.component';
@@ -34,7 +31,7 @@ export async function VolunteerCommandEvent(
     discordId: string,
     [command]: [string]
 ) {
-    if (command !== 'volunteer') {
+    if (interaction.commandName !== 'volunteer') {
         return;
     }
 
@@ -111,6 +108,7 @@ export async function VolunteerInitButtonEvent(
     return;
 }
 
+// here the user has chosen to pickup
 export async function VolunteerEditPickupSelectEvent(
     { nightDataService, markdownService }: GuildServiceModel,
     interaction: StringSelectMenuInteraction,
@@ -135,8 +133,7 @@ export async function VolunteerEditPickupSelectEvent(
         {
             day,
             role,
-            // we can add a periodicity later
-            period: 'always',
+
             discordId
         },
         pickupList
@@ -148,7 +145,45 @@ export async function VolunteerEditPickupSelectEvent(
     });
 }
 
-export async function VolunteerSaveSelectEvent(
+// // here the user has chosen to host
+// export async function VolunteerEditHostSelectEvent(
+//     { nightDataService, markdownService }: GuildServiceModel,
+//     interaction: ButtonInteraction,
+//     [command, day, role, discordId]: [
+//         string,
+//         NmDayNameType,
+//         NmNightRoleType,
+//         string
+//     ]
+// ) {
+//     if (command !== 'volunteer-save') {
+//         return;
+//     }
+
+//     dbg(command, day, role, discordId);
+
+//     interaction.deferReply({ ephemeral: true });
+
+//     await nightDataService.addNightData([
+//         {
+//             day,
+//             org: '', // this should be Davis Night Market in Central Park
+//             role,
+//             discordIdOrEmail: interaction.user.id,
+//             period: 'always',
+//             // both of these should be got from core data
+//             timeStart: '2100',
+//             timeEnd: ''
+//         }
+//     ]);
+//     // succcess!
+//     interaction.editReply({
+//         content: 'OK, all set!'
+//     });
+// }
+
+// here the user has chosen to host
+export async function VolunteerRoleEditEvent(
     { nightDataService, markdownService }: GuildServiceModel,
     interaction: ButtonInteraction,
     [command, day, role, discordId]: [
@@ -158,7 +193,7 @@ export async function VolunteerSaveSelectEvent(
         string
     ]
 ) {
-    if (command !== 'volunteer-save') {
+    if (command !== 'volunteer-host') {
         return;
     }
 
@@ -183,261 +218,38 @@ export async function VolunteerSaveSelectEvent(
         content: 'OK, all set!'
     });
 }
+export async function VolunteerPickupOrgEvent(
+    { nightDataService, markdownService }: GuildServiceModel,
+    interaction: ButtonInteraction,
+    [command, day, role, discordId]: [
+        string,
+        NmDayNameType,
+        NmNightRoleType,
+        string
+    ]
+) {
+    if (command !== 'volunteer-pickup-org') {
+        return;
+    }
 
-// // when a volunteer selects a role
-// export async function VolunteerEditPeriodButtonEvent(
-//     { nightDataService, markdownService }: GuildServiceModel,
-//     interaction: ButtonInteraction,
-//     [command, day, role, period, discordId]: [
-//         string,
-//         NmDayNameType,
-//         NmNightRoleType,
-//         NmRolePeriodType,
-//         string
-//     ]
-// ) {
-//     if (command !== 'volunteer-period') {
-//         return;
-//     }
+    dbg(command, day, role, discordId);
 
-//     dbg(command, day, role, discordId);
+    interaction.deferReply({ ephemeral: true });
 
-//     interaction.deferReply({ ephemeral: true });
-
-//     const { pickupList, hostList } = await nightDataService.getNightByDay(day);
-
-//     if (!period) {
-//         const components = GetVolunteerPeriodComponent({ day, role });
-
-//         interaction.editReply({
-//             content: await markdownService.md.VOLUNTEER_ONCE_OR_COMMIT({
-//                 roleName: NM_NIGHT_ROLES[role].name,
-//                 roleDescription: NM_NIGHT_ROLES[role].description,
-//                 hostList: hostList.map((a) => a.name).join(', ')
-//             }),
-//             components
-//         });
-
-//         return;
-//     }
-// }
-
-// export async function VolunteerEditInitButtonEvent(
-//     { nightDataService, markdownService }: GuildServiceModel,
-//     interaction: Interaction,
-//     args: string
-// ) {
-//     const [command, day, role, period] = args.split('--') as [
-//         string,
-//         NmDayNameType,
-//         NmNightRoleType,
-//         NmRolePeriodType
-//     ];
-
-//     dbg(command, day, role, period);
-
-//     if (command !== 'volunteer-init') {
-//         return;
-//     }
-
-//     (interaction as ButtonInteraction).deferReply({ ephemeral: true });
-
-//     // todo: replace all this with createMessageComponentCollector
-//     if (interaction.isButton()) {
-//         interaction = interaction as ButtonInteraction;
-//         // there should always be a day
-//         if (!day || !DAYS_OF_WEEK_CODES.includes(day as NmDayNameType)) {
-//             interaction.editReply({
-//                 content: await markdownService.getGenericSorry()
-//             });
-//             console.error('Passed not a day');
-//             return;
-//         }
-//         const { pickupList, hostList } = await nightDataService.getNightByDay(
-//             day
-//         );
-//         // role is selected in the first interaction
-//         if (!role) {
-//             interaction.editReply({
-//                 content: await markdownService.getGenericSorry()
-//             });
-//             console.error('Passed not a role.');
-//             return;
-//         }
-
-//         if (!period) {
-//             const components = GetVolunteerPeriodComponent({ day, role });
-
-//             interaction.editReply({
-//                 content: await markdownService.md.VOLUNTEER_ONCE_OR_COMMIT({
-//                     roleName: NM_NIGHT_ROLES[role].name,
-//                     roleDescription: NM_NIGHT_ROLES[role].description,
-//                     hostList: hostList.map((a) => a.name).join(', ')
-//                 }),
-//                 components
-//             });
-
-//             return;
-//         }
-
-//         // the successful select is handled above by isStringSelectMenu
-//         if (role === 'night-pickup') {
-//             console.log('NIGHT PICKUP', pickupList);
-//             const components = GetVolunteerPickupComponent(
-//                 {
-//                     day,
-//                     role,
-//                     period
-//                 },
-//                 pickupList
-//             );
-//             // TODO: we can only select 25 at a time, so slice em up
-
-//             interaction.editReply({
-//                 content: 'OK, all set!',
-//                 components
-//             });
-
-//             return;
-//         }
-
-//         if (role === 'night-host') {
-//             // TODO: save to DB
-//             await nightDataService.addNightData([
-//                 {
-//                     day,
-//                     org: '', // this should be Davis Night Market in Central Park
-//                     role,
-//                     discordIdOrEmail: interaction.user.id,
-//                     period,
-//                     // both of these should be got from core data
-//                     timeStart: '2100',
-//                     timeEnd: ''
-//                 }
-//             ]);
-//             // succcess!
-//             interaction.editReply({
-//                 content: 'OK, all set!'
-//             });
-
-//             return;
-//         }
-
-//         return;
-//     }
-// }
-
-// export async function VolunteerEditPickupButtonEvent(
-//     { nightDataService, markdownService }: GuildServiceModel,
-//     interaction: ButtonInteraction,
-//     discordId: string,
-//     args: string
-// ) {
-//     const [command, day, role, period] = args.split('--') as [
-//         string,
-//         NmDayNameType,
-//         NmNightRoleType,
-//         NmRolePeriodType
-//     ];
-
-//     if (command !== 'volunteer-period') {
-//         return;
-//     }
-
-//     dbg(command, day, role, period);
-
-//     interaction.deferReply({ ephemeral: true });
-//     // there should always be a day
-//     if (!day || !DAYS_OF_WEEK_CODES.includes(day as NmDayNameType)) {
-//         interaction.editReply({
-//             content: await markdownService.getGenericSorry()
-//         });
-//         console.error('Passed not a day');
-//         return;
-//     }
-//     const { pickupList, hostList } = await nightDataService.getNightByDay(day);
-//     // role is selected in the first interaction
-//     if (!role) {
-//         interaction.editReply({
-//             content: await markdownService.getGenericSorry()
-//         });
-//         console.error('Passed not a role.');
-//         return;
-//     }
-
-//     if (!period) {
-//         const components = GetVolunteerPeriodComponent({
-//             day,
-//             role,
-//             discordId
-//         });
-
-//         interaction.editReply({
-//             content: await markdownService.md.VOLUNTEER_ONCE_OR_COMMIT({
-//                 roleName: NM_NIGHT_ROLES[role].name,
-//                 roleDescription: NM_NIGHT_ROLES[role].description,
-//                 hostList: hostList.map((a) => a.name).join(', ')
-//             }),
-//             components
-//         });
-
-//         return;
-//     }
-
-//     const components = GetVolunteerPickupComponent(
-//         {
-//             day,
-//             role,
-//             period,
-//             discordId
-//         },
-//         pickupList
-//     );
-//     // TODO: we can only select 25 at a time, so slice em up
-
-//     interaction.editReply({
-//         content: 'OK, all set!',
-//         components
-//     });
-
-//     return;
-// }
-
-// export async function VolunteerEditPickupSelectFinalEvent(
-//     { nightDataService, markdownService }: GuildServiceModel,
-//     interaction: StringSelectMenuInteraction,
-//     [command, day, role, period]: [
-//         string,
-//         NmDayNameType,
-//         NmNightRoleType,
-//         NmRolePeriodType
-//     ]
-// ) {
-//     if (command !== 'volunteer-pickup') {
-//         return;
-//     }
-
-//     dbg(command, day, role, period);
-
-//     interaction.deferReply({ ephemeral: true });
-
-//     // TODO: save to DB
-//     const [org, timeStart] = interaction.values[0].split('---');
-
-//     await nightDataService.addNightData([
-//         {
-//             day,
-//             org, // this should be Davis Night Market in Central Park
-//             role,
-//             discordIdOrEmail: interaction.user.id,
-//             period,
-
-//             timeStart,
-//             // both of these should be got from core data
-//             timeEnd: ''
-//         }
-//     ]);
-//     interaction.editReply({
-//         content: markdownService.md.GENERIC_OK({})
-//     });
-// }
+    await nightDataService.addNightData([
+        {
+            day,
+            org: '', // this should be Davis Night Market in Central Park
+            role,
+            discordIdOrEmail: interaction.user.id,
+            period: 'always',
+            // both of these should be got from core data
+            timeStart: '2100',
+            timeEnd: ''
+        }
+    ]);
+    // succcess!
+    interaction.editReply({
+        content: 'OK, all set!'
+    });
+}

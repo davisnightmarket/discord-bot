@@ -27,11 +27,11 @@ export function GetVolunteerRoleComponent({
     const components: ActionRowBuilder<ButtonBuilder>[] = [];
 
     const hostButton = new ButtonBuilder()
-        .setCustomId(`volunteer-role--${day}--night-host--${discordId}`)
+        .setCustomId(`volunteer-host--${day}--night-host--${discordId}`)
         .setLabel(NM_NIGHT_ROLES['night-host'].description)
         .setStyle(ButtonStyle.Secondary);
     const pickupButton = new ButtonBuilder()
-        .setCustomId(`volunteer-role--${day}--night-pickup--${discordId}`)
+        .setCustomId(`volunteer-pickup--${day}--night-pickup--${discordId}`)
         .setLabel(NM_NIGHT_ROLES['night-pickup'].description)
         .setStyle(ButtonStyle.Secondary);
 
@@ -69,16 +69,13 @@ export function GetVolunteerPickupComponent(
     {
         day,
         role,
-        period,
         discordId
-    }: Required<
-        Pick<NightPersonModel, 'day' | 'role' | 'period' | 'discordId'>
-    >,
+    }: Required<Pick<NightPersonModel, 'day' | 'role' | 'discordId'>>,
     pickupList: NightPickupModel[]
 ) {
     const select = new StringSelectMenuBuilder()
         .setCustomId(
-            `volunteer-pickup--${day}--${role}--${period}--org--${discordId}`
+            `volunteer-pickup-org---${day}--${role}--org--${discordId}`
         )
         .setPlaceholder('Make a selection!')
         .addOptions(

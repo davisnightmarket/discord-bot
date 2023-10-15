@@ -8,29 +8,26 @@ export default new SlashCommandBuilder()
             .setName('user')
             .setDescription('Select a User')
             .addUserOption((option) =>
-                option.setName('target').setDescription('The user')
+                option.setName('Target').setDescription('The Marketeer')
             )
             .addStringOption((option) =>
-                option
-                    .setName('command')
-                    .setDescription('Edit Users')
-                    .addChoices(
-                        {
-                            name: 'Add or Remove Volunteer Role',
-                            value: 'volunteer'
-                        },
-                        {
-                            name: 'Add or Remove Permissions',
-                            value: 'set-permissons'
-                        },
-                        {
-                            name: 'Add or Remove Availability',
-                            value: 'set-availability'
-                        },
-                        {
-                            name: 'Add or Remove Edit Identity & Contact Info',
-                            value: 'edit-identity'
-                        }
-                    )
+                option.setName('Command').setDescription('Edit').addChoices(
+                    {
+                        name: 'Schedule',
+                        value: 'volunteer'
+                    },
+                    {
+                        name: 'Permissions',
+                        value: 'permisson'
+                    },
+                    {
+                        name: 'Availability',
+                        value: 'availability'
+                    },
+                    {
+                        name: 'Identity & Contact Info',
+                        value: 'identity'
+                    }
+                )
             )
     );

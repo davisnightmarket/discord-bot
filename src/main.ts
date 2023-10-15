@@ -4,6 +4,7 @@ import {
     Client,
     Events,
     GatewayIntentBits,
+    ModalSubmitInteraction,
     Partials,
     StringSelectMenuInteraction
 } from 'discord.js';
@@ -23,6 +24,7 @@ import {
 } from './events';
 import { AddCron } from './utility/cron.utility';
 import { FoodCountReminderJob, NightOpsJob, NightTimelineJob } from './jobs';
+import { NmDayNameType } from './model';
 
 const dbg = Dbg('main');
 
@@ -79,10 +81,17 @@ async function main() {
 
         const services = await GetGuildServices(interaction.guildId ?? '');
         if (interaction?.isCommand()) {
+            if (interaction?.commandName == 'cc') {
+            }
             if (interaction?.commandName == 'nm') {
                 dbg('/nm Command');
                 if (interaction.options.getString('command') === 'volunteer') {
-                    VolunteerCommandEvent(services, interaction);
+                    VolunteerCommandEvent(
+                        services,
+                        interaction,
+                        interaction.user.id,
+                        interaction.commandName.split('--') as [string]
+                    );
                 }
                 // ToDO: automate this
                 if (
@@ -99,7 +108,11 @@ async function main() {
                     interaction.options.getString('command') === 'edit-identity'
                 ) {
                     dbg('Editing identity');
-                    IdentityCommandEvent(services, interaction);
+                    IdentityCommandEvent(
+                        services,
+                        interaction,
+                        interaction.user.id
+                    );
                 }
 
                 if (
@@ -122,10 +135,21 @@ async function main() {
             }
         } else if (interaction.isModalSubmit()) {
             dbg('isModalSubmit');
-            IdentityEditModalEvent(services, interaction);
+            const args = (interaction as ModalSubmitInteraction).customId.split(
+                '--'
+            );
+            // by convention, the last arg is the discordId
+            // todo: throw an error if this is not set
+            const discordId = args.pop() as string;
+            IdentityEditModalEvent(services, interaction, discordId);
         }
         // we can lump these two together since they are both routed by customId
         else if (interaction.isStringSelectMenu() || interaction.isButton()) {
+            const args = (interaction as ButtonInteraction).customId.split(
+                '--'
+            );
+            // by convention, the last arg is the discordId
+            const discordId = args.pop() as string;
             dbg(
                 (
                     interaction as StringSelectMenuInteraction
@@ -142,7 +166,9 @@ async function main() {
             PermissionEditButtonEvent(
                 services,
                 interaction,
-                (interaction as ButtonInteraction)?.customId || ''
+                ((interaction as ButtonInteraction)?.customId || '').split(
+                    '--'
+                ) as [string, 'edit' | 'start', NmDayNameType]
             );
             VolunteerEditButtonEvent(
                 services,
