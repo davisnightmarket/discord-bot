@@ -36,16 +36,21 @@ const messageMap = {
         dayName: ''
     }),
     AVAILABILITY_TO_HOST: CreateMdMessage('AVAILABILITY_TO_HOST', {}),
-    VOLUNTEER_ONCE_OR_COMMIT: CreateMdMessage('VOLUNTEER_ONCE_OR_COMMIT', {
+
+    VOLUNTEER_LIST: CreateMdMessage('VOLUNTEER_LIST', {
+        pickupList: '',
+        hostList: ''
+    }),
+    VOLUNTEER_EDIT_ROLE: CreateMdMessage('VOLUNTEER_EDIT_ROLE', {
         roleName: '',
         roleDescription: '',
         hostList: ''
     }),
-    VOLUNTEER_AS_ROLE: CreateMdMessage('VOLUNTEER_AS_ROLE', {
-        roleName: '',
-        roleDescription: '',
-        hostNames: ''
-    }),
+    // VOLUNTEER_EDIT_ROLE: CreateMdMessage('VOLUNTEER_EDIT_ROLE', {
+    //     roleName: '',
+    //     roleDescription: '',
+    //     hostNames: ''
+    // }),
     FOODCOUNT_INSERT: CreateMdMessage('FOODCOUNT_INSERT', {
         lbs: '',
         note: '',

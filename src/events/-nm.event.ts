@@ -15,12 +15,15 @@ import * as Component from '../component';
 
 const dbg = DebugUtility('NmEvent');
 
-// provide a general help response for NM command
+// provide a general help response for NM command without options
 export async function NmEvent(
     { markdownService }: GuildServiceModel,
 
     interaction: ChatInputCommandInteraction
 ) {
+    // if (interaction.commandName !== 'nm') {
+    //     return;
+    // }
     // make sure crabapple doesn't choke while waiting for data
     interaction.deferReply({ ephemeral: true });
 
@@ -92,10 +95,10 @@ export async function NmAvailabilityEditInitEvent(
     { personDataService, markdownService, nightDataService }: GuildServiceModel,
     interaction: ChatInputCommandInteraction,
     discordId: string,
-    [command, step, day]: [string, NmNightRoleType, NmDayNameType]
+    [step, role, day]: [string, NmNightRoleType, NmDayNameType]
 ) {
     dbg('ok');
-    if (command !== 'availability-edit' && step !== 'night-host') {
+    if (step !== 'availability-edit' && step !== 'night-host') {
         return;
     }
 

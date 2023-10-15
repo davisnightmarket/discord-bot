@@ -10,20 +10,13 @@ export async function PermissionEditButtonEvent(
     { personDataService, markdownService }: GuildServiceModel,
 
     interaction: StringSelectMenuInteraction,
-    args: string
+    [command, step, day]: [string, 'start' | 'edit', NmDayNameType]
 ) {
-    const [command, step, day] = args.split('--') as [
-        string,
-        'start' | 'edit',
-        NmDayNameType
-    ];
-
-    dbg(command, step, day);
-
     // todo: handle this higher up
     if (command !== 'permission') {
         return;
     }
+    dbg(command, step, day);
 
     await interaction.deferReply({ ephemeral: true });
 
