@@ -6,18 +6,52 @@ import {
     StringSelectMenuOptionBuilder
 } from 'discord.js';
 import { NightPersonModel, NightPickupModel } from '../service';
-import { NM_NIGHT_ROLES } from '../const';
+import { DAYS_OF_WEEK, DAYS_OF_WEEK_CODES, NM_NIGHT_ROLES } from '../const';
 
-export function GetVolunteerEditComponent({
+export function GetVolunteerInitComponent({
     discordId,
     day
 }: Pick<NightPersonModel, 'discordId' | 'day'>) {
     const editButton = new ButtonBuilder()
         .setCustomId(`volunteer-init--${day}--${discordId}`)
-        .setLabel(`Edit Volunteer Commitment`)
+        .setLabel(`Edit Volunteer Commitments`)
         .setStyle(ButtonStyle.Secondary);
 
-    return [new ActionRowBuilder<ButtonBuilder>().addComponents(editButton)];
+    const viewButton = new ButtonBuilder()
+        .setCustomId(`volunteer-view--${discordId}`)
+        .setLabel(`View All Commitments`)
+        .setStyle(ButtonStyle.Secondary);
+
+    return [
+        new ActionRowBuilder<ButtonBuilder>()
+            .addComponents(editButton)
+            .addComponents(viewButton)
+    ];
+}
+
+export function GetVolunteerListAllComponent({
+    discordId,
+    day
+}: Pick<NightPersonModel, 'discordId' | 'day'>) {
+    const editDayButton = new StringSelectMenuBuilder()
+        .setCustomId(`volunteer-edit-day--${discordId}`)
+
+        .setPlaceholder('')
+        .addOptions(
+            DAYS_OF_WEEK_CODES.map((d) =>
+                new StringSelectMenuOptionBuilder()
+                    .setLabel(DAYS_OF_WEEK[d].name)
+                    .setDefault(day === d)
+                    .setDescription(``)
+                    .setValue(d)
+            )
+        );
+
+    return [
+        new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
+            editDayButton
+        )
+    ];
 }
 
 export function GetVolunteerRoleComponent({

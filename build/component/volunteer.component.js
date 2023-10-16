@@ -1,16 +1,38 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.GetVolunteerPickupComponent = exports.GetVolunteerPeriodComponent = exports.GetVolunteerRoleShadowComponent = exports.GetVolunteerRoleComponent = exports.GetVolunteerEditComponent = void 0;
+exports.GetVolunteerPickupComponent = exports.GetVolunteerPeriodComponent = exports.GetVolunteerRoleShadowComponent = exports.GetVolunteerRoleComponent = exports.GetVolunteerListAllComponent = exports.GetVolunteerInitComponent = void 0;
 const discord_js_1 = require("discord.js");
 const const_1 = require("../const");
-function GetVolunteerEditComponent({ discordId, day }) {
+function GetVolunteerInitComponent({ discordId, day }) {
     const editButton = new discord_js_1.ButtonBuilder()
         .setCustomId(`volunteer-init--${day}--${discordId}`)
-        .setLabel(`Edit Volunteer Commitment`)
+        .setLabel(`Edit Volunteer Commitments`)
         .setStyle(discord_js_1.ButtonStyle.Secondary);
-    return [new discord_js_1.ActionRowBuilder().addComponents(editButton)];
+    const viewButton = new discord_js_1.ButtonBuilder()
+        .setCustomId(`volunteer-view--${discordId}`)
+        .setLabel(`View All Commitments`)
+        .setStyle(discord_js_1.ButtonStyle.Secondary);
+    return [
+        new discord_js_1.ActionRowBuilder()
+            .addComponents(editButton)
+            .addComponents(viewButton)
+    ];
 }
-exports.GetVolunteerEditComponent = GetVolunteerEditComponent;
+exports.GetVolunteerInitComponent = GetVolunteerInitComponent;
+function GetVolunteerListAllComponent({ discordId, day }) {
+    const editDayButton = new discord_js_1.StringSelectMenuBuilder()
+        .setCustomId(`volunteer-edit-day--${discordId}`)
+        .setPlaceholder('')
+        .addOptions(const_1.DAYS_OF_WEEK_CODES.map((d) => new discord_js_1.StringSelectMenuOptionBuilder()
+        .setLabel(const_1.DAYS_OF_WEEK[d].name)
+        .setDefault(day === d)
+        .setDescription(``)
+        .setValue(d)));
+    return [
+        new discord_js_1.ActionRowBuilder().addComponents(editDayButton)
+    ];
+}
+exports.GetVolunteerListAllComponent = GetVolunteerListAllComponent;
 function GetVolunteerRoleComponent({ day, discordId }) {
     const components = [];
     const hostButton = new discord_js_1.ButtonBuilder()

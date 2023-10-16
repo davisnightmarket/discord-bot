@@ -6,6 +6,8 @@ import {
 
 import { type NmDayNameType, NmNightRoleType } from '../model';
 import {
+    GetVolunteerInitComponent,
+    GetVolunteerListAllComponent,
     GetVolunteerPickupComponent,
     GetVolunteerRoleComponent
 } from '../component/volunteer.component';
@@ -33,23 +35,31 @@ export async function VolunteerCommandEvent(
         (await GetChannelDayNameFromInteraction(interaction)) ||
         GetChannelDayToday();
 
+    // todo: get all night ops, not just one day?
+
     const night = await nightDataService.getNightByDay(day);
     const { pickupList } = night;
 
-    // todo: we need some logic here to decide if they need to shadow or not
-
+    // TODO: some logic here to figure out:
+    // Is there a current commitment set? If so display it
+    // If not, skip it and  show the role options
+    // however, also check their history to see if they
+    // need to shadow
     interaction.editReply({
         content: markdownService.md.VOLUNTEER_LIST({
-            //todo turn these arrays into markdown
+            //todo: get all and my
             pickupList: nightDataService.getPickupListMd(pickupList),
-            hostList: nightDataService.getHostListMd(night)
+            hostList: nightDataService.getHostListMd(night),
+            myPickupList: nightDataService.getPickupListMd(pickupList),
+            myHostList: nightDataService.getHostListMd(night)
         }),
 
-        components: GetVolunteerRoleComponent({ day, discordId })
+        components: GetVolunteerInitComponent({ day, discordId })
     });
 }
 
-// when they hit the edit button,  the editing begins, same as a above
+// when they hit the init button, the editing begins,
+// same as a above when they have no commitments
 export async function VolunteerInitButtonEvent(
     { nightDataService, markdownService }: GuildServiceModel,
     interaction: ButtonInteraction,
@@ -59,30 +69,68 @@ export async function VolunteerInitButtonEvent(
     if (command !== 'volunteer-init') {
         return;
     }
+
     dbg('volunteer-init', command);
+
     interaction.deferReply({ ephemeral: true });
-    
 
     const { pickupList } = await nightDataService.getNightByDay(day);
-    //     console.log('NIGHT PICKUP', pickupList);
-    const components = GetVolunteerPickupComponent(
-        {
-            day,
-            role,
 
-            discordId
-        },
-        pickupList
-    );
+    if (pickupList.length) {
+        const components = GetVolunteerPickupComponent(
+            {
+                day,
+                role,
+
+                discordId
+            },
+            pickupList
+        );
+        interaction.editReply({
+            content: 'Choose pickups:',
+            components
+        });
+        return;
+    }
+
     interaction.editReply({
-        content: markdownService.md.VOLUNTEER_LIST({
-            //todo turn these arrays into markdown
-            pickupList: '',
-            hostList: ''
-        }),
+        content: `No pickups available on ${day}. Choose another day:`
+        // todo: add day select button
+    });
+
+    return;
+}
+
+// here the user has chosen to pickup
+export async function VolunteerEditDaySelectEvent(
+    { nightDataService, markdownService }: GuildServiceModel,
+    interaction: StringSelectMenuInteraction,
+    [command, day, role, discordId]: [
+        string,
+        NmDayNameType,
+        NmNightRoleType,
+        string
+    ]
+) {
+    if (command !== 'volunteer-edit-day') {
+        return;
+    }
+
+    dbg(command, day, role, discordId);
+
+    interaction.deferReply({ ephemeral: true });
+
+    const { pickupList } = await nightDataService.getNightByDay(day);
+
+    const components = GetVolunteerRoleComponent({
+        day,
+        discordId
+    });
+
+    interaction.editReply({
+        content: `OK, what would you like to do on ${day}?`,
         components
     });
-    return;
 }
 
 // here the user has chosen to pickup

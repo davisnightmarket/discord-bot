@@ -45,7 +45,9 @@ const messageMap = {
 
     VOLUNTEER_LIST: CreateMdMessage('VOLUNTEER_LIST', {
         pickupList: '',
-        hostList: ''
+        hostList: '',
+        myHostList: '',
+        myPickupList: ''
     }),
     VOLUNTEER_EDIT_ROLE: CreateMdMessage('VOLUNTEER_EDIT_ROLE', {
         roleName: '',
