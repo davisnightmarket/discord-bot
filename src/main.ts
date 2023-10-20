@@ -10,9 +10,8 @@ import {
     Partials
 } from 'discord.js';
 import { GetNmSecrets } from './utility/nm-secrets.utility';
-import { type GuildServiceMapModel } from './model';
 import { AddCron } from './utility/cron-utility';
-import { FoodCountReminder, DailyPickupsWithoutThread } from './jobs';
+import { FoodCountReminder, PickupsRefreshEvent } from './jobs';
 import { CommandSerice, ConfigSerive } from './service';
 
 async function main() {
@@ -48,6 +47,9 @@ async function main() {
     // food count events
     client.on(Events.MessageCreate, FoodCountInputEvent(services));
     client.on(Events.InteractionCreate, FoodCountResponseEvent);
+
+    // pickup events
+    client.on(Events.InteractionCreate, PickupsRefreshEvent(services));
 
     // commands
     client.on(Events.InteractionCreate, commands.execute(services))

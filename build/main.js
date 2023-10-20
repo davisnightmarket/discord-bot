@@ -33,6 +33,8 @@ async function main() {
     // food count events
     client.on(discord_js_1.Events.MessageCreate, (0, events_1.FoodCountInputEvent)(services));
     client.on(discord_js_1.Events.InteractionCreate, events_1.FoodCountResponseEvent);
+    // pickup events
+    client.on(discord_js_1.Events.InteractionCreate, (0, jobs_1.PickupsRefreshEvent)(services));
     // commands
     client.on(discord_js_1.Events.InteractionCreate, commands.execute(services));
     const { discordConfig: { appToken } } = await (0, nm_secrets_utility_1.GetNmSecrets)();

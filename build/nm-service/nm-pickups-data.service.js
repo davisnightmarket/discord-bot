@@ -17,5 +17,8 @@ class NmPickupsDataService {
             .filter((pickup) => pickup.day === day)
             .filter((pickup) => pickup.activity === 'food pickup'));
     }
+    async updateCache() {
+        await this.pickupsSheetService.updateCache();
+    }
 }
 exports.NmPickupsDataService = NmPickupsDataService;

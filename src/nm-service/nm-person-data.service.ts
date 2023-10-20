@@ -58,4 +58,8 @@ export class NmPersonDataService {
     async setActiveState(email: string, status: ActiveStateType) {
         await this.personSheetService.update({ email }, { status });
     }
+
+    async updateCache() {
+        await this.personSheetService.updateCache()
+    }
 }
