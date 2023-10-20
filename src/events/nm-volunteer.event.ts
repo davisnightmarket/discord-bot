@@ -1,13 +1,13 @@
 import {
     type ButtonInteraction,
     StringSelectMenuInteraction,
-    ChatInputCommandInteraction
+    ChatInputCommandInteraction,
+    AnySelectMenuInteraction
 } from 'discord.js';
 
 import { type NmDayNameType, NmNightRoleType } from '../model';
 import {
     GetVolunteerInitComponent,
-    GetVolunteerListAllComponent,
     GetVolunteerPickupComponent,
     GetVolunteerRoleComponent
 } from '../component/volunteer.component';
@@ -17,6 +17,7 @@ import {
     GetChannelDayToday,
     type GuildServiceModel
 } from '../utility';
+import { DAYS_OF_WEEK, DAYS_OF_WEEK_CODES } from '../const';
 
 const dbg = Dbg('VolunteerResponseEvent');
 // todo: split this into different events for clarity
@@ -28,30 +29,47 @@ export async function VolunteerCommandEvent(
     interaction: ChatInputCommandInteraction,
     discordId: string
 ) {
+    console.log('hi', discordId);
     // make sure crabapple doesn't choke while waiting for data
     interaction.deferReply({ ephemeral: true });
 
+    // get the channel day or otherwise the current day
     const day =
         (await GetChannelDayNameFromInteraction(interaction)) ||
         GetChannelDayToday();
 
-    // todo: get all night ops, not just one day?
+    // get
 
     const night = await nightDataService.getNightByDay(day);
-    const { pickupList } = night;
+
+    console.log(day, JSON.stringify(night, null, 2));
+
+    const { pickupList, hostList } = night;
+
+    const myPickupList = pickupList.filter(
+        // only pickups that I am doing
+        (pickup) =>
+            pickup.personList.filter((a) => a.discordId === discordId).length
+    );
 
     // TODO: some logic here to figure out:
     // Is there a current commitment set? If so display it
     // If not, skip it and  show the role options
     // however, also check their history to see if they
     // need to shadow
+
     interaction.editReply({
         content: markdownService.md.VOLUNTEER_LIST({
+            dayName: DAYS_OF_WEEK[day].name,
+            dayChannelNameList: DAYS_OF_WEEK_CODES.join(', '),
             //todo: get all and my
+            nightCapList: nightDataService.getNightCapListMd(
+                hostList,
+                discordId
+            ),
+            hostList: nightDataService.getHostListMd(hostList, discordId),
             pickupList: nightDataService.getPickupListMd(pickupList),
-            hostList: nightDataService.getHostListMd(night),
-            myPickupList: nightDataService.getPickupListMd(pickupList),
-            myHostList: nightDataService.getHostListMd(night)
+            myPickupList: nightDataService.getPickupListMd(myPickupList)
         }),
 
         components: GetVolunteerInitComponent({ day, discordId })
@@ -134,9 +152,9 @@ export async function VolunteerEditDaySelectEvent(
 }
 
 // here the user has chosen to pickup
-export async function VolunteerEditPickupSelectEvent(
+export async function VolunteerEditPickupButtonEvent(
     { nightDataService, markdownService }: GuildServiceModel,
-    interaction: StringSelectMenuInteraction,
+    interaction: ButtonInteraction,
     [command, day, role, discordId]: [
         string,
         NmDayNameType,
@@ -157,7 +175,7 @@ export async function VolunteerEditPickupSelectEvent(
     const components = GetVolunteerPickupComponent(
         {
             day,
-            role,
+            role: 'night-pickup',
 
             discordId
         },
@@ -243,9 +261,9 @@ export async function VolunteerRoleEditEvent(
         content: 'OK, all set!'
     });
 }
-export async function VolunteerPickupOrgEvent(
+export async function VolunteerPickupSaveSelectEvent(
     { nightDataService, markdownService }: GuildServiceModel,
-    interaction: ButtonInteraction,
+    interaction: AnySelectMenuInteraction,
     [command, day, role, discordId]: [
         string,
         NmDayNameType,
@@ -256,23 +274,22 @@ export async function VolunteerPickupOrgEvent(
     if (command !== 'volunteer-pickup-org') {
         return;
     }
-
+    interaction.deferReply({ ephemeral: true });
     dbg(command, day, role, discordId);
 
-    interaction.deferReply({ ephemeral: true });
-
-    await nightDataService.addNightData([
-        {
-            day,
-            org: '', // this should be Davis Night Market in Central Park
-            role,
-            discordIdOrEmail: interaction.user.id,
-            period: 'always',
-            // both of these should be got from core data
-            timeStart: '2100',
-            timeEnd: ''
-        }
-    ]);
+    await nightDataService.addNightData(
+        interaction.values
+            .map((a) => a.split('---'))
+            .map((a) => ({
+                org: a[0],
+                timeStart: a[1],
+                timeEnd: a[2],
+                day,
+                role: 'night-pickup',
+                discordIdOrEmail: discordId,
+                period: 'always'
+            }))
+    );
     // succcess!
     interaction.editReply({
         content: 'OK, all set!'

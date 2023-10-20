@@ -35,9 +35,11 @@ const messageMap = {
     }),
     AVAILABILITY_TO_HOST: (0, utility_1.CreateMdMessage)('AVAILABILITY_TO_HOST', {}),
     VOLUNTEER_LIST: (0, utility_1.CreateMdMessage)('VOLUNTEER_LIST', {
-        pickupList: '',
+        dayName: '',
+        dayChannelNameList: '',
+        nightCapList: '',
         hostList: '',
-        myHostList: '',
+        pickupList: '',
         myPickupList: ''
     }),
     VOLUNTEER_EDIT_ROLE: (0, utility_1.CreateMdMessage)('VOLUNTEER_EDIT_ROLE', {

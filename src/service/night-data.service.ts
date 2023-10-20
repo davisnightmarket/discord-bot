@@ -203,7 +203,9 @@ export class NightDataService {
                         };
                         // get the single person in this op record
                         const person = personList.find(
-                            (a) => a.discordIdOrEmail === op.discordIdOrEmail
+                            (a) =>
+                                a.discordId === op.discordIdOrEmail ||
+                                a.email === op.discordIdOrEmail
                         ) as PersonWithIdModel;
                         if (person) {
                             a[day + org + timeStart].personList.push({
@@ -228,9 +230,11 @@ export class NightDataService {
             )
             .map((a) => {
                 const person = personList.find(
-                    (p) => p.discordIdOrEmail === a.discordIdOrEmail
+                    (p) =>
+                        a.discordId === p.discordIdOrEmail ||
+                        a.email === p.discordIdOrEmail
                 ) as PersonWithIdModel;
-
+                console.log('PERSON', person);
                 return {
                     ...a,
                     ...person
@@ -482,15 +486,41 @@ export class NightDataService {
         );
     }
     getPickupListMd(pickupList: NightPickupModel[]) {
-        return pickupList.reduce((a, { day, org, timeStart, personList }) => {
-            return (a += `${day} ${org} ${timeStart} with ${personList
-                .map((b) => b.name)
-                .join(', ')}\n`);
-        }, '');
+        return pickupList.length
+            ? pickupList.reduce((a, { org, timeStart, personList }) => {
+                  return (a += `- ${org} at ${ParseContentService.getAmPmTimeFrom24Hour(
+                      timeStart
+                  )} ${
+                      personList.length
+                          ? ' with ' + personList.map((b) => b.name).join(', ')
+                          : ''
+                  }\n`);
+              }, '')
+            : 'No Pick-ups';
     }
-    getHostListMd({ day, org, timeStart, hostList }: NightModel) {
-        return `${day} ${org} ${timeStart} with ${hostList
-            .map((b) => b.name)
+
+    getNightMd({ day, org, timeStart }: NightModel) {
+        return `${day} ${org} ${timeStart}`;
+    }
+    getHostListMd(hostList: NightPersonModel[], discordId: string) {
+        hostList = hostList.filter(
+            (a) => a.role === 'night-host' || a.role === 'night-host-shadow'
+        );
+        console.log(hostList, 'host');
+        return `Host${hostList.length ? 's' : ''}: ${hostList
+            .map((b) =>
+                b.discordId !== discordId ? b.name : `${b.name} (YOU!)`
+            )
+            .join(', ')}`;
+    }
+
+    getNightCapListMd(hostList: NightPersonModel[], discordId: string) {
+        hostList = hostList.filter((a) => a.role === 'night-captain');
+        console.log(hostList, 'cap');
+        return `Night Captain${hostList.length ? 's' : ''}: ${hostList
+            .map((b) =>
+                b.discordId !== discordId ? b.name : `${b.name} (YOU!)`
+            )
             .join(', ')}`;
     }
 }

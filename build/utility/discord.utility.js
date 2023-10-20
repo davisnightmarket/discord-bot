@@ -7,8 +7,12 @@ exports.RegisterGuildCommand = exports.GetGuildRoleIdByName = exports.GetChannel
 const discord_js_1 = require("discord.js");
 const commands_1 = __importDefault(require("../commands"));
 const utility_1 = require("../utility");
+const const_1 = require("../const");
 async function GetChannelDayNameFromInteraction(interaction) {
-    return (await interaction?.guild?.channels?.fetch(interaction?.channelId ?? ''))?.name;
+    const name = (await interaction?.guild?.channels?.fetch(interaction?.channelId ?? ''))?.name;
+    if (const_1.DAYS_OF_WEEK[name]) {
+        return name;
+    }
 }
 exports.GetChannelDayNameFromInteraction = GetChannelDayNameFromInteraction;
 function GetChannelByName(name, guild) {

@@ -10,13 +10,17 @@ import Commands from '../commands';
 import { NmSecrets } from '../utility';
 
 import { NmDayNameType } from '../model';
+import { DAYS_OF_WEEK } from '../const';
 
 export async function GetChannelDayNameFromInteraction(
     interaction: Interaction
 ): Promise<NmDayNameType | undefined> {
-    return (
+    const name = (
         await interaction?.guild?.channels?.fetch(interaction?.channelId ?? '')
     )?.name as NmDayNameType;
+    if (DAYS_OF_WEEK[name]) {
+        return name;
+    }
 }
 
 export function GetChannelByName(name: string, guild: Guild | null) {

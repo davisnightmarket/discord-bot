@@ -1,23 +1,13 @@
-{{#if (or hostList pickupList)}}
-These night ops for {{dayName}}:
-{{/if}}
+## {{dayName}}:
 
-{{#if (or myHostList myPickupList)}}
+( for other night's enter the `/nm Volunteer` command in a day channel: {{dayChannelNameList}} )
+
+{{nightCapList}}
+
 {{hostList}}
-{{/if}}
 
-{{#if myPickupList}}
 {{pickupList}}
-{{/if}}
 
-{{#if (or myHostList myPickupList)}}
-These are your commitments for {{dayName}}:
-{{/if}}
+Your pick-ups for {{dayName}}:
 
-{{#if (or myHostList myPickupList)}}
-{{myHostList}}
-{{/if}}
-
-{{#if myPickupList}}
 {{myPickupList}}
-{{/if}}

@@ -5,7 +5,11 @@ import {
     StringSelectMenuBuilder,
     StringSelectMenuOptionBuilder
 } from 'discord.js';
-import { NightPersonModel, NightPickupModel } from '../service';
+import {
+    NightPersonModel,
+    NightPickupModel,
+    ParseContentService
+} from '../service';
 import { DAYS_OF_WEEK, DAYS_OF_WEEK_CODES, NM_NIGHT_ROLES } from '../const';
 
 export function GetVolunteerInitComponent({
@@ -14,19 +18,10 @@ export function GetVolunteerInitComponent({
 }: Pick<NightPersonModel, 'discordId' | 'day'>) {
     const editButton = new ButtonBuilder()
         .setCustomId(`volunteer-init--${day}--${discordId}`)
-        .setLabel(`Edit Volunteer Commitments`)
+        .setLabel(`Volunteer the Button`)
         .setStyle(ButtonStyle.Secondary);
 
-    const viewButton = new ButtonBuilder()
-        .setCustomId(`volunteer-view--${discordId}`)
-        .setLabel(`View All Commitments`)
-        .setStyle(ButtonStyle.Secondary);
-
-    return [
-        new ActionRowBuilder<ButtonBuilder>()
-            .addComponents(editButton)
-            .addComponents(viewButton)
-    ];
+    return [new ActionRowBuilder<ButtonBuilder>().addComponents(editButton)];
 }
 
 export function GetVolunteerListAllComponent({
@@ -130,18 +125,20 @@ export function GetVolunteerPickupComponent(
     pickupList: NightPickupModel[]
 ) {
     const select = new StringSelectMenuBuilder()
-        .setCustomId(
-            `volunteer-pickup-org---${day}--${role}--org--${discordId}`
-        )
+        .setCustomId(`volunteer-pickup-org--${day}--${role}--${discordId}`)
         .setPlaceholder('Make a selection!')
+        .setMinValues(0)
+        .setMaxValues(pickupList.length)
         .addOptions(
             pickupList.map(({ org, timeStart, timeEnd, personList }) =>
                 new StringSelectMenuOptionBuilder()
                     .setLabel(org)
                     .setDescription(
-                        `at ${timeStart}${
-                            personList.length ? ' with ' : ''
-                        }${personList.map((a) => a.name).join(', ')}`
+                        `at ${ParseContentService.getAmPmTimeFrom24Hour(
+                            timeStart
+                        )}${personList.length ? ' with ' : ''}${personList
+                            .map((a) => a.name)
+                            .join(', ')}`
                     )
                     .setValue(`${org}---${timeStart}---${timeEnd || '0000'}`)
             )

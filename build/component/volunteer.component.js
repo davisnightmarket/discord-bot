@@ -2,21 +2,14 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.GetVolunteerPickupComponent = exports.GetVolunteerPeriodComponent = exports.GetVolunteerRoleShadowComponent = exports.GetVolunteerRoleComponent = exports.GetVolunteerListAllComponent = exports.GetVolunteerInitComponent = void 0;
 const discord_js_1 = require("discord.js");
+const service_1 = require("../service");
 const const_1 = require("../const");
 function GetVolunteerInitComponent({ discordId, day }) {
     const editButton = new discord_js_1.ButtonBuilder()
         .setCustomId(`volunteer-init--${day}--${discordId}`)
-        .setLabel(`Edit Volunteer Commitments`)
+        .setLabel(`Volunteer the Button`)
         .setStyle(discord_js_1.ButtonStyle.Secondary);
-    const viewButton = new discord_js_1.ButtonBuilder()
-        .setCustomId(`volunteer-view--${discordId}`)
-        .setLabel(`View All Commitments`)
-        .setStyle(discord_js_1.ButtonStyle.Secondary);
-    return [
-        new discord_js_1.ActionRowBuilder()
-            .addComponents(editButton)
-            .addComponents(viewButton)
-    ];
+    return [new discord_js_1.ActionRowBuilder().addComponents(editButton)];
 }
 exports.GetVolunteerInitComponent = GetVolunteerInitComponent;
 function GetVolunteerListAllComponent({ discordId, day }) {
@@ -85,11 +78,15 @@ function GetVolunteerPeriodComponent({ day, role, discordId }) {
 exports.GetVolunteerPeriodComponent = GetVolunteerPeriodComponent;
 function GetVolunteerPickupComponent({ day, role, discordId }, pickupList) {
     const select = new discord_js_1.StringSelectMenuBuilder()
-        .setCustomId(`volunteer-pickup-org---${day}--${role}--org--${discordId}`)
+        .setCustomId(`volunteer-pickup-org--${day}--${role}--${discordId}`)
         .setPlaceholder('Make a selection!')
+        .setMinValues(0)
+        .setMaxValues(pickupList.length)
         .addOptions(pickupList.map(({ org, timeStart, timeEnd, personList }) => new discord_js_1.StringSelectMenuOptionBuilder()
         .setLabel(org)
-        .setDescription(`at ${timeStart}${personList.length ? ' with ' : ''}${personList.map((a) => a.name).join(', ')}`)
+        .setDescription(`at ${service_1.ParseContentService.getAmPmTimeFrom24Hour(timeStart)}${personList.length ? ' with ' : ''}${personList
+        .map((a) => a.name)
+        .join(', ')}`)
         .setValue(`${org}---${timeStart}---${timeEnd || '0000'}`)));
     return [
         new discord_js_1.ActionRowBuilder().addComponents(select)

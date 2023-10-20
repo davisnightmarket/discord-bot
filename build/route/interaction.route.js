@@ -64,7 +64,6 @@ async function RouteInteraction(interaction) {
             if (command === 'volunteer') {
                 (0, events_1.VolunteerCommandEvent)(services, interaction, target.id);
             }
-            // ToDO: automate this
             if (command === 'availability') {
                 dbg('Editing Availability');
                 (0, events_1.AvailabilityCommandEvent)(services, interaction, target.id);
@@ -98,6 +97,7 @@ async function RouteInteraction(interaction) {
             dbg('isStringSelectMenu');
             (0, events_1.PermissionEditSelectEvent)(services, interaction, discordId, args);
             (0, events_1.AvailabilityEditSelectEvent)(services, interaction, discordId, args);
+            (0, events_1.VolunteerPickupSaveSelectEvent)(services, interaction, args);
         }
         if (interaction.isButton()) {
             dbg('isButton');
@@ -105,6 +105,7 @@ async function RouteInteraction(interaction) {
             (0, events_1.AvailabilityEditButtonEvent)(services, interaction, discordId, args);
             (0, events_1.PermissionButtonEvent)(services, interaction, discordId, args);
             (0, events_1.VolunteerInitButtonEvent)(services, interaction, discordId, args);
+            (0, events_1.VolunteerEditPickupButtonEvent)(services, interaction, args);
         }
     }
 }

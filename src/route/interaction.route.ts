@@ -20,7 +20,9 @@ import {
     PermissionCommandEvent,
     FoodCountDeleteButtonEvent,
     PermissionButtonEvent,
-    AvailabilityEditSelectEvent
+    AvailabilityEditSelectEvent,
+    VolunteerPickupSaveSelectEvent,
+    VolunteerEditPickupButtonEvent
 } from '../events';
 import { NmDayNameType, NmNightRoleType } from '../model';
 
@@ -108,7 +110,7 @@ export async function RouteInteraction(interaction: Interaction) {
             if (command === 'volunteer') {
                 VolunteerCommandEvent(services, interaction, target.id);
             }
-            // ToDO: automate this
+
             if (command === 'availability') {
                 dbg('Editing Availability');
                 AvailabilityCommandEvent(services, interaction, target.id);
@@ -168,6 +170,12 @@ export async function RouteInteraction(interaction: Interaction) {
                 discordId,
                 args as [string, NmNightRoleType, NmDayNameType]
             );
+
+            VolunteerPickupSaveSelectEvent(
+                services,
+                interaction as StringSelectMenuInteraction,
+                args as [string, NmDayNameType, NmNightRoleType, string]
+            );
         }
 
         if ((interaction as ButtonInteraction).isButton()) {
@@ -194,8 +202,14 @@ export async function RouteInteraction(interaction: Interaction) {
 
             VolunteerInitButtonEvent(
                 services,
-                interaction,
+                interaction as ButtonInteraction,
                 discordId,
+                args as [string, NmDayNameType, NmNightRoleType, string]
+            );
+
+            VolunteerEditPickupButtonEvent(
+                services,
+                interaction as ButtonInteraction,
                 args as [string, NmDayNameType, NmNightRoleType, string]
             );
         }

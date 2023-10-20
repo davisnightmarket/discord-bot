@@ -15,18 +15,14 @@ function loadMessage(id, reload = false) {
     if (messageCache[id] && !reload) {
         return messageCache[id];
     }
+    const errorList = [];
     try {
         // todo, we want to process with markdown
         messageCache[id] = (0, fs_1.readFileSync)((0, path_1.join)(messagePath, id + '.md'), 'utf-8');
     }
     catch (e) {
         // todo: set up a proper logger and send notifications in prod
-        if (process.env.NODE_ENV === 'prod') {
-            console.error(`No .md file for ${(0, path_1.join)(messagePath, id + '.md')}`);
-        }
-        else {
-            dbg(`No .md file for ${(0, path_1.join)(messagePath, id + '.md')}`);
-        }
+        errorList.push(`No .md file for ${(0, path_1.join)(messagePath, id + '.md')}`);
     }
     try {
         if (!messageCache[id]) {
@@ -34,16 +30,11 @@ function loadMessage(id, reload = false) {
         }
     }
     catch (e) {
-        // todo: set up a proper logger and send notifications in prod
-        if (process.env.NODE_ENV === 'prod') {
-            console.error(`No .hbs file for ${(0, path_1.join)(messagePath, id + '.hbs')}`);
-        }
-        else {
-            dbg(`No .hbs file for ${(0, path_1.join)(messagePath, id + '.hbs')}`);
-        }
+        errorList.push(`No .md file for ${(0, path_1.join)(messagePath, id + '.hbs')}`);
     }
     // TODO: also look for core and market markdown files from google drive
     if (!messageCache[id]) {
+        dbg(errorList);
         // todo: send this to the logger for letting devs know
         console.error(`Missing content for ${(0, path_1.join)(messagePath, id + '.hbs')}`);
     }

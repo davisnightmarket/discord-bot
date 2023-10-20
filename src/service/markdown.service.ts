@@ -44,9 +44,11 @@ const messageMap = {
     AVAILABILITY_TO_HOST: CreateMdMessage('AVAILABILITY_TO_HOST', {}),
 
     VOLUNTEER_LIST: CreateMdMessage('VOLUNTEER_LIST', {
-        pickupList: '',
+        dayName: '',
+        dayChannelNameList: '',
+        nightCapList: '',
         hostList: '',
-        myHostList: '',
+        pickupList: '',
         myPickupList: ''
     }),
     VOLUNTEER_EDIT_ROLE: CreateMdMessage('VOLUNTEER_EDIT_ROLE', {
