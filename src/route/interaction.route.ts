@@ -12,8 +12,7 @@ import {
     AvailabilityEditButtonEvent,
     PermissionEditSelectEvent,
     VolunteerCommandEvent,
-    VolunteerInitButtonEvent,
-    WelcomeEvent,
+    VolunteerPickupButtonEvent,
     IdentityCommandEvent,
     IdentityEditModalEvent,
     HelpAndDocsCommandEvent,
@@ -21,8 +20,7 @@ import {
     FoodCountDeleteButtonEvent,
     PermissionButtonEvent,
     AvailabilityEditSelectEvent,
-    VolunteerPickupSaveSelectEvent,
-    VolunteerEditPickupButtonEvent
+    VolunteerPickupSaveSelectEvent
 } from '../events';
 import { NmDayNameType, NmNightRoleType } from '../model';
 
@@ -133,9 +131,9 @@ export async function RouteInteraction(interaction: Interaction) {
     ) {
         const args = (interaction as ButtonInteraction).customId.split('--');
         // by convention, the last arg is the discordId
-        const discordId = args.pop() as string;
+        const discordId = args[args.length - 1] as string;
         const command = args[0];
-
+        dbg('ARGS', args);
         dbg(
             'Modal, Button or Select!',
             command,
@@ -174,7 +172,8 @@ export async function RouteInteraction(interaction: Interaction) {
             VolunteerPickupSaveSelectEvent(
                 services,
                 interaction as StringSelectMenuInteraction,
-                args as [string, NmDayNameType, NmNightRoleType, string]
+                discordId,
+                args as [string, NmDayNameType, string]
             );
         }
 
@@ -200,18 +199,18 @@ export async function RouteInteraction(interaction: Interaction) {
                 args as [string, 'revoke' | 'start', NmDayNameType]
             );
 
-            VolunteerInitButtonEvent(
+            VolunteerPickupButtonEvent(
                 services,
                 interaction as ButtonInteraction,
                 discordId,
                 args as [string, NmDayNameType, NmNightRoleType, string]
             );
 
-            VolunteerEditPickupButtonEvent(
-                services,
-                interaction as ButtonInteraction,
-                args as [string, NmDayNameType, NmNightRoleType, string]
-            );
+            // VolunteerEditPickupButtonEvent(
+            //     services,
+            //     interaction as ButtonInteraction,
+            //     args as [string, NmDayNameType, NmNightRoleType, string]
+            // );
         }
     }
 }

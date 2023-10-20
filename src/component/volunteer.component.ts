@@ -16,8 +16,9 @@ export function GetVolunteerInitComponent({
     discordId,
     day
 }: Pick<NightPersonModel, 'discordId' | 'day'>) {
+    console.log(`volunteer-pickup--${day}--${discordId}`);
     const editButton = new ButtonBuilder()
-        .setCustomId(`volunteer-init--${day}--${discordId}`)
+        .setCustomId(`volunteer-pickup--${day}--${discordId}`)
         .setLabel(`Volunteer the Button`)
         .setStyle(ButtonStyle.Secondary);
 
@@ -117,15 +118,11 @@ export function GetVolunteerPeriodComponent({
 }
 
 export function GetVolunteerPickupComponent(
-    {
-        day,
-        role,
-        discordId
-    }: Required<Pick<NightPersonModel, 'day' | 'role' | 'discordId'>>,
+    { day, discordId }: Required<Pick<NightPersonModel, 'day' | 'discordId'>>,
     pickupList: NightPickupModel[]
 ) {
     const select = new StringSelectMenuBuilder()
-        .setCustomId(`volunteer-pickup-org--${day}--${role}--${discordId}`)
+        .setCustomId(`volunteer-pickup-update--${day}--${discordId}`)
         .setPlaceholder('Make a selection!')
         .setMinValues(0)
         .setMaxValues(pickupList.length)

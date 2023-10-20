@@ -84,8 +84,9 @@ async function RouteInteraction(interaction) {
         interaction.isModalSubmit()) {
         const args = interaction.customId.split('--');
         // by convention, the last arg is the discordId
-        const discordId = args.pop();
+        const discordId = args[args.length - 1];
         const command = args[0];
+        dbg('ARGS', args);
         dbg('Modal, Button or Select!', command, discordId, interaction.isStringSelectMenu()
             ? 'isStringSelectMenu'
             : 'isButton');
@@ -97,15 +98,19 @@ async function RouteInteraction(interaction) {
             dbg('isStringSelectMenu');
             (0, events_1.PermissionEditSelectEvent)(services, interaction, discordId, args);
             (0, events_1.AvailabilityEditSelectEvent)(services, interaction, discordId, args);
-            (0, events_1.VolunteerPickupSaveSelectEvent)(services, interaction, args);
+            (0, events_1.VolunteerPickupSaveSelectEvent)(services, interaction, discordId, args);
         }
         if (interaction.isButton()) {
             dbg('isButton');
             (0, events_1.FoodCountDeleteButtonEvent)(interaction, args);
             (0, events_1.AvailabilityEditButtonEvent)(services, interaction, discordId, args);
             (0, events_1.PermissionButtonEvent)(services, interaction, discordId, args);
-            (0, events_1.VolunteerInitButtonEvent)(services, interaction, discordId, args);
-            (0, events_1.VolunteerEditPickupButtonEvent)(services, interaction, args);
+            (0, events_1.VolunteerPickupButtonEvent)(services, interaction, discordId, args);
+            // VolunteerEditPickupButtonEvent(
+            //     services,
+            //     interaction as ButtonInteraction,
+            //     args as [string, NmDayNameType, NmNightRoleType, string]
+            // );
         }
     }
 }

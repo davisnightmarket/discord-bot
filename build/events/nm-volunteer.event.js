@@ -1,10 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.VolunteerPickupSaveSelectEvent = exports.VolunteerRoleEditEvent = exports.VolunteerEditPickupButtonEvent = exports.VolunteerEditDaySelectEvent = exports.VolunteerInitButtonEvent = exports.VolunteerCommandEvent = void 0;
+exports.VolunteerPickupSaveSelectEvent = exports.VolunteerRoleEditEvent = exports.VolunteerEditDaySelectEvent = exports.VolunteerPickupButtonEvent = exports.VolunteerCommandEvent = void 0;
 const volunteer_component_1 = require("../component/volunteer.component");
 const utility_1 = require("../utility");
 const const_1 = require("../const");
-const dbg = (0, utility_1.Dbg)('VolunteerResponseEvent');
+const dbg = (0, utility_1.Dbg)('VolunteerEvent');
 // todo: split this into different events for clarity
 // when a person issues a volunteer command it means they want to view
 // and possibly edit their volunteer commitments
@@ -43,17 +43,16 @@ async function VolunteerCommandEvent({ nightDataService, markdownService }, inte
 exports.VolunteerCommandEvent = VolunteerCommandEvent;
 // when they hit the init button, the editing begins,
 // same as a above when they have no commitments
-async function VolunteerInitButtonEvent({ nightDataService, markdownService }, interaction, discordId, [command, day, role]) {
-    if (command !== 'volunteer-init') {
+async function VolunteerPickupButtonEvent({ nightDataService, markdownService }, interaction, discordId, [command, day]) {
+    if (command !== 'volunteer-pickup') {
         return;
     }
-    dbg('volunteer-init', command);
+    dbg('volunteer-pickup', [command, day, discordId]);
     interaction.deferReply({ ephemeral: true });
     const { pickupList } = await nightDataService.getNightByDay(day);
     if (pickupList.length) {
         const components = (0, volunteer_component_1.GetVolunteerPickupComponent)({
             day,
-            role,
             discordId
         }, pickupList);
         interaction.editReply({
@@ -68,9 +67,9 @@ async function VolunteerInitButtonEvent({ nightDataService, markdownService }, i
     });
     return;
 }
-exports.VolunteerInitButtonEvent = VolunteerInitButtonEvent;
+exports.VolunteerPickupButtonEvent = VolunteerPickupButtonEvent;
 // here the user has chosen to pickup
-async function VolunteerEditDaySelectEvent({ nightDataService, markdownService }, interaction, [command, day, role, discordId]) {
+async function VolunteerEditDaySelectEvent({ nightDataService, markdownService }, interaction, discordId, [command, day, role]) {
     if (command !== 'volunteer-edit-day') {
         return;
     }
@@ -87,26 +86,36 @@ async function VolunteerEditDaySelectEvent({ nightDataService, markdownService }
     });
 }
 exports.VolunteerEditDaySelectEvent = VolunteerEditDaySelectEvent;
-// here the user has chosen to pickup
-async function VolunteerEditPickupButtonEvent({ nightDataService, markdownService }, interaction, [command, day, role, discordId]) {
-    if (command !== 'volunteer-pickup') {
-        return;
-    }
-    dbg(command, day, role, discordId);
-    interaction.deferReply({ ephemeral: true });
-    const { pickupList } = await nightDataService.getNightByDay(day);
-    //     console.log('NIGHT PICKUP', pickupList);
-    const components = (0, volunteer_component_1.GetVolunteerPickupComponent)({
-        day,
-        role: 'night-pickup',
-        discordId
-    }, pickupList);
-    interaction.editReply({
-        content: 'OK, all set!',
-        components
-    });
-}
-exports.VolunteerEditPickupButtonEvent = VolunteerEditPickupButtonEvent;
+// // here the user has chosen to pickup
+// export async function VolunteerEditPickupButtonEvent(
+//     { nightDataService }: GuildServiceModel,
+//     interaction: ButtonInteraction,
+//     [command, day, role, discordId]: [
+//         string,
+//         NmDayNameType,
+//         NmNightRoleType,
+//         string
+//     ]
+// ) {
+//     if (command !== 'volunteer-pickup') {
+//         return;
+//     }
+//     dbg(command, day, role, discordId);
+//     interaction.deferReply({ ephemeral: true });
+//     const { pickupList } = await nightDataService.getNightByDay(day);
+//     //     console.log('NIGHT PICKUP', pickupList);
+//     const components = GetVolunteerPickupComponent(
+//         {
+//             day,
+//             discordId
+//         },
+//         pickupList
+//     );
+//     interaction.editReply({
+//         content: 'OK, all set!',
+//         components
+//     });
+// }
 // // here the user has chosen to host
 // export async function VolunteerEditHostSelectEvent(
 //     { nightDataService, markdownService }: GuildServiceModel,
@@ -165,12 +174,12 @@ async function VolunteerRoleEditEvent({ nightDataService, markdownService }, int
     });
 }
 exports.VolunteerRoleEditEvent = VolunteerRoleEditEvent;
-async function VolunteerPickupSaveSelectEvent({ nightDataService, markdownService }, interaction, [command, day, role, discordId]) {
-    if (command !== 'volunteer-pickup-org') {
+async function VolunteerPickupSaveSelectEvent({ nightDataService, markdownService }, interaction, discordId, [command, day]) {
+    if (command !== 'volunteer-pickup-update') {
         return;
     }
     interaction.deferReply({ ephemeral: true });
-    dbg(command, day, role, discordId);
+    dbg(command, day, discordId);
     await nightDataService.addNightData(interaction.values
         .map((a) => a.split('---'))
         .map((a) => ({

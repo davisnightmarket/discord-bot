@@ -5,8 +5,9 @@ const discord_js_1 = require("discord.js");
 const service_1 = require("../service");
 const const_1 = require("../const");
 function GetVolunteerInitComponent({ discordId, day }) {
+    console.log(`volunteer-pickup--${day}--${discordId}`);
     const editButton = new discord_js_1.ButtonBuilder()
-        .setCustomId(`volunteer-init--${day}--${discordId}`)
+        .setCustomId(`volunteer-pickup--${day}--${discordId}`)
         .setLabel(`Volunteer the Button`)
         .setStyle(discord_js_1.ButtonStyle.Secondary);
     return [new discord_js_1.ActionRowBuilder().addComponents(editButton)];
@@ -76,9 +77,9 @@ function GetVolunteerPeriodComponent({ day, role, discordId }) {
     ];
 }
 exports.GetVolunteerPeriodComponent = GetVolunteerPeriodComponent;
-function GetVolunteerPickupComponent({ day, role, discordId }, pickupList) {
+function GetVolunteerPickupComponent({ day, discordId }, pickupList) {
     const select = new discord_js_1.StringSelectMenuBuilder()
-        .setCustomId(`volunteer-pickup-org--${day}--${role}--${discordId}`)
+        .setCustomId(`volunteer-pickup-update--${day}--${discordId}`)
         .setPlaceholder('Make a selection!')
         .setMinValues(0)
         .setMaxValues(pickupList.length)

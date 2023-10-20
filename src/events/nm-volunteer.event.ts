@@ -19,7 +19,7 @@ import {
 } from '../utility';
 import { DAYS_OF_WEEK, DAYS_OF_WEEK_CODES } from '../const';
 
-const dbg = Dbg('VolunteerResponseEvent');
+const dbg = Dbg('VolunteerEvent');
 // todo: split this into different events for clarity
 // when a person issues a volunteer command it means they want to view
 // and possibly edit their volunteer commitments
@@ -78,17 +78,17 @@ export async function VolunteerCommandEvent(
 
 // when they hit the init button, the editing begins,
 // same as a above when they have no commitments
-export async function VolunteerInitButtonEvent(
+export async function VolunteerPickupButtonEvent(
     { nightDataService, markdownService }: GuildServiceModel,
     interaction: ButtonInteraction,
     discordId: string,
-    [command, day, role]: [string, NmDayNameType, NmNightRoleType, string]
+    [command, day]: [string, NmDayNameType, NmNightRoleType, string]
 ) {
-    if (command !== 'volunteer-init') {
+    if (command !== 'volunteer-pickup') {
         return;
     }
 
-    dbg('volunteer-init', command);
+    dbg('volunteer-pickup', [command, day, discordId]);
 
     interaction.deferReply({ ephemeral: true });
 
@@ -98,8 +98,6 @@ export async function VolunteerInitButtonEvent(
         const components = GetVolunteerPickupComponent(
             {
                 day,
-                role,
-
                 discordId
             },
             pickupList
@@ -123,12 +121,8 @@ export async function VolunteerInitButtonEvent(
 export async function VolunteerEditDaySelectEvent(
     { nightDataService, markdownService }: GuildServiceModel,
     interaction: StringSelectMenuInteraction,
-    [command, day, role, discordId]: [
-        string,
-        NmDayNameType,
-        NmNightRoleType,
-        string
-    ]
+    discordId: string,
+    [command, day, role]: [string, NmDayNameType, NmNightRoleType, string]
 ) {
     if (command !== 'volunteer-edit-day') {
         return;
@@ -151,42 +145,40 @@ export async function VolunteerEditDaySelectEvent(
     });
 }
 
-// here the user has chosen to pickup
-export async function VolunteerEditPickupButtonEvent(
-    { nightDataService, markdownService }: GuildServiceModel,
-    interaction: ButtonInteraction,
-    [command, day, role, discordId]: [
-        string,
-        NmDayNameType,
-        NmNightRoleType,
-        string
-    ]
-) {
-    if (command !== 'volunteer-pickup') {
-        return;
-    }
+// // here the user has chosen to pickup
+// export async function VolunteerEditPickupButtonEvent(
+//     { nightDataService }: GuildServiceModel,
+//     interaction: ButtonInteraction,
+//     [command, day, role, discordId]: [
+//         string,
+//         NmDayNameType,
+//         NmNightRoleType,
+//         string
+//     ]
+// ) {
+//     if (command !== 'volunteer-pickup') {
+//         return;
+//     }
 
-    dbg(command, day, role, discordId);
+//     dbg(command, day, role, discordId);
 
-    interaction.deferReply({ ephemeral: true });
+//     interaction.deferReply({ ephemeral: true });
 
-    const { pickupList } = await nightDataService.getNightByDay(day);
-    //     console.log('NIGHT PICKUP', pickupList);
-    const components = GetVolunteerPickupComponent(
-        {
-            day,
-            role: 'night-pickup',
+//     const { pickupList } = await nightDataService.getNightByDay(day);
+//     //     console.log('NIGHT PICKUP', pickupList);
+//     const components = GetVolunteerPickupComponent(
+//         {
+//             day,
+//             discordId
+//         },
+//         pickupList
+//     );
 
-            discordId
-        },
-        pickupList
-    );
-
-    interaction.editReply({
-        content: 'OK, all set!',
-        components
-    });
-}
+//     interaction.editReply({
+//         content: 'OK, all set!',
+//         components
+//     });
+// }
 
 // // here the user has chosen to host
 // export async function VolunteerEditHostSelectEvent(
@@ -261,21 +253,18 @@ export async function VolunteerRoleEditEvent(
         content: 'OK, all set!'
     });
 }
+
 export async function VolunteerPickupSaveSelectEvent(
     { nightDataService, markdownService }: GuildServiceModel,
     interaction: AnySelectMenuInteraction,
-    [command, day, role, discordId]: [
-        string,
-        NmDayNameType,
-        NmNightRoleType,
-        string
-    ]
+    discordId: string,
+    [command, day]: [string, NmDayNameType, string]
 ) {
-    if (command !== 'volunteer-pickup-org') {
+    if (command !== 'volunteer-pickup-update') {
         return;
     }
     interaction.deferReply({ ephemeral: true });
-    dbg(command, day, role, discordId);
+    dbg(command, day, discordId);
 
     await nightDataService.addNightData(
         interaction.values
