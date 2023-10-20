@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.PersonMetaEvent = void 0;
 const message_service_1 = require("../service/message.service");
 const utility_1 = require("../utility");
-const nm_person_input_service_1 = require("../nm-service/nm-person-input.service");
+const person_input_service_1 = require("../nm-service/person-input.service");
 const dbg = (0, utility_1.Dbg)('PersonMetaEvent');
 const APPROPRIATE_TIME_TO_BUG_U_IN_SECS = 1; // 60 * 60 * 24 * 7,
 const A_BIT_OF_LAG_BEFORE_INTROS_IN_SECS = 1; // 60 * 60;
@@ -53,7 +53,8 @@ const PersonMetaEvent = (guildServices) => async (message) => {
         return;
     }
     if (message.guild?.id) {
-        UserGuildServiceMap[author.id] = await guildServices.getServicesForGuildId(message.guild?.id);
+        UserGuildServiceMap[author.id] =
+            await guildServices.getServicesForGuildId(message.guild?.id);
     }
     const { personCoreService } = UserGuildServiceMap[author.id];
     if (!personCoreService) {
@@ -62,9 +63,7 @@ const PersonMetaEvent = (guildServices) => async (message) => {
     }
     const { id, username } = message.author;
     // OK, now we figure out what their data status is
-    const personStore = await personCoreService.getPerson({
-        discordId: id
-    });
+    const personStore = await personCoreService.getPersonByEmailOrDiscordId(id);
     // we check if they are in the cache
     if (!personMetaCache[id]) {
         // if not, make sure to add them
@@ -138,7 +137,7 @@ const PersonDmEvent = (metaStatus, message) => {
             return true;
             // we have no record of them, so start at the beginning
         }
-        const [contentStatus] = nm_person_input_service_1.PersonInputService.parseDirectReply(content);
+        const [contentStatus] = person_input_service_1.PersonInputService.parseDirectReply(content);
         dbg(`DM to bot content ${contentStatus}`);
         if (contentStatus === 'DECLINE') {
             if (metaStatus === 'EMAIL_NONE') {

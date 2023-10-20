@@ -1,10 +1,8 @@
-import { ConfigSerive } from "../src/service"
+import { GoogleSheetService } from '../src/service';
+console.log(GoogleSheetService);
 
-export const config = new ConfigSerive();
-
-export const services = config.getSericesFotTest();
-
-export const foodCountDataService = services.foodCountDataService;
-export const foodCountInputService = services.foodCountInputService;
-export const personCoreService = services.personCoreService;
-export const orgCoreService = services.orgCoreService;
+export const testSheetService = new GoogleSheetService({
+    spreadsheetId: '1kksf6xpjgz5wutszinKGOGrZesNz4mp0AKzXp9YXcas',
+    sheetName: 'test',
+    headersList: ['a', 'b', 'c']
+});

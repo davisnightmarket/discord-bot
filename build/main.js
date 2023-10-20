@@ -1,16 +1,12 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const events_1 = require("./events");
 const discord_js_1 = require("discord.js");
-const nm_secrets_utility_1 = require("./utility/nm-secrets.utility");
-const cron_utility_1 = require("./utility/cron-utility");
+const utility_1 = require("./utility");
+const events_1 = require("./events");
+const cron_utility_1 = require("./utility/cron.utility");
 const jobs_1 = require("./jobs");
-const service_1 = require("./service");
+const dbg = (0, utility_1.Dbg)('main');
 async function main() {
-    const services = new service_1.ConfigSerive();
-    const commands = new service_1.CommandSerice();
-    // Add cron jobs
-    (0, cron_utility_1.AddCron)('* * 9 * *', jobs_1.FoodCountReminder);
     // Start discord client
     const client = new discord_js_1.Client({
         intents: [
@@ -21,21 +17,82 @@ async function main() {
         ],
         partials: [discord_js_1.Partials.Message, discord_js_1.Partials.Channel]
     });
-    // build discord data
-    client.once(discord_js_1.Events.ClientReady, async (c) => {
-        for (const guild of c.guilds.cache.values()) {
-            commands.register(guild);
-        }
-        console.log(`Ready! Logged in as ${c.user.tag}`);
-    });
+    // TODO: we have to remember that each guild could have a different timezone
+    // so we need to figure out how to adjust the crons for each guild
+    // Add cron jobs
+    (0, cron_utility_1.AddCron)(
+    // at 7:30am '0 30 7 * * *'
+    '0 30 7 * * *', (0, jobs_1.NightOpsJob)(client));
+    (0, cron_utility_1.AddCron)(
+    // at 11:30pm '0 30 23 * * *'
+    '0 30 23 * * *', (0, jobs_1.NightTimelineJob)(client));
+    // reminds us to enter food count IF none has been entered
+    // AND pickups are scheduled
+    (0, cron_utility_1.AddCron)(
+    // at high noon '0 12 1 * * *'
+    '0 0 12 * * *', (0, jobs_1.FoodCountReminderJob)(client));
     // person meta data events
     // client.on(Events.MessageCreate, PersonMetaEvent(services));
-    // food count events
-    client.on(discord_js_1.Events.MessageCreate, (0, events_1.FoodCountInputEvent)(services));
-    client.on(discord_js_1.Events.InteractionCreate, events_1.FoodCountResponseEvent);
-    // commands
-    client.on(discord_js_1.Events.InteractionCreate, commands.execute(services));
-    const { discordConfig: { appToken } } = await (0, nm_secrets_utility_1.GetNmSecrets)();
+    client.on(discord_js_1.Events.ClientReady, async () => {
+        // food count input
+        console.log('Crabapple READY!');
+    });
+    client.on(discord_js_1.Events.MessageCreate, async (message) => {
+        const services = await (0, utility_1.GetGuildServices)(message.guildId ?? '');
+        // food count input
+        (0, events_1.FoodCountDeleteButtonEvent)(services);
+    });
+    client.on(discord_js_1.Events.InteractionCreate, async (interaction) => {
+        dbg(discord_js_1.Events.InteractionCreate);
+        interaction = interaction;
+        const services = await (0, utility_1.GetGuildServices)(interaction.guildId ?? '');
+        if (interaction?.commandName == 'nm') {
+            dbg('nm /Command');
+            if (interaction.options.getString('command') === 'volunteer') {
+                (0, events_1.VolunteerCommandEvent)(services, interaction);
+            }
+            // ToDO: automate this
+            if (interaction.options.getString('command') === 'set-availability') {
+                dbg('Editing Availability');
+                (0, events_1.AvailabilityAndPermissionCommandEvent)(services, interaction);
+            }
+            if (interaction.options.getString('command') === 'edit-identity') {
+                dbg('Editing identity');
+                (0, events_1.IdentityCommandEvent)(services, interaction);
+            }
+            if (interaction.options.getString('command') === 'help-and-docs') {
+                dbg('help-and-docs');
+                (0, events_1.HelpAndDocsCommandEvent)(services, interaction);
+            }
+        }
+        else if (interaction.isModalSubmit()) {
+            dbg('isModalSubmit');
+            (0, events_1.IdentityEditModalEvent)(services, interaction);
+        }
+        // we can lump these two together since they are both routed by customId
+        else if (interaction.isStringSelectMenu() || interaction.isButton()) {
+            dbg(interaction.isStringSelectMenu()
+                ? 'isStringSelectMenu'
+                : 'isButton');
+            (0, events_1.AvailabilityEditButtonEvent)(services, interaction, interaction?.customId || '');
+            (0, events_1.PermissionEditButtonEvent)(services, interaction, interaction?.customId || '');
+            (0, events_1.VolunteerEditButtonEvent)(services, interaction, interaction?.customId || '');
+        }
+        else {
+            dbg('otherwise this is a message content trigger');
+            (0, events_1.FoodCountMessageEvent)(interaction);
+            // todo: this should be split into different events
+            // uses buttons and selects to handle different volunteering steps
+        }
+    });
+    client.on(discord_js_1.Events.GuildMemberAdd, (member) => {
+        setTimeout(async () => {
+            (0, events_1.WelcomeEvent)(member);
+            // todo: add this to teh core config sheet
+            // this is how long after a person arrives in our server that we send a welcome message
+        }, 1000 * 60 * 60);
+    });
+    const { discordConfig: { appToken } } = await utility_1.NmSecrets;
     client.login(appToken);
 }
 main();

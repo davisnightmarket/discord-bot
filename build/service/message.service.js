@@ -1,74 +1,73 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MessageService = void 0;
-const fs_1 = require("fs");
-const path_1 = require("path");
-const debug_utility_1 = require("../utility/debug.utility");
-const handlebars_1 = __importDefault(require("handlebars"));
-const dbg = (0, debug_utility_1.Dbg)('MessageService');
-const messageCache = {};
-const messagePath = (0, path_1.join)(__dirname, '/../message-md');
-// TODO: do we want massage service to get it's messages from a google drive folder?
-// if so, then we want this to be a service that takes the id of the folder in the constructor
+const utility_1 = require("../utility");
+// TODO: make this simple to user from events
+const messageMap = {
+    START_HOWTO: (0, utility_1.CreateMessage)('START_HOWTO', {
+        coreLinkList: [],
+        marketLinkList: []
+    }),
+    GENERIC_OK: (0, utility_1.CreateMessage)('GENERIC_OK', {}),
+    GENERIC_SORRY: (0, utility_1.CreateMessage)('GENERIC_SORRY', {
+        techPhone: ''
+    }),
+    GENERIC_NO_PERSON: (0, utility_1.CreateMessage)('GENERIC_NO_PERSON', {
+        techPhone: ''
+    }),
+    AVAILABILITY_LIST: (0, utility_1.CreateMessage)('AVAILABILITY_LIST', {
+        availabilityHostList: [],
+        availabilityPickupList: []
+    }),
+    AVAILABILITY_TO_PICKUP: (0, utility_1.CreateMessage)('AVAILABILITY_TO_PICKUP', {
+        dayName: ''
+    }),
+    AVAILABILITY_TO_HOST: (0, utility_1.CreateMessage)('AVAILABILITY_TO_HOST', {}),
+    VOLUNTEER_ONCE_OR_COMMIT: (0, utility_1.CreateMessage)('VOLUNTEER_ONCE_OR_COMMIT', {
+        roleName: '',
+        roleDescription: '',
+        hostNames: ''
+    }),
+    VOLUNTEER_AS_ROLE: (0, utility_1.CreateMessage)('VOLUNTEER_AS_ROLE', {
+        roleName: '',
+        roleDescription: '',
+        hostNames: ''
+    }),
+    FOODCOUNT_HOWTO: (0, utility_1.CreateMessage)('FOODCOUNT_HOWTO', {
+        nightChannelNameList: '',
+        foodcountExample: ''
+    }),
+    FOODCOUNT_REMINDER: (0, utility_1.CreateMessage)('FOODCOUNT_REMINDER', {
+        randoSalutation: '',
+        dayName: '',
+        pickupOrgList: '',
+        tagUserList: ''
+    })
+};
+// message service allows us to combine core data with event data to produce messages
 class MessageService {
-    static loadMessage(id, reload = false) {
-        if (messageCache[id] && !reload) {
-            return messageCache[id];
-        }
-        try {
-            // todo, we want to process with markdown
-            messageCache[id] = (0, fs_1.readFileSync)((0, path_1.join)(messagePath, id + '.md'), 'utf-8');
-        }
-        catch (e) {
-            // todo: set up a proper logger and send notifications in prod
-            if (process.env.NODE_ENV === 'prod') {
-                console.error(e);
-            }
-            else {
-                dbg(e);
-            }
-        }
-        return messageCache[id];
+    constructor(coreDataService) {
+        this.coreDataService = coreDataService;
+        this.m = messageMap;
     }
-    static loadAllMessage(a, reload = false) {
-        const c = {};
-        try {
-            for (const b of a) {
-                c[b] = this.loadMessage(b, reload);
-            }
-        }
-        catch (e) {
-            dbg(e);
-        }
-        return c;
+    // we can get any message
+    getMessage(k) {
+        return this.m[k];
     }
-    static createMap(map) {
-        const messageMap = MessageService.loadAllMessage(Object.keys(map));
-        // todo: parse with HBS
-        return Object.keys(messageMap).reduce((a, b) => {
-            // because we do not want a message compile error to break teh app
-            let d = handlebars_1.default.compile('');
-            try {
-                d = handlebars_1.default.compile(messageMap[b] ?? '');
-            }
-            catch (e) {
-                console.error(e);
-            }
-            a[b] = (c) => {
-                let msg = '';
-                try {
-                    msg = d({ ...map[b], ...c });
-                }
-                catch (e) {
-                    console.error(e);
-                }
-                return msg;
-            };
-            return a;
-        }, {});
+    // or write a method per message so we can combine with core or market data etc.
+    async getGenericSorry() {
+        // here we can get data that goes on every message
+        // like tech phone from core
+        return this.m.GENERIC_SORRY({
+            techPhone: ''
+        });
+    }
+    async getGenericNoPerson() {
+        // here we can get data that goes on every message
+        // like tech phone from core
+        return this.m.GENERIC_SORRY({
+            techPhone: ''
+        });
     }
 }
 exports.MessageService = MessageService;

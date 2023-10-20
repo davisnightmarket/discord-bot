@@ -1,2 +1,1 @@
-_OK, posted to db:_
-{{lbs}} lbs {{note}} from {{org}} on {{date}}.
+OK, we recorded: {{lbs}} lbs {{note}} from {{org}} on {{date}}.
