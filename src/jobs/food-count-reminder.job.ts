@@ -18,9 +18,6 @@ export const FoodCountReminderJob = (client: Client) => async () => {
     const dateYesterday = new Date(new Date().getDate() - 1);
     const today = GetChannelDayToday();
     const yesterday = GetChannelDayYesterday();
-    // did we do it right?
-    console.log(today);
-    console.log(yesterday);
 
     // now we send a message to each channel in each guild
     for (const guild of guildList) {

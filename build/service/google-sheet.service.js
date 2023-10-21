@@ -24,6 +24,9 @@ class GoogleSheetService {
     async appendOneRow(row) {
         await this.spreadsheetService.rowsAppend([row], this.getSheetRangeString());
     }
+    async appendRows(rows) {
+        await this.spreadsheetService.rowsAppend(rows, this.getSheetRangeString());
+    }
     // TODO: test this
     async appendOneMap(map) {
         const headerList = await this.waitingForHeaderList;
@@ -43,9 +46,7 @@ class GoogleSheetService {
         await this.spreadsheetService.sheetClear(this.sheetName);
         const headerList = await this.waitingForHeaderList;
         rows.unshift(headerList);
-        for (const r of rows) {
-            await this.appendOneRow(r);
-        }
+        this.appendRows(rows);
     }
     async getAllRows({ 
     // if true, we get the first row as headers

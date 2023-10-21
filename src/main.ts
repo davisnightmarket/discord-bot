@@ -51,16 +51,32 @@ async function main() {
     client.on(Events.MessageCreate, async (message) => {
         const services = await GetGuildServices(message.guildId ?? '');
         // food count input
-        FoodCountMessageEvent(services);
+        try {
+            FoodCountMessageEvent(services);
+        } catch (e) {
+            // todo: logger utility
+            dbg(e);
+        }
     });
 
-    client.on(Events.InteractionCreate, async (interaction) =>
-        RouteInteraction(interaction)
-    );
+    client.on(Events.InteractionCreate, async (interaction) => {
+        try {
+            RouteInteraction(interaction);
+        } catch (e) {
+            // todo: logger utility
+            dbg(e);
+        }
+    });
 
     client.on(Events.GuildMemberAdd, (member) => {
         setTimeout(async () => {
-            WelcomeEvent(member);
+            try {
+                WelcomeEvent(member);
+            } catch (e) {
+                // todo: logger utility
+                dbg(e);
+            }
+
             // todo: add this to teh core config sheet
             // this is how long after a person arrives in our server that we send a welcome message
         }, 1000 * 60 * 60);

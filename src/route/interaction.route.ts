@@ -20,7 +20,8 @@ import {
     FoodCountDeleteButtonEvent,
     PermissionButtonEvent,
     AvailabilityEditSelectEvent,
-    VolunteerPickupSaveSelectEvent
+    VolunteerPickupSaveSelectEvent,
+    VolunteerPickupDeleteButtonEvent
 } from '../events';
 import { NmDayNameType, NmNightRoleType } from '../model';
 
@@ -204,6 +205,13 @@ export async function RouteInteraction(interaction: Interaction) {
                 interaction as ButtonInteraction,
                 discordId,
                 args as [string, NmDayNameType, NmNightRoleType, string]
+            );
+
+            VolunteerPickupDeleteButtonEvent(
+                services,
+                interaction as ButtonInteraction,
+                discordId,
+                args as [string, NmDayNameType, string]
             );
 
             // VolunteerEditPickupButtonEvent(

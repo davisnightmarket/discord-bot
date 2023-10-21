@@ -47,6 +47,13 @@ class PersonDataService {
             stampCreate
         };
     }
+    async getFreshDiscordAndEmailByDiscordIdOrEmail(discordIdOrEmailList) {
+        await this.refreshPersonListCache();
+        const personList = await this.waitingForPersonListCache;
+        return discordIdOrEmailList
+            .map((a) => personList.find((b) => b.email === a || b.discordId === a))
+            .map((a) => (a ? [a?.discordId || '', a?.email || ''] : null));
+    }
     async updatePersonByDiscordId(person) {
         const { discordId } = person;
         await this.refreshPersonListCache();

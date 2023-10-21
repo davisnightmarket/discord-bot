@@ -14,7 +14,7 @@ async function AvailabilityCommandEvent({ personDataService, markdownService }, 
     const person = await personDataService.getPersonByDiscordId(interaction.user.id);
     if (!person) {
         // show them their modal
-        interaction.editReply(await markdownService.getGenericSorry());
+        await interaction.editReply(await markdownService.getGenericSorry());
         return;
     }
     const [availabilityHostList, availabilityPickupList] = markdownService.getAvailabilityListsFromPerson(person);
@@ -25,7 +25,7 @@ async function AvailabilityCommandEvent({ personDataService, markdownService }, 
             availabilityPickupList
         })
     ].join('\n') + '\n';
-    interaction.editReply({
+    await interaction.editReply({
         content,
         components
     });
@@ -44,7 +44,7 @@ async function AvailabilityEditButtonEvent({ personDataService, nightDataService
     if (!person) {
         //! we would like to show them their modal
         // // we cannot show the identity model since we have deferred
-        interaction.editReply(await markdownService.getGenericNoPerson());
+        await interaction.editReply(await markdownService.getGenericNoPerson());
         // interaction.showModal(
         //     IdentityEditModalComponent(personDataService.createPerson(person))
         // );
@@ -64,7 +64,7 @@ async function AvailabilityEditButtonEvent({ personDataService, nightDataService
         // todo: show host then pickup, since we can't fit them all
         const components = (0, component_2.AvailabilityToHostComponent)(dayTimes, discordId, []);
         // response
-        interaction.editReply({
+        await interaction.editReply({
             content: markdownService.md.AVAILABILITY_TO_HOST({}),
             components
         });
@@ -84,7 +84,7 @@ async function AvailabilityEditSelectEvent({ personDataService, markdownService 
     if (!person) {
         //! we would like to show them their modal
         // // we cannot show the identity model since we have deferred
-        interaction.editReply(await markdownService.getGenericNoPerson());
+        await interaction.editReply(await markdownService.getGenericNoPerson());
         // interaction.showModal(
         //     IdentityEditModalComponent(personDataService.createPerson(person))
         // );
@@ -107,7 +107,7 @@ async function AvailabilityEditSelectEvent({ personDataService, markdownService 
             discordId,
             defaultList: []
         });
-        interaction.editReply({
+        await interaction.editReply({
             content: markdownService.md.AVAILABILITY_TO_PICKUP({
                 dayName: currentDay.name
             }),
@@ -134,7 +134,7 @@ async function AvailabilityEditSelectEvent({ personDataService, markdownService 
         const nextDayIndex = daysOfWeekIdList.indexOf(day) + 1;
         // in this case we are done with the pickups, want to show permissions
         if (nextDayIndex === daysOfWeekIdList.length) {
-            interaction.editReply({
+            await interaction.editReply({
                 content: markdownService.md.GENERIC_OK({})
             });
             return;
@@ -147,7 +147,7 @@ async function AvailabilityEditSelectEvent({ personDataService, markdownService 
             defaultList: []
         });
         // response
-        interaction.editReply({
+        await interaction.editReply({
             content: markdownService.md.AVAILABILITY_TO_PICKUP({
                 dayName: currentDay.name
             }),

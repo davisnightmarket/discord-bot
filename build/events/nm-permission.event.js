@@ -8,7 +8,7 @@ const const_1 = require("../const");
 const dbg = (0, utility_1.Dbg)('PermissionEditButtonEvent');
 async function PermissionCommandEvent({ personDataService, markdownService }, interaction, discordId) {
     // make sure crabapple doesn't choke while waiting for data
-    interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ ephemeral: true });
     const person = await personDataService.getPersonByDiscordId(discordId);
     if (!person) {
         // show them their modal
@@ -46,7 +46,7 @@ async function PermissionEditSelectEvent({ personDataService, markdownService },
             // interaction.editReply({
             //     content: await markdownService.getGenericNoPerson()
             // });
-            interaction.editReply(markdownService.md.GENERIC_SORRY({
+            await interaction.editReply(markdownService.md.GENERIC_SORRY({
                 techPhone: ''
             }));
             return;
@@ -56,7 +56,7 @@ async function PermissionEditSelectEvent({ personDataService, markdownService },
             .map((a) => a[1])
             .join(',');
         await personDataService.updatePersonByDiscordId(person);
-        interaction.editReply([
+        await interaction.editReply([
             markdownService.md.GENERIC_OK({}),
             markdownService.md.PERMISSION_LIST({
                 permissionList: personDataService.getPermissionListMd(person)
@@ -73,7 +73,7 @@ async function PermissionButtonEvent({ personDataService, markdownService }, int
     dbg(command, step, day);
     await interaction.deferReply({ ephemeral: true });
     if (step === 'start') {
-        interaction.editReply({
+        await interaction.editReply({
             content: markdownService.md.PERMISSION_EDIT({}),
             components: (0, component_1.PermissionToSelectComponent)(discordId)
         });
@@ -82,14 +82,14 @@ async function PermissionButtonEvent({ personDataService, markdownService }, int
     if (step === 'revoke') {
         const person = await personDataService.getPersonByDiscordId(discordId);
         if (!person) {
-            interaction.editReply(markdownService.md.GENERIC_SORRY({
+            await interaction.editReply(markdownService.md.GENERIC_SORRY({
                 techPhone: ''
             }));
             return;
         }
         person.permissionList = '';
         await personDataService.updatePersonByDiscordId(person);
-        interaction.editReply([
+        await interaction.editReply([
             markdownService.md.GENERIC_OK({}),
             markdownService.md.PERMISSION_LIST({
                 permissionList: personDataService.getPermissionListMd(person)
@@ -100,14 +100,14 @@ async function PermissionButtonEvent({ personDataService, markdownService }, int
     if (step === 'grant-all') {
         const person = await personDataService.getPersonByDiscordId(discordId);
         if (!person) {
-            interaction.editReply(markdownService.md.GENERIC_SORRY({
+            await interaction.editReply(markdownService.md.GENERIC_SORRY({
                 techPhone: ''
             }));
             return;
         }
         person.permissionList = const_1.PERMISSION_CODE_LIST.join(',');
         await personDataService.updatePersonByDiscordId(person);
-        interaction.editReply([
+        await interaction.editReply([
             markdownService.md.GENERIC_OK({}),
             markdownService.md.PERMISSION_LIST({
                 permissionList: personDataService.getPermissionListMd(person)

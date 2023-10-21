@@ -60,6 +60,13 @@ export class GoogleSheetService<T extends SpreadsheetDataModel> {
         );
     }
 
+    async appendRows(rows: SpreadsheetDataValueModel[][]) {
+        await this.spreadsheetService.rowsAppend(
+            rows,
+            this.getSheetRangeString()
+        );
+    }
+
     // TODO: test this
     async appendOneMap(map: T) {
         const headerList = await this.waitingForHeaderList;
@@ -89,10 +96,7 @@ export class GoogleSheetService<T extends SpreadsheetDataModel> {
         await this.spreadsheetService.sheetClear(this.sheetName);
         const headerList = await this.waitingForHeaderList;
         rows.unshift(headerList as string[]);
-
-        for (const r of rows) {
-            await this.appendOneRow(r);
-        }
+        this.appendRows(rows);
     }
 
     async getAllRows(

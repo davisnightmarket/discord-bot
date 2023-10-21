@@ -21,7 +21,9 @@ export const NightTimelineJob = (client: Client) => async () => {
         // get the channel by today name
         const channelDay = GetChannelDayToday();
         // get the guild service
-        const { nightDataService,markdownService } = await GetGuildServices(guild.id);
+        const { nightDataService, markdownService } = await GetGuildServices(
+            guild.id
+        );
         // get the current state of ops
         const nightOpsList = await nightDataService.getNightDataByDay(
             channelDay
@@ -46,12 +48,12 @@ export const NightTimelineJob = (client: Client) => async () => {
             (a) => new Date(a.stamp) > date
         );
 
-        console.log('FUTURE', timelineFuture.length);
+        dbg('FUTURE', timelineFuture.length);
         const timelinePast = nightTimelineList.filter(
             // inclusive of today
             (a) => new Date(a.stamp) <= date
         );
-        console.log('PAST', timelinePast.length);
+        dbg('PAST', timelinePast.length);
         const quitterList: NightOpsDataModel[] = [];
         const newTimelineList: NightOpsTimelineDataModel[] = [];
         // adds quitters to the quitterList from the
@@ -137,7 +139,7 @@ export const NightTimelineJob = (client: Client) => async () => {
                 }
             )
         );
-        console.log(
+        dbg(
             'Timeline',
             newTimelineList.filter(
                 ({
@@ -190,7 +192,7 @@ export const NightTimelineJob = (client: Client) => async () => {
         //     }
         // }
 
-        console.log('QUITTER', quitterList.length);
+        dbg('QUITTER', quitterList.length);
         await nightDataService.removeNightData(quitterList);
 
         const content = markdownService.getAfterMarketMessage(

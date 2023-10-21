@@ -106,6 +106,7 @@ async function RouteInteraction(interaction) {
             (0, events_1.AvailabilityEditButtonEvent)(services, interaction, discordId, args);
             (0, events_1.PermissionButtonEvent)(services, interaction, discordId, args);
             (0, events_1.VolunteerPickupButtonEvent)(services, interaction, discordId, args);
+            (0, events_1.VolunteerPickupDeleteButtonEvent)(services, interaction, discordId, args);
             // VolunteerEditPickupButtonEvent(
             //     services,
             //     interaction as ButtonInteraction,

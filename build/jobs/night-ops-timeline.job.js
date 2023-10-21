@@ -30,11 +30,11 @@ const NightTimelineJob = (client) => async () => {
             '/' +
             date.getFullYear();
         const timelineFuture = nightTimelineList.filter((a) => new Date(a.stamp) > date);
-        console.log('FUTURE', timelineFuture.length);
+        dbg('FUTURE', timelineFuture.length);
         const timelinePast = nightTimelineList.filter(
         // inclusive of today
         (a) => new Date(a.stamp) <= date);
-        console.log('PAST', timelinePast.length);
+        dbg('PAST', timelinePast.length);
         const quitterList = [];
         const newTimelineList = [];
         // adds quitters to the quitterList from the
@@ -84,7 +84,7 @@ const NightTimelineJob = (client) => async () => {
                 stamp
             ].join(''));
         }));
-        console.log('Timeline', newTimelineList.filter(({ day, role, org, discordIdOrEmail, period, timeStart, timeEnd, stamp }) => {
+        dbg('Timeline', newTimelineList.filter(({ day, role, org, discordIdOrEmail, period, timeStart, timeEnd, stamp }) => {
             !existsFilter.includes([
                 day,
                 role,
@@ -118,7 +118,7 @@ const NightTimelineJob = (client) => async () => {
         //         });
         //     }
         // }
-        console.log('QUITTER', quitterList.length);
+        dbg('QUITTER', quitterList.length);
         await nightDataService.removeNightData(quitterList);
         const content = markdownService.getAfterMarketMessage(await (0, utility_1.GetGuildRoleIdByName)(guild, channelDay), await nightDataService.getNightByDay(channelDay));
         (await guild.channels.cache.find((channel) => channel.name === channelDay))?.send({

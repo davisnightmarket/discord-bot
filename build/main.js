@@ -41,12 +41,32 @@ async function main() {
     client.on(discord_js_1.Events.MessageCreate, async (message) => {
         const services = await (0, utility_1.GetGuildServices)(message.guildId ?? '');
         // food count input
-        (0, events_1.FoodCountMessageEvent)(services);
+        try {
+            (0, events_1.FoodCountMessageEvent)(services);
+        }
+        catch (e) {
+            // todo: logger utility
+            dbg(e);
+        }
     });
-    client.on(discord_js_1.Events.InteractionCreate, async (interaction) => (0, route_1.RouteInteraction)(interaction));
+    client.on(discord_js_1.Events.InteractionCreate, async (interaction) => {
+        try {
+            (0, route_1.RouteInteraction)(interaction);
+        }
+        catch (e) {
+            // todo: logger utility
+            dbg(e);
+        }
+    });
     client.on(discord_js_1.Events.GuildMemberAdd, (member) => {
         setTimeout(async () => {
-            (0, events_1.WelcomeEvent)(member);
+            try {
+                (0, events_1.WelcomeEvent)(member);
+            }
+            catch (e) {
+                // todo: logger utility
+                dbg(e);
+            }
             // todo: add this to teh core config sheet
             // this is how long after a person arrives in our server that we send a welcome message
         }, 1000 * 60 * 60);

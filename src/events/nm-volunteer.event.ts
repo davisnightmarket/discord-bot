@@ -8,8 +8,7 @@ import {
 import { type NmDayNameType, NmNightRoleType } from '../model';
 import {
     GetVolunteerInitComponent,
-    GetVolunteerPickupComponent,
-    GetVolunteerRoleComponent
+    GetVolunteerPickupComponent
 } from '../component/volunteer.component';
 import {
     Dbg,
@@ -18,6 +17,7 @@ import {
     type GuildServiceModel
 } from '../utility';
 import { DAYS_OF_WEEK, DAYS_OF_WEEK_CODES } from '../const';
+import { NightOpsDataModel } from '../service';
 
 const dbg = Dbg('VolunteerEvent');
 // todo: split this into different events for clarity
@@ -29,7 +29,6 @@ export async function VolunteerCommandEvent(
     interaction: ChatInputCommandInteraction,
     discordId: string
 ) {
-    console.log('hi', discordId);
     // make sure crabapple doesn't choke while waiting for data
     interaction.deferReply({ ephemeral: true });
 
@@ -41,8 +40,6 @@ export async function VolunteerCommandEvent(
     // get
 
     const night = await nightDataService.getNightByDay(day);
-
-    console.log(day, JSON.stringify(night, null, 2));
 
     const { pickupList, hostList } = night;
 
@@ -58,7 +55,7 @@ export async function VolunteerCommandEvent(
     // however, also check their history to see if they
     // need to shadow
 
-    interaction.editReply({
+    await interaction.editReply({
         content: markdownService.md.VOLUNTEER_LIST({
             dayName: DAYS_OF_WEEK[day].name,
             dayChannelNameList: DAYS_OF_WEEK_CODES.join(', '),
@@ -109,7 +106,7 @@ export async function VolunteerPickupButtonEvent(
         return;
     }
 
-    interaction.editReply({
+    await interaction.editReply({
         content: `No pickups available on ${day}. Choose another day:`
         // todo: add day select button
     });
@@ -117,33 +114,94 @@ export async function VolunteerPickupButtonEvent(
     return;
 }
 
-// here the user has chosen to pickup
-export async function VolunteerEditDaySelectEvent(
+// this fires when a select interaction to choose pickups is triggered
+// it is complicated by the fact that the select is the complete set of
+// pickups for that day and person - it replaces all records for that day/person
+export async function VolunteerPickupSaveSelectEvent(
     { nightDataService, markdownService }: GuildServiceModel,
-    interaction: StringSelectMenuInteraction,
+    interaction: AnySelectMenuInteraction,
     discordId: string,
-    [command, day, role]: [string, NmDayNameType, NmNightRoleType, string]
+    [command, day]: [string, NmDayNameType, string]
 ) {
-    if (command !== 'volunteer-edit-day') {
+    if (command !== 'volunteer-pickup-update') {
         return;
     }
-
-    dbg(command, day, role, discordId);
-
     interaction.deferReply({ ephemeral: true });
+    dbg(command, day);
 
-    const { pickupList } = await nightDataService.getNightByDay(day);
-
-    const components = GetVolunteerRoleComponent({
+    const addList = nightDataService.getNightDataDiscordSelectValues(
+        interaction.values,
+        {
+            day,
+            role: 'night-pickup',
+            discordIdOrEmail: discordId,
+            period: 'always'
+        }
+    );
+    dbg(`Adding ${addList.length} records`);
+    await nightDataService.updateNightOpsForPersonAndDayAndSave(
         day,
-        discordId
-    });
-
-    interaction.editReply({
-        content: `OK, what would you like to do on ${day}?`,
-        components
+        discordId,
+        addList
+    );
+    // succcess!
+    await interaction.editReply({
+        content: 'OK, all set!'
     });
 }
+
+export async function VolunteerPickupDeleteButtonEvent(
+    { nightDataService, markdownService }: GuildServiceModel,
+    interaction: ButtonInteraction,
+    discordId: string,
+    [command, day]: [string, NmDayNameType, string]
+) {
+    if (command !== 'volunteer-pickup-delete') {
+        return;
+    }
+    interaction.deferReply({ ephemeral: true });
+    dbg(command, day);
+
+    // todo: make sure we are only sending addList for this discordId and day?
+
+    await nightDataService.updateNightOpsForPersonAndDayAndSave(
+        day,
+        discordId,
+        []
+    );
+    // succcess!
+    await interaction.editReply({
+        content: 'OK, all set!'
+    });
+}
+
+// here the user has chosen to pickup
+// export async function VolunteerEditDaySelectEvent(
+//     { nightDataService, markdownService }: GuildServiceModel,
+//     interaction: StringSelectMenuInteraction,
+//     discordId: string,
+//     [command, day, role]: [string, NmDayNameType, NmNightRoleType, string]
+// ) {
+//     if (command !== 'volunteer-edit-day') {
+//         return;
+//     }
+
+//     dbg(command, day, role, discordId);
+
+//     interaction.deferReply({ ephemeral: true });
+
+//     const { pickupList } = await nightDataService.getNightByDay(day);
+
+//     const components = GetVolunteerRoleComponent({
+//         day,
+//         discordId
+//     });
+
+//     await interaction.editReply({
+//         content: `OK, what would you like to do on ${day}?`,
+//         components
+//     });
+// }
 
 // // here the user has chosen to pickup
 // export async function VolunteerEditPickupButtonEvent(
@@ -180,8 +238,45 @@ export async function VolunteerEditDaySelectEvent(
 //     });
 // }
 
+// // // here the user has chosen to host
+// // export async function VolunteerEditHostSelectEvent(
+// //     { nightDataService, markdownService }: GuildServiceModel,
+// //     interaction: ButtonInteraction,
+// //     [command, day, role, discordId]: [
+// //         string,
+// //         NmDayNameType,
+// //         NmNightRoleType,
+// //         string
+// //     ]
+// // ) {
+// //     if (command !== 'volunteer-save') {
+// //         return;
+// //     }
+
+// //     dbg(command, day, role, discordId);
+
+// //     interaction.deferReply({ ephemeral: true });
+
+// //     await nightDataService.addNightData([
+// //         {
+// //             day,
+// //             org: '', // this should be Davis Night Market in Central Park
+// //             role,
+// //             discordIdOrEmail: interaction.user.id,
+// //             period: 'always',
+// //             // both of these should be got from core data
+// //             timeStart: '2100',
+// //             timeEnd: ''
+// //         }
+// //     ]);
+// //     // succcess!
+// //     interaction.editReply({
+// //         content: 'OK, all set!'
+// //     });
+// // }
+
 // // here the user has chosen to host
-// export async function VolunteerEditHostSelectEvent(
+// export async function VolunteerRoleEditEvent(
 //     { nightDataService, markdownService }: GuildServiceModel,
 //     interaction: ButtonInteraction,
 //     [command, day, role, discordId]: [
@@ -191,7 +286,7 @@ export async function VolunteerEditDaySelectEvent(
 //         string
 //     ]
 // ) {
-//     if (command !== 'volunteer-save') {
+//     if (command !== 'volunteer-host') {
 //         return;
 //     }
 
@@ -212,75 +307,7 @@ export async function VolunteerEditDaySelectEvent(
 //         }
 //     ]);
 //     // succcess!
-//     interaction.editReply({
+//     await interaction.editReply({
 //         content: 'OK, all set!'
 //     });
 // }
-
-// here the user has chosen to host
-export async function VolunteerRoleEditEvent(
-    { nightDataService, markdownService }: GuildServiceModel,
-    interaction: ButtonInteraction,
-    [command, day, role, discordId]: [
-        string,
-        NmDayNameType,
-        NmNightRoleType,
-        string
-    ]
-) {
-    if (command !== 'volunteer-host') {
-        return;
-    }
-
-    dbg(command, day, role, discordId);
-
-    interaction.deferReply({ ephemeral: true });
-
-    await nightDataService.addNightData([
-        {
-            day,
-            org: '', // this should be Davis Night Market in Central Park
-            role,
-            discordIdOrEmail: interaction.user.id,
-            period: 'always',
-            // both of these should be got from core data
-            timeStart: '2100',
-            timeEnd: ''
-        }
-    ]);
-    // succcess!
-    interaction.editReply({
-        content: 'OK, all set!'
-    });
-}
-
-export async function VolunteerPickupSaveSelectEvent(
-    { nightDataService, markdownService }: GuildServiceModel,
-    interaction: AnySelectMenuInteraction,
-    discordId: string,
-    [command, day]: [string, NmDayNameType, string]
-) {
-    if (command !== 'volunteer-pickup-update') {
-        return;
-    }
-    interaction.deferReply({ ephemeral: true });
-    dbg(command, day, discordId);
-
-    await nightDataService.addNightData(
-        interaction.values
-            .map((a) => a.split('---'))
-            .map((a) => ({
-                org: a[0],
-                timeStart: a[1],
-                timeEnd: a[2],
-                day,
-                role: 'night-pickup',
-                discordIdOrEmail: discordId,
-                period: 'always'
-            }))
-    );
-    // succcess!
-    interaction.editReply({
-        content: 'OK, all set!'
-    });
-}

@@ -49,7 +49,7 @@ export async function IdentityEditModalEvent(
     const person = await personDataService.getPersonByDiscordId(discordId);
 
     if (!person) {
-        interaction.editReply({
+        await interaction.editReply({
             content: 'Sorry, we cannot find that!'
         });
         return;
@@ -60,7 +60,7 @@ export async function IdentityEditModalEvent(
         try {
             value = interaction.fields.getTextInputValue(k).trim();
         } catch (e: any) {
-            console.log(e.message);
+            console.error(e.message);
         }
 
         if (value) {
@@ -72,7 +72,7 @@ export async function IdentityEditModalEvent(
         ...person
     });
 
-    interaction.editReply({
+    await interaction.editReply({
         content: 'OK, all set!'
     });
 }

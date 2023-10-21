@@ -12,9 +12,6 @@ const FoodCountReminderJob = (client) => async () => {
     const dateYesterday = new Date(new Date().getDate() - 1);
     const today = (0, utility_1.GetChannelDayToday)();
     const yesterday = (0, utility_1.GetChannelDayYesterday)();
-    // did we do it right?
-    console.log(today);
-    console.log(yesterday);
     // now we send a message to each channel in each guild
     for (const guild of guildList) {
         const { markdownService, nightDataService, foodCountDataService, personDataService } = await (0, utility_1.GetGuildServices)(guild.id);

@@ -23,7 +23,7 @@ export async function PermissionCommandEvent(
     discordId: string
 ) {
     // make sure crabapple doesn't choke while waiting for data
-    interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ ephemeral: true });
     const person = await personDataService.getPersonByDiscordId(discordId);
 
     if (!person) {
@@ -81,7 +81,7 @@ export async function PermissionEditSelectEvent(
             // interaction.editReply({
             //     content: await markdownService.getGenericNoPerson()
             // });
-            interaction.editReply(
+            await interaction.editReply(
                 markdownService.md.GENERIC_SORRY({
                     techPhone: ''
                 })
@@ -96,7 +96,7 @@ export async function PermissionEditSelectEvent(
 
         await personDataService.updatePersonByDiscordId(person);
 
-        interaction.editReply(
+        await interaction.editReply(
             [
                 markdownService.md.GENERIC_OK({}),
                 markdownService.md.PERMISSION_LIST({
@@ -129,7 +129,7 @@ export async function PermissionButtonEvent(
     await interaction.deferReply({ ephemeral: true });
 
     if (step === 'start') {
-        interaction.editReply({
+        await interaction.editReply({
             content: markdownService.md.PERMISSION_EDIT({}),
             components: PermissionToSelectComponent(discordId)
         });
@@ -140,7 +140,7 @@ export async function PermissionButtonEvent(
         const person = await personDataService.getPersonByDiscordId(discordId);
 
         if (!person) {
-            interaction.editReply(
+            await interaction.editReply(
                 markdownService.md.GENERIC_SORRY({
                     techPhone: ''
                 })
@@ -151,7 +151,7 @@ export async function PermissionButtonEvent(
 
         await personDataService.updatePersonByDiscordId(person);
 
-        interaction.editReply(
+        await interaction.editReply(
             [
                 markdownService.md.GENERIC_OK({}),
                 markdownService.md.PERMISSION_LIST({
@@ -167,7 +167,7 @@ export async function PermissionButtonEvent(
         const person = await personDataService.getPersonByDiscordId(discordId);
 
         if (!person) {
-            interaction.editReply(
+            await interaction.editReply(
                 markdownService.md.GENERIC_SORRY({
                     techPhone: ''
                 })
@@ -178,7 +178,7 @@ export async function PermissionButtonEvent(
 
         await personDataService.updatePersonByDiscordId(person);
 
-        interaction.editReply(
+        await interaction.editReply(
             [
                 markdownService.md.GENERIC_OK({}),
                 markdownService.md.PERMISSION_LIST({

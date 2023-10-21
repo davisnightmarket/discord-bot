@@ -16,7 +16,6 @@ export function GetVolunteerInitComponent({
     discordId,
     day
 }: Pick<NightPersonModel, 'discordId' | 'day'>) {
-    console.log(`volunteer-pickup--${day}--${discordId}`);
     const editButton = new ButtonBuilder()
         .setCustomId(`volunteer-pickup--${day}--${discordId}`)
         .setLabel(`Volunteer the Button`)
@@ -124,12 +123,12 @@ export function GetVolunteerPickupComponent(
     const select = new StringSelectMenuBuilder()
         .setCustomId(`volunteer-pickup-update--${day}--${discordId}`)
         .setPlaceholder('Make a selection!')
-        .setMinValues(0)
+        .setMinValues(1)
         .setMaxValues(pickupList.length)
         .addOptions(
             pickupList.map(({ org, timeStart, timeEnd, personList }) =>
                 new StringSelectMenuOptionBuilder()
-                    .setLabel(org)
+                    .setLabel(`Pickup: ${org}`)
                     .setDescription(
                         `at ${ParseContentService.getAmPmTimeFrom24Hour(
                             timeStart
@@ -141,7 +140,12 @@ export function GetVolunteerPickupComponent(
             )
         );
 
+    const deleteButton = new ButtonBuilder()
+        .setCustomId(`volunteer-pickup-delete--${day}--${discordId}`)
+        .setLabel(`Delete ALL them Pickups`)
+        .setStyle(ButtonStyle.Secondary);
     return [
-        new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(select)
+        new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(select),
+        new ActionRowBuilder<ButtonBuilder>().addComponents(deleteButton)
     ];
 }

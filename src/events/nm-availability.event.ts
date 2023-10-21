@@ -33,7 +33,7 @@ export async function AvailabilityCommandEvent(
 
     if (!person) {
         // show them their modal
-        interaction.editReply(await markdownService.getGenericSorry());
+        await interaction.editReply(await markdownService.getGenericSorry());
         return;
     }
 
@@ -50,7 +50,7 @@ export async function AvailabilityCommandEvent(
             })
         ].join('\n') + '\n';
 
-    interaction.editReply({
+    await interaction.editReply({
         content,
         components
     });
@@ -80,7 +80,7 @@ export async function AvailabilityEditButtonEvent(
     if (!person) {
         //! we would like to show them their modal
         // // we cannot show the identity model since we have deferred
-        interaction.editReply(await markdownService.getGenericNoPerson());
+        await interaction.editReply(await markdownService.getGenericNoPerson());
         // interaction.showModal(
         //     IdentityEditModalComponent(personDataService.createPerson(person))
         // );
@@ -104,7 +104,7 @@ export async function AvailabilityEditButtonEvent(
         // todo: show host then pickup, since we can't fit them all
         const components = AvailabilityToHostComponent(dayTimes, discordId, []);
         // response
-        interaction.editReply({
+        await interaction.editReply({
             content: markdownService.md.AVAILABILITY_TO_HOST({}),
             components
         });
@@ -135,7 +135,7 @@ export async function AvailabilityEditSelectEvent(
     if (!person) {
         //! we would like to show them their modal
         // // we cannot show the identity model since we have deferred
-        interaction.editReply(await markdownService.getGenericNoPerson());
+        await interaction.editReply(await markdownService.getGenericNoPerson());
         // interaction.showModal(
         //     IdentityEditModalComponent(personDataService.createPerson(person))
         // );
@@ -163,7 +163,7 @@ export async function AvailabilityEditSelectEvent(
             defaultList: []
         });
 
-        interaction.editReply({
+        await interaction.editReply({
             content: markdownService.md.AVAILABILITY_TO_PICKUP({
                 dayName: currentDay.name
             }),
@@ -192,7 +192,7 @@ export async function AvailabilityEditSelectEvent(
         const nextDayIndex = daysOfWeekIdList.indexOf(day) + 1;
         // in this case we are done with the pickups, want to show permissions
         if (nextDayIndex === daysOfWeekIdList.length) {
-            interaction.editReply({
+            await interaction.editReply({
                 content: markdownService.md.GENERIC_OK({})
             });
             return;
@@ -207,7 +207,7 @@ export async function AvailabilityEditSelectEvent(
         });
 
         // response
-        interaction.editReply({
+        await interaction.editReply({
             content: markdownService.md.AVAILABILITY_TO_PICKUP({
                 dayName: currentDay.name
             }),

@@ -102,6 +102,18 @@ export class PersonDataService {
         };
     }
 
+    async getFreshDiscordAndEmailByDiscordIdOrEmail(
+        discordIdOrEmailList: string[]
+    ): Promise<([string, string] | null)[]> {
+        await this.refreshPersonListCache();
+        const personList = await this.waitingForPersonListCache;
+        return discordIdOrEmailList
+            .map((a) =>
+                personList.find((b) => b.email === a || b.discordId === a)
+            )
+            .map((a) => (a ? [a?.discordId || '', a?.email || ''] : null));
+    }
+
     async updatePersonByDiscordId(person: PersonModel) {
         const { discordId } = person;
         await this.refreshPersonListCache();

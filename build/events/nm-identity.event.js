@@ -30,7 +30,7 @@ async function IdentityEditModalEvent({ personDataService }, interaction, discor
     // get the person's data
     const person = await personDataService.getPersonByDiscordId(discordId);
     if (!person) {
-        interaction.editReply({
+        await interaction.editReply({
             content: 'Sorry, we cannot find that!'
         });
         return;
@@ -41,7 +41,7 @@ async function IdentityEditModalEvent({ personDataService }, interaction, discor
             value = interaction.fields.getTextInputValue(k).trim();
         }
         catch (e) {
-            console.log(e.message);
+            console.error(e.message);
         }
         if (value) {
             person[k] = value;
@@ -50,7 +50,7 @@ async function IdentityEditModalEvent({ personDataService }, interaction, discor
     await personDataService.updatePersonByDiscordId({
         ...person
     });
-    interaction.editReply({
+    await interaction.editReply({
         content: 'OK, all set!'
     });
 }

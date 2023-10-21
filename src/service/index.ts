@@ -10,4 +10,4 @@ export * from './google-sheet.service';
 export * from './core-data.service';
 export * from './markdown.service';
 export * from './process-event.service';
-export * from './discord-reply.service';
+export * from './discord.service';
