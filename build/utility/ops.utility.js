@@ -64,7 +64,7 @@ function GetNightCapMessage({ day, hostList }) {
 exports.GetNightCapMessage = GetNightCapMessage;
 // todo: use message service
 function GetHostMessage({ hostList }) {
-    const a = hostList.filter((a) => a.role === 'night-host');
+    const a = hostList.filter((a) => a.role === 'night-distro');
     return `Host${a.length > 1 ? 's' : ''}: ${a
         .map(({ name, discordId }) => `${(0, discord_js_1.bold)(name)} ${discordId ? (0, discord_js_1.userMention)(discordId) : ''}`)
         .join(', ')} `;

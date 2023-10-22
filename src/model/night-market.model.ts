@@ -14,8 +14,8 @@ export type NmActiveStateType = 'active' | 'inactive';
 export type NmRoleType = NmNightRoleType | NmAdminRoleType;
 
 export type NmNightRoleType =
-    | 'night-host'
-    | 'night-host-shadow'
+    | 'night-distro'
+    | 'night-distro-shadow'
     | 'night-captain'
     | 'night-pickup'
     | 'night-pickup-shadow';

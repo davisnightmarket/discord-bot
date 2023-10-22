@@ -81,7 +81,7 @@ async function VolunteerEditButtonEvent({ nightDataService, markdownService }, i
             });
             return;
         }
-        if (role === 'night-host') {
+        if (role === 'night-distro') {
             // TODO: save to DB
             await nightDataService.addNightData([
                 {

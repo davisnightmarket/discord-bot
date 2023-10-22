@@ -5,7 +5,9 @@
   "main": "main.js",
   "scripts": {
     "start": "NODE_ENV=prod pm2 start build/main.js --name crabapple",
+    "stop": "pm2 stop crabapple",
     "start:jr": "NODE_ENV=test pm2 start build/main.js --name jr",
+    "stop:jr": "pm2 stop jr",
     "dev": "DEBUG=* NODE_ENV=dev npm run watch",
     "test": "jest",
     "test:test": "NODE_ENV=test jest",

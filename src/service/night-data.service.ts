@@ -10,13 +10,50 @@ import {
     ParseContentService
 } from '.';
 
+// we need a simple way to know what is the status of a night
+// this is not stored in teh data, it's added to the night based on
+// what's in teh data
+// so that crabapple knows what to do
+type NightStatusType = 'OK' | 'NEEDED_DISTRO' | 'NEEDED_CAP' | 'NEEDED_PICKUP';
+
+export const NightOpPickupStatus: {
+    [k in NightStatusType]: {
+        id: k;
+        // todo: flesh out these periodStatuses
+        // name: string;
+        // description: string;
+    };
+} = {
+    OK: { id: 'OK' },
+    NEEDED_DISTRO: { id: 'NEEDED_DISTRO' },
+    NEEDED_CAP: { id: 'NEEDED_CAP' },
+    NEEDED_PICKUP: { id: 'NEEDED_PICKUP' }
+};
+
+// shadow type may be redundant if we have a shadow roles
+// maybe one or the other
+type PeriodStatusType = 'ALWAYS' | 'ONCE' | 'QUIT' | 'SHADOW';
+export const NightOpPeriodStatus: {
+    [k in PeriodStatusType]: {
+        id: k;
+        // todo: flesh out these periodStatuses
+        // name: string;
+        // description: string;
+    };
+} = {
+    ALWAYS: { id: 'ALWAYS' },
+    ONCE: { id: 'ONCE' },
+    QUIT: { id: 'QUIT' },
+    SHADOW: { id: 'SHADOW' }
+};
+
 // models what's in the "ops" sheet
 export interface NightOpsDataModel extends SpreadsheetDataModel {
     day: NmDayNameType;
     role: NmNightRoleType;
     org: string;
     discordIdOrEmail: string;
-    period: string;
+    periodStatus: PeriodStatusType;
     timeStart: string;
     timeEnd: string;
 }
@@ -29,7 +66,7 @@ export interface NightOpsTimelineDataModel extends SpreadsheetDataModel {
     role: NmNightRoleType;
     org: string;
     discordIdOrEmail: string;
-    period: string;
+    periodStatus: string;
     timeStart: string;
     timeEnd: string;
     stamp: string;
@@ -44,15 +81,17 @@ export interface NightOpsPickupNotesDataModel extends SpreadsheetDataModel {
     note: string;
 }
 
+// person plus ops data, for pickups and hosting
 export type NightPersonModel = PersonModel &
-    Pick<NightOpsDataModel, 'role' | 'period' | 'discordIdOrEmail'>;
+    Pick<NightOpsDataModel, 'role' | 'periodStatus' | 'discordIdOrEmail'>;
 
+// isolates just those ops that are pickups, adds person list
 export type NightPickupModel = Pick<
     NightOpsDataModel,
     | 'day'
     | 'role'
     | 'org'
-    | 'period'
+    | 'periodStatus'
     | 'discordIdOrEmail'
     | 'timeStart'
     | 'timeEnd'
@@ -61,30 +100,32 @@ export type NightPickupModel = Pick<
     noteList: string[];
 };
 
-// the model for the market itself
+// the model for a single night
+// includes day, time, location, list of hosts, list of pickups
 export type NightModel = Pick<
     NightOpsDataModel,
     'day' | 'org' | 'timeStart' | 'timeEnd'
 > & {
+    statusList: NightStatusType[];
     // distro and captain
     hostList: NightPersonModel[];
     // the model for pickups
     pickupList: NightPickupModel[];
 };
 
+// we cache ops data so we don't touch the db too much
 export type NightDataCache = NightOpsDataModel[];
 
 export class NightDataService {
     private readonly nightSheetService: GoogleSheetService<NightOpsDataModel>;
     private readonly opsTimelineSheetService: GoogleSheetService<NightOpsTimelineDataModel>;
     private readonly opsNotesSheetService: GoogleSheetService<NightOpsPickupNotesDataModel>;
-    private readonly personCoreDataService: PersonDataService;
 
     waitingForNightCache: Promise<NightDataCache> = Promise.resolve([]);
 
     constructor(
         spreadsheetId: string,
-        personCoreDataService: PersonDataService
+        private personDataService: PersonDataService
     ) {
         this.nightSheetService = new GoogleSheetService({
             spreadsheetId,
@@ -103,9 +144,26 @@ export class NightDataService {
             sheetName: 'ops-pickup-notes'
         });
 
-        this.personCoreDataService = personCoreDataService;
-
         this.refreshCache();
+    }
+    createNightOpsData({
+        day = 'monday',
+        role = 'night-captain',
+        org = '',
+        discordIdOrEmail = '',
+        periodStatus = 'ALWAYS',
+        timeStart = '',
+        timeEnd = ''
+    }: Partial<NightOpsDataModel>): NightOpsDataModel {
+        return {
+            day,
+            role,
+            org,
+            discordIdOrEmail,
+            periodStatus,
+            timeStart,
+            timeEnd
+        };
     }
 
     // used to make sure our night object is populated
@@ -123,13 +181,113 @@ export class NightDataService {
             dbg(`createNight  missing day ${day}`);
         }
 
+        // if no org, grab it from the night cap
+        if (!org) {
+            const nightCap = hostList.filter(
+                (a) => a.role === 'night-captain'
+            )[0];
+            if (nightCap) {
+                org = nightCap.org as string;
+            }
+        }
+        if (!org) {
+            const nightCap = hostList.filter(
+                (a) => a.role === 'night-captain'
+            )[0];
+            if (nightCap) {
+                org = nightCap.org as string;
+                timeStart = nightCap.timeStart as string;
+                timeEnd = nightCap.timeEnd as string;
+            }
+        }
+        const statusList: NightStatusType[] = [];
+        // if there are no distro folks
+        if (
+            this.getHostPersonLength(
+                hostList,
+                ['night-distro'],
+                ['QUIT', 'SHADOW']
+            ) === 0
+        ) {
+            statusList.push('NEEDED_DISTRO');
+        }
+        // if there are no night caps
+        if (
+            this.getHostPersonLength(
+                hostList,
+                ['night-captain'],
+                ['QUIT', 'SHADOW']
+            ) === 0
+        ) {
+            statusList.push('NEEDED_CAP');
+        }
+        // if there are pickups with no folks
+        if (
+            this.getPickupPersonStatusLength(pickupList, ['QUIT', 'SHADOW']) ===
+            0
+        ) {
+            statusList.push('NEEDED_PICKUP');
+        }
+
         return {
             day,
             org,
+            statusList,
             timeStart,
             timeEnd,
             hostList,
             pickupList
+        };
+    }
+    //does a night have any pickup need?
+    getPickupPersonStatusLength(
+        pickupList: NightPickupModel[],
+        excludePeriodStatusList: PeriodStatusType[] = []
+    ): number {
+        // if any of the pickups have need, we return true
+        return pickupList.filter((pickup) => {
+            // does this pickup have need?
+            // true if it's person list length is zero
+            // filtering out records that have no person or the person is quitting
+            return (
+                pickup.personList.filter(
+                    // we get the person if they have an identifier and they are not in the exclude status list
+                    (a) =>
+                        a.discordIdOrEmail &&
+                        !excludePeriodStatusList.includes(a.periodStatus)
+                ).length === 0
+            );
+        }).length;
+    }
+
+    // does a night have host needs?
+    getHostPersonLength(
+        hostList: NightPersonModel[],
+        includeRoleList: NmNightRoleType[],
+        excludePeriodStatusList: PeriodStatusType[] = []
+    ): number {
+        const list = hostList.filter((a) => includeRoleList.includes(a.role));
+        // we get the person if they have an identifier and they are not in the exclude status list
+        return list.filter(
+            (a) =>
+                a.discordIdOrEmail &&
+                !excludePeriodStatusList.includes(a.periodStatus)
+        ).length;
+    }
+
+    createNightPerson(
+        nightPerson: Partial<NightPersonModel>
+    ): NightPersonModel {
+        // todo: set status?
+        let { periodStatus } = nightPerson;
+        // if the night person record has no person, then we
+        // assume that the role is a request to fill
+        periodStatus = (
+            nightPerson.discordIdOrEmail ? periodStatus : 'NEEDED'
+        ) as PeriodStatusType;
+        return {
+            ...(nightPerson as NightPersonModel),
+            periodStatus
         };
     }
 
@@ -199,14 +357,19 @@ export class NightDataService {
     async getPickupListByDay(day: NmDayNameType): Promise<NightPickupModel[]> {
         const nightList = await this.getNightDataByDay(day);
         const personList = await this.getNightPersonList(nightList);
+
         const noteList = await this.getOpsNotesByDay(day);
         // return a complete set of pickups, with personList and noteList
         const pickupList = Object.values(
             nightList
                 .filter((a) => (a.role = 'night-pickup'))
+                // todo: simplify
                 .reduce<{ [k in string]: NightPickupModel }>((a, op) => {
-                    const { day, org, timeStart } = op;
-                    if (day && org && timeStart && !a[day + org + timeStart]) {
+                    const { day, org, timeStart, discordIdOrEmail } = op;
+                    if (!timeStart || !org) {
+                        return a;
+                    }
+                    if (!a[day + org + timeStart]) {
                         a[day + org + timeStart] = {
                             ...op,
                             // this needs to happen for each op since that's where the discordIdOrEmail is
@@ -221,18 +384,20 @@ export class NightDataService {
                                 )
                                 .map((a) => a.note)
                         };
-                        // get the single person in this op record
-                        const person = personList.find(
-                            (a) =>
-                                a.discordId === op.discordIdOrEmail ||
-                                a.email === op.discordIdOrEmail
-                        ) as PersonWithIdModel;
-                        if (person) {
-                            a[day + org + timeStart].personList.push({
+                    }
+                    // get the single person in this op record
+                    const person = personList.find(
+                        (a) =>
+                            a.discordId === discordIdOrEmail ||
+                            a.email === discordIdOrEmail
+                    ) as PersonWithIdModel;
+                    if (person) {
+                        a[day + org + timeStart].personList.push(
+                            this.createNightPerson({
                                 ...op,
                                 ...person
-                            });
-                        }
+                            })
+                        );
                     }
                     return a;
                 }, {})
@@ -242,11 +407,11 @@ export class NightDataService {
     }
     async getHostListByDay(day: NmDayNameType): Promise<NightPersonModel[]> {
         const opList = await this.getNightDataByDay(day);
-        const personList = await this.personCoreDataService.getPersonList();
+        const personList = await this.personDataService.getPersonList();
         // return a complete set of pickups, with personList
         const hostList = opList
             .filter(
-                (a) => a.role === 'night-host' || a.role === 'night-captain'
+                (a) => a.role === 'night-distro' || a.role === 'night-captain'
             )
             .map((a) => {
                 const person = personList.find(
@@ -255,102 +420,30 @@ export class NightDataService {
                         a.discordIdOrEmail === p.email
                 ) as PersonWithIdModel;
 
-                return {
+                return this.createNightPerson({
                     ...a,
                     ...person
-                };
+                });
             });
 
         return hostList;
     }
-    // // nightcap and host
-    // async getHostListByDay(day: NmDayNameType): Promise<NightHostModel[]> {
-    //     const opList = await this.getNightDataByDay(day);
-    //     const personList = await this.personCoreDataService.getPersonList();
-    //     // return a complete set of pickups, with personList
-    //     const hostMap = opList
-    //         .filter((a) => (a.role === 'night-host'||a.role==='night-captain'))
-    //         .reduce<
-    //             Partial<{
-    //                 [k in NmDayNameType]: NightHostModel;
-    //             }>
-    //         >(
-    //             (
-    //                 a,
-    //                 {
-    //                     day,
-    //                     org,
-    //                     timeStart,
-    //                     timeEnd,
-    //                     discordIdOrEmail,
-    //                     period,
-    //                     role
-    //                 }
-    //             ) => {
-    //                 if (!a[day]) {
-    //                     a[day] = {
-    //                         day,
-    //                         org,
-    //                         timeStart,
-    //                         timeEnd,
-    //                         personList: [],
-    //                         noteList: []
-    //                     };
-    //                 }
 
-    //                 (a[day] as NightHostModel).personList = personList
-    //                     .filter((p) => p.discordIdOrEmail === discordIdOrEmail)
-    //                     .map((a) => ({
-    //                         day,
-    //                         org,
-    //                         timeStart,
-    //                         timeEnd,
-    //                         period,
-    //                         role,
-    //                         discordIdOrEmail,
-    //                         ...a
-    //                     }));
-
-    //                 return a;
-    //             },
-    //             {}
-    //         ) as {
-    //         [k in NmDayNameType]: NightHostModel;
-    //     };
-
-    //     return Object.values(hostMap);
-    // }
-
-    async getNightByDay(day: NmDayNameType): Promise<NightModel> {
-        const night = (await this.getNightDataByDay(day)).reduce<NightModel>(
-            (a, b) => {
-                b.day = day;
-                // basically we want all the values with an actual value
-
-                if (b.org) {
-                    a.org = b.org;
-                }
-                if (b.timeStart) {
-                    a.timeStart = b.timeStart;
-                }
-                if (b.timeEnd) {
-                    a.timeEnd = b.timeEnd;
-                }
-
-                return a;
-            },
-            this.createNight({})
-        ) as NightModel;
-
+    async getNightByDay(
+        day: NmDayNameType,
+        { refreshCache }: { refreshCache?: boolean } = {}
+    ): Promise<NightModel> {
+        if (refreshCache) {
+            await this.refreshCache();
+        }
         const hostList = await this.getHostListByDay(day);
         const pickupList = await this.getPickupListByDay(day);
-
-        return {
-            ...night,
-
+        console.log(pickupList);
+        return this.createNight({
+            day,
             hostList,
             pickupList
-        };
+        });
     }
 
     // add a record to the top of the sheet
@@ -377,7 +470,9 @@ export class NightDataService {
         timeStart,
         discordIdOrEmail
     }: NightOpsDataModel): string {
-        return `${day}--${org}--${role}--${timeStart}--${discordIdOrEmail}`;
+        return `${day}--${org}--${role}--${'' + timeStart}--${
+            '' + discordIdOrEmail
+        }`;
     }
 
     // this really attempts to turn person identifiers into discord ids
@@ -387,7 +482,7 @@ export class NightDataService {
         return await Promise.all(
             nightOps.map(async (op) => {
                 const person =
-                    await this.personCoreDataService.getPersonByEmailOrDiscordId(
+                    await this.personDataService.getPersonByEmailOrDiscordId(
                         op.discordIdOrEmail
                     );
 
@@ -402,7 +497,7 @@ export class NightDataService {
         );
     }
 
-    // gets a night data list adding unique records
+    // // gets a night data list adding unique records
     async getNightDataAdding(
         nightList: NightOpsDataModel[],
         addList: NightOpsDataModel[]
@@ -418,7 +513,7 @@ export class NightDataService {
         );
     }
 
-    // gets a night data list removing unique records
+    // // gets a night data list removing unique records
 
     async getNightDataRemoving(
         nightList: NightOpsDataModel[],
@@ -434,39 +529,102 @@ export class NightDataService {
             return !idRemoveList.includes(idNightList[i]);
         });
     }
+
     // to prevent overwriting each others data
+    // this won't work if we have multiple instances
     updateQueue: Promise<any>[] = [];
-    async setUpdateQueue(a: Promise<any>) {
+    setUpdateQueue(a: Promise<any>) {
         this.updateQueue.push(
             a.then(() => {
-                this.updateQueue.splice(
-                    this.updateQueue.findIndex((b) => b === a),
-                    1
-                );
+                const i = this.updateQueue.findIndex((b) => b === a);
+                if (i > 0) {
+                    this.updateQueue.splice(i, 1);
+                }
             })
         );
-        await a;
     }
-    async updateNightOpsForPersonAndDayAndSave(
+
+    // update pickup ops sheet for one day for one person
+    // note: this is a repace op: we delete and replace
+    // all pickups for that day and person and replace them
+
+    async replacePickupsForOnePersonAndDay(
+        day: NmDayNameType,
+        discordId: string,
+        addList: NightOpsDataModel[]
+    ) {
+        this.setUpdateQueue(
+            this.replacePickupsForOnePersonAndDayQueue(day, discordId, addList)
+        );
+
+        await Promise.all(this.updateQueue);
+    }
+
+    async replacePickupsForOnePersonAndDayQueue(
+        day: NmDayNameType,
+        discordId: string,
+        addList: NightOpsDataModel[]
+    ) {
+        // get a fresh night list
+        await this.refreshCache();
+        // get the night ops in a list with discordId if there is one
+        let nightList = await this.waitingForNightCache;
+        // figure out what needs removing. To do this, we ...
+
+        // filter remove all pickup role for this day and person
+        nightList = nightList.filter(
+            (a) =>
+                !(
+                    a.discordIdOrEmail === discordId &&
+                    a.day === day &&
+                    a.role === 'night-pickup'
+                )
+        );
+
+        // here are the unique identifiers so we can remove them from the set of data to be removed
+        nightList.push(...addList);
+
+        // nightList = personDayNightList.filter(
+        //     // the person day record is NOT in the list we are adding
+        //     (a) => !removeIdList.includes(this.getUniqueNightOpIdentifier(a))
+        // );
+
+        // dbg(`Starting ${nightList.length}`);
+        // dbg(`Adding ${addList.length}`);
+
+        // dbg(addList);
+
+        // nightList = await this.getNightDataAdding(nightList, addList);
+
+        // dbg(`Added ${nightList.length}`);
+        // dbg(`Removing ${removeList.length}`);
+
+        // dbg(removeList);
+
+        // nightList = await this.getNightDataRemoving(nightList, removeList);
+        // dbg(`Removed ${nightList.length}`);
+
+        await this.updateNightData(nightList);
+    }
+
+    async addHostForOnePersonAndDay(
+        day: NmDayNameType,
+        discordId: string,
+        addList: NightOpsDataModel[]
+    ) {
+        this.setUpdateQueue(
+            this.addHostForOnePersonAndDayQueue(day, discordId, addList)
+        );
+        await Promise.all(this.updateQueue);
+    }
+
+    async addHostForOnePersonAndDayQueue(
         day: NmDayNameType,
         discordId: string,
         addList: NightOpsDataModel[]
     ) {
         await Promise.all(this.updateQueue);
-        await this.setUpdateQueue(
-            this.updateNightOpsForPersonAndDayAndSaveQueue(
-                day,
-                discordId,
-                addList
-            )
-        );
-    }
 
-    async updateNightOpsForPersonAndDayAndSaveQueue(
-        day: NmDayNameType,
-        discordId: string,
-        addList: NightOpsDataModel[]
-    ) {
         // get a fresh night list
         await this.refreshCache();
         // get the night ops in a list with discordId if there is one
@@ -478,37 +636,21 @@ export class NightDataService {
             (a) => a.discordIdOrEmail === discordId && a.day === day
         );
 
-        // here are the unique identifiers so we can remove them from the set of data to be removed
-        const addIdList = addList.map(this.getUniqueNightOpIdentifier);
-
-        const removeList = personDayNightList.filter(
-            // the person day record is NOT in the list we are adding
-            (a) => !addIdList.includes(this.getUniqueNightOpIdentifier(a))
-        );
-
         dbg(`Starting ${nightList.length}`);
         dbg(`Adding ${addList.length}`);
+
+        dbg(addList);
 
         nightList = await this.getNightDataAdding(nightList, addList);
 
         dbg(`Added ${nightList.length}`);
-        dbg(`Removing ${removeList.length}`);
-
-        nightList = await this.getNightDataRemoving(nightList, removeList);
-        dbg(`Removed ${nightList.length}`);
 
         await this.updateNightData(nightList);
     }
-    // async addNightData(addList: NightOpsDataModel[]) {
-    //     await this.refreshCache();
-    //     let nightList = await this.waitingForNightCache;
-    //     nightList = await this.getNightDataAdding(nightList, addList);
-    //     await this.updateNightData(nightList);
-    // }
 
     async removeNightData(removeList: NightOpsDataModel[]) {
+        this.setUpdateQueue(this.removeNightDataQueue(removeList));
         await Promise.all(this.updateQueue);
-        await this.setUpdateQueue(this.removeNightDataQueue(removeList));
     }
 
     async removeNightDataQueue(removeList: NightOpsDataModel[]) {
@@ -528,7 +670,7 @@ export class NightDataService {
         nightData = await Promise.all(
             nightData.map(async (a) => {
                 const person =
-                    await this.personCoreDataService.getPersonByEmailOrDiscordId(
+                    await this.personDataService.getPersonByEmailOrDiscordId(
                         a.discordIdOrEmail
                     );
                 return {
@@ -566,6 +708,7 @@ export class NightDataService {
                 // every record must have a day
                 a.filter((b) => b.day?.trim())
             )
+            .then((a) => a.map(this.createNightOpsData))
             // make that we have a discordId on the discordIdOrEmail prop if possible
             .then((a) => this.getNightOpListWithDiscordIdIfPossible(a));
     }
@@ -580,7 +723,7 @@ export class NightDataService {
                 .filter((a) => a)
                 .map(async (discordIdOrEmail) => {
                     const p =
-                        await this.personCoreDataService.getPersonByEmailOrDiscordId(
+                        await this.personDataService.getPersonByEmailOrDiscordId(
                             discordIdOrEmail
                         );
                     return PersonDataService.createPersonWithQueryId(
@@ -590,6 +733,8 @@ export class NightDataService {
                 })
         );
     }
+
+    // todo: move to markdown service
     getPickupListMd(pickupList: NightPickupModel[]) {
         return pickupList.length
             ? pickupList.reduce((a, { org, timeStart, personList }) => {
@@ -607,39 +752,39 @@ export class NightDataService {
     getNightMd({ day, org, timeStart }: NightModel) {
         return `${day} ${org} ${timeStart}`;
     }
-    getHostListMd(hostList: NightPersonModel[], discordId: string) {
-        hostList = hostList.filter(
-            (a) => a.role === 'night-host' || a.role === 'night-host-shadow'
-        );
-        console.log(hostList, 'host');
-        return `Host${hostList.length ? 's' : ''}: ${hostList
-            .map((b) =>
-                b.discordId !== discordId ? b.name : `${b.name} (YOU!)`
-            )
-            .join(', ')}`;
-    }
+    // getHostListMd(hostList: NightPersonModel[], discordId: string) {
+    //     hostList = hostList.filter(
+    //         (a) => a.role === 'night-distro' || a.role === 'night-distro-shadow'
+    //     );
 
-    getNightCapListMd(hostList: NightPersonModel[], discordId: string) {
-        hostList = hostList.filter((a) => a.role === 'night-captain');
-        console.log(hostList, 'cap');
-        return `Night Captain${hostList.length ? 's' : ''}: ${hostList
-            .map((b) =>
-                b.discordId !== discordId ? b.name : `${b.name} (YOU!)`
-            )
-            .join(', ')}`;
-    }
+    //     return `Host${hostList.length ? 's' : ''}: ${hostList
+    //         .map((b) =>
+    //             b.discordId !== discordId ? b.name : `${b.name} (YOU!)`
+    //         )
+    //         .join(', ')}`;
+    // }
 
-    // handle discord data from interactions
+    // getNightCapListMd(hostList: NightPersonModel[], discordId: string) {
+    //     hostList = hostList.filter((a) => a.role === 'night-captain');
+
+    //     return `Night Captain${hostList.length ? 's' : ''}: ${hostList
+    //         .map((b) =>
+    //             b.discordId !== discordId ? b.name : `${b.name} (YOU!)`
+    //         )
+    //         .join(', ')}`;
+    // }
+
+    // handle discord data from select interaction
     getNightDataDiscordSelectValues(
         values: string[],
         {
             day,
             role,
             discordIdOrEmail,
-            period
+            periodStatus
         }: Pick<
             NightOpsDataModel,
-            'day' | 'role' | 'discordIdOrEmail' | 'period'
+            'day' | 'role' | 'discordIdOrEmail' | 'periodStatus'
         >
     ): NightOpsDataModel[] {
         return values
@@ -651,7 +796,7 @@ export class NightDataService {
                 day,
                 role,
                 discordIdOrEmail,
-                period
+                periodStatus
             }));
     }
 }

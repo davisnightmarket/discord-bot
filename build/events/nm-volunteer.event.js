@@ -1,9 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.VolunteerPickupDeleteButtonEvent = exports.VolunteerPickupSaveSelectEvent = exports.VolunteerPickupButtonEvent = exports.VolunteerCommandEvent = void 0;
+exports.VolunteerHostSaveButtonEvent = exports.VolunteerPickupDeleteButtonEvent = exports.VolunteerPickupSaveSelectEvent = exports.VolunteerPickupButtonEvent = exports.VolunteerCommandEvent = void 0;
 const volunteer_component_1 = require("../component/volunteer.component");
 const utility_1 = require("../utility");
-const const_1 = require("../const");
 const dbg = (0, utility_1.Dbg)('VolunteerEvent');
 // todo: split this into different events for clarity
 // when a person issues a volunteer command it means they want to view
@@ -15,46 +14,37 @@ async function VolunteerCommandEvent({ nightDataService, markdownService }, inte
     const day = (await (0, utility_1.GetChannelDayNameFromInteraction)(interaction)) ||
         (0, utility_1.GetChannelDayToday)();
     // get
-    const night = await nightDataService.getNightByDay(day);
-    const { pickupList, hostList } = night;
-    const myPickupList = pickupList.filter(
-    // only pickups that I am doing
-    (pickup) => pickup.personList.filter((a) => a.discordId === discordId).length);
+    const nightMap = await nightDataService.getNightByDay(day, {
+        refreshCache: true
+    });
     // TODO: some logic here to figure out:
-    // Is there a current commitment set? If so display it
-    // If not, skip it and  show the role options
-    // however, also check their history to see if they
-    // need to shadow
+    // check their history to see if they
+    // need to shadow -- this can be done with NightPerson Status in night data
     await interaction.editReply({
-        content: markdownService.md.VOLUNTEER_LIST({
-            dayName: const_1.DAYS_OF_WEEK[day].name,
-            dayChannelNameList: const_1.DAYS_OF_WEEK_CODES.join(', '),
-            //todo: get all and my
-            nightCapList: nightDataService.getNightCapListMd(hostList, discordId),
-            hostList: nightDataService.getHostListMd(hostList, discordId),
-            pickupList: nightDataService.getPickupListMd(pickupList),
-            myPickupList: nightDataService.getPickupListMd(myPickupList)
-        }),
-        components: (0, volunteer_component_1.GetVolunteerInitComponent)({ day, discordId })
+        content: markdownService.getNightOpsEphemeral(day, discordId, nightMap),
+        components: (0, volunteer_component_1.GetVolunteerInitComponent)({
+            day,
+            discordId
+        })
     });
 }
 exports.VolunteerCommandEvent = VolunteerCommandEvent;
-// when they hit the init button, the editing begins,
-// same as a above when they have no commitments
+// when they hit the pickup button, the editing begins
 async function VolunteerPickupButtonEvent({ nightDataService, markdownService }, interaction, discordId, [command, day]) {
     if (command !== 'volunteer-pickup') {
         return;
     }
     dbg('volunteer-pickup', [command, day, discordId]);
     interaction.deferReply({ ephemeral: true });
-    const { pickupList } = await nightDataService.getNightByDay(day);
+    const nightMap = await nightDataService.getNightByDay(day);
+    const { pickupList } = nightMap;
     if (pickupList.length) {
         const components = (0, volunteer_component_1.GetVolunteerPickupComponent)({
             day,
             discordId
         }, pickupList);
         interaction.editReply({
-            content: 'Choose pickups:',
+            content: `Replace pick-ups:\n ${markdownService.getMyPickups(discordId, nightMap)} \nTHESE WILL BE REPLACED BY ANY SELECTION`,
             components
         });
         return;
@@ -63,12 +53,10 @@ async function VolunteerPickupButtonEvent({ nightDataService, markdownService },
         content: `No pickups available on ${day}. Choose another day:`
         // todo: add day select button
     });
-    return;
 }
 exports.VolunteerPickupButtonEvent = VolunteerPickupButtonEvent;
 // this fires when a select interaction to choose pickups is triggered
-// it is complicated by the fact that the select is the complete set of
-// pickups for that day and person - it replaces all records for that day/person
+// it is the complete set of pickups for that day and person - it replaces all records for that day/person
 async function VolunteerPickupSaveSelectEvent({ nightDataService, markdownService }, interaction, discordId, [command, day]) {
     if (command !== 'volunteer-pickup-update') {
         return;
@@ -79,13 +67,17 @@ async function VolunteerPickupSaveSelectEvent({ nightDataService, markdownServic
         day,
         role: 'night-pickup',
         discordIdOrEmail: discordId,
-        period: 'always'
+        periodStatus: 'ALWAYS'
     });
     dbg(`Adding ${addList.length} records`);
-    await nightDataService.updateNightOpsForPersonAndDayAndSave(day, discordId, addList);
+    await nightDataService.replacePickupsForOnePersonAndDay(day, discordId, addList);
+    const nightMap = await nightDataService.getNightByDay(day, {
+        refreshCache: true
+    });
+    console.log(JSON.stringify(nightMap, null, 2));
     // succcess!
     await interaction.editReply({
-        content: 'OK, all set!'
+        content: 'OK, all set!\n' + markdownService.getMyPickups(discordId, nightMap)
     });
 }
 exports.VolunteerPickupSaveSelectEvent = VolunteerPickupSaveSelectEvent;
@@ -96,13 +88,42 @@ async function VolunteerPickupDeleteButtonEvent({ nightDataService, markdownServ
     interaction.deferReply({ ephemeral: true });
     dbg(command, day);
     // todo: make sure we are only sending addList for this discordId and day?
-    await nightDataService.updateNightOpsForPersonAndDayAndSave(day, discordId, []);
+    await nightDataService.replacePickupsForOnePersonAndDay(day, discordId, []);
     // succcess!
     await interaction.editReply({
         content: 'OK, all set!'
     });
 }
 exports.VolunteerPickupDeleteButtonEvent = VolunteerPickupDeleteButtonEvent;
+// this fires when a select interaction to choose pickups is triggered
+// it is the complete set of pickups for that day and person - it replaces all records for that day/person
+async function VolunteerHostSaveButtonEvent({ nightDataService, markdownService }, interaction, discordId, [command, day]) {
+    if (command !== 'volunteer-distro-update') {
+        return;
+    }
+    interaction.deferReply({ ephemeral: true });
+    dbg(command, day);
+    const nightMap = await nightDataService.getNightByDay(day, {
+        refreshCache: true
+    });
+    const { org, timeStart, timeEnd } = nightMap;
+    await nightDataService.addHostForOnePersonAndDay(day, discordId, [
+        {
+            day,
+            role: 'night-distro',
+            discordIdOrEmail: discordId,
+            periodStatus: 'ALWAYS',
+            org,
+            timeStart,
+            timeEnd
+        }
+    ]);
+    // succcess!
+    await interaction.editReply({
+        content: 'OK, all set!'
+    });
+}
+exports.VolunteerHostSaveButtonEvent = VolunteerHostSaveButtonEvent;
 // here the user has chosen to pickup
 // export async function VolunteerEditDaySelectEvent(
 //     { nightDataService, markdownService }: GuildServiceModel,

@@ -19,7 +19,7 @@ export const NightOpsJob = (client: Client) => async () => {
         // get the channel by today name
         const channelDay = GetChannelDayToday();
 
-        const content = markdownService.getAnnounceMessage(
+        const content = markdownService.getNightOpsAnnounce(
             await GetGuildRoleIdByName(guild, channelDay),
             await nightDataService.getNightByDay(channelDay)
         );

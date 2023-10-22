@@ -104,13 +104,13 @@ exports.NM_NIGHT_ROLES = {
         name: 'Night Captain',
         description: ''
     },
-    'night-host': {
-        id: 'night-host',
+    'night-distro': {
+        id: 'night-distro',
         name: 'Night Host',
         description: 'Host Market with Friends'
     },
-    'night-host-shadow': {
-        id: 'night-host-shadow',
+    'night-distro-shadow': {
+        id: 'night-distro-shadow',
         name: 'Night Host Shadow',
         description: 'Learn to Host Market'
     },

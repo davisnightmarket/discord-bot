@@ -62,28 +62,28 @@ export const NightTimelineJob = (client: Client) => async () => {
             role,
             org,
             discordIdOrEmail,
-            period,
+            periodStatus,
             timeStart,
             timeEnd
         } of nightOpsList) {
-            dbg(period, discordIdOrEmail);
+            dbg(periodStatus, discordIdOrEmail);
             newTimelineList.push({
                 day,
                 role,
                 org,
                 discordIdOrEmail,
-                period,
+                periodStatus,
                 timeStart,
                 timeEnd,
                 stamp
             });
-            if (period === 'quit') {
+            if (periodStatus === 'QUIT') {
                 quitterList.push({
                     day,
                     role,
                     org,
                     discordIdOrEmail,
-                    period,
+                    periodStatus,
                     timeStart,
                     timeEnd
                 });
@@ -96,7 +96,7 @@ export const NightTimelineJob = (client: Client) => async () => {
                 role,
                 org,
                 discordIdOrEmail,
-                period,
+                periodStatus,
                 timeStart,
                 timeEnd,
                 stamp
@@ -106,7 +106,7 @@ export const NightTimelineJob = (client: Client) => async () => {
                     role,
                     org,
                     discordIdOrEmail,
-                    period,
+                    periodStatus,
                     timeStart,
                     timeEnd,
                     stamp
@@ -119,7 +119,7 @@ export const NightTimelineJob = (client: Client) => async () => {
                     role,
                     org,
                     discordIdOrEmail,
-                    period,
+                    periodStatus,
                     timeStart,
                     timeEnd,
                     stamp
@@ -130,7 +130,7 @@ export const NightTimelineJob = (client: Client) => async () => {
                             role,
                             org,
                             discordIdOrEmail,
-                            period,
+                            periodStatus,
                             timeStart,
                             timeEnd,
                             stamp
@@ -147,7 +147,7 @@ export const NightTimelineJob = (client: Client) => async () => {
                     role,
                     org,
                     discordIdOrEmail,
-                    period,
+                    periodStatus,
                     timeStart,
                     timeEnd,
                     stamp
@@ -158,7 +158,7 @@ export const NightTimelineJob = (client: Client) => async () => {
                             role,
                             org,
                             discordIdOrEmail,
-                            period,
+                            periodStatus,
                             timeStart,
                             timeEnd,
                             stamp
@@ -175,17 +175,17 @@ export const NightTimelineJob = (client: Client) => async () => {
         //     role,
         //     org,
         //     discordIdOrEmail,
-        //     period,
+        //     periodStatus,
         //     timeStart,
         //     timeEnd
         // } of timelineFuture) {
-        //     if (period === 'quit') {
+        //     if (periodStatus === 'quit') {
         //         quitterList.push({
         //             day,
         //             role,
         //             org,
         //             discordIdOrEmail,
-        //             period,
+        //             periodStatus,
         //             timeStart,
         //             timeEnd
         //         });
@@ -195,7 +195,7 @@ export const NightTimelineJob = (client: Client) => async () => {
         dbg('QUITTER', quitterList.length);
         await nightDataService.removeNightData(quitterList);
 
-        const content = markdownService.getAfterMarketMessage(
+        const content = markdownService.getAfterMarketAnnounce(
             await GetGuildRoleIdByName(guild, channelDay),
             await nightDataService.getNightByDay(channelDay)
         );

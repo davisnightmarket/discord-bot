@@ -144,8 +144,8 @@ export async function AvailabilityEditSelectEvent(
 
     const daysOfWeekIdList = Object.values(DAYS_OF_WEEK).map((a) => a.id);
 
-    // in this case we have selected our night-host availability so ...
-    if (step === 'night-host') {
+    // in this case we have selected our night-distro availability so ...
+    if (step === 'night-distro') {
         // save it to the db ...
         // const [day, timeStart] = interaction.values[0].split('|||');
         // dbg(day, timeStart);

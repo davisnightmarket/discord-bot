@@ -38,59 +38,59 @@ const NightTimelineJob = (client) => async () => {
         const quitterList = [];
         const newTimelineList = [];
         // adds quitters to the quitterList from the
-        for (const { day, role, org, discordIdOrEmail, period, timeStart, timeEnd } of nightOpsList) {
-            dbg(period, discordIdOrEmail);
+        for (const { day, role, org, discordIdOrEmail, periodStatus, timeStart, timeEnd } of nightOpsList) {
+            dbg(periodStatus, discordIdOrEmail);
             newTimelineList.push({
                 day,
                 role,
                 org,
                 discordIdOrEmail,
-                period,
+                periodStatus,
                 timeStart,
                 timeEnd,
                 stamp
             });
-            if (period === 'quit') {
+            if (periodStatus === 'QUIT') {
                 quitterList.push({
                     day,
                     role,
                     org,
                     discordIdOrEmail,
-                    period,
+                    periodStatus,
                     timeStart,
                     timeEnd
                 });
             }
         }
-        const existsFilter = timelinePast.map(({ day, role, org, discordIdOrEmail, period, timeStart, timeEnd, stamp }) => [
+        const existsFilter = timelinePast.map(({ day, role, org, discordIdOrEmail, periodStatus, timeStart, timeEnd, stamp }) => [
             day,
             role,
             org,
             discordIdOrEmail,
-            period,
+            periodStatus,
             timeStart,
             timeEnd,
             stamp
         ].join(''));
-        nightDataService.addNightTimelineRecordList(newTimelineList.filter(({ day, role, org, discordIdOrEmail, period, timeStart, timeEnd, stamp }) => {
+        nightDataService.addNightTimelineRecordList(newTimelineList.filter(({ day, role, org, discordIdOrEmail, periodStatus, timeStart, timeEnd, stamp }) => {
             return !existsFilter.includes([
                 day,
                 role,
                 org,
                 discordIdOrEmail,
-                period,
+                periodStatus,
                 timeStart,
                 timeEnd,
                 stamp
             ].join(''));
         }));
-        dbg('Timeline', newTimelineList.filter(({ day, role, org, discordIdOrEmail, period, timeStart, timeEnd, stamp }) => {
+        dbg('Timeline', newTimelineList.filter(({ day, role, org, discordIdOrEmail, periodStatus, timeStart, timeEnd, stamp }) => {
             !existsFilter.includes([
                 day,
                 role,
                 org,
                 discordIdOrEmail,
-                period,
+                periodStatus,
                 timeStart,
                 timeEnd,
                 stamp
@@ -102,17 +102,17 @@ const NightTimelineJob = (client) => async () => {
         //     role,
         //     org,
         //     discordIdOrEmail,
-        //     period,
+        //     periodStatus,
         //     timeStart,
         //     timeEnd
         // } of timelineFuture) {
-        //     if (period === 'quit') {
+        //     if (periodStatus === 'quit') {
         //         quitterList.push({
         //             day,
         //             role,
         //             org,
         //             discordIdOrEmail,
-        //             period,
+        //             periodStatus,
         //             timeStart,
         //             timeEnd
         //         });
@@ -120,7 +120,7 @@ const NightTimelineJob = (client) => async () => {
         // }
         dbg('QUITTER', quitterList.length);
         await nightDataService.removeNightData(quitterList);
-        const content = markdownService.getAfterMarketMessage(await (0, utility_1.GetGuildRoleIdByName)(guild, channelDay), await nightDataService.getNightByDay(channelDay));
+        const content = markdownService.getAfterMarketAnnounce(await (0, utility_1.GetGuildRoleIdByName)(guild, channelDay), await nightDataService.getNightByDay(channelDay));
         (await guild.channels.cache.find((channel) => channel.name === channelDay))?.send({
             content
         });

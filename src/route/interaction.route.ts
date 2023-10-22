@@ -21,7 +21,8 @@ import {
     PermissionButtonEvent,
     AvailabilityEditSelectEvent,
     VolunteerPickupSaveSelectEvent,
-    VolunteerPickupDeleteButtonEvent
+    VolunteerPickupDeleteButtonEvent,
+    VolunteerHostSaveButtonEvent
 } from '../events';
 import { NmDayNameType, NmNightRoleType } from '../model';
 
@@ -198,6 +199,13 @@ export async function RouteInteraction(interaction: Interaction) {
                 interaction as ButtonInteraction,
                 discordId,
                 args as [string, 'revoke' | 'start', NmDayNameType]
+            );
+
+            VolunteerHostSaveButtonEvent(
+                services,
+                interaction as ButtonInteraction,
+                discordId,
+                args as [string, NmDayNameType]
             );
 
             VolunteerPickupButtonEvent(

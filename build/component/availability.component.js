@@ -16,7 +16,7 @@ exports.AvailabilityEditButtonComponent = AvailabilityEditButtonComponent;
 const AvailabilityToHostComponent = (dayTimeList, discordId, defaultDayTimeList) => {
     return [
         new discord_js_1.ActionRowBuilder().addComponents(new discord_js_1.StringSelectMenuBuilder()
-            .setCustomId(`availability--night-host--${discordId}`)
+            .setCustomId(`availability--night-distro--${discordId}`)
             .setMinValues(0)
             .setMaxValues(dayTimeList.length)
             .addOptions(...dayTimeList.map((dayTime) => {
@@ -26,7 +26,7 @@ const AvailabilityToHostComponent = (dayTimeList, discordId, defaultDayTimeList)
                 .setValue(dayTime[0]);
         }))),
         new discord_js_1.ActionRowBuilder().addComponents(new discord_js_1.ButtonBuilder()
-            .setCustomId(`availability--night-host-none--${discordId}`)
+            .setCustomId(`availability--night-distro-none--${discordId}`)
             .setLabel('No availability')
             .setStyle(discord_js_1.ButtonStyle.Secondary))
     ];

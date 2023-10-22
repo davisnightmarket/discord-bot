@@ -5,7 +5,9 @@ const const_1 = require("../const");
 // import { type NmDayNameType, type GuildServiceModel } from '../model';
 // import { type PersonModel, type PickUp } from '../service';
 const GetChannelDayToday = (date = new Date()) => {
-    return const_1.DAYS_OF_WEEK_CODES[date.getDay()];
+    return const_1.DAYS_OF_WEEK_CODES[
+    // because Monday is the first day of the week
+    date.getDay() ? date.getDay() - 1 : 6];
 };
 exports.GetChannelDayToday = GetChannelDayToday;
 const GetChannelDayYesterday = (date = new Date()) => {
@@ -101,7 +103,7 @@ exports.GetChannelDayYesterday = GetChannelDayYesterday;
 // }
 // // todo: use message service
 // export function GetHostMessage({ hostList }: NightModel): string {
-//     const a = hostList.filter((a) => a.role === 'night-host');
+//     const a = hostList.filter((a) => a.role === 'night-distro');
 //     return `Host${a.length > 1 ? 's' : ''}: ${a
 //         .map(
 //             ({ name, discordId }) =>

@@ -212,11 +212,13 @@ export class PersonDataService {
         return a[0] || null;
     }
     async getPersonByEmailOrDiscordId(
-        emailOrDiscordId: string
+        emailOrDiscordId?: string
     ): Promise<PersonModel | undefined> {
         // ok, so we find out if there is an @, and if not we assume it is a discord id
         // otherwise we assume it is an email, and if that fails, then we assume it is a discord id
-
+        if (!emailOrDiscordId?.trim()) {
+            return;
+        }
         return emailOrDiscordId.split('@').length !== 2
             ? await this.getPersonByDiscordId(emailOrDiscordId)
             : (await this.getPersonByEmail(emailOrDiscordId)) ??

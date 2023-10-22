@@ -82,7 +82,7 @@ async function VolunteerResponseEvent({ nightDataService, messageService }, inte
             });
             return;
         }
-        if (role === 'night-host') {
+        if (role === 'night-distro') {
             // TODO: save to DB
             await nightDataService.addNightData([
                 {

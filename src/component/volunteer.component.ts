@@ -16,12 +16,23 @@ export function GetVolunteerInitComponent({
     discordId,
     day
 }: Pick<NightPersonModel, 'discordId' | 'day'>) {
-    const editButton = new ButtonBuilder()
+    const pickupButton = new ButtonBuilder()
         .setCustomId(`volunteer-pickup--${day}--${discordId}`)
-        .setLabel(`Volunteer the Button`)
+        .setLabel(`Volunteer the Pickup Button`)
         .setStyle(ButtonStyle.Secondary);
 
-    return [new ActionRowBuilder<ButtonBuilder>().addComponents(editButton)];
+    const hostButton = new ButtonBuilder()
+        // this is an "update" since we don't need more data, we can save this to db
+        .setCustomId(`volunteer-distro-update--${day}--${discordId}`)
+        .setLabel(`Volunteer the Distro Button`)
+        .setStyle(ButtonStyle.Secondary);
+
+    return [
+        new ActionRowBuilder<ButtonBuilder>().addComponents(
+            pickupButton,
+            hostButton
+        )
+    ];
 }
 
 export function GetVolunteerListAllComponent({
@@ -56,8 +67,8 @@ export function GetVolunteerRoleComponent({
     const components: ActionRowBuilder<ButtonBuilder>[] = [];
 
     const hostButton = new ButtonBuilder()
-        .setCustomId(`volunteer-init--${day}--night-host--${discordId}`)
-        .setLabel(NM_NIGHT_ROLES['night-host'].description)
+        .setCustomId(`volunteer-init--${day}--night-distro--${discordId}`)
+        .setLabel(NM_NIGHT_ROLES['night-distro'].description)
         .setStyle(ButtonStyle.Secondary);
     const pickupButton = new ButtonBuilder()
         .setCustomId(`volunteer-init--${day}--night-pickup--${discordId}`)
@@ -78,8 +89,10 @@ export function GetVolunteerRoleShadowComponent({
     const components: ActionRowBuilder<ButtonBuilder>[] = [];
 
     const shadowHostButton = new ButtonBuilder()
-        .setCustomId(`volunteer-init--${day}--night-host-shadow--${discordId}`)
-        .setLabel(NM_NIGHT_ROLES['night-host-shadow'].description)
+        .setCustomId(
+            `volunteer-init--${day}--night-distro-shadow--${discordId}`
+        )
+        .setLabel(NM_NIGHT_ROLES['night-distro-shadow'].description)
         .setStyle(ButtonStyle.Secondary);
     const shadowPickupButton = new ButtonBuilder()
         .setCustomId(
@@ -120,32 +133,47 @@ export function GetVolunteerPickupComponent(
     { day, discordId }: Required<Pick<NightPersonModel, 'day' | 'discordId'>>,
     pickupList: NightPickupModel[]
 ) {
-    const select = new StringSelectMenuBuilder()
-        .setCustomId(`volunteer-pickup-update--${day}--${discordId}`)
-        .setPlaceholder('Make a selection!')
-        .setMinValues(1)
-        .setMaxValues(pickupList.length)
-        .addOptions(
-            pickupList.map(({ org, timeStart, timeEnd, personList }) =>
-                new StringSelectMenuOptionBuilder()
-                    .setLabel(`Pickup: ${org}`)
-                    .setDescription(
-                        `at ${ParseContentService.getAmPmTimeFrom24Hour(
-                            timeStart
-                        )}${personList.length ? ' with ' : ''}${personList
-                            .map((a) => a.name)
-                            .join(', ')}`
+    const hasOwnPickups = pickupList.filter((a) =>
+        a.personList.some((b) => b.discordIdOrEmail === discordId)
+    ).length;
+
+    const rows: ActionRowBuilder<StringSelectMenuBuilder | ButtonBuilder>[] = [
+        new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
+            new StringSelectMenuBuilder()
+                .setCustomId(`volunteer-pickup-update--${day}--${discordId}`)
+                .setPlaceholder('Make a selection!')
+                .setMinValues(1)
+                .setMaxValues(pickupList.length)
+                .addOptions(
+                    pickupList.map(({ org, timeStart, timeEnd, personList }) =>
+                        new StringSelectMenuOptionBuilder()
+                            .setLabel(`Pickup: ${org}`)
+                            .setDescription(
+                                `at ${ParseContentService.getAmPmTimeFrom24Hour(
+                                    timeStart
+                                )}${
+                                    personList.length ? ' with ' : ''
+                                }${personList.map((a) => a.name).join(', ')}`
+                            )
+                            .setValue(
+                                `${org}---${timeStart}---${timeEnd || '0000'}`
+                            )
                     )
-                    .setValue(`${org}---${timeStart}---${timeEnd || '0000'}`)
+                )
+        )
+    ];
+
+    if (hasOwnPickups) {
+        rows.push(
+            new ActionRowBuilder<ButtonBuilder>().addComponents(
+                new ButtonBuilder()
+                    .setCustomId(
+                        `volunteer-pickup-delete--${day}--${discordId}`
+                    )
+                    .setLabel(`Delete ${hasOwnPickups} Pickups`)
+                    .setStyle(ButtonStyle.Secondary)
             )
         );
-
-    const deleteButton = new ButtonBuilder()
-        .setCustomId(`volunteer-pickup-delete--${day}--${discordId}`)
-        .setLabel(`Delete ALL them Pickups`)
-        .setStyle(ButtonStyle.Secondary);
-    return [
-        new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(select),
-        new ActionRowBuilder<ButtonBuilder>().addComponents(deleteButton)
-    ];
+    }
+    return rows;
 }

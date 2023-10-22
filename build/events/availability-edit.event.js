@@ -55,8 +55,8 @@ async function AvailabilitySelectEvent({ personDataService, nightDataService, me
     }
     const daysOfWeekIdList = Object.values(const_1.DAYS_OF_WEEK).map((a) => a.id);
     // todo: we probably should have a routing utility for routing different types of responses
-    // in this case we have selected our night-host availability so ...
-    if (period === 'night-host') {
+    // in this case we have selected our night-distro availability so ...
+    if (period === 'night-distro') {
         // save it to the db ...
         const [day, timeStart] = interaction.values[0].split('|||');
         dbg(day, timeStart);

@@ -29,7 +29,7 @@ export const AvailabilityToHostComponent = (
     return [
         new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
             new StringSelectMenuBuilder()
-                .setCustomId(`availability--night-host--${discordId}`)
+                .setCustomId(`availability--night-distro--${discordId}`)
 
                 .setMinValues(0)
                 .setMaxValues(dayTimeList.length)
@@ -45,7 +45,7 @@ export const AvailabilityToHostComponent = (
         ),
         new ActionRowBuilder<ButtonBuilder>().addComponents(
             new ButtonBuilder()
-                .setCustomId(`availability--night-host-none--${discordId}`)
+                .setCustomId(`availability--night-distro-none--${discordId}`)
                 .setLabel('No availability')
                 .setStyle(ButtonStyle.Secondary)
         )

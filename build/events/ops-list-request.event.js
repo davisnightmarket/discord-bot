@@ -52,7 +52,7 @@ async function NightListRequestEvent({ nightDataService }, guild, interaction) {
             });
             return;
         }
-        if (role === 'night-host') {
+        if (role === 'night-distro') {
             interaction.reply({
                 content: 'host options'
             });

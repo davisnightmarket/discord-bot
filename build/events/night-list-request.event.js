@@ -24,8 +24,8 @@ async function NightListRequestEvent({ nightDataService }, interaction) {
         const components = [];
         const content = (0, utility_1.GetPickupJoinMessage)(pickupList);
         const joinOnceButton = new discord_js_1.ButtonBuilder()
-            .setCustomId(`volunteer--${channelDay}--night-host`)
-            .setLabel(const_1.NM_NIGHT_ROLES['night-host'].description)
+            .setCustomId(`volunteer--${channelDay}--night-distro`)
+            .setLabel(const_1.NM_NIGHT_ROLES['night-distro'].description)
             .setStyle(discord_js_1.ButtonStyle.Secondary);
         const joinAlwaysButton = new discord_js_1.ButtonBuilder()
             .setCustomId(`volunteer--${channelDay}--night-pickup`)
@@ -123,7 +123,7 @@ async function NightListRequestEvent({ nightDataService }, interaction) {
             });
             return;
         }
-        if (role === 'night-host') {
+        if (role === 'night-distro') {
             // TODO: save to DB
             await nightDataService.addNightData([
                 {

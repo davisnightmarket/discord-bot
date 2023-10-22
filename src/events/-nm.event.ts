@@ -97,7 +97,7 @@ export async function NmEvent(
 //     [step, role, day]: [string, NmNightRoleType, NmDayNameType]
 // ) {
 //     dbg('ok');
-//     if (step !== 'availability-edit' && step !== 'night-host') {
+//     if (step !== 'availability-edit' && step !== 'night-distro') {
 //         return;
 //     }
 
@@ -237,7 +237,7 @@ export async function NmEvent(
 //         return;
 //     }
 
-//     if (role === 'night-host') {
+//     if (role === 'night-distro') {
 //         // TODO: save to DB
 //         await nightDataService.addNightData([
 //             {

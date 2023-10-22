@@ -11,7 +11,7 @@ const NightOpsJob = (client) => async () => {
         const { nightDataService, markdownService } = await (0, utility_1.GetGuildServices)(guild.id);
         // get the channel by today name
         const channelDay = (0, utility_1.GetChannelDayToday)();
-        const content = markdownService.getAnnounceMessage(await (0, utility_1.GetGuildRoleIdByName)(guild, channelDay), await nightDataService.getNightByDay(channelDay));
+        const content = markdownService.getNightOpsAnnounce(await (0, utility_1.GetGuildRoleIdByName)(guild, channelDay), await nightDataService.getNightByDay(channelDay));
         (await guild.channels.cache.find((channel) => channel.name === channelDay))?.send({
             content
         });

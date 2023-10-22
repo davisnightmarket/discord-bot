@@ -3,7 +3,10 @@ import { DAYS_OF_WEEK_CODES } from '../const';
 // import { type PersonModel, type PickUp } from '../service';
 
 export const GetChannelDayToday = (date = new Date()) => {
-    return DAYS_OF_WEEK_CODES[date.getDay()];
+    return DAYS_OF_WEEK_CODES[
+        // because Monday is the first day of the week
+        date.getDay() ? date.getDay() - 1 : 6
+    ];
 };
 export const GetChannelDayYesterday = (date = new Date()) => {
     return DAYS_OF_WEEK_CODES[date.getDay() - 1] || DAYS_OF_WEEK_CODES[6];
@@ -102,7 +105,7 @@ export const GetChannelDayYesterday = (date = new Date()) => {
 
 // // todo: use message service
 // export function GetHostMessage({ hostList }: NightModel): string {
-//     const a = hostList.filter((a) => a.role === 'night-host');
+//     const a = hostList.filter((a) => a.role === 'night-distro');
 //     return `Host${a.length > 1 ? 's' : ''}: ${a
 //         .map(
 //             ({ name, discordId }) =>

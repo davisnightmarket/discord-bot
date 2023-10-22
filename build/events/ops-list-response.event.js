@@ -22,7 +22,7 @@ async function OpsListResponseEvent({ nightDataService }, interaction) {
     if (role === 'night-pickup') {
         return;
     }
-    if (role === 'night-host') {
+    if (role === 'night-distro') {
         return;
     }
     // let channelDay = day ?? (interaction?.guild?.name as NmDayNameType);
