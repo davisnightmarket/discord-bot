@@ -5,16 +5,19 @@ import {
     ButtonBuilder,
     ButtonStyle
 } from 'discord.js';
-import { PersonModel } from '../service';
-import { DAYS_OF_WEEK, PARTS_OF_DAY } from '../const';
+import { DAYS_OF_WEEK, DAYS_OF_WEEK_CODES, PARTS_OF_DAY } from '../const';
 import { NmDayNameType } from '../model';
 
 export const AvailabilityEditButtonComponent = (discordId: string) => {
     return [
         new ActionRowBuilder<ButtonBuilder>().addComponents(
             new ButtonBuilder()
-                .setCustomId(`availability--init--${discordId}`)
-                .setLabel('Edit availability?')
+                .setCustomId(`availability--init-host--${discordId}`)
+                .setLabel('Edit Hosting Availability')
+                .setStyle(ButtonStyle.Secondary),
+            new ButtonBuilder()
+                .setCustomId(`availability--init-pickup--${discordId}`)
+                .setLabel('Edit Pickup Availability')
                 .setStyle(ButtonStyle.Secondary)
         )
     ];
@@ -45,15 +48,41 @@ export const AvailabilityToHostComponent = (
         ),
         new ActionRowBuilder<ButtonBuilder>().addComponents(
             new ButtonBuilder()
-                .setCustomId(`availability--night-distro-none--${discordId}`)
-                .setLabel('No availability')
-                .setStyle(ButtonStyle.Secondary)
+                .setCustomId(`availability--night-distro-clear--${discordId}`)
+                .setLabel('DELETE ALL AVAILABILITY TO HOST')
+                .setStyle(ButtonStyle.Danger)
         )
     ];
 };
 
 // selects to identify your availability for night ops
-export const AvailabilityToPickupPerDayComponent = ({
+export const AvailabilityToPickupDaySelectComponent = ({
+    discordId
+}: {
+    discordId: string;
+}) => {
+    return [
+        new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
+            new StringSelectMenuBuilder()
+                .setCustomId(
+                    `availability--night-pickup-day--none--${discordId}`
+                )
+                .addOptions(
+                    ...DAYS_OF_WEEK_CODES.map((day) =>
+                        new StringSelectMenuOptionBuilder()
+                            .setLabel(`${DAYS_OF_WEEK[day].name}`)
+                            .setDescription(
+                                DAYS_OF_WEEK[day as NmDayNameType].description
+                            )
+                            .setValue(DAYS_OF_WEEK[day].id)
+                    )
+                )
+        )
+    ];
+};
+
+// selects to identify your availability for night ops
+export const AvailabilityToPickupPerDaySelectComponent = ({
     day,
     discordId,
     defaultList
@@ -87,10 +116,12 @@ export const AvailabilityToPickupPerDayComponent = ({
         new ActionRowBuilder<ButtonBuilder>().addComponents(
             new ButtonBuilder()
                 .setCustomId(
-                    `availability--night-pickup-none--${day}--${discordId}`
+                    `availability--night-pickup-clear-day--${day}--${discordId}`
                 )
-                .setLabel('No availability')
-                .setStyle(ButtonStyle.Secondary)
+                .setLabel(
+                    `DELETE ALL MY ${DAYS_OF_WEEK[day].name} AVAILABILITY`
+                )
+                .setStyle(ButtonStyle.Danger)
         )
     ];
 };

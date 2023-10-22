@@ -191,7 +191,16 @@ export async function RouteInteraction(interaction: Interaction) {
                 services,
                 interaction as ButtonInteraction,
                 discordId,
-                args as [string, 'init', NmDayNameType]
+                args as [
+                    string,
+                    (
+                        | 'init-host'
+                        | 'init-pickup'
+                        | 'night-distro-clear'
+                        | 'night-pickup-clear'
+                    ),
+                    NmDayNameType
+                ]
             );
 
             PermissionButtonEvent(

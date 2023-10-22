@@ -45,28 +45,54 @@ async function AvailabilityEditButtonEvent({ personDataService, nightDataService
         //! we would like to show them their modal
         // // we cannot show the identity model since we have deferred
         await interaction.editReply(await markdownService.getGenericNoPerson());
-        // interaction.showModal(
-        //     IdentityEditModalComponent(personDataService.createPerson(person))
-        // );
         return;
     }
-    if (step === 'init') {
-        // if (!person) {
-        //     // show them their modal
-        //     interaction.showModal(
-        //         IdentityEditModalComponent(
-        //             personDataService.createPerson(person)
-        //         )
-        //     );
-        //     return;
-        // }
-        const dayTimes = await nightDataService.getDayTimeIdAndReadableByDayAsTupleList();
+    if (step === 'init-pickup') {
         // todo: show host then pickup, since we can't fit them all
+        const components = (0, component_1.AvailabilityToPickupDaySelectComponent)({
+            discordId
+        });
+        // response
+        await interaction.editReply({
+            content: markdownService.md.AVAILABILITY_TO_PICKUP({}),
+            components
+        });
+    }
+    if (step === 'init-host') {
+        const dayTimes = await nightDataService.getDayTimeIdAndReadableByDayAsTupleList();
         const components = (0, component_2.AvailabilityToHostComponent)(dayTimes, discordId, []);
+        // todo: show host then pickup, since we can't fit them all
         // response
         await interaction.editReply({
             content: markdownService.md.AVAILABILITY_TO_HOST({}),
             components
+        });
+    }
+    const daysOfWeekIdList = Object.values(const_1.DAYS_OF_WEEK).map((a) => a.id);
+    // in this case we have selected our night-distro availability so ...
+    if (step === 'night-distro-clear') {
+        personDataService.updatePersonByDiscordId({
+            ...person,
+            availabilityHost: ''
+        });
+        await interaction.editReply({
+            content: markdownService.md.GENERIC_OK({})
+        });
+        return;
+    }
+    // in this case we are in the pickup section
+    if (step === 'night-pickup-clear') {
+        // save the previous to the db ...
+        // if we are on the first day, reset
+        let { availabilityPickup } = person;
+        availabilityPickup = '';
+        personDataService.updatePersonByDiscordId({
+            ...person,
+            availabilityPickup
+        });
+        // response
+        await interaction.editReply({
+            content: markdownService.md.GENERIC_OK({})
         });
     }
 }
@@ -102,13 +128,13 @@ async function AvailabilityEditSelectEvent({ personDataService, markdownService 
         });
         // now display first night-pickup select
         const currentDay = const_1.DAYS_OF_WEEK[daysOfWeekIdList[0]];
-        const components = (0, component_2.AvailabilityToPickupPerDayComponent)({
+        const components = (0, component_2.AvailabilityToPickupPerDaySelectComponent)({
             day: currentDay.id,
             discordId,
             defaultList: []
         });
         await interaction.editReply({
-            content: markdownService.md.AVAILABILITY_TO_PICKUP({
+            content: markdownService.md.AVAILABILITY_TO_HOST({
                 dayName: currentDay.name
             }),
             components
@@ -116,43 +142,165 @@ async function AvailabilityEditSelectEvent({ personDataService, markdownService 
         return;
     }
     // in this case we are in the pickup section
+    if (step === 'night-pickup-day') {
+        // save the previous to the db ...
+        // if we are on the first day, reset
+        const selectedDayId = interaction.values[0];
+        const selectedDay = const_1.DAYS_OF_WEEK[selectedDayId];
+        // todo: show host then pickup, since we can't fit them all
+        const components = (0, component_2.AvailabilityToPickupPerDaySelectComponent)({
+            day: selectedDay.id,
+            discordId,
+            defaultList: []
+        });
+        // response
+        await interaction.editReply({
+            content: markdownService.md.AVAILABILITY_TO_PICKUP_ON_DAY({
+                dayName: selectedDay.name
+            }),
+            components
+        });
+    }
+    // in this case we are in the pickup section
     if (step === 'night-pickup') {
         // save the previous to the db ...
         // if we are on the first day, reset
-        let availabilityPickup = '';
+        let { availabilityPickup } = person;
         if (!daysOfWeekIdList.indexOf(day)) {
             availabilityPickup = interaction.values.join(',');
         }
         else {
             availabilityPickup += interaction.values.join(',');
         }
+        // make sure they are unique
+        availabilityPickup = availabilityPickup
+            .split(', ')
+            .reduce((a, b) => {
+            if (!a.includes(b)) {
+                a.push(b);
+            }
+            return a;
+        }, [])
+            .join(',');
         personDataService.updatePersonByDiscordId({
             ...person,
             availabilityPickup
         });
-        // show the next step
-        const nextDayIndex = daysOfWeekIdList.indexOf(day) + 1;
-        // in this case we are done with the pickups, want to show permissions
-        if (nextDayIndex === daysOfWeekIdList.length) {
-            await interaction.editReply({
-                content: markdownService.md.GENERIC_OK({})
-            });
-            return;
-        }
-        const currentDay = Object.values(const_1.DAYS_OF_WEEK)[nextDayIndex];
-        // todo: show host then pickup, since we can't fit them all
-        const components = (0, component_2.AvailabilityToPickupPerDayComponent)({
-            day: currentDay.id,
-            discordId,
-            defaultList: []
-        });
+        // // show the next step
+        // const nextDayIndex = daysOfWeekIdList.indexOf(day) + 1;
+        // // in this case we are done with the pickups, want to show permissions
+        // if (nextDayIndex === daysOfWeekIdList.length) {
+        //     await interaction.editReply({
+        //         content: markdownService.md.GENERIC_OK({})
+        //     });
+        //     return;
+        // }
+        // const currentDay = Object.values(DAYS_OF_WEEK)[nextDayIndex];
+        // // todo: show host then pickup, since we can't fit them all
+        // const components = AvailabilityToPickupPerDaySelectComponent({
+        //     day: currentDay.id,
+        //     discordId,
+        //     defaultList: []
+        // });
         // response
         await interaction.editReply({
-            content: markdownService.md.AVAILABILITY_TO_PICKUP({
-                dayName: currentDay.name
-            }),
-            components
+            content: markdownService.md.GENERIC_OK({})
+            //components
         });
     }
 }
 exports.AvailabilityEditSelectEvent = AvailabilityEditSelectEvent;
+// // in which user edits their availability
+// export async function AvailabilityNoneButtonEvent(
+//     { personDataService, markdownService }: GuildServiceModel,
+//     interaction: ButtonInteraction,
+//     discordId: string,
+//     [command, step, day]: [
+//         string,
+//         NmNightRoleType | 'night-distro' | 'night-pickup',
+//         NmDayNameType
+//     ]
+// ) {
+//     // todo: handle this higher up
+//     if (command !== 'availability-none') {
+//         return;
+//     }
+//     dbg(command, step, day);
+//     await interaction.deferReply({ ephemeral: true });
+//     // get the person's data
+//     const person = await personDataService.getPersonByDiscordId(
+//         interaction.user.id
+//     );
+//     if (!person) {
+//         //! we would like to show them their modal
+//         // // we cannot show the identity model since we have deferred
+//         await interaction.editReply(await markdownService.getGenericNoPerson());
+//         // interaction.showModal(
+//         //     IdentityEditModalComponent(personDataService.createPerson(person))
+//         // );
+//         return;
+//     }
+//     const daysOfWeekIdList = Object.values(DAYS_OF_WEEK).map((a) => a.id);
+//     // in this case we have selected our night-distro availability so ...
+//     if (step === 'night-distro') {
+//         // save it to the db ...
+//         // const [day, timeStart] = interaction.values[0].split('|||');
+//         // dbg(day, timeStart);
+//         personDataService.updatePersonByDiscordId({
+//             ...person,
+//             availabilityHost: ''
+//         });
+//         // now display first night-pickup select
+//         const currentDay = DAYS_OF_WEEK[daysOfWeekIdList[0]];
+//         const components = AvailabilityToPickupPerDayComponent({
+//             day: currentDay.id,
+//             discordId,
+//             defaultList: []
+//         });
+//         await interaction.editReply({
+//             content: markdownService.md.AVAILABILITY_TO_PICKUP({
+//                 dayName: currentDay.name
+//             }),
+//             components
+//         });
+//         return;
+//     }
+//     // in this case we are in the pickup section
+//     if (step === 'night-pickup') {
+//         // save the previous to the db ...
+//         // if we are on the first day, reset
+//         let { availabilityPickup } = person;
+//         if (!daysOfWeekIdList.indexOf(day)) {
+//             availabilityPickup = '';
+//         } else {
+//             availabilityPickup += '';
+//         }
+//         personDataService.updatePersonByDiscordId({
+//             ...person,
+//             availabilityPickup
+//         });
+//         // show the next step
+//         const nextDayIndex = daysOfWeekIdList.indexOf(day) + 1;
+//         // in this case we are done with the pickups, want to show permissions
+//         if (nextDayIndex === daysOfWeekIdList.length) {
+//             await interaction.editReply({
+//                 content: markdownService.md.GENERIC_OK({})
+//             });
+//             return;
+//         }
+//         const currentDay = Object.values(DAYS_OF_WEEK)[nextDayIndex];
+//         // todo: show host then pickup, since we can't fit them all
+//         const components = AvailabilityToPickupPerDayComponent({
+//             day: currentDay.id,
+//             discordId,
+//             defaultList: []
+//         });
+//         // response
+//         await interaction.editReply({
+//             content: markdownService.md.AVAILABILITY_TO_PICKUP({
+//                 dayName: currentDay.name
+//             }),
+//             components
+//         });
+//     }
+// }

@@ -30,7 +30,8 @@ const messageMap = {
         availabilityHostList: '',
         availabilityPickupList: ''
     }),
-    AVAILABILITY_TO_PICKUP: (0, utility_1.CreateMdMessage)('AVAILABILITY_TO_PICKUP', {
+    AVAILABILITY_TO_PICKUP: (0, utility_1.CreateMdMessage)('AVAILABILITY_TO_PICKUP', {}),
+    AVAILABILITY_TO_PICKUP_ON_DAY: (0, utility_1.CreateMdMessage)('AVAILABILITY_TO_PICKUP_ON_DAY', {
         dayName: ''
     }),
     AVAILABILITY_TO_HOST: (0, utility_1.CreateMdMessage)('AVAILABILITY_TO_HOST', {}),
@@ -117,19 +118,21 @@ class MarkdownService {
         return [
             person.availabilityHost
                 .split(',')
+                .filter((a) => a.trim())
                 .map((a) => a
                 .trim()
                 .split('|||')
                 .map((a) => a.trim()))
-                .map((a) => `  - Host ${const_1.DAYS_OF_WEEK[a[0]].name} ${_1.ParseContentService.getAmPmTimeFrom24Hour(a[1])}`)
+                .map((a) => `  - Host ${const_1.DAYS_OF_WEEK[a[0]]?.name} ${_1.ParseContentService.getAmPmTimeFrom24Hour(a[1])}`)
                 .join('\n'),
             person.availabilityPickup
                 .split(',')
+                .filter((a) => a.trim())
                 .map((a) => a
                 .trim()
                 .split('|||')
                 .map((a) => a.trim()))
-                .map((a) => `  - Pick-up ${const_1.DAYS_OF_WEEK[a[0]].name} ${const_1.PARTS_OF_DAY[a[1]].name}`)
+                .map((a) => `  - Pick-up ${const_1.DAYS_OF_WEEK[a[0]]?.name} ${const_1.PARTS_OF_DAY[a[1]]?.name}`)
                 .join('\n')
         ];
     }
