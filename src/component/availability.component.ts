@@ -49,7 +49,7 @@ export const AvailabilityToHostComponent = (
         new ActionRowBuilder<ButtonBuilder>().addComponents(
             new ButtonBuilder()
                 .setCustomId(`availability--night-distro-clear--${discordId}`)
-                .setLabel('DELETE ALL AVAILABILITY TO HOST')
+                .setLabel('Delete My Availability')
                 .setStyle(ButtonStyle.Danger)
         )
     ];
@@ -118,9 +118,7 @@ export const AvailabilityToPickupPerDaySelectComponent = ({
                 .setCustomId(
                     `availability--night-pickup-clear-day--${day}--${discordId}`
                 )
-                .setLabel(
-                    `DELETE ALL MY ${DAYS_OF_WEEK[day].name} AVAILABILITY`
-                )
+                .setLabel(`Delete ${DAYS_OF_WEEK[day].name} Availability`)
                 .setStyle(ButtonStyle.Danger)
         )
     ];

@@ -195,17 +195,18 @@ export const NightTimelineJob = (client: Client) => async () => {
         dbg('QUITTER', quitterList.length);
         await nightDataService.removeNightData(quitterList);
 
-        const content = markdownService.getAfterMarketAnnounce(
-            await GetGuildRoleIdByName(guild, channelDay),
-            await nightDataService.getNightByDay(channelDay)
-        );
+        // todo: do we want an announce on timeline update? Probably not
+        // const content = markdownService.getAfterMarketAnnounce(
+        //     await GetGuildRoleIdByName(guild, channelDay),
+        //     await nightDataService.getNightByDay(channelDay)
+        // );
 
-        (
-            (await guild.channels.cache.find(
-                (channel) => channel.name === channelDay
-            )) as TextChannel
-        )?.send({
-            content
-        });
+        // (
+        //     (await guild.channels.cache.find(
+        //         (channel) => channel.name === channelDay
+        //     )) as TextChannel
+        // )?.send({
+        //     content
+        // });
     }
 };

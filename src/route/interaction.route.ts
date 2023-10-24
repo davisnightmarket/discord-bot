@@ -96,14 +96,28 @@ export async function RouteInteraction(interaction: Interaction) {
             // show how to become a cc message and return
             // return
             //}
+            const { marketAdminService } = services;
+            // todo: this is going to break our current model, we need to fix it
+            await interaction.deferReply({ ephemeral: true });
+            const ccList =
+                await marketAdminService.getCommunityCoordinatorDiscordIdList();
+            console.log(ccList);
 
-            const target = interaction.options.getUser('target');
-            if (!command) {
-                interaction.reply(' CC how-to docs and help coming soon!');
+            if (!ccList.includes(interaction.user.id)) {
+                interaction.editReply(
+                    'Sorry, you cannot do that unless you are a Community Coordinator'
+                );
                 return;
             }
+            if (!command) {
+                interaction.editReply(' CC how-to docs and help coming soon!');
+                return;
+            }
+
+            const target = interaction.options.getUser('target');
+
             if (!target) {
-                interaction.reply(`CC ${command} how-to coming soon!`);
+                interaction.editReply(`CC ${command} how-to coming soon!`);
                 return;
             }
 

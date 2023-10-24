@@ -4,6 +4,7 @@ import {
     FoodCountDataService,
     FoodCountInputService,
     OrgDataService,
+    MarketAdminService,
     PersonDataService,
     NightDataService,
     MarkdownService
@@ -27,6 +28,7 @@ export interface GuildServiceModel {
     personDataService: PersonDataService;
     nightDataService: NightDataService;
     markdownService: MarkdownService;
+    marketAdminService: MarketAdminService;
 }
 
 // because we need to build a set of services that are connected to data per guild
@@ -35,18 +37,23 @@ export async function GetGuildServices(guildId: string) {
     if (!servicesByGuildId.has(guildId)) {
         const config = await coreDataService.getConfigByGuildId(guildId);
 
-        const orgDataService = new OrgDataService(config.GSPREAD_ORG_ID);
+        const orgDataService = new OrgDataService(config.GSPREAD_MARKET_ID);
 
         const personDataService = new PersonDataService(
-            config.GSPREAD_PERSON_ID
+            config.GSPREAD_MARKET_ID
         );
 
         const nightDataService = new NightDataService(
-            config.GSPREAD_NIGHT_ID,
+            config.GSPREAD_MARKET_ID,
             personDataService
         );
 
         const markdownService = new MarkdownService(coreDataService);
+
+        const marketAdminService = new MarketAdminService(
+            config.GSPREAD_MARKET_ID,
+            personDataService
+        );
 
         servicesByGuildId.set(guildId, {
             config,
@@ -54,11 +61,12 @@ export async function GetGuildServices(guildId: string) {
             coreDataService,
             nightDataService,
             foodCountDataService: new FoodCountDataService(
-                config.GSPREAD_FOODCOUNT_ID
+                config.GSPREAD_MARKET_ID
             ),
             foodCountInputService: new FoodCountInputService(orgDataService),
             personDataService,
-            orgDataService
+            orgDataService,
+            marketAdminService
         });
     }
 

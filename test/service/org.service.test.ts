@@ -8,5 +8,6 @@ describe('NightMarketDataService', () => {
         const { orgDataService } = await WaitForGuildServices;
         const orgList = await orgDataService.getOrgList();
         expect(orgList.length).toBeGreaterThan(3);
+        expect(orgList.filter((a) => a.name === 'Mishkas').length).toBe(1);
     });
 });

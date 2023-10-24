@@ -40,9 +40,10 @@ async function main() {
     });
     client.on(discord_js_1.Events.MessageCreate, async (message) => {
         const services = await (0, utility_1.GetGuildServices)(message.guildId ?? '');
+        console.log('wtg');
         // food count input
         try {
-            (0, events_1.FoodCountMessageEvent)(services);
+            (0, events_1.FoodCountMessageEvent)(services, message);
         }
         catch (e) {
             // todo: logger utility

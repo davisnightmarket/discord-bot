@@ -149,18 +149,30 @@ class NightDataService {
     }
     // this is because we need to get teh day/time as a unique identifier
     // and as a human readable string
-    async getDayTimeIdAndReadableByDayAsTupleList() {
+    async getDayTimeIdAndReadableByDayAsTupleList({ includeRoleList }) {
+        await this.refreshCache();
         return this.waitingForNightCache.then((nightOps) => {
-            const dayTimesMap = nightOps.reduce((a, b) => {
-                if (b.day && b.timeStart && !a[b.day + b.timeStart]) {
-                    a[b.day + b.timeStart] = [
-                        `${b.day}|||${b.timeStart}`,
-                        `${const_1.DAYS_OF_WEEK[b.day].name} ${_1.ParseContentService.getAmPmTimeFrom24Hour(b.timeStart)}`
-                    ];
+            console.log(nightOps.filter((a) => includeRoleList.includes(a.role)));
+            return (nightOps
+                .filter((a) => includeRoleList.includes(a.role))
+                .map((a) => {
+                return `${a.day}|||${a.timeStart}`;
+            })
+                // make them unique
+                .reduce((a, b, i) => {
+                if (!a.includes(b)) {
+                    a.push(b);
                 }
                 return a;
-            }, {});
-            return Object.values(dayTimesMap);
+            }, [])
+                // add the pretty name
+                .map((a) => {
+                const [day, timeStart] = a.split('|||');
+                return [
+                    a,
+                    `${const_1.DAYS_OF_WEEK[day].name} ${_1.ParseContentService.getAmPmTimeFrom24Hour(timeStart)}`
+                ];
+            }));
         });
     }
     // this pulls notes per day

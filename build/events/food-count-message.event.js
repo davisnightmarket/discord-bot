@@ -17,7 +17,8 @@ exports.TIME_UNTIL_UPDATE = 60 * 1000; // one minute in milliseconds
  *
  */
 const dbg = (0, utility_1.Dbg)('FoodCountInputEvent');
-const FoodCountMessageEvent = ({ personDataService, foodCountInputService, foodCountDataService, markdownService }) => async (message) => {
+const FoodCountMessageEvent = async ({ personDataService, foodCountInputService, foodCountDataService, markdownService }, message) => {
+    console.log('FoodCountMessageEvent');
     dbg('ok');
     const { channel, author } = message;
     /* STAGE 1: skip the message entirely in some cases */
@@ -54,15 +55,13 @@ const FoodCountMessageEvent = ({ personDataService, foodCountInputService, foodC
         return;
     }
     // because when we have only errors, and we are in the night channel ...
-    if (inputStatus === 'ONLY_ERRORS' &&
-        channelStatus === 'NIGHT_CHANNEL') {
+    if (inputStatus === 'ONLY_ERRORS' && channelStatus === 'NIGHT_CHANNEL') {
         // we want to ask them nicely if they meant to do a count at all
         // ? perhaps we want a a separate cache for this case and let them confirm?
         return;
     }
     // because when we have some errors, and we are in the night channel ...
-    if (inputStatus === 'OK_WITH_ERRORS' &&
-        channelStatus === 'NIGHT_CHANNEL') {
+    if (inputStatus === 'OK_WITH_ERRORS' && channelStatus === 'NIGHT_CHANNEL') {
         // we want to ask them nicely if they meant to do a count
         // because we do not assume that we are doing a count in this case ?
         // ? perhaps we want a a separate cache for this case and let them confirm?
@@ -70,8 +69,7 @@ const FoodCountMessageEvent = ({ personDataService, foodCountInputService, foodC
         return;
     }
     // because when we have only errors, and we are in the count channel ...
-    if (inputStatus === 'ONLY_ERRORS' &&
-        channelStatus === 'COUNT_CHANNEL') {
+    if (inputStatus === 'ONLY_ERRORS' && channelStatus === 'COUNT_CHANNEL') {
         // we want to show them their errors, ask if they meant to do it
         return;
     }

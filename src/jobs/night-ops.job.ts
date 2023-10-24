@@ -1,11 +1,13 @@
 import { type Client, type TextChannel } from 'discord.js';
 
 import {
+    DebugUtility,
     GetChannelDayToday,
     GetGuildRoleIdByName,
     GetGuildServices
 } from '../utility';
 
+const dbg = DebugUtility('NightOpsJob');
 // when a person requests a listing of
 export const NightOpsJob = (client: Client) => async () => {
     // get the guild
@@ -18,10 +20,13 @@ export const NightOpsJob = (client: Client) => async () => {
         );
         // get the channel by today name
         const channelDay = GetChannelDayToday();
-
+        const nightMap = await nightDataService.getNightByDay(channelDay);
+        if (nightMap.pickupList.length == 0 && nightMap.hostList.length == 0) {
+            dbg('No pickups or hosting, skipping announce.');
+        }
         const content = markdownService.getNightOpsAnnounce(
             await GetGuildRoleIdByName(guild, channelDay),
-            await nightDataService.getNightByDay(channelDay)
+            nightMap
         );
 
         (

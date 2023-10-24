@@ -5,10 +5,7 @@ exports.EnvConfig = exports.InstanceConfig = void 0;
 exports.InstanceConfig = {
     NM_ID: '',
     DISCORD_GUILD_ID: '',
-    GSPREAD_FOODCOUNT_ID: '',
-    GSPREAD_NIGHT_ID: '',
-    GSPREAD_PERSON_ID: '',
-    GSPREAD_ORG_ID: ''
+    GSPREAD_MARKET_ID: ''
 };
 const coreConfig = {
     // GSPREAD_CORE_PERSON_ID: '1X5fJDmGKJtbAanHOqyQ3RCHMP63ABQK4fgpvzm9RSLM',

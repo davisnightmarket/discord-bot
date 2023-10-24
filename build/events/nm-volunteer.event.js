@@ -14,6 +14,7 @@ async function VolunteerCommandEvent({ nightDataService, markdownService }, inte
     const day = (await (0, utility_1.GetChannelDayNameFromInteraction)(interaction)) ||
         (0, utility_1.GetChannelDayToday)();
     // get
+    dbg(day);
     const nightMap = await nightDataService.getNightByDay(day, {
         refreshCache: true
     });

@@ -50,9 +50,11 @@ async function main() {
     });
     client.on(Events.MessageCreate, async (message) => {
         const services = await GetGuildServices(message.guildId ?? '');
+        console.log('wtg');
+
         // food count input
         try {
-            FoodCountMessageEvent(services);
+            FoodCountMessageEvent(services, message);
         } catch (e) {
             // todo: logger utility
             dbg(e);

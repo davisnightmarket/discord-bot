@@ -201,7 +201,7 @@ export class MarkdownService {
 
     getNightOpsAnnounce(roleId: string, nightMap: NightModel): string {
         return (
-            `## ${this.getRandoSalute()} ${roleMention(roleId)}!\n` +
+            `## ${roleMention(roleId)}!\n` +
             '\n' +
             this.getNightCapAnnounce(nightMap) +
             '\n' +
@@ -211,13 +211,11 @@ export class MarkdownService {
         );
     }
 
-    getRandoSalute() {
+    getRandoChannelSalute(channelName: string) {
         const saluteList: string[] = [
-            'Hellooo',
-            'Holla',
-            'Dear',
-            'Dearest',
-            'Darling'
+            `Pardon Me ${roleMention(channelName)}, my dear ol' chap,`,
+            `Dearest Darling ${roleMention(channelName)},`,
+            `Sup ${roleMention(channelName)} Dogz`
         ];
 
         return saluteList[Math.floor(Math.random() * saluteList.length)];

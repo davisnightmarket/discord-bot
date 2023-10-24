@@ -30,7 +30,7 @@ const AvailabilityToHostComponent = (dayTimeList, discordId, defaultDayTimeList)
         }))),
         new discord_js_1.ActionRowBuilder().addComponents(new discord_js_1.ButtonBuilder()
             .setCustomId(`availability--night-distro-clear--${discordId}`)
-            .setLabel('DELETE ALL AVAILABILITY TO HOST')
+            .setLabel('Delete My Availability')
             .setStyle(discord_js_1.ButtonStyle.Danger))
     ];
 };
@@ -61,7 +61,7 @@ const AvailabilityToPickupPerDaySelectComponent = ({ day, discordId, defaultList
             .setValue(`${day}|||${partOfDay.id}`)))),
         new discord_js_1.ActionRowBuilder().addComponents(new discord_js_1.ButtonBuilder()
             .setCustomId(`availability--night-pickup-clear-day--${day}--${discordId}`)
-            .setLabel(`DELETE ALL MY ${const_1.DAYS_OF_WEEK[day].name} AVAILABILITY`)
+            .setLabel(`Delete ${const_1.DAYS_OF_WEEK[day].name} Availability`)
             .setStyle(discord_js_1.ButtonStyle.Danger))
     ];
 };

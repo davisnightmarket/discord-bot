@@ -2,6 +2,7 @@ export * from './parse-content.service';
 export * from './food-count-input.service';
 export * from './food-count-data.service';
 export * from './org-data.service';
+export * from './market-admin.service';
 export * from './person-data.service';
 export * from './night-data.service';
 export * from './google-drive.service';

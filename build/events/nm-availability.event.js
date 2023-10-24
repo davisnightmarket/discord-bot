@@ -31,7 +31,7 @@ async function AvailabilityCommandEvent({ personDataService, markdownService }, 
     });
 }
 exports.AvailabilityCommandEvent = AvailabilityCommandEvent;
-// in which user edits their availability
+// triggered by any button event with an availability custom id
 async function AvailabilityEditButtonEvent({ personDataService, nightDataService, markdownService }, interaction, discordId, [command, step, day]) {
     // todo: handle this higher up
     if (command !== 'availability') {
@@ -47,22 +47,27 @@ async function AvailabilityEditButtonEvent({ personDataService, nightDataService
         await interaction.editReply(await markdownService.getGenericNoPerson());
         return;
     }
+    // they have clicked the button and want to edit pickup avail
     if (step === 'init-pickup') {
-        // todo: show host then pickup, since we can't fit them all
+        // this component is a list of days
+        // they choose a day, then edit the pickup availability for that day
+        // because showing every day pickup iss too much interface - we have option limits
         const components = (0, component_1.AvailabilityToPickupDaySelectComponent)({
             discordId
         });
-        // response
         await interaction.editReply({
             content: markdownService.md.AVAILABILITY_TO_PICKUP({}),
             components
         });
     }
+    // they ave clicked the button indicating they want to edit host avail
     if (step === 'init-host') {
-        const dayTimes = await nightDataService.getDayTimeIdAndReadableByDayAsTupleList();
+        const dayTimes = await nightDataService.getDayTimeIdAndReadableByDayAsTupleList({
+            includeRoleList: ['night-captain']
+        });
+        console.log(dayTimes);
         const components = (0, component_2.AvailabilityToHostComponent)(dayTimes, discordId, []);
         // todo: show host then pickup, since we can't fit them all
-        // response
         await interaction.editReply({
             content: markdownService.md.AVAILABILITY_TO_HOST({}),
             components
@@ -97,7 +102,7 @@ async function AvailabilityEditButtonEvent({ personDataService, nightDataService
     }
 }
 exports.AvailabilityEditButtonEvent = AvailabilityEditButtonEvent;
-// in which user edits their availability
+// triggered by any select event with an availability custom id
 async function AvailabilityEditSelectEvent({ personDataService, markdownService }, interaction, discordId, [command, step, day]) {
     // todo: handle this higher up
     if (command !== 'availability') {
@@ -126,18 +131,8 @@ async function AvailabilityEditSelectEvent({ personDataService, markdownService 
             ...person,
             availabilityHost: interaction.values.join(',')
         });
-        // now display first night-pickup select
-        const currentDay = const_1.DAYS_OF_WEEK[daysOfWeekIdList[0]];
-        const components = (0, component_2.AvailabilityToPickupPerDaySelectComponent)({
-            day: currentDay.id,
-            discordId,
-            defaultList: []
-        });
         await interaction.editReply({
-            content: markdownService.md.AVAILABILITY_TO_HOST({
-                dayName: currentDay.name
-            }),
-            components
+            content: markdownService.md.GENERIC_OK({})
         });
         return;
     }

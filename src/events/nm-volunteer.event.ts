@@ -35,6 +35,7 @@ export async function VolunteerCommandEvent(
         GetChannelDayToday();
 
     // get
+    dbg(day);
 
     const nightMap = await nightDataService.getNightByDay(day, {
         refreshCache: true

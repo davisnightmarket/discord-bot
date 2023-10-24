@@ -318,26 +318,42 @@ export class NightDataService {
 
     // this is because we need to get teh day/time as a unique identifier
     // and as a human readable string
-    async getDayTimeIdAndReadableByDayAsTupleList(): Promise<
-        [string, string][]
-    > {
+    async getDayTimeIdAndReadableByDayAsTupleList({
+        includeRoleList
+    }: {
+        includeRoleList: NmNightRoleType[];
+    }): Promise<[string, string][]> {
+        await this.refreshCache();
         return this.waitingForNightCache.then((nightOps) => {
-            const dayTimesMap = nightOps.reduce<{
-                [k in string]: [string, string];
-            }>((a, b) => {
-                if (b.day && b.timeStart && !a[b.day + b.timeStart]) {
-                    a[b.day + b.timeStart] = [
-                        `${b.day}|||${b.timeStart}`,
-                        `${
-                            DAYS_OF_WEEK[b.day].name
-                        } ${ParseContentService.getAmPmTimeFrom24Hour(
-                            b.timeStart
-                        )}`
-                    ];
-                }
-                return a;
-            }, {});
-            return Object.values(dayTimesMap);
+            console.log(
+                nightOps.filter((a) => includeRoleList.includes(a.role))
+            );
+            return (
+                nightOps
+                    .filter((a) => includeRoleList.includes(a.role))
+                    .map((a) => {
+                        return `${a.day}|||${a.timeStart}`;
+                    })
+                    // make them unique
+                    .reduce<string[]>((a, b, i) => {
+                        if (!a.includes(b)) {
+                            a.push(b);
+                        }
+                        return a;
+                    }, [])
+                    // add the pretty name
+                    .map((a) => {
+                        const [day, timeStart] = a.split('|||');
+                        return [
+                            a,
+                            `${
+                                DAYS_OF_WEEK[day as NmDayNameType].name
+                            } ${ParseContentService.getAmPmTimeFrom24Hour(
+                                timeStart
+                            )}`
+                        ];
+                    })
+            );
         });
     }
 

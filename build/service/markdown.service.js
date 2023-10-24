@@ -151,7 +151,7 @@ class MarkdownService {
             this.getPickupsEphemeral(discordId, nightMap));
     }
     getNightOpsAnnounce(roleId, nightMap) {
-        return (`## ${this.getRandoSalute()} ${(0, discord_js_1.roleMention)(roleId)}!\n` +
+        return (`## ${(0, discord_js_1.roleMention)(roleId)}!\n` +
             '\n' +
             this.getNightCapAnnounce(nightMap) +
             '\n' +
@@ -159,13 +159,11 @@ class MarkdownService {
             '\n' +
             this.getPickupsAnnounce(nightMap));
     }
-    getRandoSalute() {
+    getRandoChannelSalute(channelName) {
         const saluteList = [
-            'Hellooo',
-            'Holla',
-            'Dear',
-            'Dearest',
-            'Darling'
+            `Pardon Me ${(0, discord_js_1.roleMention)(channelName)}, my dear ol' chap,`,
+            `Dearest Darling ${(0, discord_js_1.roleMention)(channelName)},`,
+            `Sup ${(0, discord_js_1.roleMention)(channelName)} Dogz`
         ];
         return saluteList[Math.floor(Math.random() * saluteList.length)];
     }
