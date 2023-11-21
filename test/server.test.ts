@@ -1,12 +1,7 @@
 import { describe, expect, test, jest } from '@jest/globals';
-import {
-    Client,
-    Events,
-    GatewayIntentBits,
-    Partials,
-    TextChannel
-} from 'discord.js';
+import { Events, TextChannel } from 'discord.js';
 import { NmSecrets } from '../src/utility';
+import { CrabappleClient } from './crabapple-client';
 
 jest.setTimeout(5000);
 
@@ -15,22 +10,13 @@ describe('nm-secrets.utility.ts', () => {
     if (process.env.NODE_ENV !== 'prod') {
         test('make sure our Discord server works', async () => {
             // Start discord client
-            const client = new Client({
-                intents: [
-                    GatewayIntentBits.Guilds,
-                    GatewayIntentBits.GuildMessages,
-                    GatewayIntentBits.MessageContent,
-                    GatewayIntentBits.DirectMessages
-                ],
-                partials: [Partials.Message, Partials.Channel]
-            });
 
-            client.on(Events.MessageCreate, async (client) => {
+            CrabappleClient.on(Events.MessageCreate, async (client) => {
                 // food count input
                 expect(client.content).toBe('hello!');
             });
 
-            client.on(Events.ClientReady, async (client) => {
+            CrabappleClient.on(Events.ClientReady, async (client) => {
                 const channel = client.channels?.cache?.get(
                     // tuesday
                     '1095377181514936321'
@@ -42,7 +28,7 @@ describe('nm-secrets.utility.ts', () => {
                 discordConfig: { appToken }
             } = await NmSecrets;
 
-            client.login(appToken);
+            CrabappleClient.login(appToken);
         });
     }
 });

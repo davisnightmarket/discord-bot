@@ -3,48 +3,35 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.EnvConfig = exports.InstanceConfig = void 0;
 // these come from the config spreadsheet, used here as placeholders
 exports.InstanceConfig = {
+    // identifies each Night Market instance with a human readable code, ie: davis.ca.usa
     NM_ID: '',
+    // comes from discord, the unique id of the guild that is associated with the market
     DISCORD_GUILD_ID: '',
+    // each market gets a dedicated spreadsheet for their data
     GSPREAD_MARKET_ID: ''
-};
-const coreConfig = {
-    // GSPREAD_CORE_PERSON_ID: '1X5fJDmGKJtbAanHOqyQ3RCHMP63ABQK4fgpvzm9RSLM',
-    // GSPREAD_CORE_ORG_ID: '1Y1RerSbgdrVcwocvCjWo8SyxutLr7BLiuJnUJlajodI',
-    // types are lists of strings or numbers with specific uses
-    GSPREAD_CORE_ID: ''
 };
 // important: the "core" goog spreadsheet ids are hard coded since there is only ever one of them
 // the instance ones are defined in the core one, so you have to await those with the Config Utility
+const coreProdConfig = {
+    GSPREAD_CORE_ID: '1hJktYzxM10wQMggY4vUVfv-SuQ1YRUWok5y75ojC91M'
+};
+const coreTestConfig = {
+    GSPREAD_CORE_ID: '17ktzAhVMDElya2kGIEp1BNtwVk2_gXwR4vM3fWWi5Vg'
+};
 exports.EnvConfig = {
     test: {
-        ...coreConfig,
-        ...exports.InstanceConfig,
-        // this is the spreadsheet that bootstraps all else
-        GSPREAD_CORE_ID: '17ktzAhVMDElya2kGIEp1BNtwVk2_gXwR4vM3fWWi5Vg'
-        // NM_ID: 'TEST.usa.ca.davis',
-        // DISCORD_GUILD_ID: '1094663742559625367',
-        // GSPREAD_FOODCOUNT_ID: '1DPPmJU1w34PEWB3XZKeIBA0Qc7nx3R2xiJFwDbTxeNk',
-        // GSPREAD_OPS_ID: '1bTt7dVKTTMY7iMNcxY0-X2Ulkw7B5p-_lmwMTDgyGP4',
-        // GSPREAD_CORE_PERSON_ID: '1X5fJDmGKJtbAanHOqyQ3RCHMP63ABQK4fgpvzm9RSLM',
-        // GSPREAD_CORE_ORG_ID: '1Y1RerSbgdrVcwocvCjWo8SyxutLr7BLiuJnUJlajodI',
-        // GSPREAD_CORE_TYPE_ID: '1MW2utNJZcuJad2LC57D5DDTx_S_Q0iXYNg7XwlzPcx0',
-        // GSPREAD_CORE_CONFIG_ID: '1rPyY8Gn7lA59GLLMAQOtCeW47zi5gA2elVcv0zMp-2M'
+        // use test config
+        ...coreTestConfig,
+        ...exports.InstanceConfig
     },
     dev: {
-        ...coreConfig,
-        ...exports.InstanceConfig,
-        // this is the spreadsheet that bootstraps all else
-        GSPREAD_CORE_ID: '17ktzAhVMDElya2kGIEp1BNtwVk2_gXwR4vM3fWWi5Vg'
-        // GSPREAD_CORE_PERSON_ID: '1X5fJDmGKJtbAanHOqyQ3RCHMP63ABQK4fgpvzm9RSLM',
-        // GSPREAD_CORE_ORG_ID: '1Y1RerSbgdrVcwocvCjWo8SyxutLr7BLiuJnUJlajodI',
-        // GSPREAD_CORE_TYPE_ID: '1MW2utNJZcuJad2LC57D5DDTx_S_Q0iXYNg7XwlzPcx0',
-        // GSPREAD_CORE_CONFIG_ID: '1rPyY8Gn7lA59GLLMAQOtCeW47zi5gA2elVcv0zMp-2M',
-        // ...InstanceConfig
+        // use test config (for now)
+        ...coreTestConfig,
+        ...exports.InstanceConfig
     },
     prod: {
-        ...coreConfig,
-        ...exports.InstanceConfig,
-        // this is the spreadsheet that bootstraps all else
-        GSPREAD_CORE_ID: '1hJktYzxM10wQMggY4vUVfv-SuQ1YRUWok5y75ojC91M'
+        // use prod config
+        ...coreProdConfig,
+        ...exports.InstanceConfig
     }
 };

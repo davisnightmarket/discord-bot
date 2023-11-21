@@ -1,9 +1,10 @@
 import { IdentityEditModalComponent } from '../component';
 import {
-    ChatInputCommandInteraction,
-    ModalSubmitInteraction
+    type ChatInputCommandInteraction,
+    type ModalSubmitInteraction
 } from 'discord.js';
 import { type GuildServiceModel, Dbg } from '../utility';
+import { PersonDataService } from '../service';
 
 const dbg = Dbg('IdentityEvent');
 
@@ -19,7 +20,7 @@ export async function IdentityCommandEvent(
     // than three seconds, which discord doesn't allow. We will have to live with this.
     const person = await personDataService.getPersonByDiscordId(discordId);
 
-    //show them their modal
+    // show them their modal
     try {
         await interaction.showModal(
             IdentityEditModalComponent(personDataService.createPerson(person))
@@ -46,13 +47,17 @@ export async function IdentityEditModalEvent(
     });
 
     // get the person's data
-    const person = await personDataService.getPersonByDiscordId(discordId);
-
-    if (!person) {
-        await interaction.editReply({
-            content: 'Sorry, we cannot find that!'
+    // or create a blank person
+    const person =
+        (await personDataService.getPersonByDiscordId(discordId)) ??
+        PersonDataService.createPerson({
+            discordId
         });
-        return;
+
+    if (!person.email) {
+        dbg(`Creating new person record ${person.email}`);
+    } else {
+        dbg(`Updating person record ${person.email}`);
     }
 
     for (const k of Object.keys(person)) {
@@ -68,7 +73,7 @@ export async function IdentityEditModalEvent(
         }
     }
 
-    await personDataService.updatePersonByDiscordId({
+    await personDataService.createOrUpdatePersonByDiscordId({
         ...person
     });
 

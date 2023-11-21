@@ -12,13 +12,11 @@ class MarketAdminService {
     }
     async getCommunityCoordinatorList() {
         const rows = (await this.adminSheetService.getAllRowsAsMaps()).map((a) => a.communityCoordinator);
-        return await Promise.all(rows
-            .map((a) => this.personDataService.getPersonByEmailOrDiscordId(a))
-            .filter((a) => a));
+        return await Promise.all(rows.map((a) => this.personDataService.getPersonByEmailOrDiscordId(a)));
     }
     async getCommunityCoordinatorDiscordIdList() {
         const list = await this.getCommunityCoordinatorList();
-        return list.map((a) => a?.discordId);
+        return list.map((a) => a?.discordId).filter((a) => a);
     }
 }
 exports.MarketAdminService = MarketAdminService;

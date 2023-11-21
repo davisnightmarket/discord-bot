@@ -5,40 +5,39 @@ import { FoodCountReminderJob, NightOpsJob, NightTimelineJob } from './jobs';
 import { FoodCountMessageEvent, WelcomeEvent } from './events';
 import { RouteInteraction } from './route';
 
-const dbg = Dbg('main');
+const dbg = Dbg('run');
+// Start discord client
+const client = new Client({
+    intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.MessageContent,
+        GatewayIntentBits.DirectMessages
+    ],
+    partials: [Partials.Message, Partials.Channel]
+});
 
-async function main() {
-    // Start discord client
-    const client = new Client({
-        intents: [
-            GatewayIntentBits.Guilds,
-            GatewayIntentBits.GuildMessages,
-            GatewayIntentBits.MessageContent,
-            GatewayIntentBits.DirectMessages
-        ],
-        partials: [Partials.Message, Partials.Channel]
-    });
+run();
 
+async function run() {
     // TODO: we have to remember that each guild could have a different timezone
     // so we need to figure out how to adjust the crons for each guild
     // Add cron jobs
     AddCron(
-        // at 7:30am '0 30 7 * * *'
-        '0 30 7 * * *',
+        '0 30 7 * * *', // 7:30 am, every day
+        // '* * * * *', //every minute
         NightOpsJob(client)
     );
 
     AddCron(
-        // at 11:30pm '0 30 23 * * *'
-        '0 30 23 * * *',
+        '0 30 23 * * *', // at 11:30pm
         NightTimelineJob(client)
     );
 
     // reminds us to enter food count IF none has been entered
     // AND pickups are scheduled
     AddCron(
-        // at high noon '0 12 1 * * *'
-        '0 0 12 * * *',
+        '0 0 12 * * *', // at high noon
         FoodCountReminderJob(client)
     );
 
@@ -50,7 +49,6 @@ async function main() {
     });
     client.on(Events.MessageCreate, async (message) => {
         const services = await GetGuildServices(message.guildId ?? '');
-        console.log('wtg');
 
         // food count input
         try {
@@ -90,5 +88,3 @@ async function main() {
 
     client.login(appToken);
 }
-
-main();

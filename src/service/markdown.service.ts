@@ -1,16 +1,16 @@
 import {
-    PersonModel,
+    type PersonModel,
     type CoreDataService,
     ParseContentService,
-    NightModel
+    type NightModel
 } from '.';
 import { DAYS_OF_WEEK, PARTS_OF_DAY } from '../const';
-import { NmDayNameType, NmPartOfDayNameType } from '../model';
+import { type NmDayNameType, type NmPartOfDayNameType } from '../model';
 import { CreateMdMessage } from '../utility';
 
 import { roleMention, bold, userMention } from 'discord.js';
 
-import { NightPickupModel } from '../service';
+import { type NightPickupModel } from '../service';
 
 // TODO: make this simple to user from events
 
@@ -100,9 +100,10 @@ export class MarkdownService {
 
         this.md = messageMap;
     }
+
     // we can get any message
     getMessage<U extends keyof typeof messageMap>(k: U) {
-        return this.md[k] as (typeof messageMap)[typeof k];
+        return this.md[k];
     }
 
     // or write a method per message so we can combine with core or market data etc.
@@ -121,9 +122,11 @@ export class MarkdownService {
             techPhone: ''
         });
     }
-    getGenericBulletList(list: { name: string }[]) {
+
+    getGenericBulletList(list: Array<{ name: string }>) {
         return list.map(({ name }) => `  - ${name}`).join('\n');
     }
+
     getPersonBulletList(personList: PersonModel[]) {
         return personList.map(({ name }) => `  - ${name}`).join('\n');
     }
@@ -137,7 +140,7 @@ export class MarkdownService {
     // turns person availability strings from spreadsheet into a md list of readable day and time
     getAvailabilityListsFromPerson(person: PersonModel): [string, string] {
         return [
-            person.availabilityHost
+            person.availabilityHostList
                 .split(',')
                 .filter((a) => a.trim())
                 .map((a) =>
@@ -153,7 +156,7 @@ export class MarkdownService {
                         } ${ParseContentService.getAmPmTimeFrom24Hour(a[1])}`
                 )
                 .join('\n'),
-            person.availabilityPickup
+            person.availabilityPickupList
                 .split(',')
                 .filter((a) => a.trim())
                 .map((a) =>
@@ -201,13 +204,14 @@ export class MarkdownService {
 
     getNightOpsAnnounce(roleId: string, nightMap: NightModel): string {
         return (
-            `## ${roleMention(roleId)}!\n` +
+            `## ${roleMention(roleId)}\n` +
             '\n' +
             this.getNightCapAnnounce(nightMap) +
             '\n' +
             this.getDistroAnnounce(nightMap) +
             '\n' +
-            this.getPickupsAnnounce(nightMap)
+            this.getPickupsAnnounce(nightMap) +
+            '\n\n Love, Crabapple'
         );
     }
 
@@ -271,7 +275,7 @@ export class MarkdownService {
     getNightCapAnnounce({ hostList, statusList }: NightModel): string {
         // todo: this logic needs improvement
         const nightCapList = hostList.filter((a) => a.role === 'night-captain');
-        if (!statusList.includes('NEEDED_CAP')) {
+        if (statusList.includes('NEEDED_CAP')) {
             return 'Night Cap NEEDED!';
         }
 
@@ -284,14 +288,14 @@ export class MarkdownService {
 
     // todo: use message service
     getDistroAnnounce({ hostList, statusList }: NightModel): string {
-        if (!statusList.includes('NEEDED_DISTRO')) {
+        if (statusList.includes('NEEDED_DISTRO')) {
             return 'Distro help NEEDED!';
         }
         const a = hostList.filter((a) => a.role === 'night-distro');
         return `Host${a.length > 1 ? 's' : ''}: ${a
             .map(
                 ({ name, discordId }) =>
-                    `${bold(name)} ${discordId ? userMention(discordId) : ''}`
+                    `${discordId ? userMention(discordId) : bold(name)}`
             )
             .join(', ')} `;
     }
@@ -313,7 +317,11 @@ export class MarkdownService {
                     personList
                         .map(
                             (a) =>
-                                `${bold(a.name)} ${
+                                `${
+                                    discordId
+                                        ? userMention(a.discordId)
+                                        : bold(a.name)
+                                } ${
                                     a.periodStatus === 'SHADOW'
                                         ? '(Shadow Mode)'
                                         : ''
@@ -323,6 +331,7 @@ export class MarkdownService {
                 );
             })}`;
     }
+
     getPickupsEphemeral(
         discordId: string,
         { pickupList, statusList }: NightModel

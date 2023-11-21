@@ -2,11 +2,11 @@ import { type NmNightRoleType, type NmDayNameType } from '../model';
 import { DAYS_OF_WEEK, DAYS_OF_WEEK_CODES } from '../const';
 import { DebugUtility, GetChannelDayToday } from '../utility';
 import {
-    GoogleSheetService,
-    type SpreadsheetDataModel,
-    PersonDataService,
     type PersonModel,
-    PersonWithIdModel,
+    type SpreadsheetDataModel,
+    type PersonWithIdModel,
+    GoogleSheetService,
+    PersonDataService,
     ParseContentService
 } from '.';
 
@@ -125,7 +125,7 @@ export class NightDataService {
 
     constructor(
         spreadsheetId: string,
-        private personDataService: PersonDataService
+        private readonly personDataService: PersonDataService
     ) {
         this.nightSheetService = new GoogleSheetService({
             spreadsheetId,
@@ -146,6 +146,7 @@ export class NightDataService {
 
         this.refreshCache();
     }
+
     createNightOpsData({
         day = 'monday',
         role = 'night-captain',
@@ -178,7 +179,7 @@ export class NightDataService {
         pickupList = []
     }: Partial<NightModel>): NightModel {
         if (!day) {
-            dbg(`createNight  missing day ${day}`);
+            dbg(`createNight  missing day`);
         }
 
         // if no org, grab it from the night cap
@@ -239,7 +240,9 @@ export class NightDataService {
             pickupList
         };
     }
-    //does a night have any pickup need?
+
+    // does a night have any pickup need?
+
     getPickupPersonStatusLength(
         pickupList: NightPickupModel[],
         excludePeriodStatusList: PeriodStatusType[] = []
@@ -313,7 +316,11 @@ export class NightDataService {
         // defaults to today
         day: NmDayNameType = GetChannelDayToday()
     ): Promise<NightOpsDataModel[]> {
-        return (await this.waitingForNightCache).filter((a) => a.day === day);
+        const a = await this.waitingForNightCache;
+        if (!a.length) {
+            await this.refreshCache();
+        }
+        return a.filter((a) => a.day === day);
     }
 
     // this is because we need to get teh day/time as a unique identifier
@@ -322,9 +329,9 @@ export class NightDataService {
         includeRoleList
     }: {
         includeRoleList: NmNightRoleType[];
-    }): Promise<[string, string][]> {
+    }): Promise<Array<[string, string]>> {
         await this.refreshCache();
-        return this.waitingForNightCache.then((nightOps) => {
+        return await this.waitingForNightCache.then((nightOps) => {
             console.log(
                 nightOps.filter((a) => includeRoleList.includes(a.role))
             );
@@ -421,6 +428,7 @@ export class NightDataService {
 
         return pickupList;
     }
+
     async getHostListByDay(day: NmDayNameType): Promise<NightPersonModel[]> {
         const opList = await this.getNightDataByDay(day);
         const personList = await this.personDataService.getPersonList();
@@ -505,8 +513,8 @@ export class NightDataService {
                 return {
                     ...op,
                     discordIdOrEmail:
-                        person?.discordId ||
-                        person?.email ||
+                        person?.discordId ??
+                        person?.email ??
                         op.discordIdOrEmail
                 };
             })
@@ -537,9 +545,7 @@ export class NightDataService {
     ) {
         const idNightList = nightList.map(this.getUniqueNightOpIdentifier);
 
-        const idRemoveList = await removeList.map(
-            this.getUniqueNightOpIdentifier
-        );
+        const idRemoveList = removeList.map(this.getUniqueNightOpIdentifier);
         // if it is to be removed, filter it off
         return nightList.filter((_, i) => {
             return !idRemoveList.includes(idNightList[i]);
@@ -548,7 +554,7 @@ export class NightDataService {
 
     // to prevent overwriting each others data
     // this won't work if we have multiple instances
-    updateQueue: Promise<any>[] = [];
+    updateQueue: Array<Promise<any>> = [];
     setUpdateQueue(a: Promise<any>) {
         this.updateQueue.push(
             a.then(() => {
@@ -691,7 +697,7 @@ export class NightDataService {
                     );
                 return {
                     ...a,
-                    discordIdOrEmail: person?.email || a.discordIdOrEmail
+                    discordIdOrEmail: person?.email ?? a.discordIdOrEmail
                 };
             })
         );
@@ -726,7 +732,9 @@ export class NightDataService {
             )
             .then((a) => a.map(this.createNightOpsData))
             // make that we have a discordId on the discordIdOrEmail prop if possible
-            .then((a) => this.getNightOpListWithDiscordIdIfPossible(a));
+            .then(
+                async (a) => await this.getNightOpListWithDiscordIdIfPossible(a)
+            );
     }
 
     async getNightPersonList(
@@ -744,7 +752,7 @@ export class NightDataService {
                         );
                     return PersonDataService.createPersonWithQueryId(
                         discordIdOrEmail,
-                        p || {}
+                        p ?? {}
                     );
                 })
         );

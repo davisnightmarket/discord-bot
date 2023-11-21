@@ -44,8 +44,7 @@ export const FoodCountMessageEvent = async (
     }: GuildServiceModel,
     message: Message
 ) => {
-    console.log('FoodCountMessageEvent');
-    dbg('ok');
+    dbg('FoodCountMessageEvent');
     const { channel, author } = message as Message<true>;
 
     /* STAGE 1: skip the message entirely in some cases */

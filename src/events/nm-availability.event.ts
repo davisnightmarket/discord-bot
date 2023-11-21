@@ -1,13 +1,14 @@
-import { ButtonInteraction, ChatInputCommandInteraction } from 'discord.js';
 import {
-    AvailabilityEditButtonComponent,
-    AvailabilityToPickupDaySelectComponent
-} from '../component';
+    type ButtonInteraction,
+    type ChatInputCommandInteraction,
+    type StringSelectMenuInteraction
+} from 'discord.js';
 import { type GuildServiceModel, Dbg } from '../utility';
 
-import { StringSelectMenuInteraction } from 'discord.js';
-import { NmDayNameType, NmNightRoleType } from '../model';
+import { type NmDayNameType, type NmNightRoleType } from '../model';
 import {
+    AvailabilityEditButtonComponent,
+    AvailabilityToPickupDaySelectComponent,
     AvailabilityToHostComponent,
     AvailabilityToPickupPerDaySelectComponent
 } from '../component';
@@ -146,13 +147,13 @@ export async function AvailabilityEditButtonEvent(
     if (step === 'night-pickup-clear') {
         // save the previous to the db ...
         // if we are on the first day, reset
-        let { availabilityPickup } = person;
+        let { availabilityPickupList } = person;
 
-        availabilityPickup = '';
+        availabilityPickupList = '';
 
         personDataService.updatePersonByDiscordId({
             ...person,
-            availabilityPickup
+            availabilityPickupList
         });
 
         // response
@@ -244,14 +245,14 @@ export async function AvailabilityEditSelectEvent(
     if (step === 'night-pickup') {
         // save the previous to the db ...
         // if we are on the first day, reset
-        let { availabilityPickup } = person;
+        let { availabilityPickupList } = person;
         if (!daysOfWeekIdList.indexOf(day)) {
-            availabilityPickup = interaction.values.join(',');
+            availabilityPickupList = interaction.values.join(',');
         } else {
-            availabilityPickup += interaction.values.join(',');
+            availabilityPickupList += interaction.values.join(',');
         }
         // make sure they are unique
-        availabilityPickup = availabilityPickup
+        availabilityPickupList = availabilityPickupList
             .split(', ')
             .reduce<string[]>((a, b) => {
                 if (!a.includes(b)) {
@@ -263,7 +264,7 @@ export async function AvailabilityEditSelectEvent(
 
         personDataService.updatePersonByDiscordId({
             ...person,
-            availabilityPickup
+            availabilityPickupList
         });
 
         // // show the next step
@@ -287,8 +288,6 @@ export async function AvailabilityEditSelectEvent(
         // response
         await interaction.editReply({
             content: markdownService.md.GENERIC_OK({})
-
-            //components
         });
     }
 }

@@ -18,8 +18,7 @@ exports.TIME_UNTIL_UPDATE = 60 * 1000; // one minute in milliseconds
  */
 const dbg = (0, utility_1.Dbg)('FoodCountInputEvent');
 const FoodCountMessageEvent = async ({ personDataService, foodCountInputService, foodCountDataService, markdownService }, message) => {
-    console.log('FoodCountMessageEvent');
-    dbg('ok');
+    dbg('FoodCountMessageEvent');
     const { channel, author } = message;
     /* STAGE 1: skip the message entirely in some cases */
     // if we are a bot, we do not want to process the message

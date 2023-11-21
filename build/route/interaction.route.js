@@ -10,9 +10,9 @@ async function RouteInteraction(interaction) {
     interaction = interaction;
     const services = await (0, utility_1.GetGuildServices)(interaction.guildId ?? '');
     if (interaction?.isCommand()) {
-        let command = 'NONE';
+        let command = '';
         try {
-            command = interaction.options.getString('command') || 'NONE';
+            command = interaction.options.getString('command') || '';
         }
         catch (e) {
             dbg('NO command found');
@@ -61,12 +61,19 @@ async function RouteInteraction(interaction) {
                 interaction.editReply('Sorry, you cannot do that unless you are a Community Coordinator');
                 return;
             }
-            if (!command) {
+            const target = interaction.options.getUser('target');
+            if (!command && !target) {
+                console.log('!command && !target');
                 interaction.editReply(' CC how-to docs and help coming soon!');
                 return;
             }
-            const target = interaction.options.getUser('target');
+            if (!command) {
+                console.log('!command');
+                interaction.editReply(`CC user info coming soon!`);
+                return;
+            }
             if (!target) {
+                console.log('!target');
                 interaction.editReply(`CC ${command} how-to coming soon!`);
                 return;
             }
@@ -84,6 +91,9 @@ async function RouteInteraction(interaction) {
             if (command === 'identity') {
                 dbg('Editing identity');
                 (0, events_1.IdentityCommandEvent)(services, interaction, target.id);
+            }
+            if (process.env.NODE_ENV === 'prod') {
+                return;
             }
         }
     }

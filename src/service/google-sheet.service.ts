@@ -29,6 +29,13 @@ export class GoogleSheetService<T extends SpreadsheetDataModel> {
             headersList as Array<keyof T>
         );
     }
+    // TODO: test this
+    async createRowWithMap(map: T) {
+        const rows = (await this.waitingForHeaderList).map(
+            (header) => map[header] || ''
+        );
+        await this.prependOneRowAfterHeader(rows);
+    }
 
     // TODO: test this
     async updateRowWithMapByRowNumber(index: number, map: T) {

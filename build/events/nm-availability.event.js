@@ -1,9 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AvailabilityEditSelectEvent = exports.AvailabilityEditButtonEvent = exports.AvailabilityCommandEvent = void 0;
-const component_1 = require("../component");
 const utility_1 = require("../utility");
-const component_2 = require("../component");
+const component_1 = require("../component");
 const const_1 = require("../const");
 // in which user edits their availability
 const dbg = (0, utility_1.Dbg)('AvailabilityEvent');
@@ -66,7 +65,7 @@ async function AvailabilityEditButtonEvent({ personDataService, nightDataService
             includeRoleList: ['night-captain']
         });
         console.log(dayTimes);
-        const components = (0, component_2.AvailabilityToHostComponent)(dayTimes, discordId, []);
+        const components = (0, component_1.AvailabilityToHostComponent)(dayTimes, discordId, []);
         // todo: show host then pickup, since we can't fit them all
         await interaction.editReply({
             content: markdownService.md.AVAILABILITY_TO_HOST({}),
@@ -89,11 +88,11 @@ async function AvailabilityEditButtonEvent({ personDataService, nightDataService
     if (step === 'night-pickup-clear') {
         // save the previous to the db ...
         // if we are on the first day, reset
-        let { availabilityPickup } = person;
-        availabilityPickup = '';
+        let { availabilityPickupList } = person;
+        availabilityPickupList = '';
         personDataService.updatePersonByDiscordId({
             ...person,
-            availabilityPickup
+            availabilityPickupList
         });
         // response
         await interaction.editReply({
@@ -143,7 +142,7 @@ async function AvailabilityEditSelectEvent({ personDataService, markdownService 
         const selectedDayId = interaction.values[0];
         const selectedDay = const_1.DAYS_OF_WEEK[selectedDayId];
         // todo: show host then pickup, since we can't fit them all
-        const components = (0, component_2.AvailabilityToPickupPerDaySelectComponent)({
+        const components = (0, component_1.AvailabilityToPickupPerDaySelectComponent)({
             day: selectedDay.id,
             discordId,
             defaultList: []
@@ -160,15 +159,15 @@ async function AvailabilityEditSelectEvent({ personDataService, markdownService 
     if (step === 'night-pickup') {
         // save the previous to the db ...
         // if we are on the first day, reset
-        let { availabilityPickup } = person;
+        let { availabilityPickupList } = person;
         if (!daysOfWeekIdList.indexOf(day)) {
-            availabilityPickup = interaction.values.join(',');
+            availabilityPickupList = interaction.values.join(',');
         }
         else {
-            availabilityPickup += interaction.values.join(',');
+            availabilityPickupList += interaction.values.join(',');
         }
         // make sure they are unique
-        availabilityPickup = availabilityPickup
+        availabilityPickupList = availabilityPickupList
             .split(', ')
             .reduce((a, b) => {
             if (!a.includes(b)) {
@@ -179,7 +178,7 @@ async function AvailabilityEditSelectEvent({ personDataService, markdownService 
             .join(',');
         personDataService.updatePersonByDiscordId({
             ...person,
-            availabilityPickup
+            availabilityPickupList
         });
         // // show the next step
         // const nextDayIndex = daysOfWeekIdList.indexOf(day) + 1;
@@ -200,7 +199,6 @@ async function AvailabilityEditSelectEvent({ personDataService, markdownService 
         // response
         await interaction.editReply({
             content: markdownService.md.GENERIC_OK({})
-            //components
         });
     }
 }

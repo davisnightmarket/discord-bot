@@ -24,7 +24,7 @@ class PersonDataService {
     createPerson(person = {}) {
         return PersonDataService.createPerson(person);
     }
-    static createPerson({ status = '', name = '', email = '', phone = '', location = '', bike = '', bikeCart = '', bikeCartAtNight = '', skills = '', bio = '', pronouns = '', interest = '', reference = '', discordId = '', availabilityHost = '', availabilityPickup = '', teamInterest = '', permissionList = '', stampCreate = '' } = {}) {
+    static createPerson({ status = '', name = '', email = '', phone = '', location = '', bike = '', bikeCart = '', bikeCartAtNight = '', skills = '', bio = '', pronouns = '', interest = '', reference = '', discordId = '', availabilityHostList = '', availabilityPickupList = '', teamInterestList = '', permissionList = '', stampCreate = '' } = {}) {
         return {
             status,
             name,
@@ -40,9 +40,9 @@ class PersonDataService {
             interest,
             reference,
             discordId,
-            availabilityHost,
-            availabilityPickup,
-            teamInterest,
+            availabilityHostList,
+            availabilityPickupList,
+            teamInterestList,
             permissionList,
             stampCreate
         };
@@ -53,6 +53,23 @@ class PersonDataService {
         return discordIdOrEmailList
             .map((a) => personList.find((b) => b.email === a || b.discordId === a))
             .map((a) => (a ? [a?.discordId || '', a?.email || ''] : null));
+    }
+    async createOrUpdatePersonByDiscordId(person) {
+        const { discordId } = person;
+        await this.refreshPersonListCache();
+        const personIdList = await this.personSheetService.getRowNumberListByMatchAnyProperties({
+            discordId
+        });
+        if (personIdList.length > 1) {
+            console.error('We should only have one person record per discordID. Updating all.');
+        }
+        if (!personIdList.length) {
+            await this.personSheetService.createRowWithMap(person);
+        }
+        for (const id of personIdList) {
+            await this.personSheetService.updateRowWithMapByRowNumber(id, person);
+        }
+        await this.refreshPersonListCache();
     }
     async updatePersonByDiscordId(person) {
         const { discordId } = person;
@@ -74,8 +91,8 @@ class PersonDataService {
     async getPersonList() {
         return await this.personSheetService.getAllRowsAsMaps();
     }
-    refreshPersonListCache() {
-        return (this.waitingForPersonListCache = this.getPersonList());
+    async refreshPersonListCache() {
+        return await (this.waitingForPersonListCache = this.getPersonList());
     }
     async getPersonListCache() {
         return await this.waitingForPersonListCache;
@@ -86,7 +103,8 @@ class PersonDataService {
         const list = (await this.waitingForPersonListCache).filter((map) => {
             return Object.keys(map).some(
             // note that we turn everything into strings
-            (k) => query[k] && '' + query[k] === '' + map[k]);
+            (k) => query[k] &&
+                '' + query[k] === '' + map[k]);
         });
         return list;
         // .length

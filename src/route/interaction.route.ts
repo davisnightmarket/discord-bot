@@ -34,9 +34,9 @@ export async function RouteInteraction(interaction: Interaction) {
 
     const services = await GetGuildServices(interaction.guildId ?? '');
     if (interaction?.isCommand()) {
-        let command = 'NONE';
+        let command = '';
         try {
-            command = interaction.options.getString('command') || 'NONE';
+            command = interaction.options.getString('command') || '';
         } catch (e) {
             dbg('NO command found');
         }
@@ -102,21 +102,27 @@ export async function RouteInteraction(interaction: Interaction) {
             const ccList =
                 await marketAdminService.getCommunityCoordinatorDiscordIdList();
             console.log(ccList);
-
             if (!ccList.includes(interaction.user.id)) {
                 interaction.editReply(
                     'Sorry, you cannot do that unless you are a Community Coordinator'
                 );
                 return;
             }
-            if (!command) {
+            const target = interaction.options.getUser('target');
+
+            if (!command && !target) {
+                console.log('!command && !target');
                 interaction.editReply(' CC how-to docs and help coming soon!');
                 return;
             }
 
-            const target = interaction.options.getUser('target');
-
+            if (!command) {
+                console.log('!command');
+                interaction.editReply(`CC user info coming soon!`);
+                return;
+            }
             if (!target) {
+                console.log('!target');
                 interaction.editReply(`CC ${command} how-to coming soon!`);
                 return;
             }
@@ -136,6 +142,9 @@ export async function RouteInteraction(interaction: Interaction) {
             if (command === 'identity') {
                 dbg('Editing identity');
                 IdentityCommandEvent(services, interaction, target.id);
+            }
+            if (process.env.NODE_ENV === 'prod') {
+                return;
             }
         }
     }

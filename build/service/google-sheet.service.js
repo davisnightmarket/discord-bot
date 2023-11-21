@@ -12,6 +12,11 @@ class GoogleSheetService {
         this.waitingForHeaderList = this.getHeaders(headersList);
     }
     // TODO: test this
+    async createRowWithMap(map) {
+        const rows = (await this.waitingForHeaderList).map((header) => map[header] || '');
+        await this.prependOneRowAfterHeader(rows);
+    }
+    // TODO: test this
     async updateRowWithMapByRowNumber(index, map) {
         const rows = (await this.waitingForHeaderList).map((header) => map[header] || '');
         await this.spreadsheetService.rowsWrite([rows], this.getSheetRangeString(`A${index}`));

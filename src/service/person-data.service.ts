@@ -1,4 +1,4 @@
-import { PERMISSION_MAP, PermissionType } from '../const';
+import { PERMISSION_MAP, type PermissionType } from '../const';
 import { type NmActiveStateType } from '../model';
 import { GoogleSheetService, type SpreadsheetDataModel } from '../service';
 
@@ -17,9 +17,9 @@ export interface PersonModel extends SpreadsheetDataModel {
     interest: string;
     reference: string;
     discordId: string;
-    availabilityHost: string;
-    availabilityPickup: string;
-    teamInterest: string;
+    availabilityHostList: string;
+    availabilityPickupList: string;
+    teamInterestList: string;
     permissionList: string;
     stampCreate: string;
 }
@@ -73,9 +73,9 @@ export class PersonDataService {
         interest = '',
         reference = '',
         discordId = '',
-        availabilityHost = '',
-        availabilityPickup = '',
-        teamInterest = '',
+        availabilityHostList = '',
+        availabilityPickupList = '',
+        teamInterestList = '',
         permissionList = '',
         stampCreate = ''
     }: Partial<PersonModel> = {}): PersonModel {
@@ -94,9 +94,9 @@ export class PersonDataService {
             interest,
             reference,
             discordId,
-            availabilityHost,
-            availabilityPickup,
-            teamInterest,
+            availabilityHostList,
+            availabilityPickupList,
+            teamInterestList,
             permissionList,
             stampCreate
         };
@@ -104,7 +104,7 @@ export class PersonDataService {
 
     async getFreshDiscordAndEmailByDiscordIdOrEmail(
         discordIdOrEmailList: string[]
-    ): Promise<([string, string] | null)[]> {
+    ): Promise<Array<[string, string] | null>> {
         await this.refreshPersonListCache();
         const personList = await this.waitingForPersonListCache;
         return discordIdOrEmailList
@@ -112,6 +112,32 @@ export class PersonDataService {
                 personList.find((b) => b.email === a || b.discordId === a)
             )
             .map((a) => (a ? [a?.discordId || '', a?.email || ''] : null));
+    }
+
+    async createOrUpdatePersonByDiscordId(person: PersonModel) {
+        const { discordId } = person;
+        await this.refreshPersonListCache();
+
+        const personIdList =
+            await this.personSheetService.getRowNumberListByMatchAnyProperties({
+                discordId
+            });
+
+        if (personIdList.length > 1) {
+            console.error(
+                'We should only have one person record per discordID. Updating all.'
+            );
+        }
+        if (!personIdList.length) {
+            await this.personSheetService.createRowWithMap(person);
+        }
+        for (const id of personIdList) {
+            await this.personSheetService.updateRowWithMapByRowNumber(
+                id,
+                person
+            );
+        }
+        await this.refreshPersonListCache();
     }
 
     async updatePersonByDiscordId(person: PersonModel) {
@@ -145,8 +171,8 @@ export class PersonDataService {
         return await this.personSheetService.getAllRowsAsMaps();
     }
 
-    refreshPersonListCache() {
-        return (this.waitingForPersonListCache = this.getPersonList());
+    async refreshPersonListCache() {
+        return await (this.waitingForPersonListCache = this.getPersonList());
     }
 
     async getPersonListCache(): Promise<PersonModel[]> {
@@ -159,7 +185,9 @@ export class PersonDataService {
         const list = (await this.waitingForPersonListCache).filter((map) => {
             return Object.keys(map).some(
                 // note that we turn everything into strings
-                (k) => query[k] && '' + query[k] === '' + map[k]
+                (k) =>
+                    query[k] &&
+                    '' + (query[k] as string) === '' + (map[k] as string)
             );
         });
 
@@ -187,6 +215,7 @@ export class PersonDataService {
             .map((person) => person.email)
             .filter((email) => email.trim());
     }
+
     async getPersonByDiscordId(
         discordId: string
     ): Promise<PersonModel | undefined> {
@@ -200,6 +229,7 @@ export class PersonDataService {
         }
         return a[0];
     }
+
     async getPersonByEmail(email: string): Promise<PersonModel | null> {
         const a = await this.getPersonListByMatchAnyProperties({
             email
@@ -211,6 +241,7 @@ export class PersonDataService {
         }
         return a[0] || null;
     }
+
     async getPersonByEmailOrDiscordId(
         emailOrDiscordId?: string
     ): Promise<PersonModel | undefined> {

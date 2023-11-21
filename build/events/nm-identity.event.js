@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.IdentityEditModalEvent = exports.IdentityCommandEvent = void 0;
 const component_1 = require("../component");
 const utility_1 = require("../utility");
+const service_1 = require("../service");
 const dbg = (0, utility_1.Dbg)('IdentityEvent');
 async function IdentityCommandEvent({ personDataService }, interaction, discordId) {
     dbg('IdentityCommandEvent');
@@ -10,7 +11,7 @@ async function IdentityCommandEvent({ personDataService }, interaction, discordI
     // i think this is because when the cache is reloading, the reply has to wait for more
     // than three seconds, which discord doesn't allow. We will have to live with this.
     const person = await personDataService.getPersonByDiscordId(discordId);
-    //show them their modal
+    // show them their modal
     try {
         await interaction.showModal((0, component_1.IdentityEditModalComponent)(personDataService.createPerson(person)));
     }
@@ -28,12 +29,16 @@ async function IdentityEditModalEvent({ personDataService }, interaction, discor
         ephemeral: true
     });
     // get the person's data
-    const person = await personDataService.getPersonByDiscordId(discordId);
-    if (!person) {
-        await interaction.editReply({
-            content: 'Sorry, we cannot find that!'
+    // or create a blank person
+    const person = (await personDataService.getPersonByDiscordId(discordId)) ??
+        service_1.PersonDataService.createPerson({
+            discordId
         });
-        return;
+    if (!person.email) {
+        dbg(`Creating new person record ${person.email}`);
+    }
+    else {
+        dbg(`Updating person record ${person.email}`);
     }
     for (const k of Object.keys(person)) {
         let value = '';
@@ -47,7 +52,7 @@ async function IdentityEditModalEvent({ personDataService }, interaction, discor
             person[k] = value;
         }
     }
-    await personDataService.updatePersonByDiscordId({
+    await personDataService.createOrUpdatePersonByDiscordId({
         ...person
     });
     await interaction.editReply({

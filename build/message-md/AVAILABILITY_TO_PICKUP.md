@@ -1,1 +1,1 @@
-What times are you available to pickup {{dayName}}
+What day would you like to edit availability to pickup?

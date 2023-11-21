@@ -116,7 +116,7 @@ class MarkdownService {
     // turns person availability strings from spreadsheet into a md list of readable day and time
     getAvailabilityListsFromPerson(person) {
         return [
-            person.availabilityHost
+            person.availabilityHostList
                 .split(',')
                 .filter((a) => a.trim())
                 .map((a) => a
@@ -125,7 +125,7 @@ class MarkdownService {
                 .map((a) => a.trim()))
                 .map((a) => `  - Host ${const_1.DAYS_OF_WEEK[a[0]]?.name} ${_1.ParseContentService.getAmPmTimeFrom24Hour(a[1])}`)
                 .join('\n'),
-            person.availabilityPickup
+            person.availabilityPickupList
                 .split(',')
                 .filter((a) => a.trim())
                 .map((a) => a
@@ -151,13 +151,14 @@ class MarkdownService {
             this.getPickupsEphemeral(discordId, nightMap));
     }
     getNightOpsAnnounce(roleId, nightMap) {
-        return (`## ${(0, discord_js_1.roleMention)(roleId)}!\n` +
+        return (`## ${(0, discord_js_1.roleMention)(roleId)}\n` +
             '\n' +
             this.getNightCapAnnounce(nightMap) +
             '\n' +
             this.getDistroAnnounce(nightMap) +
             '\n' +
-            this.getPickupsAnnounce(nightMap));
+            this.getPickupsAnnounce(nightMap) +
+            '\n\n Love, Crabapple');
     }
     getRandoChannelSalute(channelName) {
         const saluteList = [
@@ -197,7 +198,7 @@ class MarkdownService {
     getNightCapAnnounce({ hostList, statusList }) {
         // todo: this logic needs improvement
         const nightCapList = hostList.filter((a) => a.role === 'night-captain');
-        if (!statusList.includes('NEEDED_CAP')) {
+        if (statusList.includes('NEEDED_CAP')) {
             return 'Night Cap NEEDED!';
         }
         return `Night Captain${nightCapList.length === 1 ? '' : 's'}: ${nightCapList
@@ -206,12 +207,12 @@ class MarkdownService {
     }
     // todo: use message service
     getDistroAnnounce({ hostList, statusList }) {
-        if (!statusList.includes('NEEDED_DISTRO')) {
+        if (statusList.includes('NEEDED_DISTRO')) {
             return 'Distro help NEEDED!';
         }
         const a = hostList.filter((a) => a.role === 'night-distro');
         return `Host${a.length > 1 ? 's' : ''}: ${a
-            .map(({ name, discordId }) => `${(0, discord_js_1.bold)(name)} ${discordId ? (0, discord_js_1.userMention)(discordId) : ''}`)
+            .map(({ name, discordId }) => `${discordId ? (0, discord_js_1.userMention)(discordId) : (0, discord_js_1.bold)(name)}`)
             .join(', ')} `;
     }
     getMyPickups(discordId, { pickupList }) {
@@ -224,7 +225,9 @@ class MarkdownService {
                 _1.ParseContentService.getAmPmTimeFrom24Hour(timeStart) +
                 ' ' +
                 personList
-                    .map((a) => `${(0, discord_js_1.bold)(a.name)} ${a.periodStatus === 'SHADOW'
+                    .map((a) => `${discordId
+                    ? (0, discord_js_1.userMention)(a.discordId)
+                    : (0, discord_js_1.bold)(a.name)} ${a.periodStatus === 'SHADOW'
                     ? '(Shadow Mode)'
                     : ''}`)
                     .join(', '));

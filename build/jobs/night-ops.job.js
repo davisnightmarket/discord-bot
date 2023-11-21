@@ -13,10 +13,17 @@ const NightOpsJob = (client) => async () => {
         // get the channel by today name
         const channelDay = (0, utility_1.GetChannelDayToday)();
         const nightMap = await nightDataService.getNightByDay(channelDay);
+        dbg(channelDay);
+        dbg(nightMap);
+        console.log(JSON.stringify(nightMap, null, 2));
+        let content = '';
         if (nightMap.pickupList.length == 0 && nightMap.hostList.length == 0) {
-            dbg('No pickups or hosting, skipping announce.');
+            dbg('No pickups or hosting scheduled.');
+            content = 'No pickups or hosting scheduled.';
         }
-        const content = markdownService.getNightOpsAnnounce(await (0, utility_1.GetGuildRoleIdByName)(guild, channelDay), nightMap);
+        else {
+            content = markdownService.getNightOpsAnnounce(await (0, utility_1.GetGuildRoleIdByName)(guild, channelDay), nightMap);
+        }
         (await guild.channels.cache.find((channel) => channel.name === channelDay))?.send({
             content
         });
