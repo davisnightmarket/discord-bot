@@ -24,8 +24,11 @@ async function run() {
     // so we need to figure out how to adjust the crons for each guild
     // Add cron jobs
     AddCron(
-        '0 30 7 * * *', // 7:30 am, every day
-        // '* * * * *', //every minute
+        // 7:30 am, every day
+        '0 30 7 * * *',
+        // every minute
+        // '* * * * *',
+
         NightOpsJob(client)
     );
 

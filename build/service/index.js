@@ -26,5 +26,4 @@ __exportStar(require("./google-spreadsheet.service"), exports);
 __exportStar(require("./google-sheet.service"), exports);
 __exportStar(require("./core-data.service"), exports);
 __exportStar(require("./markdown.service"), exports);
-__exportStar(require("./process-event.service"), exports);
 __exportStar(require("./discord.service"), exports);

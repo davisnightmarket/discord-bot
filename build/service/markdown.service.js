@@ -138,26 +138,36 @@ class MarkdownService {
     }
     getPickupJoinMessage(pickupList) {
         return pickupList
-            .map(({ org, timeStart, personList }) => `## ${org} at ${_1.ParseContentService.getAmPmTimeFrom24Hour(timeStart)} with ${personList.map((a) => a.name).join(', ')} `)
+            .map(({ orgPickup, timeStart, personList }) => `## ${orgPickup} at ${_1.ParseContentService.getAmPmTimeFrom24Hour(timeStart)} with ${personList.map((a) => a.name).join(', ')} `)
             .join('\n');
     }
-    getNightOpsEphemeral(day, discordId, nightMap) {
+    getNightMapEphemeral(discordId, { day, marketList }) {
         return (`## ${const_1.DAYS_OF_WEEK[day].name}:\n` +
             '\n' +
-            this.getNightCapEphemeral(discordId, nightMap) +
-            '\n' +
-            this.getDistroEphemeral(discordId, nightMap) +
-            '\n' +
-            this.getPickupsEphemeral(discordId, nightMap));
+            marketList
+                .map((a) => this.getNightOpsEphemeral(day, discordId, a))
+                .join('\n\n'));
     }
-    getNightOpsAnnounce(roleId, nightMap) {
-        return (`## ${(0, discord_js_1.roleMention)(roleId)}\n` +
+    getNightOpsEphemeral(day, discordId, nightMarket) {
+        return (this.getNightCapEphemeral(discordId, nightMarket) +
             '\n' +
-            this.getNightCapAnnounce(nightMap) +
+            this.getDistroEphemeral(discordId, nightMarket) +
             '\n' +
-            this.getDistroAnnounce(nightMap) +
+            this.getPickupsEphemeral(discordId, nightMarket));
+    }
+    getNightMapAnnounce(roleId, { day, marketList }) {
+        return (`## ${(0, discord_js_1.roleMention)(roleId)} \n` +
             '\n' +
-            this.getPickupsAnnounce(nightMap) +
+            marketList
+                .map((a) => this.getNightOpsAnnounce(roleId, a))
+                .join('\n\n'));
+    }
+    getNightOpsAnnounce(roleId, market) {
+        return (this.getNightCapAnnounce(market) +
+            '\n' +
+            this.getDistroAnnounce(market) +
+            '\n' +
+            this.getPickupsAnnounce(market) +
             '\n\n Love, Crabapple');
     }
     getRandoChannelSalute(channelName) {
@@ -171,9 +181,9 @@ class MarkdownService {
     // todo: use message service
     getAfterMarketAnnounce(roleId, { pickupList }) {
         return `## ${(0, discord_js_1.roleMention)(roleId)}!\nNight herstory has been recorded! New night list: ${pickupList
-            .map(({ org, timeStart, personList }) => {
+            .map(({ orgPickup, timeStart, personList }) => {
             return ('\n>' +
-                org +
+                orgPickup +
                 ' ' +
                 _1.ParseContentService.getAmPmTimeFrom24Hour(timeStart) +
                 ' ' +
@@ -184,16 +194,17 @@ class MarkdownService {
             .join('\n')}`;
     }
     getPickupsAnnounce({ pickupList }) {
-        return `Pick-up${pickupList.length === 1 ? '' : 's'}: ${pickupList.map(({ org, timeStart, personList }) => {
-            return ('\n> ' +
-                org +
+        return `Pick-up${pickupList.length === 1 ? '' : 's'}:\n> ${pickupList
+            .map(({ orgPickup, timeStart, personList }) => {
+            return (orgPickup +
                 ' ' +
                 _1.ParseContentService.getAmPmTimeFrom24Hour(timeStart) +
                 ' ' +
                 personList
                     .map(({ name, discordId }) => `${(0, discord_js_1.bold)(name)} ${discordId ? (0, discord_js_1.userMention)(discordId) : ''}`)
                     .join(', '));
-        })}`;
+        })
+            .join('\n> ')}`;
     }
     getNightCapAnnounce({ hostList, statusList }) {
         // todo: this logic needs improvement
@@ -215,12 +226,24 @@ class MarkdownService {
             .map(({ name, discordId }) => `${discordId ? (0, discord_js_1.userMention)(discordId) : (0, discord_js_1.bold)(name)}`)
             .join(', ')} `;
     }
-    getMyPickups(discordId, { pickupList }) {
-        return `Current pick-up${pickupList.length === 1 ? '' : 's'}:${pickupList
+    getMyDistros(discordId, { marketList }) {
+        const hostList = [...marketList.map((a) => a.hostList)]
+            .flat()
+            .filter((a) => a.discordIdOrEmail === discordId);
+        return `Current distro${hostList.length === 1 ? '' : 's'}:\n> ${hostList
+            .map(({ orgMarket, timeStart }) => {
+            return (orgMarket +
+                ' ' +
+                _1.ParseContentService.getAmPmTimeFrom24Hour(timeStart));
+        })
+            .join('\n> ')}`;
+    }
+    getMyPickups(discordId, { marketList }) {
+        const pickupList = [...marketList.map((a) => a.pickupList)].flat();
+        return `Current pick-up${pickupList.length === 1 ? '' : 's'}:\n> ${pickupList
             .filter((a) => a.personList.some((b) => b.discordIdOrEmail === discordId))
-            .map(({ org, timeStart, personList }) => {
-            return ('\n> ' +
-                org +
+            .map(({ orgPickup, timeStart, personList }) => {
+            return (orgPickup +
                 ' ' +
                 _1.ParseContentService.getAmPmTimeFrom24Hour(timeStart) +
                 ' ' +
@@ -231,12 +254,13 @@ class MarkdownService {
                     ? '(Shadow Mode)'
                     : ''}`)
                     .join(', '));
-        })}`;
+        })
+            .join('\n> ')}`;
     }
     getPickupsEphemeral(discordId, { pickupList, statusList }) {
-        return `Pick-up${pickupList.length === 1 ? '' : 's'}${statusList.includes('NEEDED_PICKUP') ? ' HELP NEEDED' : ''}:${pickupList.map(({ org, timeStart, personList }) => {
-            return ('\n> ' +
-                org +
+        return `Pick-up${pickupList.length === 1 ? '' : 's'}${statusList.includes('NEEDED_PICKUP') ? ' HELP NEEDED' : ''}:${pickupList
+            .map(({ orgPickup, timeStart, personList }) => {
+            return (orgPickup +
                 ' ' +
                 _1.ParseContentService.getAmPmTimeFrom24Hour(timeStart) +
                 ' ' +
@@ -247,7 +271,8 @@ class MarkdownService {
                         : ''})`
                     : ''}`)
                     .join(', '));
-        })}`;
+        })
+            .join('\n')}`;
     }
     getNightCapEphemeral(discordId, { hostList, statusList }) {
         if (statusList.includes('NEEDED_CAP')) {

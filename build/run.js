@@ -22,8 +22,11 @@ async function run() {
     // TODO: we have to remember that each guild could have a different timezone
     // so we need to figure out how to adjust the crons for each guild
     // Add cron jobs
-    (0, cron_utility_1.AddCron)('0 30 7 * * *', // 7:30 am, every day
-    // '* * * * *', //every minute
+    (0, cron_utility_1.AddCron)(
+    // 7:30 am, every day
+    '0 30 7 * * *', 
+    // every minute
+    // '* * * * *',
     (0, jobs_1.NightOpsJob)(client));
     (0, cron_utility_1.AddCron)('0 30 23 * * *', // at 11:30pm
     (0, jobs_1.NightTimelineJob)(client));

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.GetVolunteerPickupComponent = exports.GetVolunteerPeriodComponent = exports.GetVolunteerRoleShadowComponent = exports.GetVolunteerRoleComponent = exports.GetVolunteerListAllComponent = exports.GetVolunteerInitComponent = void 0;
+exports.GetVolunteerDistroComponent = exports.GetVolunteerPickupComponent = exports.GetVolunteerPeriodComponent = exports.GetVolunteerRoleShadowComponent = exports.GetVolunteerRoleComponent = exports.GetVolunteerListAllComponent = exports.GetVolunteerInitComponent = void 0;
 const discord_js_1 = require("discord.js");
 const service_1 = require("../service");
 const const_1 = require("../const");
@@ -11,7 +11,7 @@ function GetVolunteerInitComponent({ discordId, day }) {
         .setStyle(discord_js_1.ButtonStyle.Secondary);
     const hostButton = new discord_js_1.ButtonBuilder()
         // this is an "update" since we don't need more data, we can save this to db
-        .setCustomId(`volunteer-distro-update--${day}--${discordId}`)
+        .setCustomId(`volunteer-distro--${day}--${discordId}`)
         .setLabel(`Volunteer the Distro Button`)
         .setStyle(discord_js_1.ButtonStyle.Secondary);
     return [
@@ -91,10 +91,12 @@ function GetVolunteerPickupComponent({ day, discordId }, pickupList) {
             .setPlaceholder('Make a selection!')
             .setMinValues(1)
             .setMaxValues(pickupList.length)
-            .addOptions(pickupList.map(({ org, timeStart, timeEnd, personList }) => new discord_js_1.StringSelectMenuOptionBuilder()
-            .setLabel(`Pickup: ${org}`)
-            .setDescription(`at ${service_1.ParseContentService.getAmPmTimeFrom24Hour(timeStart)}${personList.length ? ' with ' : ''}${personList.map((a) => a.name).join(', ')}`)
-            .setValue(`${org}---${timeStart}---${timeEnd || '0000'}`))))
+            .addOptions(pickupList.map(({ orgPickup, timeStart, timeEnd, personList }) => new discord_js_1.StringSelectMenuOptionBuilder()
+            .setLabel(`Pickup: ${orgPickup}`)
+            .setDescription(`at ${service_1.ParseContentService.getAmPmTimeFrom24Hour(timeStart)}${personList.length ? ' with ' : ''}${personList
+            .map((a) => a.name)
+            .join(', ')}`)
+            .setValue(`${orgPickup}---${timeStart}---${timeEnd || '0000'}`))))
     ];
     if (hasOwnPickups) {
         rows.push(new discord_js_1.ActionRowBuilder().addComponents(new discord_js_1.ButtonBuilder()
@@ -105,3 +107,30 @@ function GetVolunteerPickupComponent({ day, discordId }, pickupList) {
     return rows;
 }
 exports.GetVolunteerPickupComponent = GetVolunteerPickupComponent;
+function GetVolunteerDistroComponent({ day, discordId }, marketList) {
+    const hostList = [...marketList.map((a) => a.hostList)].flat();
+    const hasOwnDistro = hostList.filter((a) => hostList.some((b) => b.discordIdOrEmail === discordId)).length;
+    const personList = hostList.filter((a) => a.discordIdOrEmail !== discordId);
+    const rows = [
+        new discord_js_1.ActionRowBuilder().addComponents(new discord_js_1.StringSelectMenuBuilder()
+            .setCustomId(`volunteer-distro-update--${day}--${discordId}`)
+            .setPlaceholder('Make a selection!')
+            .setMinValues(1)
+            .setMaxValues(hostList.length)
+            .addOptions(marketList.map(({ orgMarket, orgPickup, timeStart, timeEnd }) => new discord_js_1.StringSelectMenuOptionBuilder()
+            .setLabel(`Host: ${orgMarket}`)
+            .setDescription(`at ${service_1.ParseContentService.getAmPmTimeFrom24Hour(timeStart)} with ${personList
+            .filter((a) => a.orgMarket === orgMarket)
+            .map((a) => a.name)
+            .join(', ')}`)
+            .setValue(`${orgPickup}---${timeStart}---${timeEnd || '0000'}---${orgMarket}`))))
+    ];
+    if (hasOwnDistro) {
+        rows.push(new discord_js_1.ActionRowBuilder().addComponents(new discord_js_1.ButtonBuilder()
+            .setCustomId(`volunteer-distro-delete--${day}--${discordId}`)
+            .setLabel(`Delete ${hasOwnDistro} Distro`)
+            .setStyle(discord_js_1.ButtonStyle.Secondary)));
+    }
+    return rows;
+}
+exports.GetVolunteerDistroComponent = GetVolunteerDistroComponent;

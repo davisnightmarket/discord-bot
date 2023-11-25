@@ -1,12 +1,10 @@
-import { type Client, type TextChannel } from 'discord.js';
+import { type Client } from 'discord.js';
 
+import { GetChannelDayToday, GetGuildServices, Dbg } from '../utility';
 import {
-    GetChannelDayToday,
-    GetGuildRoleIdByName,
-    GetGuildServices,
-    Dbg
-} from '../utility';
-import { NightOpsDataModel, NightOpsTimelineDataModel } from '../service';
+    type NightOpsDataModel,
+    type NightOpsTimelineDataModel
+} from '../service';
 
 // runs after market, at midnight
 // adds rows to timeline for yesterday
@@ -38,12 +36,14 @@ export const NightTimelineJob = (client: Client) => async () => {
         const date = new Date();
         const stamp =
             (date.getMonth() > 8
-                ? date.getMonth() + 1
-                : '0' + (date.getMonth() + 1)) +
+                ? (date.getMonth() + 1).toString()
+                : '0' + (date.getMonth() + 1).toString()) +
             '/' +
-            (date.getDate() > 9 ? date.getDate() : '0' + date.getDate()) +
+            (date.getDate() > 9
+                ? date.getDate().toString()
+                : '0' + date.getDate().toString()) +
             '/' +
-            date.getFullYear();
+            date.getFullYear().toString();
         const timelineFuture = nightTimelineList.filter(
             (a) => new Date(a.stamp) > date
         );
@@ -60,7 +60,8 @@ export const NightTimelineJob = (client: Client) => async () => {
         for (const {
             day,
             role,
-            org,
+            orgPickup,
+            orgMarket,
             discordIdOrEmail,
             periodStatus,
             timeStart,
@@ -70,7 +71,8 @@ export const NightTimelineJob = (client: Client) => async () => {
             newTimelineList.push({
                 day,
                 role,
-                org,
+                orgPickup,
+                orgMarket,
                 discordIdOrEmail,
                 periodStatus,
                 timeStart,
@@ -81,7 +83,8 @@ export const NightTimelineJob = (client: Client) => async () => {
                 quitterList.push({
                     day,
                     role,
-                    org,
+                    orgPickup,
+                    orgMarket,
                     discordIdOrEmail,
                     periodStatus,
                     timeStart,
@@ -94,7 +97,8 @@ export const NightTimelineJob = (client: Client) => async () => {
             ({
                 day,
                 role,
-                org,
+                orgPickup,
+                orgMarket,
                 discordIdOrEmail,
                 periodStatus,
                 timeStart,
@@ -104,7 +108,8 @@ export const NightTimelineJob = (client: Client) => async () => {
                 [
                     day,
                     role,
-                    org,
+                    orgPickup,
+                    orgMarket,
                     discordIdOrEmail,
                     periodStatus,
                     timeStart,
@@ -117,7 +122,8 @@ export const NightTimelineJob = (client: Client) => async () => {
                 ({
                     day,
                     role,
-                    org,
+                    orgPickup,
+                    orgMarket,
                     discordIdOrEmail,
                     periodStatus,
                     timeStart,
@@ -128,7 +134,8 @@ export const NightTimelineJob = (client: Client) => async () => {
                         [
                             day,
                             role,
-                            org,
+                            orgPickup,
+                            orgMarket,
                             discordIdOrEmail,
                             periodStatus,
                             timeStart,
@@ -145,26 +152,27 @@ export const NightTimelineJob = (client: Client) => async () => {
                 ({
                     day,
                     role,
-                    org,
+                    orgPickup,
+                    orgMarket,
                     discordIdOrEmail,
                     periodStatus,
                     timeStart,
                     timeEnd,
                     stamp
-                }) => {
+                }) =>
                     !existsFilter.includes(
                         [
                             day,
                             role,
-                            org,
+                            orgPickup,
+                            orgMarket,
                             discordIdOrEmail,
                             periodStatus,
                             timeStart,
                             timeEnd,
                             stamp
                         ].join('')
-                    );
-                }
+                    )
             )
         );
 

@@ -29,6 +29,7 @@ export class GoogleSheetService<T extends SpreadsheetDataModel> {
             headersList as Array<keyof T>
         );
     }
+
     // TODO: test this
     async createRowWithMap(map: T) {
         const rows = (await this.waitingForHeaderList).map(
@@ -93,6 +94,7 @@ export class GoogleSheetService<T extends SpreadsheetDataModel> {
             1
         );
     }
+
     async prependOneMap(map: T) {
         const headerList = await this.waitingForHeaderList;
         const row = headerList.map((a) => map[a]);
@@ -226,11 +228,12 @@ export class GoogleSheetService<T extends SpreadsheetDataModel> {
             columnStart && columnEnd ? ':' + columnEnd : ''
         }`;
     }
+
     // this is called in the constructor to get the headers
     // if the headers have changed, this will update them in the sheet before populating
     async getHeaders(headerList?: Array<keyof T>): Promise<Array<keyof T>> {
         await this.waitingForSheetId;
-        let list = ((
+        const list = ((
             await this.spreadsheetService.rangeGet(
                 this.getSheetRangeString('A1', 'Z1')
             )

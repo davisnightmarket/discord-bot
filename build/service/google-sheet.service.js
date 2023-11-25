@@ -127,7 +127,7 @@ class GoogleSheetService {
     // if the headers have changed, this will update them in the sheet before populating
     async getHeaders(headerList) {
         await this.waitingForSheetId;
-        let list = ((await this.spreadsheetService.rangeGet(this.getSheetRangeString('A1', 'Z1')))[0] || []);
+        const list = ((await this.spreadsheetService.rangeGet(this.getSheetRangeString('A1', 'Z1')))[0] || []);
         // if we past a header list then we are replacing the
         if (headerList) {
             // the keys do NOT match, we throw an error

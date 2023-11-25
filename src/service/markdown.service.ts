@@ -2,7 +2,8 @@ import {
     type PersonModel,
     type CoreDataService,
     ParseContentService,
-    type NightModel
+    type NightMarketModel,
+    type NightMapModel
 } from '.';
 import { DAYS_OF_WEEK, PARTS_OF_DAY } from '../const';
 import { type NmDayNameType, type NmPartOfDayNameType } from '../model';
@@ -178,39 +179,61 @@ export class MarkdownService {
     getPickupJoinMessage(pickupList: NightPickupModel[]) {
         return pickupList
             .map(
-                ({ org, timeStart, personList }) =>
-                    `## ${org} at ${ParseContentService.getAmPmTimeFrom24Hour(
+                ({ orgPickup, timeStart, personList }) =>
+                    `## ${orgPickup} at ${ParseContentService.getAmPmTimeFrom24Hour(
                         timeStart
                     )} with ${personList.map((a) => a.name).join(', ')} `
             )
             .join('\n');
     }
 
-    getNightOpsEphemeral(
-        day: NmDayNameType,
+    getNightMapEphemeral(
         discordId: string,
-        nightMap: NightModel
+        { day, marketList }: NightMapModel
     ): string {
         return (
             `## ${DAYS_OF_WEEK[day].name}:\n` +
             '\n' +
-            this.getNightCapEphemeral(discordId, nightMap) +
-            '\n' +
-            this.getDistroEphemeral(discordId, nightMap) +
-            '\n' +
-            this.getPickupsEphemeral(discordId, nightMap)
+            marketList
+                .map((a) => this.getNightOpsEphemeral(day, discordId, a))
+                .join('\n\n')
         );
     }
 
-    getNightOpsAnnounce(roleId: string, nightMap: NightModel): string {
+    getNightOpsEphemeral(
+        day: NmDayNameType,
+        discordId: string,
+        nightMarket: NightMarketModel
+    ): string {
         return (
-            `## ${roleMention(roleId)}\n` +
+            this.getNightCapEphemeral(discordId, nightMarket) +
             '\n' +
-            this.getNightCapAnnounce(nightMap) +
+            this.getDistroEphemeral(discordId, nightMarket) +
             '\n' +
-            this.getDistroAnnounce(nightMap) +
+            this.getPickupsEphemeral(discordId, nightMarket)
+        );
+    }
+
+    getNightMapAnnounce(
+        roleId: string,
+        { day, marketList }: NightMapModel
+    ): string {
+        return (
+            `## ${roleMention(roleId)} \n` +
             '\n' +
-            this.getPickupsAnnounce(nightMap) +
+            marketList
+                .map((a) => this.getNightOpsAnnounce(roleId, a))
+                .join('\n\n')
+        );
+    }
+
+    getNightOpsAnnounce(roleId: string, market: NightMarketModel): string {
+        return (
+            this.getNightCapAnnounce(market) +
+            '\n' +
+            this.getDistroAnnounce(market) +
+            '\n' +
+            this.getPickupsAnnounce(market) +
             '\n\n Love, Crabapple'
         );
     }
@@ -226,14 +249,17 @@ export class MarkdownService {
     }
 
     // todo: use message service
-    getAfterMarketAnnounce(roleId: string, { pickupList }: NightModel): string {
+    getAfterMarketAnnounce(
+        roleId: string,
+        { pickupList }: NightMarketModel
+    ): string {
         return `## ${roleMention(
             roleId
         )}!\nNight herstory has been recorded! New night list: ${pickupList
-            .map(({ org, timeStart, personList }) => {
+            .map(({ orgPickup, timeStart, personList }) => {
                 return (
                     '\n>' +
-                    org +
+                    orgPickup +
                     ' ' +
                     ParseContentService.getAmPmTimeFrom24Hour(timeStart) +
                     ' ' +
@@ -250,12 +276,11 @@ export class MarkdownService {
             .join('\n')}`;
     }
 
-    getPickupsAnnounce({ pickupList }: NightModel): string {
-        return `Pick-up${pickupList.length === 1 ? '' : 's'}: ${pickupList.map(
-            ({ org, timeStart, personList }) => {
+    getPickupsAnnounce({ pickupList }: NightMarketModel): string {
+        return `Pick-up${pickupList.length === 1 ? '' : 's'}:\n> ${pickupList
+            .map(({ orgPickup, timeStart, personList }) => {
                 return (
-                    '\n> ' +
-                    org +
+                    orgPickup +
                     ' ' +
                     ParseContentService.getAmPmTimeFrom24Hour(timeStart) +
                     ' ' +
@@ -268,11 +293,11 @@ export class MarkdownService {
                         )
                         .join(', ')
                 );
-            }
-        )}`;
+            })
+            .join('\n> ')}`;
     }
 
-    getNightCapAnnounce({ hostList, statusList }: NightModel): string {
+    getNightCapAnnounce({ hostList, statusList }: NightMarketModel): string {
         // todo: this logic needs improvement
         const nightCapList = hostList.filter((a) => a.role === 'night-captain');
         if (statusList.includes('NEEDED_CAP')) {
@@ -287,7 +312,7 @@ export class MarkdownService {
     }
 
     // todo: use message service
-    getDistroAnnounce({ hostList, statusList }: NightModel): string {
+    getDistroAnnounce({ hostList, statusList }: NightMarketModel): string {
         if (statusList.includes('NEEDED_DISTRO')) {
             return 'Distro help NEEDED!';
         }
@@ -300,17 +325,34 @@ export class MarkdownService {
             .join(', ')} `;
     }
 
-    getMyPickups(discordId: string, { pickupList }: NightModel) {
+    getMyDistros(discordId: string, { marketList }: NightMapModel) {
+        const hostList = [...marketList.map((a) => a.hostList)]
+            .flat()
+            .filter((a) => a.discordIdOrEmail === discordId);
+        return `Current distro${hostList.length === 1 ? '' : 's'}:\n> ${hostList
+            .map(({ orgMarket, timeStart }) => {
+                return (
+                    (orgMarket as string) +
+                    ' ' +
+                    ParseContentService.getAmPmTimeFrom24Hour(
+                        timeStart as string
+                    )
+                );
+            })
+            .join('\n> ')}`;
+    }
+
+    getMyPickups(discordId: string, { marketList }: NightMapModel) {
+        const pickupList = [...marketList.map((a) => a.pickupList)].flat();
         return `Current pick-up${
             pickupList.length === 1 ? '' : 's'
-        }:${pickupList
+        }:\n> ${pickupList
             .filter((a) =>
                 a.personList.some((b) => b.discordIdOrEmail === discordId)
             )
-            .map(({ org, timeStart, personList }) => {
+            .map(({ orgPickup, timeStart, personList }) => {
                 return (
-                    '\n> ' +
-                    org +
+                    orgPickup +
                     ' ' +
                     ParseContentService.getAmPmTimeFrom24Hour(timeStart) +
                     ' ' +
@@ -329,43 +371,45 @@ export class MarkdownService {
                         )
                         .join(', ')
                 );
-            })}`;
+            })
+            .join('\n> ')}`;
     }
 
     getPickupsEphemeral(
         discordId: string,
-        { pickupList, statusList }: NightModel
+        { pickupList, statusList }: NightMarketModel
     ): string {
         return `Pick-up${pickupList.length === 1 ? '' : 's'}${
             statusList.includes('NEEDED_PICKUP') ? ' HELP NEEDED' : ''
-        }:${pickupList.map(({ org, timeStart, personList }) => {
-            return (
-                '\n> ' +
-                org +
-                ' ' +
-                ParseContentService.getAmPmTimeFrom24Hour(timeStart) +
-                ' ' +
-                personList
-                    .map(
-                        (a) =>
-                            `${bold(a.name)} ${
-                                discordId === a.discordId
-                                    ? `(YOU${
-                                          a.periodStatus === 'SHADOW'
-                                              ? ', Shadow Mode'
-                                              : ''
-                                      })`
-                                    : ''
-                            }`
-                    )
-                    .join(', ')
-            );
-        })}`;
+        }:${pickupList
+            .map(({ orgPickup, timeStart, personList }) => {
+                return (
+                    orgPickup +
+                    ' ' +
+                    ParseContentService.getAmPmTimeFrom24Hour(timeStart) +
+                    ' ' +
+                    personList
+                        .map(
+                            (a) =>
+                                `${bold(a.name)} ${
+                                    discordId === a.discordId
+                                        ? `(YOU${
+                                              a.periodStatus === 'SHADOW'
+                                                  ? ', Shadow Mode'
+                                                  : ''
+                                          })`
+                                        : ''
+                                }`
+                        )
+                        .join(', ')
+                );
+            })
+            .join('\n')}`;
     }
 
     getNightCapEphemeral(
         discordId: string,
-        { hostList, statusList }: NightModel
+        { hostList, statusList }: NightMarketModel
     ): string {
         if (statusList.includes('NEEDED_CAP')) {
             return 'Night Cap: HELP NEEDED!';
@@ -394,7 +438,7 @@ export class MarkdownService {
     // todo: use message service
     getDistroEphemeral(
         discordId: string,
-        { hostList, statusList }: NightModel
+        { hostList, statusList }: NightMarketModel
     ): string {
         if (statusList.includes('NEEDED_DISTRO')) {
             return 'Distro: HELP NEEDED!';

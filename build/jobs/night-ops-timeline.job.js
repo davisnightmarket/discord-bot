@@ -23,12 +23,14 @@ const NightTimelineJob = (client) => async () => {
         // split past and future timeline records
         const date = new Date();
         const stamp = (date.getMonth() > 8
-            ? date.getMonth() + 1
-            : '0' + (date.getMonth() + 1)) +
+            ? (date.getMonth() + 1).toString()
+            : '0' + (date.getMonth() + 1).toString()) +
             '/' +
-            (date.getDate() > 9 ? date.getDate() : '0' + date.getDate()) +
+            (date.getDate() > 9
+                ? date.getDate().toString()
+                : '0' + date.getDate().toString()) +
             '/' +
-            date.getFullYear();
+            date.getFullYear().toString();
         const timelineFuture = nightTimelineList.filter((a) => new Date(a.stamp) > date);
         dbg('FUTURE', timelineFuture.length);
         const timelinePast = nightTimelineList.filter(
@@ -38,12 +40,13 @@ const NightTimelineJob = (client) => async () => {
         const quitterList = [];
         const newTimelineList = [];
         // adds quitters to the quitterList from the
-        for (const { day, role, org, discordIdOrEmail, periodStatus, timeStart, timeEnd } of nightOpsList) {
+        for (const { day, role, orgPickup, orgMarket, discordIdOrEmail, periodStatus, timeStart, timeEnd } of nightOpsList) {
             dbg(periodStatus, discordIdOrEmail);
             newTimelineList.push({
                 day,
                 role,
-                org,
+                orgPickup,
+                orgMarket,
                 discordIdOrEmail,
                 periodStatus,
                 timeStart,
@@ -54,7 +57,8 @@ const NightTimelineJob = (client) => async () => {
                 quitterList.push({
                     day,
                     role,
-                    org,
+                    orgPickup,
+                    orgMarket,
                     discordIdOrEmail,
                     periodStatus,
                     timeStart,
@@ -62,21 +66,23 @@ const NightTimelineJob = (client) => async () => {
                 });
             }
         }
-        const existsFilter = timelinePast.map(({ day, role, org, discordIdOrEmail, periodStatus, timeStart, timeEnd, stamp }) => [
+        const existsFilter = timelinePast.map(({ day, role, orgPickup, orgMarket, discordIdOrEmail, periodStatus, timeStart, timeEnd, stamp }) => [
             day,
             role,
-            org,
+            orgPickup,
+            orgMarket,
             discordIdOrEmail,
             periodStatus,
             timeStart,
             timeEnd,
             stamp
         ].join(''));
-        nightDataService.addNightTimelineRecordList(newTimelineList.filter(({ day, role, org, discordIdOrEmail, periodStatus, timeStart, timeEnd, stamp }) => {
+        nightDataService.addNightTimelineRecordList(newTimelineList.filter(({ day, role, orgPickup, orgMarket, discordIdOrEmail, periodStatus, timeStart, timeEnd, stamp }) => {
             return !existsFilter.includes([
                 day,
                 role,
-                org,
+                orgPickup,
+                orgMarket,
                 discordIdOrEmail,
                 periodStatus,
                 timeStart,
@@ -84,18 +90,17 @@ const NightTimelineJob = (client) => async () => {
                 stamp
             ].join(''));
         }));
-        dbg('Timeline', newTimelineList.filter(({ day, role, org, discordIdOrEmail, periodStatus, timeStart, timeEnd, stamp }) => {
-            !existsFilter.includes([
-                day,
-                role,
-                org,
-                discordIdOrEmail,
-                periodStatus,
-                timeStart,
-                timeEnd,
-                stamp
-            ].join(''));
-        }));
+        dbg('Timeline', newTimelineList.filter(({ day, role, orgPickup, orgMarket, discordIdOrEmail, periodStatus, timeStart, timeEnd, stamp }) => !existsFilter.includes([
+            day,
+            role,
+            orgPickup,
+            orgMarket,
+            discordIdOrEmail,
+            periodStatus,
+            timeStart,
+            timeEnd,
+            stamp
+        ].join(''))));
         // get timeline events happening today
         // for (const {
         //     day,

@@ -1,10 +1,10 @@
 import {
-    ButtonInteraction,
-    ChatInputCommandInteraction,
+    type ButtonInteraction,
+    type ChatInputCommandInteraction,
     Events,
-    Interaction,
-    ModalSubmitInteraction,
-    StringSelectMenuInteraction
+    type Interaction,
+    type ModalSubmitInteraction,
+    type StringSelectMenuInteraction
 } from 'discord.js';
 import { GetGuildServices, Dbg } from '../utility';
 import {
@@ -22,9 +22,10 @@ import {
     AvailabilityEditSelectEvent,
     VolunteerPickupSaveSelectEvent,
     VolunteerPickupDeleteButtonEvent,
-    VolunteerHostSaveButtonEvent
+    VolunteerDistroSaveSelectEvent,
+    VolunteerDistroButtonEvent
 } from '../events';
-import { NmDayNameType, NmNightRoleType } from '../model';
+import { type NmDayNameType, type NmNightRoleType } from '../model';
 
 const dbg = Dbg('RouteInteraction');
 
@@ -42,7 +43,7 @@ export async function RouteInteraction(interaction: Interaction) {
         }
 
         dbg(`Command: ${command}`);
-        if (interaction?.commandName == 'nm') {
+        if (interaction?.commandName === 'nm') {
             dbg('/nm Command');
 
             if (command === 'volunteer') {
@@ -85,7 +86,7 @@ export async function RouteInteraction(interaction: Interaction) {
         }
 
         // restrict to community coordinator
-        if (interaction?.commandName == 'cc') {
+        if (interaction?.commandName === 'cc') {
             dbg('/cc Command');
             // todo: make sure they are a CC
             // todo: we don't want to rely on discord role records, we want to geth from the admin sheet of the night spreadsheet
@@ -95,7 +96,7 @@ export async function RouteInteraction(interaction: Interaction) {
             // if(!ccList.map(a=>a.discordId).includes(interaction.user.id)){
             // show how to become a cc message and return
             // return
-            //}
+            // }
             const { marketAdminService } = services;
             // todo: this is going to break our current model, we need to fix it
             await interaction.deferReply({ ephemeral: true });
@@ -143,9 +144,8 @@ export async function RouteInteraction(interaction: Interaction) {
                 dbg('Editing identity');
                 IdentityCommandEvent(services, interaction, target.id);
             }
-            if (process.env.NODE_ENV === 'prod') {
-                return;
-            }
+            // if (process.env.NODE_ENV === 'prod') {
+            // }
         }
     }
     // we can lump these two together since they are both routed by customId
@@ -156,7 +156,7 @@ export async function RouteInteraction(interaction: Interaction) {
     ) {
         const args = (interaction as ButtonInteraction).customId.split('--');
         // by convention, the last arg is the discordId
-        const discordId = args[args.length - 1] as string;
+        const discordId = args[args.length - 1];
         const command = args[0];
         dbg('ARGS', args);
         dbg(
@@ -200,6 +200,13 @@ export async function RouteInteraction(interaction: Interaction) {
                 discordId,
                 args as [string, NmDayNameType, string]
             );
+
+            VolunteerDistroSaveSelectEvent(
+                services,
+                interaction as StringSelectMenuInteraction,
+                discordId,
+                args as [string, NmDayNameType]
+            );
         }
 
         if ((interaction as ButtonInteraction).isButton()) {
@@ -233,14 +240,14 @@ export async function RouteInteraction(interaction: Interaction) {
                 args as [string, 'revoke' | 'start', NmDayNameType]
             );
 
-            VolunteerHostSaveButtonEvent(
+            VolunteerPickupButtonEvent(
                 services,
                 interaction as ButtonInteraction,
                 discordId,
-                args as [string, NmDayNameType]
+                args as [string, NmDayNameType, NmNightRoleType, string]
             );
 
-            VolunteerPickupButtonEvent(
+            VolunteerDistroButtonEvent(
                 services,
                 interaction as ButtonInteraction,
                 discordId,

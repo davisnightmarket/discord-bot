@@ -6,9 +6,10 @@ import {
     StringSelectMenuOptionBuilder
 } from 'discord.js';
 import {
-    NightPersonModel,
-    NightPickupModel,
-    ParseContentService
+    type NightPersonModel,
+    type NightPickupModel,
+    ParseContentService,
+    NightMarketModel
 } from '../service';
 import { DAYS_OF_WEEK, DAYS_OF_WEEK_CODES, NM_NIGHT_ROLES } from '../const';
 
@@ -17,13 +18,13 @@ export function GetVolunteerInitComponent({
     day
 }: Pick<NightPersonModel, 'discordId' | 'day'>) {
     const pickupButton = new ButtonBuilder()
-        .setCustomId(`volunteer-pickup--${day}--${discordId}`)
+        .setCustomId(`volunteer-pickup--${day as string}--${discordId}`)
         .setLabel(`Volunteer the Pickup Button`)
         .setStyle(ButtonStyle.Secondary);
 
     const hostButton = new ButtonBuilder()
         // this is an "update" since we don't need more data, we can save this to db
-        .setCustomId(`volunteer-distro-update--${day}--${discordId}`)
+        .setCustomId(`volunteer-distro--${day as string}--${discordId}`)
         .setLabel(`Volunteer the Distro Button`)
         .setStyle(ButtonStyle.Secondary);
 
@@ -64,14 +65,18 @@ export function GetVolunteerRoleComponent({
     day,
     discordId
 }: Pick<NightPersonModel, 'day' | 'discordId'>) {
-    const components: ActionRowBuilder<ButtonBuilder>[] = [];
+    const components: Array<ActionRowBuilder<ButtonBuilder>> = [];
 
     const hostButton = new ButtonBuilder()
-        .setCustomId(`volunteer-init--${day}--night-distro--${discordId}`)
+        .setCustomId(
+            `volunteer-init--${day as string}--night-distro--${discordId}`
+        )
         .setLabel(NM_NIGHT_ROLES['night-distro'].description)
         .setStyle(ButtonStyle.Secondary);
     const pickupButton = new ButtonBuilder()
-        .setCustomId(`volunteer-init--${day}--night-pickup--${discordId}`)
+        .setCustomId(
+            `volunteer-init--${day as string}--night-pickup--${discordId}`
+        )
         .setLabel(NM_NIGHT_ROLES['night-pickup'].description)
         .setStyle(ButtonStyle.Secondary);
 
@@ -86,17 +91,21 @@ export function GetVolunteerRoleShadowComponent({
     day,
     discordId
 }: Pick<NightPersonModel, 'day' | 'discordId'>) {
-    const components: ActionRowBuilder<ButtonBuilder>[] = [];
+    const components: Array<ActionRowBuilder<ButtonBuilder>> = [];
 
     const shadowHostButton = new ButtonBuilder()
         .setCustomId(
-            `volunteer-init--${day}--night-distro-shadow--${discordId}`
+            `volunteer-init--${
+                day as string
+            }--night-distro-shadow--${discordId}`
         )
         .setLabel(NM_NIGHT_ROLES['night-distro-shadow'].description)
         .setStyle(ButtonStyle.Secondary);
     const shadowPickupButton = new ButtonBuilder()
         .setCustomId(
-            `volunteer-init--${day}--night-pickup-shaddow--${discordId}`
+            `volunteer-init--${
+                day as string
+            }--night-pickup-shaddow--${discordId}`
         )
         .setLabel(NM_NIGHT_ROLES['night-pickup-shadow'].description)
         .setStyle(ButtonStyle.Secondary);
@@ -114,12 +123,16 @@ export function GetVolunteerPeriodComponent({
     discordId
 }: Pick<NightPersonModel, 'day' | 'role' | 'discordId'>) {
     const joinOnceButton = new ButtonBuilder()
-        .setCustomId(`volunteer-period--${day}--${role}--once--${discordId}`)
-        .setLabel(`${NM_NIGHT_ROLES[role].name} just this ${day}`)
+        .setCustomId(
+            `volunteer-period--${day as string}--${role}--once--${discordId}`
+        )
+        .setLabel(`${NM_NIGHT_ROLES[role].name} just this ${day as string}`)
         .setStyle(ButtonStyle.Secondary);
     const joinAlwaysButton = new ButtonBuilder()
-        .setCustomId(`volunteer--${day}--${role}--every--${discordId}`)
-        .setLabel(`${NM_NIGHT_ROLES[role].name}  every ${day}`)
+        .setCustomId(
+            `volunteer--${day as string}--${role}--every--${discordId}`
+        )
+        .setLabel(`${NM_NIGHT_ROLES[role].name}  every ${day as string}`)
         .setStyle(ButtonStyle.Secondary);
 
     return [
@@ -137,27 +150,36 @@ export function GetVolunteerPickupComponent(
         a.personList.some((b) => b.discordIdOrEmail === discordId)
     ).length;
 
-    const rows: ActionRowBuilder<StringSelectMenuBuilder | ButtonBuilder>[] = [
+    const rows: Array<
+        ActionRowBuilder<StringSelectMenuBuilder | ButtonBuilder>
+    > = [
         new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
             new StringSelectMenuBuilder()
-                .setCustomId(`volunteer-pickup-update--${day}--${discordId}`)
+                .setCustomId(
+                    `volunteer-pickup-update--${day as string}--${discordId}`
+                )
                 .setPlaceholder('Make a selection!')
                 .setMinValues(1)
                 .setMaxValues(pickupList.length)
                 .addOptions(
-                    pickupList.map(({ org, timeStart, timeEnd, personList }) =>
-                        new StringSelectMenuOptionBuilder()
-                            .setLabel(`Pickup: ${org}`)
-                            .setDescription(
-                                `at ${ParseContentService.getAmPmTimeFrom24Hour(
-                                    timeStart
-                                )}${
-                                    personList.length ? ' with ' : ''
-                                }${personList.map((a) => a.name).join(', ')}`
-                            )
-                            .setValue(
-                                `${org}---${timeStart}---${timeEnd || '0000'}`
-                            )
+                    pickupList.map(
+                        ({ orgPickup, timeStart, timeEnd, personList }) =>
+                            new StringSelectMenuOptionBuilder()
+                                .setLabel(`Pickup: ${orgPickup}`)
+                                .setDescription(
+                                    `at ${ParseContentService.getAmPmTimeFrom24Hour(
+                                        timeStart
+                                    )}${
+                                        personList.length ? ' with ' : ''
+                                    }${personList
+                                        .map((a) => a.name)
+                                        .join(', ')}`
+                                )
+                                .setValue(
+                                    `${orgPickup}---${timeStart}---${
+                                        timeEnd || '0000'
+                                    }`
+                                )
                     )
                 )
         )
@@ -168,9 +190,73 @@ export function GetVolunteerPickupComponent(
             new ActionRowBuilder<ButtonBuilder>().addComponents(
                 new ButtonBuilder()
                     .setCustomId(
-                        `volunteer-pickup-delete--${day}--${discordId}`
+                        `volunteer-pickup-delete--${
+                            day as string
+                        }--${discordId}`
                     )
                     .setLabel(`Delete ${hasOwnPickups} Pickups`)
+                    .setStyle(ButtonStyle.Secondary)
+            )
+        );
+    }
+    return rows;
+}
+export function GetVolunteerDistroComponent(
+    { day, discordId }: Required<Pick<NightPersonModel, 'day' | 'discordId'>>,
+    marketList: NightMarketModel[]
+) {
+    const hostList = [...marketList.map((a) => a.hostList)].flat();
+    const hasOwnDistro = hostList.filter((a) =>
+        hostList.some((b) => b.discordIdOrEmail === discordId)
+    ).length;
+    const personList = hostList.filter((a) => a.discordIdOrEmail !== discordId);
+
+    const rows: Array<
+        ActionRowBuilder<StringSelectMenuBuilder | ButtonBuilder>
+    > = [
+        new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
+            new StringSelectMenuBuilder()
+                .setCustomId(
+                    `volunteer-distro-update--${day as string}--${discordId}`
+                )
+                .setPlaceholder('Make a selection!')
+                .setMinValues(1)
+                .setMaxValues(hostList.length)
+                .addOptions(
+                    marketList.map(
+                        ({ orgMarket, orgPickup, timeStart, timeEnd }) =>
+                            new StringSelectMenuOptionBuilder()
+                                .setLabel(`Host: ${orgMarket}`)
+                                .setDescription(
+                                    `at ${ParseContentService.getAmPmTimeFrom24Hour(
+                                        timeStart
+                                    )} with ${personList
+                                        .filter(
+                                            (a) => a.orgMarket === orgMarket
+                                        )
+                                        .map((a) => a.name)
+                                        .join(', ')}`
+                                )
+                                .setValue(
+                                    `${orgPickup}---${timeStart}---${
+                                        timeEnd || '0000'
+                                    }---${orgMarket}`
+                                )
+                    )
+                )
+        )
+    ];
+
+    if (hasOwnDistro) {
+        rows.push(
+            new ActionRowBuilder<ButtonBuilder>().addComponents(
+                new ButtonBuilder()
+                    .setCustomId(
+                        `volunteer-distro-delete--${
+                            day as string
+                        }--${discordId}`
+                    )
+                    .setLabel(`Delete ${hasOwnDistro} Distro`)
                     .setStyle(ButtonStyle.Secondary)
             )
         );

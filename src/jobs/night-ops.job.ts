@@ -20,27 +20,29 @@ export const NightOpsJob = (client: Client) => async () => {
         );
         // get the channel by today name
         const channelDay = GetChannelDayToday();
-        const nightMap = await nightDataService.getNightByDay(channelDay);
+        const nightMap = await nightDataService.getNightMapByDay(channelDay);
         dbg(channelDay);
         dbg(nightMap);
 
-        console.log(JSON.stringify(nightMap, null, 2));
-
+        const pickupList = [
+            ...nightMap.marketList.map((a) => a.pickupList)
+        ].flat();
+        const hostList = [...nightMap.marketList.map((a) => a.hostList)].flat();
         let content: string = '';
-        if (nightMap.pickupList.length == 0 && nightMap.hostList.length == 0) {
+        if (pickupList.length === 0 && hostList.length === 0) {
             dbg('No pickups or hosting scheduled.');
             content = 'No pickups or hosting scheduled.';
         } else {
-            content = markdownService.getNightOpsAnnounce(
+            content = markdownService.getNightMapAnnounce(
                 await GetGuildRoleIdByName(guild, channelDay),
                 nightMap
             );
         }
 
         (
-            (await guild.channels.cache.find(
+            guild.channels.cache.find(
                 (channel) => channel.name === channelDay
-            )) as TextChannel
+            ) as TextChannel
         )?.send({
             content
         });

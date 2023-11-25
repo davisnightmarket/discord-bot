@@ -32,7 +32,7 @@ export const NightOpPickupStatus: {
 
 // shadow type may be redundant if we have a shadow roles
 // maybe one or the other
-type PeriodStatusType = 'ALWAYS' | 'ONCE' | 'QUIT' | 'SHADOW';
+export type PeriodStatusType = 'ALWAYS' | 'ONCE' | 'QUIT' | 'SHADOW';
 export const NightOpPeriodStatus: {
     [k in PeriodStatusType]: {
         id: k;
@@ -51,7 +51,8 @@ export const NightOpPeriodStatus: {
 export interface NightOpsDataModel extends SpreadsheetDataModel {
     day: NmDayNameType;
     role: NmNightRoleType;
-    org: string;
+    orgPickup: string;
+    orgMarket: string;
     discordIdOrEmail: string;
     periodStatus: PeriodStatusType;
     timeStart: string;
@@ -64,7 +65,8 @@ const dbg = DebugUtility('NightDataService');
 export interface NightOpsTimelineDataModel extends SpreadsheetDataModel {
     day: NmDayNameType;
     role: NmNightRoleType;
-    org: string;
+    orgPickup: string;
+    orgMarket: string;
     discordIdOrEmail: string;
     periodStatus: string;
     timeStart: string;
@@ -75,7 +77,8 @@ export interface NightOpsTimelineDataModel extends SpreadsheetDataModel {
 // models what's in the "ops-pickup-notes" sheet
 export interface NightOpsPickupNotesDataModel extends SpreadsheetDataModel {
     day: string;
-    org: string;
+    orgPickup: string;
+    orgMarket: string;
     contact: string;
     timeStart: string;
     note: string;
@@ -90,7 +93,8 @@ export type NightPickupModel = Pick<
     NightOpsDataModel,
     | 'day'
     | 'role'
-    | 'org'
+    | 'orgMarket'
+    | 'orgPickup'
     | 'periodStatus'
     | 'discordIdOrEmail'
     | 'timeStart'
@@ -102,9 +106,14 @@ export type NightPickupModel = Pick<
 
 // the model for a single night
 // includes day, time, location, list of hosts, list of pickups
-export type NightModel = Pick<
+export type NightMapModel = Pick<NightOpsDataModel, 'day'> & {
+    // distro and captain
+    marketList: NightMarketModel[];
+};
+
+export type NightMarketModel = Pick<
     NightOpsDataModel,
-    'day' | 'org' | 'timeStart' | 'timeEnd'
+    'day' | 'orgPickup' | 'orgMarket' | 'timeStart' | 'timeEnd'
 > & {
     statusList: NightStatusType[];
     // distro and captain
@@ -150,7 +159,8 @@ export class NightDataService {
     createNightOpsData({
         day = 'monday',
         role = 'night-captain',
-        org = '',
+        orgPickup = '',
+        orgMarket = '',
         discordIdOrEmail = '',
         periodStatus = 'ALWAYS',
         timeStart = '',
@@ -159,7 +169,8 @@ export class NightDataService {
         return {
             day,
             role,
-            org,
+            orgPickup,
+            orgMarket,
             discordIdOrEmail,
             periodStatus,
             timeStart,
@@ -169,75 +180,91 @@ export class NightDataService {
 
     // used to make sure our night object is populated
     // todo: log errors if stuff is missing?
-    createNight({
+    createNightMap({
         // defaults to blank, because we should always get a day
         day = '' as unknown as NmDayNameType,
-        org = '',
-        timeStart = '',
-        timeEnd = '',
-        hostList = [],
-        pickupList = []
-    }: Partial<NightModel>): NightModel {
+        marketList = []
+    }: Partial<NightMapModel>): NightMapModel {
         if (!day) {
             dbg(`createNight  missing day`);
         }
 
-        // if no org, grab it from the night cap
-        if (!org) {
-            const nightCap = hostList.filter(
-                (a) => a.role === 'night-captain'
-            )[0];
-            if (nightCap) {
-                org = nightCap.org as string;
+        marketList = marketList.map(
+            ({
+                orgPickup = '',
+                orgMarket = '',
+                timeStart = '',
+                timeEnd = '',
+                hostList = [],
+                pickupList = []
+            }) => {
+                // if no org, grab it from the night cap
+
+                if (!orgMarket) {
+                    const nightCap = hostList.filter(
+                        (a) => a.role === 'night-captain'
+                    )[0];
+                    if (nightCap) {
+                        orgMarket = nightCap.orgMarket as string;
+                        orgPickup = nightCap.orgPickup as string;
+                        timeStart = nightCap.timeStart as string;
+                        timeEnd = nightCap.timeEnd as string;
+                    }
+                }
+
+                // orgPickup = '',
+                // orgMarket = '',
+                // timeStart = '',
+                // timeEnd = '',
+                // hostList = [],
+                // pickupList = []
+                const statusList: NightStatusType[] = [];
+                // if there are no distro folks
+                if (
+                    this.getHostPersonLength(
+                        hostList,
+                        ['night-distro'],
+                        ['QUIT', 'SHADOW']
+                    ) === 0
+                ) {
+                    statusList.push('NEEDED_DISTRO');
+                }
+                // if there are no night caps
+                if (
+                    this.getHostPersonLength(
+                        hostList,
+                        ['night-captain'],
+                        ['QUIT', 'SHADOW']
+                    ) === 0
+                ) {
+                    statusList.push('NEEDED_CAP');
+                }
+                // if there are pickups with no folks
+                if (
+                    this.getPickupPersonStatusLength(pickupList, [
+                        'QUIT',
+                        'SHADOW'
+                    ]) === 0
+                ) {
+                    statusList.push('NEEDED_PICKUP');
+                }
+
+                return {
+                    day,
+                    statusList,
+                    orgPickup,
+                    orgMarket,
+                    timeStart,
+                    timeEnd,
+                    hostList,
+                    pickupList
+                };
             }
-        }
-        if (!org) {
-            const nightCap = hostList.filter(
-                (a) => a.role === 'night-captain'
-            )[0];
-            if (nightCap) {
-                org = nightCap.org as string;
-                timeStart = nightCap.timeStart as string;
-                timeEnd = nightCap.timeEnd as string;
-            }
-        }
-        const statusList: NightStatusType[] = [];
-        // if there are no distro folks
-        if (
-            this.getHostPersonLength(
-                hostList,
-                ['night-distro'],
-                ['QUIT', 'SHADOW']
-            ) === 0
-        ) {
-            statusList.push('NEEDED_DISTRO');
-        }
-        // if there are no night caps
-        if (
-            this.getHostPersonLength(
-                hostList,
-                ['night-captain'],
-                ['QUIT', 'SHADOW']
-            ) === 0
-        ) {
-            statusList.push('NEEDED_CAP');
-        }
-        // if there are pickups with no folks
-        if (
-            this.getPickupPersonStatusLength(pickupList, ['QUIT', 'SHADOW']) ===
-            0
-        ) {
-            statusList.push('NEEDED_PICKUP');
-        }
+        );
 
         return {
             day,
-            org,
-            statusList,
-            timeStart,
-            timeEnd,
-            hostList,
-            pickupList
+            marketList
         };
     }
 
@@ -332,9 +359,6 @@ export class NightDataService {
     }): Promise<Array<[string, string]>> {
         await this.refreshCache();
         return await this.waitingForNightCache.then((nightOps) => {
-            console.log(
-                nightOps.filter((a) => includeRoleList.includes(a.role))
-            );
             return (
                 nightOps
                     .filter((a) => includeRoleList.includes(a.role))
@@ -375,26 +399,109 @@ export class NightDataService {
         );
     }
 
+    // this is the main hook that turns data into market model
+    async getMarketListByDay(day: NmDayNameType): Promise<NightMarketModel[]> {
+        // assemble all our resources including ops ...
+        const opsList = await this.getNightDataByDay(day);
+        // people ...
+        const personList = await this.getNightPersonList(opsList);
+        /// and notes
+        const noteList = await this.getOpsNotesByDay(day);
+
+        const orgMarketDefault =
+            opsList.find((a) => a.orgMarket)?.orgMarket ?? '';
+        if (!orgMarketDefault) {
+            console.error(`No Market found for this ${day}!`);
+            return [];
+        }
+
+        // turn the records into map of unique array per market
+        const getMarketDataList = opsList.reduce<
+            Record<string, NightOpsDataModel[]>
+        >(
+            (all, record) => {
+                if (record.orgMarket.trim() && !all[record.orgMarket]) {
+                    all[record.orgMarket] = [];
+                }
+                if (record.orgMarket) {
+                    all[record.orgMarket].push(record);
+                } else {
+                    all[orgMarketDefault].push(record);
+                }
+
+                return all;
+            },
+            { [orgMarketDefault]: [] }
+        );
+        const marketList: NightMarketModel[] = Object.keys(
+            getMarketDataList
+        ).map((orgMarket) => {
+            // here we assume that orgPickup,timeStart,timeEnd are unique per market
+            // and only exist on night-cap records
+            const nightCapOps = getMarketDataList[orgMarket].filter(
+                (a) => a.role === 'night-captain' && a.orgMarket === orgMarket
+            );
+            const orgPickup =
+                nightCapOps.find((a) => a.orgPickup)?.orgPickup ?? '';
+            const timeStart =
+                nightCapOps.find((a) => a.timeStart)?.timeStart ?? '';
+            const timeEnd = nightCapOps.find((a) => a.timeEnd)?.timeEnd ?? '';
+
+            const hostList = this.getHostListFromData(
+                getMarketDataList[orgMarket],
+                personList,
+                noteList
+            );
+            const pickupList = this.getPickupListFromData(
+                getMarketDataList[orgMarket],
+                personList,
+                noteList,
+                timeStart
+            );
+
+            const statusList: NightStatusType[] = [];
+
+            return {
+                day,
+                orgMarket,
+                orgPickup,
+                timeStart,
+                timeEnd,
+                statusList,
+                hostList,
+                pickupList
+            };
+        });
+
+        return marketList;
+    }
+
     // this is so complicated because we are reducing a list of flat data
     // into a per day list of pickups and hosts and etc
-    async getPickupListByDay(day: NmDayNameType): Promise<NightPickupModel[]> {
-        const nightList = await this.getNightDataByDay(day);
-        const personList = await this.getNightPersonList(nightList);
-
-        const noteList = await this.getOpsNotesByDay(day);
+    getPickupListFromData(
+        opList: NightOpsDataModel[],
+        personList: PersonWithIdModel[],
+        noteList: NightOpsPickupNotesDataModel[],
+        timeStartDefault: string
+    ): NightPickupModel[] {
         // return a complete set of pickups, with personList and noteList
         const pickupList = Object.values(
-            nightList
+            opList
                 .filter((a) => (a.role = 'night-pickup'))
                 // todo: simplify
                 .reduce<{ [k in string]: NightPickupModel }>((a, op) => {
-                    const { day, org, timeStart, discordIdOrEmail } = op;
-                    if (!timeStart || !org) {
+                    const { day, orgPickup, discordIdOrEmail } = op;
+                    let { timeStart } = op;
+                    timeStart = timeStart || timeStartDefault;
+
+                    if (!orgPickup) {
                         return a;
                     }
-                    if (!a[day + org + timeStart]) {
-                        a[day + org + timeStart] = {
+
+                    if (!a[day + orgPickup + timeStart]) {
+                        a[day + orgPickup + timeStart] = {
                             ...op,
+                            timeStart,
                             // this needs to happen for each op since that's where the discordIdOrEmail is
                             personList: [],
                             // this can happen once
@@ -415,9 +522,10 @@ export class NightDataService {
                             a.email === discordIdOrEmail
                     ) as PersonWithIdModel;
                     if (person) {
-                        a[day + org + timeStart].personList.push(
+                        a[day + orgPickup + timeStart].personList.push(
                             this.createNightPerson({
                                 ...op,
+                                timeStart,
                                 ...person
                             })
                         );
@@ -429,9 +537,12 @@ export class NightDataService {
         return pickupList;
     }
 
-    async getHostListByDay(day: NmDayNameType): Promise<NightPersonModel[]> {
-        const opList = await this.getNightDataByDay(day);
-        const personList = await this.personDataService.getPersonList();
+    getHostListFromData(
+        opList: NightOpsDataModel[],
+        personList: PersonWithIdModel[],
+        noteList: NightOpsPickupNotesDataModel[]
+    ): NightPersonModel[] {
+        console.log(noteList);
         // return a complete set of pickups, with personList
         const hostList = opList
             .filter(
@@ -453,20 +564,18 @@ export class NightDataService {
         return hostList;
     }
 
-    async getNightByDay(
+    async getNightMapByDay(
         day: NmDayNameType,
         { refreshCache }: { refreshCache?: boolean } = {}
-    ): Promise<NightModel> {
+    ): Promise<NightMapModel> {
         if (refreshCache) {
             await this.refreshCache();
         }
-        const hostList = await this.getHostListByDay(day);
-        const pickupList = await this.getPickupListByDay(day);
-        console.log(pickupList);
-        return this.createNight({
+        const marketList = await this.getMarketListByDay(day);
+
+        return this.createNightMap({
             day,
-            hostList,
-            pickupList
+            marketList
         });
     }
 
@@ -489,12 +598,12 @@ export class NightDataService {
     // person
     getUniqueNightOpIdentifier({
         day,
-        org,
+        orgPickup,
         role,
         timeStart,
         discordIdOrEmail
     }: NightOpsDataModel): string {
-        return `${day}--${org}--${role}--${'' + timeStart}--${
+        return `${day}--${orgPickup}--${role}--${'' + timeStart}--${
             '' + discordIdOrEmail
         }`;
     }
@@ -513,8 +622,9 @@ export class NightDataService {
                 return {
                     ...op,
                     discordIdOrEmail:
-                        person?.discordId ??
-                        person?.email ??
+                        // nullish won't work on empty strings
+                        person?.discordId ||
+                        person?.email ||
                         op.discordIdOrEmail
                 };
             })
@@ -731,6 +841,7 @@ export class NightDataService {
                 a.filter((b) => b.day?.trim())
             )
             .then((a) => a.map(this.createNightOpsData))
+
             // make that we have a discordId on the discordIdOrEmail prop if possible
             .then(
                 async (a) => await this.getNightOpListWithDiscordIdIfPossible(a)
@@ -761,8 +872,8 @@ export class NightDataService {
     // todo: move to markdown service
     getPickupListMd(pickupList: NightPickupModel[]) {
         return pickupList.length
-            ? pickupList.reduce((a, { org, timeStart, personList }) => {
-                  return (a += `- ${org} at ${ParseContentService.getAmPmTimeFrom24Hour(
+            ? pickupList.reduce((a, { orgPickup, timeStart, personList }) => {
+                  return (a += `- ${orgPickup} at ${ParseContentService.getAmPmTimeFrom24Hour(
                       timeStart
                   )} ${
                       personList.length
@@ -773,9 +884,9 @@ export class NightDataService {
             : 'No Pick-ups';
     }
 
-    getNightMd({ day, org, timeStart }: NightModel) {
-        return `${day} ${org} ${timeStart}`;
-    }
+    // getNightMarketMd({ day, orgPickup, timeStart }: NightMarketModel) {
+    //     return `${day} ${orgPickup} ${timeStart}`;
+    // }
     // getHostListMd(hostList: NightPersonModel[], discordId: string) {
     //     hostList = hostList.filter(
     //         (a) => a.role === 'night-distro' || a.role === 'night-distro-shadow'
@@ -814,7 +925,8 @@ export class NightDataService {
         return values
             .map((a) => a.split('---'))
             .map((a) => ({
-                org: a[0],
+                orgPickup: a[0],
+                orgMarket: a[3] || '',
                 timeStart: a[1],
                 timeEnd: a[2],
                 day,

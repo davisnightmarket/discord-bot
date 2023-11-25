@@ -18,7 +18,7 @@ async function RouteInteraction(interaction) {
             dbg('NO command found');
         }
         dbg(`Command: ${command}`);
-        if (interaction?.commandName == 'nm') {
+        if (interaction?.commandName === 'nm') {
             dbg('/nm Command');
             if (command === 'volunteer') {
                 (0, events_1.VolunteerCommandEvent)(services, interaction, interaction.user.id);
@@ -42,7 +42,7 @@ async function RouteInteraction(interaction) {
             }
         }
         // restrict to community coordinator
-        if (interaction?.commandName == 'cc') {
+        if (interaction?.commandName === 'cc') {
             dbg('/cc Command');
             // todo: make sure they are a CC
             // todo: we don't want to rely on discord role records, we want to geth from the admin sheet of the night spreadsheet
@@ -51,7 +51,7 @@ async function RouteInteraction(interaction) {
             // if(!ccList.map(a=>a.discordId).includes(interaction.user.id)){
             // show how to become a cc message and return
             // return
-            //}
+            // }
             const { marketAdminService } = services;
             // todo: this is going to break our current model, we need to fix it
             await interaction.deferReply({ ephemeral: true });
@@ -92,9 +92,8 @@ async function RouteInteraction(interaction) {
                 dbg('Editing identity');
                 (0, events_1.IdentityCommandEvent)(services, interaction, target.id);
             }
-            if (process.env.NODE_ENV === 'prod') {
-                return;
-            }
+            // if (process.env.NODE_ENV === 'prod') {
+            // }
         }
     }
     // we can lump these two together since they are both routed by customId
@@ -118,14 +117,15 @@ async function RouteInteraction(interaction) {
             (0, events_1.PermissionEditSelectEvent)(services, interaction, discordId, args);
             (0, events_1.AvailabilityEditSelectEvent)(services, interaction, discordId, args);
             (0, events_1.VolunteerPickupSaveSelectEvent)(services, interaction, discordId, args);
+            (0, events_1.VolunteerDistroSaveSelectEvent)(services, interaction, discordId, args);
         }
         if (interaction.isButton()) {
             dbg('isButton');
             (0, events_1.FoodCountDeleteButtonEvent)(interaction, args);
             (0, events_1.AvailabilityEditButtonEvent)(services, interaction, discordId, args);
             (0, events_1.PermissionButtonEvent)(services, interaction, discordId, args);
-            (0, events_1.VolunteerHostSaveButtonEvent)(services, interaction, discordId, args);
             (0, events_1.VolunteerPickupButtonEvent)(services, interaction, discordId, args);
+            (0, events_1.VolunteerDistroButtonEvent)(services, interaction, discordId, args);
             (0, events_1.VolunteerPickupDeleteButtonEvent)(services, interaction, discordId, args);
             // VolunteerEditPickupButtonEvent(
             //     services,
