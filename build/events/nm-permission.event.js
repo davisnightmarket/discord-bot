@@ -8,7 +8,6 @@ const const_1 = require("../const");
 const dbg = (0, utility_1.Dbg)('PermissionEditButtonEvent');
 async function PermissionCommandEvent({ personDataService, markdownService }, interaction, discordId) {
     // make sure crabapple doesn't choke while waiting for data
-    await interaction.deferReply({ ephemeral: true });
     const person = await personDataService.getPersonByDiscordId(discordId);
     if (!person) {
         // show them their modal
@@ -113,7 +112,6 @@ async function PermissionButtonEvent({ personDataService, markdownService }, int
                 permissionList: personDataService.getPermissionListMd(person)
             })
         ].join('\n'));
-        return;
     }
 }
 exports.PermissionButtonEvent = PermissionButtonEvent;

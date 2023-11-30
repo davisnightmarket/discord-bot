@@ -8,7 +8,6 @@ const const_1 = require("../const");
 const dbg = (0, utility_1.Dbg)('AvailabilityEvent');
 async function AvailabilityCommandEvent({ personDataService, markdownService }, interaction, discordId) {
     dbg('ok');
-    await interaction.deferReply({ ephemeral: true });
     // get the person's data
     const person = await personDataService.getPersonByDiscordId(interaction.user.id);
     if (!person) {
@@ -37,7 +36,6 @@ async function AvailabilityEditButtonEvent({ personDataService, nightDataService
         return;
     }
     dbg(command, step, day);
-    await interaction.deferReply({ ephemeral: true });
     // get the person's data
     const person = await personDataService.getPersonByDiscordId(interaction.user.id);
     if (!person) {
@@ -108,7 +106,6 @@ async function AvailabilityEditSelectEvent({ personDataService, markdownService 
         return;
     }
     dbg(command, step, day);
-    await interaction.deferReply({ ephemeral: true });
     // get the person's data
     const person = await personDataService.getPersonByDiscordId(interaction.user.id);
     if (!person) {

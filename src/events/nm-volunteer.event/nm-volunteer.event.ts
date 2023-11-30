@@ -4,20 +4,20 @@ import {
     type ChatInputCommandInteraction
 } from 'discord.js';
 
-import { type NmDayNameType, type NmNightRoleType } from '../model';
+import { type NmDayNameType, type NmNightRoleType } from '../../model';
 import {
     GetVolunteerDistroComponent,
     GetVolunteerInitComponent,
     GetVolunteerPickupComponent
-} from '../component/volunteer.component';
+} from '../../component/volunteer.component';
 import {
     Dbg,
     GetChannelDayNameFromInteraction,
     GetChannelDayToday,
     type GuildServiceModel
-} from '../utility';
+} from '../../utility';
 
-import { type PeriodStatusType } from '../service';
+import { type PeriodStatusType } from '../../service';
 
 const dbg = Dbg('VolunteerEvent');
 // todo: split this into different events for clarity
@@ -29,9 +29,6 @@ export async function VolunteerCommandEvent(
     interaction: ChatInputCommandInteraction,
     discordId: string
 ) {
-    // make sure crabapple doesn't choke while waiting for data
-    interaction.deferReply({ ephemeral: true });
-
     // get the channel day or otherwise the current day
     const day =
         (await GetChannelDayNameFromInteraction(interaction)) ??

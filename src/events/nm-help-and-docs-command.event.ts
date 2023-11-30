@@ -1,5 +1,5 @@
-import { ChatInputCommandInteraction } from 'discord.js';
-import { Dbg, GuildServiceModel } from '../utility';
+import { type ChatInputCommandInteraction } from 'discord.js';
+import { Dbg, type GuildServiceModel } from '../utility';
 
 const dbg = Dbg('HelpAndDocsCommandEvent');
 
@@ -13,7 +13,7 @@ export async function HelpAndDocsCommandEvent(
     }
     dbg('ok');
 
-    interaction.reply({
+    interaction.editReply({
         content: markdownService.md.START_HOWTO({
             // todo implement docs list and get them for core ...
             coreDocsList: markdownService.getGenericBulletList([]),

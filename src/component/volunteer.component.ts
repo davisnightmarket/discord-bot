@@ -9,7 +9,7 @@ import {
     type NightPersonModel,
     type NightPickupModel,
     ParseContentService,
-    NightMarketModel
+    type NightMarketModel
 } from '../service';
 import { DAYS_OF_WEEK, DAYS_OF_WEEK_CODES, NM_NIGHT_ROLES } from '../const';
 
@@ -36,7 +36,29 @@ export function GetVolunteerInitComponent({
     ];
 }
 
-export function GetVolunteerListAllComponent({
+export function GetVolunteerRoleComponent({
+    discordId,
+    day
+}: Pick<NightPersonModel, 'discordId' | 'day'>) {
+    const pickupButton = new ButtonBuilder()
+        .setCustomId(`volunteer-pickup--${day as string}--${discordId}`)
+        .setLabel(`Volunteer the Pickup Button`)
+        .setStyle(ButtonStyle.Secondary);
+
+    const hostButton = new ButtonBuilder()
+        // this is an "update" since we don't need more data, we can save this to db
+        .setCustomId(`volunteer-distro--${day as string}--${discordId}`)
+        .setLabel(`Volunteer the Distro Button`)
+        .setStyle(ButtonStyle.Secondary);
+
+    return [
+        new ActionRowBuilder<ButtonBuilder>().addComponents(
+            pickupButton,
+            hostButton
+        )
+    ];
+}
+export function GetVolunteerListDayComponent({
     discordId,
     day
 }: Pick<NightPersonModel, 'discordId' | 'day'>) {
@@ -61,31 +83,31 @@ export function GetVolunteerListAllComponent({
     ];
 }
 
-export function GetVolunteerRoleComponent({
-    day,
-    discordId
-}: Pick<NightPersonModel, 'day' | 'discordId'>) {
-    const components: Array<ActionRowBuilder<ButtonBuilder>> = [];
+// export function GetVolunteerRoleComponent({
+//     day,
+//     discordId
+// }: Pick<NightPersonModel, 'day' | 'discordId'>) {
+//     const components: Array<ActionRowBuilder<ButtonBuilder>> = [];
 
-    const hostButton = new ButtonBuilder()
-        .setCustomId(
-            `volunteer-init--${day as string}--night-distro--${discordId}`
-        )
-        .setLabel(NM_NIGHT_ROLES['night-distro'].description)
-        .setStyle(ButtonStyle.Secondary);
-    const pickupButton = new ButtonBuilder()
-        .setCustomId(
-            `volunteer-init--${day as string}--night-pickup--${discordId}`
-        )
-        .setLabel(NM_NIGHT_ROLES['night-pickup'].description)
-        .setStyle(ButtonStyle.Secondary);
+//     const hostButton = new ButtonBuilder()
+//         .setCustomId(
+//             `volunteer-init--${day as string}--night-distro--${discordId}`
+//         )
+//         .setLabel(NM_NIGHT_ROLES['night-distro'].description)
+//         .setStyle(ButtonStyle.Secondary);
+//     const pickupButton = new ButtonBuilder()
+//         .setCustomId(
+//             `volunteer-init--${day as string}--night-pickup--${discordId}`
+//         )
+//         .setLabel(NM_NIGHT_ROLES['night-pickup'].description)
+//         .setStyle(ButtonStyle.Secondary);
 
-    return [
-        new ActionRowBuilder<ButtonBuilder>()
-            .addComponents(hostButton)
-            .addComponents(pickupButton)
-    ];
-}
+//     return [
+//         new ActionRowBuilder<ButtonBuilder>()
+//             .addComponents(hostButton)
+//             .addComponents(pickupButton)
+//     ];
+// }
 
 export function GetVolunteerRoleShadowComponent({
     day,

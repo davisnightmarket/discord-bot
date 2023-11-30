@@ -10,6 +10,7 @@ async function RouteInteraction(interaction) {
     interaction = interaction;
     const services = await (0, utility_1.GetGuildServices)(interaction.guildId ?? '');
     if (interaction?.isCommand()) {
+        await interaction.deferReply({ ephemeral: true });
         let command = '';
         try {
             command = interaction.options.getString('command') || '';
@@ -54,7 +55,6 @@ async function RouteInteraction(interaction) {
             // }
             const { marketAdminService } = services;
             // todo: this is going to break our current model, we need to fix it
-            await interaction.deferReply({ ephemeral: true });
             const ccList = await marketAdminService.getCommunityCoordinatorDiscordIdList();
             console.log(ccList);
             if (!ccList.includes(interaction.user.id)) {

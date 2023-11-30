@@ -1,9 +1,9 @@
 import {
-    ButtonInteraction,
-    ChatInputCommandInteraction,
-    StringSelectMenuInteraction
+    type ButtonInteraction,
+    type ChatInputCommandInteraction,
+    type StringSelectMenuInteraction
 } from 'discord.js';
-import { NmDayNameType } from '../model';
+import { type NmDayNameType } from '../model';
 import {
     IdentityEditModalComponent,
     PermissionStartComponent,
@@ -23,7 +23,6 @@ export async function PermissionCommandEvent(
     discordId: string
 ) {
     // make sure crabapple doesn't choke while waiting for data
-    await interaction.deferReply({ ephemeral: true });
     const person = await personDataService.getPersonByDiscordId(discordId);
 
     if (!person) {
@@ -187,6 +186,5 @@ export async function PermissionButtonEvent(
                 })
             ].join('\n')
         );
-        return;
     }
 }

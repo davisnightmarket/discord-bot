@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.VolunteerDistroSaveSelectEvent = exports.VolunteerPickupDeleteButtonEvent = exports.VolunteerPickupSaveSelectEvent = exports.VolunteerDistroButtonEvent = exports.VolunteerPickupButtonEvent = exports.VolunteerCommandEvent = void 0;
-const volunteer_component_1 = require("../component/volunteer.component");
-const utility_1 = require("../utility");
+const volunteer_component_1 = require("../../component/volunteer.component");
+const utility_1 = require("../../utility");
 const dbg = (0, utility_1.Dbg)('VolunteerEvent');
 // todo: split this into different events for clarity
 // when a person issues a volunteer command it means they want to view

@@ -8,7 +8,7 @@ async function HelpAndDocsCommandEvent({ markdownService }, interaction) {
         return;
     }
     dbg('ok');
-    interaction.reply({
+    interaction.editReply({
         content: markdownService.md.START_HOWTO({
             // todo implement docs list and get them for core ...
             coreDocsList: markdownService.getGenericBulletList([]),

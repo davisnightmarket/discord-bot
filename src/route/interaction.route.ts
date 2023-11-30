@@ -35,6 +35,7 @@ export async function RouteInteraction(interaction: Interaction) {
 
     const services = await GetGuildServices(interaction.guildId ?? '');
     if (interaction?.isCommand()) {
+        await interaction.deferReply({ ephemeral: true });
         let command = '';
         try {
             command = interaction.options.getString('command') || '';
@@ -99,7 +100,7 @@ export async function RouteInteraction(interaction: Interaction) {
             // }
             const { marketAdminService } = services;
             // todo: this is going to break our current model, we need to fix it
-            await interaction.deferReply({ ephemeral: true });
+
             const ccList =
                 await marketAdminService.getCommunityCoordinatorDiscordIdList();
             console.log(ccList);

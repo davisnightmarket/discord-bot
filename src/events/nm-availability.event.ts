@@ -25,8 +25,6 @@ export async function AvailabilityCommandEvent(
 ) {
     dbg('ok');
 
-    await interaction.deferReply({ ephemeral: true });
-
     // get the person's data
     const person = await personDataService.getPersonByDiscordId(
         interaction.user.id
@@ -82,7 +80,6 @@ export async function AvailabilityEditButtonEvent(
     }
 
     dbg(command, step, day);
-    await interaction.deferReply({ ephemeral: true });
 
     // get the person's data
     const person = await personDataService.getPersonByDiscordId(
@@ -181,7 +178,6 @@ export async function AvailabilityEditSelectEvent(
     }
 
     dbg(command, step, day);
-    await interaction.deferReply({ ephemeral: true });
 
     // get the person's data
     const person = await personDataService.getPersonByDiscordId(

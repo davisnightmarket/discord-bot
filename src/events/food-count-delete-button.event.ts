@@ -1,8 +1,7 @@
 import {
     type Message,
     type TextChannel,
-    type ButtonInteraction,
-    type Interaction
+    type ButtonInteraction
 } from 'discord.js';
 import { FoodCountInputCache } from './';
 

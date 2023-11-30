@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.GetVolunteerDistroComponent = exports.GetVolunteerPickupComponent = exports.GetVolunteerPeriodComponent = exports.GetVolunteerRoleShadowComponent = exports.GetVolunteerRoleComponent = exports.GetVolunteerListAllComponent = exports.GetVolunteerInitComponent = void 0;
+exports.GetVolunteerDistroComponent = exports.GetVolunteerPickupComponent = exports.GetVolunteerPeriodComponent = exports.GetVolunteerRoleShadowComponent = exports.GetVolunteerListDayComponent = exports.GetVolunteerRoleComponent = exports.GetVolunteerInitComponent = void 0;
 const discord_js_1 = require("discord.js");
 const service_1 = require("../service");
 const const_1 = require("../const");
@@ -19,7 +19,22 @@ function GetVolunteerInitComponent({ discordId, day }) {
     ];
 }
 exports.GetVolunteerInitComponent = GetVolunteerInitComponent;
-function GetVolunteerListAllComponent({ discordId, day }) {
+function GetVolunteerRoleComponent({ discordId, day }) {
+    const pickupButton = new discord_js_1.ButtonBuilder()
+        .setCustomId(`volunteer-pickup--${day}--${discordId}`)
+        .setLabel(`Volunteer the Pickup Button`)
+        .setStyle(discord_js_1.ButtonStyle.Secondary);
+    const hostButton = new discord_js_1.ButtonBuilder()
+        // this is an "update" since we don't need more data, we can save this to db
+        .setCustomId(`volunteer-distro--${day}--${discordId}`)
+        .setLabel(`Volunteer the Distro Button`)
+        .setStyle(discord_js_1.ButtonStyle.Secondary);
+    return [
+        new discord_js_1.ActionRowBuilder().addComponents(pickupButton, hostButton)
+    ];
+}
+exports.GetVolunteerRoleComponent = GetVolunteerRoleComponent;
+function GetVolunteerListDayComponent({ discordId, day }) {
     const editDayButton = new discord_js_1.StringSelectMenuBuilder()
         .setCustomId(`volunteer-edit-day--${discordId}`)
         .setPlaceholder('')
@@ -32,24 +47,30 @@ function GetVolunteerListAllComponent({ discordId, day }) {
         new discord_js_1.ActionRowBuilder().addComponents(editDayButton)
     ];
 }
-exports.GetVolunteerListAllComponent = GetVolunteerListAllComponent;
-function GetVolunteerRoleComponent({ day, discordId }) {
-    const components = [];
-    const hostButton = new discord_js_1.ButtonBuilder()
-        .setCustomId(`volunteer-init--${day}--night-distro--${discordId}`)
-        .setLabel(const_1.NM_NIGHT_ROLES['night-distro'].description)
-        .setStyle(discord_js_1.ButtonStyle.Secondary);
-    const pickupButton = new discord_js_1.ButtonBuilder()
-        .setCustomId(`volunteer-init--${day}--night-pickup--${discordId}`)
-        .setLabel(const_1.NM_NIGHT_ROLES['night-pickup'].description)
-        .setStyle(discord_js_1.ButtonStyle.Secondary);
-    return [
-        new discord_js_1.ActionRowBuilder()
-            .addComponents(hostButton)
-            .addComponents(pickupButton)
-    ];
-}
-exports.GetVolunteerRoleComponent = GetVolunteerRoleComponent;
+exports.GetVolunteerListDayComponent = GetVolunteerListDayComponent;
+// export function GetVolunteerRoleComponent({
+//     day,
+//     discordId
+// }: Pick<NightPersonModel, 'day' | 'discordId'>) {
+//     const components: Array<ActionRowBuilder<ButtonBuilder>> = [];
+//     const hostButton = new ButtonBuilder()
+//         .setCustomId(
+//             `volunteer-init--${day as string}--night-distro--${discordId}`
+//         )
+//         .setLabel(NM_NIGHT_ROLES['night-distro'].description)
+//         .setStyle(ButtonStyle.Secondary);
+//     const pickupButton = new ButtonBuilder()
+//         .setCustomId(
+//             `volunteer-init--${day as string}--night-pickup--${discordId}`
+//         )
+//         .setLabel(NM_NIGHT_ROLES['night-pickup'].description)
+//         .setStyle(ButtonStyle.Secondary);
+//     return [
+//         new ActionRowBuilder<ButtonBuilder>()
+//             .addComponents(hostButton)
+//             .addComponents(pickupButton)
+//     ];
+// }
 function GetVolunteerRoleShadowComponent({ day, discordId }) {
     const components = [];
     const shadowHostButton = new discord_js_1.ButtonBuilder()
