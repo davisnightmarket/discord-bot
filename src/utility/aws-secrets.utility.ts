@@ -15,17 +15,20 @@ const client = new SecretsManagerClient({
     region: 'us-west-1'
 });
 
-// todo: add app names
+type AwsSecrets = 'nm-rds-postgres' | 'nm-discord-api' | 'nm-google-api';
 
-export const GetSecret = async <U>(env: EnvType = 'test', name: string) => {
+export const GetAwsSecret = async <U>(
+    env: EnvType = 'test',
+    name: AwsSecrets
+) => {
     if (env === 'dev') {
         console.log('GetSecret: Environment is "dev", using "test" secret.');
         env = 'test';
     }
 
-    dbg(GetSecret, env, name);
+    dbg(env, name);
 
-    const SecretId = `${env}/${name}`;
+    const SecretId = `${env as string}/${name}`;
 
     let response;
     try {
@@ -42,12 +45,4 @@ export const GetSecret = async <U>(env: EnvType = 'test', name: string) => {
     }
 
     return JSON.parse(response?.SecretString ?? '{}') as U;
-};
-
-export const GetSecretProp = async <U>(
-    env: EnvType = 'test',
-    name: string,
-    prop: keyof U
-): Promise<any> => {
-    return (await GetSecret<U>(env, name))[prop];
 };

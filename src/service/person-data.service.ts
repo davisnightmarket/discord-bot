@@ -1,6 +1,10 @@
 import { PERMISSION_MAP, type PermissionType } from '../const';
 import { type NmActiveStateType } from '../model';
-import { GoogleSheetService, type SpreadsheetDataModel } from '../service';
+import {
+    GoogleSheetService,
+    type PgService,
+    type SpreadsheetDataModel
+} from '../service';
 
 export interface PersonModel extends SpreadsheetDataModel {
     status: string;
@@ -28,9 +32,10 @@ export type PersonWithIdModel = PersonModel & { discordIdOrEmail: string };
 
 export class PersonDataService {
     personSheetService: GoogleSheetService<PersonModel>;
-
     waitingForPersonListCache: Promise<PersonModel[]>;
-    constructor(spreadsheetId: string) {
+    constructor(spreadsheetId: string, private readonly pgService: PgService) {
+        console.log(this.pgService.query('select 1 from dual'));
+
         this.personSheetService = new GoogleSheetService({
             spreadsheetId,
             sheetName: `person`

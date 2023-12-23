@@ -1,7 +1,7 @@
 import { GoogleAuth } from 'google-auth-library';
 import { google, type sheets_v4 } from 'googleapis';
 import { Dbg } from '../utility';
-import { NmSecrets } from '../utility/secrets.utility';
+import { NmSecrets } from '../utility/google-config.utility';
 import { GaxiosPromise } from 'googleapis/build/src/apis/abusiveexperiencereport';
 import { GaxiosResponse } from 'gaxios';
 

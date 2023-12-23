@@ -1,28 +1,25 @@
-import { Config } from '../config';
+import { Config, ConfigLocal } from '../config';
 import { type MarketConfigModel } from '../model';
 import {
-    type CoreDataService,
+    CoreDataService,
     FoodCountDataService,
     FoodCountInputService,
     OrgDataService,
     MarketAdminService,
     PersonDataService,
     NightDataService,
-    MarkdownService
+    MarkdownService,
+    PgService
 } from '../service';
+
+const coreDataService = new CoreDataService(ConfigLocal.marketConfig);
 
 // technically we want to instantiate this once,
 // and don't really want services in utilities, but since our
 // per-market config data is stored in a gspread, we kinda have to
 // break the rules
 
-const servicesByGuildId = new Map<
-    string,
-    GuildServiceModel & {
-        // also return the config so we can test it
-        config: MarketConfigModel;
-    }
->();
+const servicesByGuildId = new Map<string, GuildServiceModel>();
 
 export interface GuildServiceModel {
     coreDataService: CoreDataService;
@@ -37,39 +34,37 @@ export interface GuildServiceModel {
 
 // because we need to build a set of services that are connected to data per guild
 // as well as services that are "core", meaning the same data source for all guilds
-export async function GetGuildServices(
-    guildId: string,
-    coreDataService: CoreDataService
-) {
+export async function GetGuildServices(guildId: string) {
+    const { pgConfig } = await Config;
     if (!servicesByGuildId.has(guildId)) {
-        const config = await coreDataService.getMarketConfigByGuildId(guildId);
+        const pgService = new PgService(pgConfig);
+        const { GSPREAD_MARKET_ID } =
+            await coreDataService.getMarketConfigByGuildId(guildId);
 
-        const orgDataService = new OrgDataService(config.GSPREAD_MARKET_ID);
+        const orgDataService = new OrgDataService(GSPREAD_MARKET_ID);
 
         const personDataService = new PersonDataService(
-            config.GSPREAD_MARKET_ID
+            GSPREAD_MARKET_ID,
+            pgService
         );
 
         const nightDataService = new NightDataService(
-            config.GSPREAD_MARKET_ID,
+            GSPREAD_MARKET_ID,
             personDataService
         );
 
         const markdownService = new MarkdownService(coreDataService);
 
         const marketAdminService = new MarketAdminService(
-            config.GSPREAD_MARKET_ID,
+            GSPREAD_MARKET_ID,
             personDataService
         );
 
         servicesByGuildId.set(guildId, {
-            config,
             markdownService,
             coreDataService,
             nightDataService,
-            foodCountDataService: new FoodCountDataService(
-                config.GSPREAD_MARKET_ID
-            ),
+            foodCountDataService: new FoodCountDataService(GSPREAD_MARKET_ID),
             foodCountInputService: new FoodCountInputService(orgDataService),
             personDataService,
             orgDataService,

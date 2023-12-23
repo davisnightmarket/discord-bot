@@ -1,7 +1,7 @@
 import { GoogleAuth } from 'google-auth-library';
 import { google } from 'googleapis';
 import { Dbg } from '../utility';
-import { NmSecrets } from '../utility/secrets.utility';
+import { NmSecrets } from '../utility/google-config.utility';
 
 const dbg = Dbg('GoogleDriveService');
 

@@ -1,14 +1,9 @@
-import { type ConnectionConfig } from 'pg';
-import type { EnvType, MarketConfigModel } from './model/market-config.model';
-import { GetConfig } from './utility';
-
-interface ConfigModel extends Record<string, any> {
-    pgConfig: ConnectionConfig;
-    marketConfig: MarketConfigModel;
-}
+import { type EnvType, type MarketConfigModel } from './model';
+import { type ConfigModel, GetConfig } from './utility/config-utility';
 
 // these come from the config spreadsheet, used here as placeholders
-export const InstanceConfig = {
+export const InstanceConfig: MarketConfigModel = {
+    GSPREAD_CORE_ID: '',
     // identifies each Night Market instance with a human readable code, ie: davis.ca.usa
     NM_ID: '',
     // comes from discord, the unique id of the guild that is associated with the market
@@ -17,57 +12,37 @@ export const InstanceConfig = {
     GSPREAD_MARKET_ID: ''
 };
 
-// important: the "core" goog spreadsheet ids are hard coded since there is only ever one of them
-// the instance ones are defined in the core one, so you have to await those with the Config Utility
-
-const pgConfig: ConnectionConfig = {
-    host: 'eco-free.cyfdn3lqzhyk.us-west-1.rds.amazonaws.com',
-    user: 'postgres',
-    password: ''
-};
-
-const coreProdConfig: ConfigModel = {
-    pgConfig,
-    marketConfig: {
-        GSPREAD_CORE_ID: '1hJktYzxM10wQMggY4vUVfv-SuQ1YRUWok5y75ojC91M',
-        ...InstanceConfig
-    }
-};
-
-const coreTestConfig: ConfigModel = {
-    pgConfig,
-    marketConfig: {
-        GSPREAD_CORE_ID: '17ktzAhVMDElya2kGIEp1BNtwVk2_gXwR4vM3fWWi5Vg',
-        ...InstanceConfig
-    }
-};
-
-export const EnvConfig: Record<EnvType, ConfigModel> = {
+// core marketConfig property GSPREAD_CORE_ID is stored in
+// the local codebase because it bootstraps our core data service
+export const EnvConfigLocal: Record<
+    EnvType,
+    Pick<ConfigModel, 'marketConfig'>
+> = {
     test: {
-        // use test config
-        ...coreTestConfig,
-        ...InstanceConfig
+        marketConfig: {
+            ...InstanceConfig,
+            GSPREAD_CORE_ID: '17ktzAhVMDElya2kGIEp1BNtwVk2_gXwR4vM3fWWi5Vg'
+        }
     },
     dev: {
-        // use test config (for now)
-        ...coreTestConfig,
-        ...InstanceConfig
+        marketConfig: {
+            ...InstanceConfig,
+            GSPREAD_CORE_ID: '17ktzAhVMDElya2kGIEp1BNtwVk2_gXwR4vM3fWWi5Vg'
+        }
     },
     prod: {
-        // use prod config
-        ...coreProdConfig,
-        ...InstanceConfig
+        marketConfig: {
+            ...InstanceConfig,
+            GSPREAD_CORE_ID: '1hJktYzxM10wQMggY4vUVfv-SuQ1YRUWok5y75ojC91M'
+        }
     }
 };
 
-export const Config = GetConfig<
-    {
-        PG_PASSWORD: string;
-    },
-    ConfigModel
->(({ PG_PASSWORD }) => {
-    // get our environment config
-    const config = EnvConfig[process.env.NODE_ENV as EnvType];
-    config.pgConfig.password = PG_PASSWORD;
-    return config;
-});
+export const ConfigLocal = EnvConfigLocal[process.env.NODE_ENV as EnvType];
+
+// we call GetConfig once and then import the promise anywhere we need config
+
+export const Config = GetConfig(
+    process.env.NODE_ENV as EnvType,
+    EnvConfigLocal
+);

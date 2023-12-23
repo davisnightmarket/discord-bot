@@ -1,11 +1,10 @@
 import { Client, Events, GatewayIntentBits, Partials } from 'discord.js';
-import { NmSecrets, GetGuildServices, GetDebug } from './utility';
+import { GetGuildServices, GetDebug } from './utility';
 import { AddCron } from './utility/cron.utility';
 import { FoodCountReminderJob, NightOpsJob, NightTimelineJob } from './jobs';
 import { FoodCountMessageEvent, WelcomeEvent } from './events';
 import { RouteInteraction } from './route';
 import { Config } from './config';
-import { CoreDataService } from './service';
 
 const dbg = GetDebug('run');
 // Start discord client
@@ -23,7 +22,7 @@ run();
 
 async function run() {
     const config = await Config;
-    const coreDataService = new CoreDataService(config.marketConfig);
+
     // TODO: we have to remember that each guild could have a different timezone
     // so we need to figure out how to adjust the crons for each guild
     // Add cron jobs
@@ -38,14 +37,14 @@ async function run() {
 
     AddCron(
         '0 30 23 * * *', // at 11:30pm
-        NightTimelineJob(client, coreDataService)
+        NightTimelineJob(client)
     );
 
     // reminds us to enter food count IF none has been entered
     // AND pickups are scheduled
     AddCron(
         '0 0 12 * * *', // at high noon
-        FoodCountReminderJob(client, coreDataService)
+        FoodCountReminderJob(client)
     );
 
     // person meta data events
@@ -55,10 +54,7 @@ async function run() {
         console.log('Crabapple READY!');
     });
     client.on(Events.MessageCreate, async (message) => {
-        const services = await GetGuildServices(
-            message.guildId ?? '',
-            coreDataService
-        );
+        const services = await GetGuildServices(message.guildId ?? '');
 
         // food count input
         try {
@@ -94,7 +90,7 @@ async function run() {
 
     const {
         discordConfig: { appToken }
-    } = await NmSecrets;
+    } = config;
 
     client.login(appToken);
 }
