@@ -1,6 +1,6 @@
 import { type NmNightRoleType, type NmDayNameType } from '../model';
 import { DAYS_OF_WEEK, DAYS_OF_WEEK_CODES } from '../const';
-import { DebugUtility, GetChannelDayToday } from '../utility';
+import { GetDebug, GetChannelDayToday } from '../utility';
 import {
     type PersonModel,
     type SpreadsheetDataModel,
@@ -59,7 +59,7 @@ export interface NightOpsDataModel extends SpreadsheetDataModel {
     timeEnd: string;
 }
 
-const dbg = DebugUtility('NightDataService');
+const dbg = GetDebug('NightDataService');
 
 // models what's in the "ops-timeline" sheet
 export interface NightOpsTimelineDataModel extends SpreadsheetDataModel {

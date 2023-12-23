@@ -1,6 +1,7 @@
-import { type ConfigModel } from '../model';
+import { Config } from '../config';
+import { type MarketConfigModel } from '../model';
 import {
-    CoreDataService,
+    type CoreDataService,
     FoodCountDataService,
     FoodCountInputService,
     OrgDataService,
@@ -10,13 +11,16 @@ import {
     MarkdownService
 } from '../service';
 
-const coreDataService = new CoreDataService();
+// technically we want to instantiate this once,
+// and don't really want services in utilities, but since our
+// per-market config data is stored in a gspread, we kinda have to
+// break the rules
 
 const servicesByGuildId = new Map<
     string,
     GuildServiceModel & {
         // also return the config so we can test it
-        config: ConfigModel;
+        config: MarketConfigModel;
     }
 >();
 
@@ -33,9 +37,12 @@ export interface GuildServiceModel {
 
 // because we need to build a set of services that are connected to data per guild
 // as well as services that are "core", meaning the same data source for all guilds
-export async function GetGuildServices(guildId: string) {
+export async function GetGuildServices(
+    guildId: string,
+    coreDataService: CoreDataService
+) {
     if (!servicesByGuildId.has(guildId)) {
-        const config = await coreDataService.getConfigByGuildId(guildId);
+        const config = await coreDataService.getMarketConfigByGuildId(guildId);
 
         const orgDataService = new OrgDataService(config.GSPREAD_MARKET_ID);
 

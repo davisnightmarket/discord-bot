@@ -1,2 +1,2 @@
 export * from './night-market.model';
-export * from './config.model';
+export * from './market-config.model';

@@ -1,26 +1,22 @@
-import { EnvConfig } from '../config';
-import { ConfigModel, type EnvType } from '../model';
+import { type MarketConfigModel, type EnvType } from '../model';
 import {
     GoogleSheetService,
-    SpreadsheetDataModel,
+    type SpreadsheetDataModel,
     GoogleDriveService
 } from '.';
 
 const Env = process.env.NODE_ENV as EnvType;
 
-if (!Env || !Object.keys(EnvConfig).includes(Env)) {
-    throw new Error('Must set an environment');
-}
-
 interface ConfigDataModel extends SpreadsheetDataModel {
     marketId: string;
-    code: keyof ConfigModel;
+    code: keyof MarketConfigModel;
     value: string;
 }
 
 interface TypeDataModel extends SpreadsheetDataModel {}
 
 export class CoreDataService {
+    marketConfig: MarketConfigModel;
     configSheetService: GoogleSheetService<ConfigDataModel>;
     configMarketSheetService: GoogleSheetService<ConfigDataModel>;
     coreTypeSheetService: GoogleSheetService<TypeDataModel>;
@@ -32,35 +28,30 @@ export class CoreDataService {
 
     // the constructor gets the core id which points to the core google spreadsheet by default
     // you can pass in a different id for testing purposes, but this should work in test and prod
-    constructor(spreadsheetId: string = EnvConfig[Env].GSPREAD_CORE_ID) {
-        this.driveCoreDataService = new GoogleDriveService(
-            // todo: this should be the core data folder
-            EnvConfig[Env].GSPREAD_CORE_ID
-        );
+    constructor(marketConfig: MarketConfigModel) {
+        this.marketConfig = marketConfig;
+        const spreadsheetId = marketConfig.GSPREAD_CORE_ID;
+        this.driveCoreDataService = new GoogleDriveService(spreadsheetId);
 
         this.configSheetService = new GoogleSheetService({
             spreadsheetId,
-            // todo: we should store sheet names in const
-            // todo: OR we should store them in a spreadsheet
             sheetName: 'config'
         });
 
         this.configMarketSheetService = new GoogleSheetService({
             spreadsheetId,
-            // todo: we should store sheet names in const
-            // todo: OR we should store them in a spreadsheet
             sheetName: 'config-market'
         });
 
         this.coreTypeSheetService = new GoogleSheetService({
             spreadsheetId,
-            // todo: we should store sheet names in const
-            // todo: OR we should store them in a spreadsheet
             sheetName: 'type'
         });
     }
 
-    async getConfigByGuildId(guildId: string): Promise<ConfigModel> {
+    async getMarketConfigByGuildId(
+        guildId: string
+    ): Promise<MarketConfigModel> {
         // get the market id
         const configRows =
             await this.configMarketSheetService.getAllRowsAsMaps();
@@ -76,14 +67,48 @@ export class CoreDataService {
 
         // build the config
 
-        const config = { ...EnvConfig[Env] };
+        const config = { ...this.marketConfig };
         for (const row of configRow) {
             config[row.code] = row.value;
         }
 
         // return
-        return new ConfigModel(config);
+        return this.getValidMarketConfig(config);
     }
+
+    getValidMarketConfig({
+        PG_CONFIG,
+        GSPREAD_CORE_ID,
+        NM_ID,
+        DISCORD_GUILD_ID,
+        GSPREAD_MARKET_ID
+    }: Partial<MarketConfigModel>): MarketConfigModel {
+        if (!GSPREAD_CORE_ID) {
+            throw new Error('Missing GSPREAD_CORE_ID');
+        }
+
+        if (!NM_ID) {
+            throw new Error('Missing NM_ID');
+        }
+        if (!DISCORD_GUILD_ID) {
+            throw new Error('Missing DISCORD_GUILD_ID');
+        }
+
+        if (!GSPREAD_MARKET_ID) {
+            throw new Error('Missing GSPREAD_CORE_PERSON_ID');
+        }
+        if (!PG_CONFIG) {
+            throw new Error('Missing PG_CONFIG');
+        }
+
+        return {
+            GSPREAD_CORE_ID,
+            NM_ID,
+            DISCORD_GUILD_ID,
+            GSPREAD_MARKET_ID
+        };
+    }
+
     async getAllGuildIds(): Promise<string[]> {
         // get the market id
         const configRows =
@@ -93,3 +118,53 @@ export class CoreDataService {
             .map((a) => a.value);
     }
 }
+
+// export class MarketConfigModel implements AllMarketConfigModel {
+//     // the spreadsheet id for where configuration is kept for all market instances
+//     GSPREAD_CORE_ID: string;
+//     // the spreadsheet id for where types are kept for all market instances
+//     // GSPREAD_CORE_TYPE_ID: string;
+//     // the spreadsheet id for the core data model where people and orgs are kept
+//     // GSPREAD_CORE_PERSON_ID: string;
+//     // // the spreadsheet id for where organizations are kept
+//     // GSPREAD_CORE_ORG_ID: string;
+
+//     // the id of the instance
+//     NM_ID: string;
+//     // the guild id
+//     DISCORD_GUILD_ID: string;
+//     // all the data are here
+//     GSPREAD_MARKET_ID: string;
+//     constructor({
+//         PG_CONFIG,
+//         GSPREAD_CORE_ID,
+//         NM_ID,
+//         DISCORD_GUILD_ID,
+//         GSPREAD_MARKET_ID
+//     }: Partial<AllMarketConfigModel>) {
+//         if (!GSPREAD_CORE_ID) {
+//             throw new Error('Missing GSPREAD_CORE_ID');
+//         }
+
+//         this.GSPREAD_CORE_ID = GSPREAD_CORE_ID;
+
+//         if (!NM_ID) {
+//             throw new Error('Missing NM_ID');
+//         }
+//         if (!DISCORD_GUILD_ID) {
+//             throw new Error('Missing DISCORD_GUILD_ID');
+//         }
+
+//         if (!GSPREAD_MARKET_ID) {
+//             throw new Error('Missing GSPREAD_CORE_PERSON_ID');
+//         }
+//         if (!PG_CONFIG) {
+//             throw new Error('Missing PG_CONFIG');
+//         }
+
+//         this.NM_ID = NM_ID;
+//         // adding strings to this because it is an integer id
+//         this.DISCORD_GUILD_ID = DISCORD_GUILD_ID + '';
+//         this.GSPREAD_MARKET_ID = GSPREAD_MARKET_ID;
+//     }
+// }

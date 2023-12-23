@@ -1,4 +1,11 @@
-import type { ConfigModel, EnvType } from './model/config.model';
+import { type ConnectionConfig } from 'pg';
+import type { EnvType, MarketConfigModel } from './model/market-config.model';
+import { GetConfig } from './utility';
+
+interface ConfigModel extends Record<string, any> {
+    pgConfig: ConnectionConfig;
+    marketConfig: MarketConfigModel;
+}
 
 // these come from the config spreadsheet, used here as placeholders
 export const InstanceConfig = {
@@ -13,12 +20,26 @@ export const InstanceConfig = {
 // important: the "core" goog spreadsheet ids are hard coded since there is only ever one of them
 // the instance ones are defined in the core one, so you have to await those with the Config Utility
 
-const coreProdConfig = {
-    GSPREAD_CORE_ID: '1hJktYzxM10wQMggY4vUVfv-SuQ1YRUWok5y75ojC91M'
+const pgConfig: ConnectionConfig = {
+    host: 'eco-free.cyfdn3lqzhyk.us-west-1.rds.amazonaws.com',
+    user: 'postgres',
+    password: ''
 };
 
-const coreTestConfig = {
-    GSPREAD_CORE_ID: '17ktzAhVMDElya2kGIEp1BNtwVk2_gXwR4vM3fWWi5Vg'
+const coreProdConfig: ConfigModel = {
+    pgConfig,
+    marketConfig: {
+        GSPREAD_CORE_ID: '1hJktYzxM10wQMggY4vUVfv-SuQ1YRUWok5y75ojC91M',
+        ...InstanceConfig
+    }
+};
+
+const coreTestConfig: ConfigModel = {
+    pgConfig,
+    marketConfig: {
+        GSPREAD_CORE_ID: '17ktzAhVMDElya2kGIEp1BNtwVk2_gXwR4vM3fWWi5Vg',
+        ...InstanceConfig
+    }
 };
 
 export const EnvConfig: Record<EnvType, ConfigModel> = {
@@ -38,3 +59,15 @@ export const EnvConfig: Record<EnvType, ConfigModel> = {
         ...InstanceConfig
     }
 };
+
+export const Config = GetConfig<
+    {
+        PG_PASSWORD: string;
+    },
+    ConfigModel
+>(({ PG_PASSWORD }) => {
+    // get our environment config
+    const config = EnvConfig[process.env.NODE_ENV as EnvType];
+    config.pgConfig.password = PG_PASSWORD;
+    return config;
+});

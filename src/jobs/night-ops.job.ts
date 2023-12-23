@@ -1,13 +1,13 @@
 import { type Client, type TextChannel } from 'discord.js';
 
 import {
-    DebugUtility,
+    GetDebug,
     GetChannelDayToday,
     GetGuildRoleIdByName,
     GetGuildServices
 } from '../utility';
 
-const dbg = DebugUtility('NightOpsJob');
+const dbg = GetDebug('NightOpsJob');
 // when a person requests a listing of
 export const NightOpsJob = (client: Client) => async () => {
     // get the guild
