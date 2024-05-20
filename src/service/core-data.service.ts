@@ -77,7 +77,6 @@ export class CoreDataService {
     }
 
     getValidMarketConfig({
-        PG_CONFIG,
         GSPREAD_CORE_ID,
         NM_ID,
         DISCORD_GUILD_ID,
@@ -96,9 +95,6 @@ export class CoreDataService {
 
         if (!GSPREAD_MARKET_ID) {
             throw new Error('Missing GSPREAD_CORE_PERSON_ID');
-        }
-        if (!PG_CONFIG) {
-            throw new Error('Missing PG_CONFIG');
         }
 
         return {

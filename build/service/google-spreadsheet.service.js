@@ -4,13 +4,13 @@ exports.GoogleSpreadsheetsService = exports.Alphabet = exports.AlphaIndex = void
 const google_auth_library_1 = require("google-auth-library");
 const googleapis_1 = require("googleapis");
 const utility_1 = require("../utility");
-const secrets_utility_1 = require("../utility/secrets.utility");
-const dbg = (0, utility_1.Dbg)('GoogleSpreadsheetsService');
+const config_1 = require("../config");
+const dbg = (0, utility_1.GetDebug)('GoogleSpreadsheetsService');
 // the alphabet indexed in array
 exports.AlphaIndex = Array.from(Array(26)).map((e, i) => i + 65);
 // the alphabet in an array
 exports.Alphabet = exports.AlphaIndex.map((x) => String.fromCharCode(x).toUpperCase());
-const Gspread = secrets_utility_1.NmSecrets.then((keys) => {
+const Gspread = config_1.Config.then((keys) => {
     const credentials = keys.googleSpreadsheetsKeys;
     const auth = new google_auth_library_1.GoogleAuth({
         credentials,
@@ -202,7 +202,6 @@ class GoogleSpreadsheetsService {
         }
         catch (e) {
             console.error(e);
-            return;
         }
     }
     async sheetExists(title) {
@@ -250,6 +249,7 @@ class GoogleSpreadsheetsService {
                 ranges: [title],
                 includeGridData: false
             };
+            console.log(request);
             const [gspread] = await Gspread;
             const res = await gspread.spreadsheets.get(request);
             if (!res?.data?.sheets?.length ||

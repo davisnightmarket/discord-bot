@@ -16,7 +16,7 @@ exports.NightOpPeriodStatus = {
     QUIT: { id: 'QUIT' },
     SHADOW: { id: 'SHADOW' }
 };
-const dbg = (0, utility_1.DebugUtility)('NightDataService');
+const dbg = (0, utility_1.GetDebug)('NightDataService');
 class NightDataService {
     constructor(spreadsheetId, personDataService) {
         this.personDataService = personDataService;

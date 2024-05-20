@@ -34,8 +34,6 @@ export class PersonDataService {
     personSheetService: GoogleSheetService<PersonModel>;
     waitingForPersonListCache: Promise<PersonModel[]>;
     constructor(spreadsheetId: string, private readonly pgService: PgService) {
-        console.log(this.pgService.query('select 1 from dual'));
-
         this.personSheetService = new GoogleSheetService({
             spreadsheetId,
             sheetName: `person`

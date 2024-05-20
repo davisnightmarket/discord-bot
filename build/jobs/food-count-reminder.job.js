@@ -4,7 +4,7 @@ exports.FoodCountReminderJob = void 0;
 const service_1 = require("../service");
 const utility_1 = require("../utility");
 const const_1 = require("../const");
-const dbg = (0, utility_1.Dbg)('FoodCountReminderJob');
+const dbg = (0, utility_1.GetDebug)('FoodCountReminderJob');
 const FoodCountReminderJob = (client) => async () => {
     dbg('OK');
     const guildList = client.guilds.cache.map((guild) => guild);
@@ -25,7 +25,7 @@ const FoodCountReminderJob = (client) => async () => {
             const pickupOrgList = yesterdayFoodCountList
                 .map((a) => a.org)
                 .join(', ');
-            const tagUserList = (await Promise.all(yesterdayPickupList.map((a) => personDataService.getPersonByEmailOrDiscordId(a.discordIdOrEmail))))
+            const tagUserList = (await Promise.all(yesterdayPickupList.map(async (a) => await personDataService.getPersonByEmailOrDiscordId(a.discordIdOrEmail))))
                 .filter((a) => a)
                 // tag them if possible
                 .map((a) => a?.discordId
@@ -44,14 +44,14 @@ const FoodCountReminderJob = (client) => async () => {
             }
             channel.send({
                 content: [
-                    await markdownService.md.FOODCOUNT_REMINDER({
+                    markdownService.md.FOODCOUNT_REMINDER({
                         randoSalutation: 'Helloo!',
                         dayName: const_1.DAYS_OF_WEEK[yesterday].name,
                         pickupOrgList,
                         tagUserList
                     }),
                     'Reminder:',
-                    await markdownService.md.FOODCOUNT_HOWTO({
+                    markdownService.md.FOODCOUNT_HOWTO({
                         nightChannelNameList: Object.keys(service_1.NIGHT_CHANNEL_NAMES_MAP).join(', '),
                         foodcountExample: 'davis food coop 3'
                     })

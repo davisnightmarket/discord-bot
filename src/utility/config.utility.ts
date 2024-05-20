@@ -1,18 +1,25 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.WaitingForConfig = exports.ConfigLocal = exports.EnvConfigLocal = exports.InstanceConfig = exports.GetConfig = void 0;
-const _1 = require(".");
-const waitingForAwsSecrets = (0, _1.GetAwsSecretsConfig)();
-const GetConfig = async (env = (0, _1.GetEnv)(), envConfig) => {
+import type { EnvType, MarketConfigModel } from '../model/nm-config.model';
+import { GetAwsSecretsConfig, GetEnv, type SecretConfigModel } from '.';
+
+const waitingForAwsSecrets = GetAwsSecretsConfig();
+
+export interface ConfigModel extends SecretConfigModel {
+    marketConfig: MarketConfigModel;
+}
+export const GetConfig = async (
+    env: EnvType = GetEnv(),
+    envConfig: Record<EnvType, Pick<ConfigModel, 'marketConfig'>>
+): Promise<ConfigModel> => {
     // get our local environment config
     const config = envConfig[env];
     const secretConfig = await waitingForAwsSecrets;
+
     // combined with our config from secrets
     return { ...config, ...secretConfig };
 };
-exports.GetConfig = GetConfig;
+
 // these come from the config spreadsheet, used here as placeholders
-exports.InstanceConfig = {
+export const InstanceConfig: MarketConfigModel = {
     GSPREAD_CORE_ID: '',
     // identifies each Night Market instance with a human readable code, ie: davis.ca.usa
     NM_ID: '',
@@ -21,28 +28,35 @@ exports.InstanceConfig = {
     // each market gets a dedicated spreadsheet for their data
     GSPREAD_MARKET_ID: ''
 };
+
 // core marketConfig property GSPREAD_CORE_ID is stored in
 // the local codebase because it bootstraps our core data service
-exports.EnvConfigLocal = {
+export const EnvConfigLocal: Record<
+    EnvType,
+    Pick<ConfigModel, 'marketConfig'>
+> = {
     test: {
         marketConfig: {
-            ...exports.InstanceConfig,
+            ...InstanceConfig,
             GSPREAD_CORE_ID: '17ktzAhVMDElya2kGIEp1BNtwVk2_gXwR4vM3fWWi5Vg'
         }
     },
     dev: {
         marketConfig: {
-            ...exports.InstanceConfig,
+            ...InstanceConfig,
             GSPREAD_CORE_ID: '17ktzAhVMDElya2kGIEp1BNtwVk2_gXwR4vM3fWWi5Vg'
         }
     },
     prod: {
         marketConfig: {
-            ...exports.InstanceConfig,
+            ...InstanceConfig,
             GSPREAD_CORE_ID: '1hJktYzxM10wQMggY4vUVfv-SuQ1YRUWok5y75ojC91M'
         }
     }
 };
-exports.ConfigLocal = exports.EnvConfigLocal[process.env.NODE_ENV];
+
+export const ConfigLocal = EnvConfigLocal[process.env.NODE_ENV as EnvType];
+
 // we call GetConfig once and then import the promise anywhere we need config
-exports.WaitingForConfig = (0, exports.GetConfig)(process.env.NODE_ENV, exports.EnvConfigLocal);
+
+export const WaitingForConfig = GetConfig(GetEnv(), EnvConfigLocal);

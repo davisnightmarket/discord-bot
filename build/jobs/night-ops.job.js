@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.NightOpsJob = void 0;
 const utility_1 = require("../utility");
-const dbg = (0, utility_1.DebugUtility)('NightOpsJob');
+const dbg = (0, utility_1.GetDebug)('NightOpsJob');
 // when a person requests a listing of
 const NightOpsJob = (client) => async () => {
     // get the guild

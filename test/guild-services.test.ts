@@ -1,5 +1,5 @@
 import { describe, expect, test, jest } from '@jest/globals';
-import { WaitForGuildServices } from '../guild-services';
+import { WaitForGuildServices } from './guild-services';
 
 jest.setTimeout(5000);
 

@@ -1,9 +1,9 @@
 import { GoogleAuth } from 'google-auth-library';
 import { google, type sheets_v4 } from 'googleapis';
-import { Dbg } from '../utility';
-import { NmSecrets } from '../utility/google-config.utility';
-import { GaxiosPromise } from 'googleapis/build/src/apis/abusiveexperiencereport';
-import { GaxiosResponse } from 'gaxios';
+import { GetDebug } from '../utility';
+import { Config } from '../config';
+import type { GaxiosPromise } from 'googleapis/build/src/apis/abusiveexperiencereport';
+import type { GaxiosResponse } from 'gaxios';
 
 export type SpreadsheetDataValueModel = string | number | undefined;
 
@@ -11,7 +11,7 @@ export type SpreadsheetDataModel = {
     [k in string]: SpreadsheetDataValueModel;
 };
 
-const dbg = Dbg('GoogleSpreadsheetsService');
+const dbg = GetDebug('GoogleSpreadsheetsService');
 // the alphabet indexed in array
 export const AlphaIndex = Array.from(Array(26)).map((e, i) => i + 65);
 // the alphabet in an array
@@ -19,8 +19,8 @@ export const Alphabet = AlphaIndex.map((x) =>
     String.fromCharCode(x).toUpperCase()
 );
 
-const Gspread = NmSecrets.then((keys) => {
-    const credentials = keys.googleSpreadsheetsKeys;
+const Gspread = Config.then((keys) => {
+    const credentials = keys.googleApiConfig;
     const auth = new GoogleAuth({
         credentials,
         scopes: 'https://www.googleapis.com/auth/spreadsheets'
@@ -119,6 +119,7 @@ export class GoogleSpreadsheetsService {
             console.error(err);
         }
     }
+
     async rowsWrite(values: SpreadsheetDataValueModel[][], range: string) {
         await Promise.all(this.opsQueue);
 
@@ -264,13 +265,13 @@ export class GoogleSpreadsheetsService {
             });
         } catch (e) {
             console.error(e);
-            return;
         }
     }
 
     async sheetExists(title: string): Promise<boolean> {
         return !!(await this.getSheetTitleList()).find((t) => t === title);
     }
+
     async getSheetIdList(): Promise<number[]> {
         const spreadsheetId = this.spreadsheetId;
         try {
@@ -290,6 +291,7 @@ export class GoogleSpreadsheetsService {
             throw err;
         }
     }
+
     async getSheetTitleList(): Promise<string[]> {
         const spreadsheetId = this.spreadsheetId;
         try {

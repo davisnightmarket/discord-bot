@@ -1,5 +1,5 @@
 import { type EnvType, type MarketConfigModel } from './model';
-import { type ConfigModel, GetConfig } from './utility/config-utility';
+import { type ConfigModel, GetConfig } from './utility/config.utility';
 
 // these come from the config spreadsheet, used here as placeholders
 export const InstanceConfig: MarketConfigModel = {

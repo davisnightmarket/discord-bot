@@ -8,6 +8,12 @@ import {
 } from '@aws-sdk/client-secrets-manager';
 import { type EnvType } from '../model';
 import { GetDebug } from '.';
+import { GetEnv } from './env.utility';
+import type {
+    DiscordApiKeysModel,
+    GoogleApiKeysModel,
+    PostgresApiKeysModel
+} from '../model/nm-keys.model';
 
 const dbg = GetDebug('aws-secrets.utility');
 
@@ -15,20 +21,25 @@ const client = new SecretsManagerClient({
     region: 'us-west-1'
 });
 
-type AwsSecrets = 'nm-rds-postgres' | 'nm-discord-api' | 'nm-google-api';
+interface AwsSecretsMap {
+    'nm-rds-postgres': PostgresApiKeysModel;
+    'nm-discord-api': DiscordApiKeysModel;
+    'nm-google-api': GoogleApiKeysModel;
+}
 
-export const GetAwsSecret = async <U>(
-    env: EnvType = 'test',
-    name: AwsSecrets
+
+export const GetAwsSecret = async <V extends keyof AwsSecretsMap>(
+    name: V,
+    env: EnvType = GetEnv()
 ) => {
     if (env === 'dev') {
         console.log('GetSecret: Environment is "dev", using "test" secret.');
         env = 'test';
     }
 
-    dbg(env, name);
-
     const SecretId = `${env as string}/${name}`;
+
+    dbg(SecretId);
 
     let response;
     try {
@@ -44,5 +55,5 @@ export const GetAwsSecret = async <U>(
         console.error(error.message);
     }
 
-    return JSON.parse(response?.SecretString ?? '{}') as U;
+    return JSON.parse(response?.SecretString ?? '{}') as AwsSecretsMap[V];
 };

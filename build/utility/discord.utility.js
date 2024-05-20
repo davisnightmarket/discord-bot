@@ -6,8 +6,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.RegisterGuildCommand = exports.GetGuildRoleIdByName = exports.GetChannelByName = exports.GetChannelDayNameFromInteraction = void 0;
 const discord_js_1 = require("discord.js");
 const commands_1 = __importDefault(require("../commands"));
-const utility_1 = require("../utility");
 const const_1 = require("../const");
+const aws_config_utility_1 = require("./aws-config.utility");
 async function GetChannelDayNameFromInteraction(interaction) {
     const name = (await interaction?.guild?.channels?.fetch(interaction?.channelId ?? ''))?.name;
     if (const_1.DAYS_OF_WEEK[name]) {
@@ -27,7 +27,7 @@ async function GetGuildRoleIdByName(guild, name) {
 }
 exports.GetGuildRoleIdByName = GetGuildRoleIdByName;
 async function RegisterGuildCommand(guildId) {
-    const { discordConfig } = await utility_1.NmSecrets;
+    const { discordConfig } = await (0, aws_config_utility_1.GetAwsSecretsConfig)();
     const rest = new discord_js_1.REST().setToken(discordConfig.appToken);
     await rest.put(discord_js_1.Routes.applicationGuildCommands(discordConfig.clientId, guildId), {
         body: commands_1.default.map((command) => command.toJSON())

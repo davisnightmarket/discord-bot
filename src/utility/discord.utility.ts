@@ -7,10 +7,10 @@ import {
     type Interaction
 } from 'discord.js';
 import Commands from '../commands';
-import { NmSecrets } from '../utility';
+import type { NmDayNameType } from '../model';
 
-import { NmDayNameType } from '../model';
 import { DAYS_OF_WEEK } from '../const';
+import { GetAwsSecretsConfig } from './aws-config.utility';
 
 export async function GetChannelDayNameFromInteraction(
     interaction: Interaction
@@ -37,7 +37,7 @@ export async function GetGuildRoleIdByName(guild: Guild, name: string) {
 }
 
 export async function RegisterGuildCommand(guildId: string) {
-    const { discordConfig } = await NmSecrets;
+    const { discordConfig } = await GetAwsSecretsConfig();
 
     const rest = new REST().setToken(discordConfig.appToken);
 

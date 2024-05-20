@@ -1,4 +1,4 @@
-import { type NmDayNameType } from '../model/night-market.model';
+import { type NmDayNameType } from '../model/nm.model';
 import type { OrgDataService } from './org-data.service';
 import { ParseContentService } from '../service';
 import { DAYS_OF_WEEK_CODES } from '../const';

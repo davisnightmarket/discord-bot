@@ -1,4 +1,4 @@
-import { Dbg } from './debug.utility';
+import { GetDebug } from './debug.utility';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import Handlebars from 'handlebars';
@@ -27,9 +27,9 @@ type MessageCodeType =
     | 'NIGHT_CAP_NEEDED'
     | 'START_WELCOME';
 
-type MessageCoreParamType = {};
+interface MessageCoreParamType {}
 
-const dbg = Dbg('MessageUtility');
+const dbg = GetDebug('MessageUtility');
 
 const messageCache: Record<string, string> = {};
 

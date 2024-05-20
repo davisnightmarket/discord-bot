@@ -1,12 +1,12 @@
 import { GoogleAuth } from 'google-auth-library';
 import { google } from 'googleapis';
-import { Dbg } from '../utility';
-import { NmSecrets } from '../utility/google-config.utility';
+import { GetDebug } from '../utility';
+import { Config } from '../config';
 
-const dbg = Dbg('GoogleDriveService');
+const dbg = GetDebug('GoogleDriveService');
 
-const waitingForGdrive = NmSecrets.then((keys) => {
-    const credentials = keys.googleSpreadsheetsKeys;
+const waitingForGdrive = Config.then((keys) => {
+    const credentials = keys.googleApiConfig;
     const auth = new GoogleAuth({
         credentials,
         scopes: 'https://www.googleapis.com/auth/drive'
@@ -26,7 +26,7 @@ export class GoogleDriveService<U extends string> {
     async getFileIdByName(fileName: U): Promise<string> {
         dbg(`getFileIdByName ${fileName}`);
         const fileList = await this.getFileList(this.folderId);
-        return fileList.data.files?.find((a) => a.name === fileName)?.id || '';
+        return fileList.data.files?.find((a) => a.name === fileName)?.id ?? '';
     }
 
     async getFileList(folderId: string) {

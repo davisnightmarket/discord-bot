@@ -6,7 +6,8 @@ const cron_utility_1 = require("./utility/cron.utility");
 const jobs_1 = require("./jobs");
 const events_1 = require("./events");
 const route_1 = require("./route");
-const dbg = (0, utility_1.Dbg)('run');
+const config_1 = require("./config");
+const dbg = (0, utility_1.GetDebug)('run');
 // Start discord client
 const client = new discord_js_1.Client({
     intents: [
@@ -19,6 +20,7 @@ const client = new discord_js_1.Client({
 });
 run();
 async function run() {
+    const config = await config_1.Config;
     // TODO: we have to remember that each guild could have a different timezone
     // so we need to figure out how to adjust the crons for each guild
     // Add cron jobs
@@ -73,6 +75,6 @@ async function run() {
             // this is how long after a person arrives in our server that we send a welcome message
         }, 1000 * 60 * 60);
     });
-    const { discordConfig: { appToken } } = await utility_1.NmSecrets;
+    const { discordConfig: { appToken } } = config;
     client.login(appToken);
 }

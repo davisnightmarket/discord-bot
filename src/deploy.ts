@@ -1,16 +1,17 @@
-import { NmSecrets, Dbg } from './utility';
+import { GetDebug } from './utility';
 import commands from './commands';
 import { CoreDataService } from './service';
 import { REST, Routes } from 'discord.js';
+import { Config } from './config';
 
 const coreDataService = new CoreDataService();
 
-const dbg = Dbg('Deploy');
+const dbg = GetDebug('Deploy');
 (async () => {
     try {
         const {
             discordConfig: { clientId, appToken }
-        } = await NmSecrets;
+        } = await Config;
         const rest = new REST().setToken(appToken);
         dbg(`Started refreshing ${commands.length} application (/) commands.`);
         const body = commands.map((a) => a.toJSON());

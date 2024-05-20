@@ -542,7 +542,6 @@ export class NightDataService {
         personList: PersonWithIdModel[],
         noteList: NightOpsPickupNotesDataModel[]
     ): NightPersonModel[] {
-        console.log(noteList);
         // return a complete set of pickups, with personList
         const hostList = opList
             .filter(

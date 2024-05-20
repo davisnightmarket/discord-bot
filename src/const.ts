@@ -4,7 +4,7 @@ import {
     NmAdminRoleType,
     NmDayNameType,
     NmPartOfDayNameType
-} from './model/night-market.model';
+} from './model/nm.model';
 
 /**
  * CORE DATA

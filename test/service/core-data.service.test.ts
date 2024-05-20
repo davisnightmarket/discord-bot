@@ -6,9 +6,9 @@ jest.setTimeout(10000);
 describe('nm-config.utility.ts', () => {
     test('make sure our GetConfigByGuildId function works', async () => {
         const { coreDataService } = await WaitForGuildServices;
-        const a = await coreDataService.getConfigByGuildId(
+        const a = await coreDataService.getMarketConfigByGuildId(
             '1094663742559625367'
         );
-        expect(Object.keys(a).length).toBe(8);
+        expect(Object.keys(a).length).toBe(4);
     });
 });

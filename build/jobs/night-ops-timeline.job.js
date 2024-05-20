@@ -6,7 +6,7 @@ const utility_1 = require("../utility");
 // adds rows to timeline for yesterday
 // looks for tomorrow rows and adds them to state ops
 // updates state of ops sheet for tomorrow
-const dbg = (0, utility_1.Dbg)('NightTimelineJob');
+const dbg = (0, utility_1.GetDebug)('NightTimelineJob');
 const NightTimelineJob = (client) => async () => {
     // get the guild
     const guildList = client.guilds.cache.map((guild) => guild);
