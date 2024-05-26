@@ -4,7 +4,7 @@
   "description": "A discord bot for davis night market",
   "main": "run.js",
   "scripts": {
-    "start": "NODE_ENV=prod pm2 start build/run.js --name crabapple",
+    "start": "NODE_ENV=prod node build/run.js",
     "stop": "pm2 stop crabapple",
     "start:jr": "NODE_ENV=test pm2 start build/run.js --name jr",
     "stop:jr": "pm2 stop jr",
