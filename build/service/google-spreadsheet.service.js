@@ -268,16 +268,19 @@ class GoogleSpreadsheetsService {
             throw err;
         }
     }
-    async sheetCreateIfNone(title) {
-        const spreadsheetId = this.spreadsheetId;
+    async getOrCreateSheet(title, { headersList, range } = {}) {
         // we create a new sheet every year, so we test if the sheet exists, and create it if not
         if (!(await this.sheetExists(title))) {
-            await this.sheetCreate(title);
-            return true;
+            if (!(await this.createSheet(title, {
+                headersList,
+                range
+            }))) {
+                throw new Error('getOrCreateSheet: Could not create sheet!');
+            }
         }
-        return false;
+        return await this.getSheetIdByTitle(title);
     }
-    async sheetCreate(title) {
+    async createSheet(title, { headersList, range } = {}) {
         const spreadsheetId = this.spreadsheetId;
         this.validateRange(title);
         const [gspread, auth] = await Gspread;
@@ -299,6 +302,9 @@ class GoogleSpreadsheetsService {
             };
             try {
                 await gspread.spreadsheets.batchUpdate(request);
+                if (headersList && range) {
+                    await this.rowsAppend([headersList], range);
+                }
             }
             catch (e) {
                 console.error(e);

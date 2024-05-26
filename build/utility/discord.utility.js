@@ -27,9 +27,9 @@ async function GetGuildRoleIdByName(guild, name) {
 }
 exports.GetGuildRoleIdByName = GetGuildRoleIdByName;
 async function RegisterGuildCommand(guildId) {
-    const { discordConfig } = await (0, aws_config_utility_1.GetAwsSecretsConfig)();
-    const rest = new discord_js_1.REST().setToken(discordConfig.appToken);
-    await rest.put(discord_js_1.Routes.applicationGuildCommands(discordConfig.clientId, guildId), {
+    const { discordApiConfig } = await (0, aws_config_utility_1.GetAwsSecretsConfig)();
+    const rest = new discord_js_1.REST().setToken(discordApiConfig.appToken);
+    await rest.put(discord_js_1.Routes.applicationGuildCommands(discordApiConfig.clientId, guildId), {
         body: commands_1.default.map((command) => command.toJSON())
     });
 }

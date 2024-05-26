@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.WaitingForConfig = exports.ConfigLocal = exports.EnvConfigLocal = exports.InstanceConfig = exports.GetConfig = void 0;
+exports.WaitingForConfig = exports.ConfigLocal = exports.InstanceConfig = exports.GetConfig = void 0;
 const _1 = require(".");
 const waitingForAwsSecrets = (0, _1.GetAwsSecretsConfig)();
 const GetConfig = async (env = (0, _1.GetEnv)(), envConfig) => {
@@ -23,26 +23,26 @@ exports.InstanceConfig = {
 };
 // core marketConfig property GSPREAD_CORE_ID is stored in
 // the local codebase because it bootstraps our core data service
-exports.EnvConfigLocal = {
+const EnvConfig = {
     test: {
-        marketConfig: {
+        nmConfig: {
             ...exports.InstanceConfig,
             GSPREAD_CORE_ID: '17ktzAhVMDElya2kGIEp1BNtwVk2_gXwR4vM3fWWi5Vg'
         }
     },
     dev: {
-        marketConfig: {
+        nmConfig: {
             ...exports.InstanceConfig,
             GSPREAD_CORE_ID: '17ktzAhVMDElya2kGIEp1BNtwVk2_gXwR4vM3fWWi5Vg'
         }
     },
     prod: {
-        marketConfig: {
+        nmConfig: {
             ...exports.InstanceConfig,
             GSPREAD_CORE_ID: '1hJktYzxM10wQMggY4vUVfv-SuQ1YRUWok5y75ojC91M'
         }
     }
 };
-exports.ConfigLocal = exports.EnvConfigLocal[process.env.NODE_ENV];
+exports.ConfigLocal = EnvConfig[process.env.NODE_ENV];
 // we call GetConfig once and then import the promise anywhere we need config
-exports.WaitingForConfig = (0, exports.GetConfig)((0, _1.GetEnv)(), exports.EnvConfigLocal);
+exports.WaitingForConfig = (0, exports.GetConfig)((0, _1.GetEnv)(), EnvConfig);

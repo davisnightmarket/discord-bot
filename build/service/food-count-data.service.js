@@ -13,6 +13,7 @@ class FoodCountDataService {
         // todo: this will fail on January first but why?
         const year = date.getFullYear();
         const rows = await (await this.getSheetByYear(year)).getAllRowsAsMaps({ limitRows: 500 });
+        console.log(rows);
         return rows.filter((a) => {
             const d = new Date(a.date);
             return (d.getDate() + d.getMonth() + d.getFullYear() ===

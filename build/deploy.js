@@ -8,14 +8,15 @@ const commands_1 = __importDefault(require("./commands"));
 const service_1 = require("./service");
 const discord_js_1 = require("discord.js");
 const config_1 = require("./config");
-const coreDataService = new service_1.CoreDataService();
 const dbg = (0, utility_1.GetDebug)('Deploy');
 (async () => {
     try {
-        const { discordConfig: { clientId, appToken } } = await config_1.Config;
+        console.log(await config_1.Config);
+        const { nmConfig, discordApiConfig: { clientId, appToken } } = await config_1.Config;
         const rest = new discord_js_1.REST().setToken(appToken);
         dbg(`Started refreshing ${commands_1.default.length} application (/) commands.`);
         const body = commands_1.default.map((a) => a.toJSON());
+        const coreDataService = new service_1.CoreDataService(nmConfig);
         // The put method is used to fully refresh all commands in the guild with the current set
         const guildIdList = await coreDataService.getAllGuildIds();
         for (const guildId of guildIdList) {

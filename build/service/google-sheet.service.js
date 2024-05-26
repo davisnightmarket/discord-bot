@@ -7,8 +7,10 @@ class GoogleSheetService {
         // store params
         this.spreadsheetService = new google_spreadsheet_service_1.GoogleSpreadsheetsService(spreadsheetId);
         this.sheetName = sheetName;
-        this.spreadsheetService.sheetCreateIfNone(this.sheetName);
-        this.waitingForSheetId = this.spreadsheetService.getSheetIdByTitle(this.sheetName);
+        this.waitingForSheetId = this.spreadsheetService.getOrCreateSheet(this.sheetName, {
+            headersList,
+            range: this.getSheetRangeString()
+        });
         this.waitingForHeaderList = this.getHeaders(headersList);
     }
     // TODO: test this
@@ -36,6 +38,8 @@ class GoogleSheetService {
     async appendOneMap(map) {
         const headerList = await this.waitingForHeaderList;
         const row = headerList.map((a) => map[a]);
+        console.log(headerList);
+        console.log(row);
         await this.spreadsheetService.rowsAppend([row], this.getSheetRangeString());
     }
     // TODO: test this

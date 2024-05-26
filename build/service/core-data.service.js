@@ -69,7 +69,7 @@ class CoreDataService {
     }
 }
 exports.CoreDataService = CoreDataService;
-// export class MarketConfigModel implements AllMarketConfigModel {
+// export class NMConfigModel implements AllNMConfigModel {
 //     // the spreadsheet id for where configuration is kept for all market instances
 //     GSPREAD_CORE_ID: string;
 //     // the spreadsheet id for where types are kept for all market instances
@@ -90,7 +90,7 @@ exports.CoreDataService = CoreDataService;
 //         NM_ID,
 //         DISCORD_GUILD_ID,
 //         GSPREAD_MARKET_ID
-//     }: Partial<AllMarketConfigModel>) {
+//     }: Partial<AllNMConfigModel>) {
 //         if (!GSPREAD_CORE_ID) {
 //             throw new Error('Missing GSPREAD_CORE_ID');
 //         }
