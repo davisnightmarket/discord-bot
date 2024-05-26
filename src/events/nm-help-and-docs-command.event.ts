@@ -1,7 +1,7 @@
 import { type ChatInputCommandInteraction } from 'discord.js';
-import { Dbg, type GuildServiceModel } from '../utility';
+import { GetDebug, type GuildServiceModel } from '../utility';
 
-const dbg = Dbg('HelpAndDocsCommandEvent');
+const dbg = GetDebug('HelpAndDocsCommandEvent');
 
 export async function HelpAndDocsCommandEvent(
     { markdownService }: GuildServiceModel,

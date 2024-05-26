@@ -5,7 +5,7 @@ const component_1 = require("../component");
 const utility_1 = require("../utility");
 const const_1 = require("../const");
 // in which user edits their availability
-const dbg = (0, utility_1.Dbg)('PermissionEditButtonEvent');
+const dbg = (0, utility_1.GetDebug)('PermissionEditButtonEvent');
 async function PermissionCommandEvent({ personDataService, markdownService }, interaction, discordId) {
     // make sure crabapple doesn't choke while waiting for data
     const person = await personDataService.getPersonByDiscordId(discordId);

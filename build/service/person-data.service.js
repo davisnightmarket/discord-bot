@@ -6,7 +6,6 @@ const service_1 = require("../service");
 class PersonDataService {
     constructor(spreadsheetId, pgService) {
         this.pgService = pgService;
-        console.log(this.pgService.query('select 1 from dual'));
         this.personSheetService = new service_1.GoogleSheetService({
             spreadsheetId,
             sheetName: `person`

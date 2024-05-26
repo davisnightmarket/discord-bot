@@ -1,5 +1,4 @@
 import { GoogleSheetService, type SpreadsheetDataModel } from '.';
-import { NmDayNameType } from '../model';
 
 interface FoodCountModel extends SpreadsheetDataModel {
     org: string;
@@ -25,12 +24,19 @@ export class FoodCountDataService {
     }
 
     async getFoodCountByDate(date: Date): Promise<FoodCountModel[]> {
-        // todo: this will fail on January first
+        // todo: this will fail on January first but why?
+        const year = date.getFullYear();
         const rows = await (
-            await this.getSheetByCurrentYear()
+            await this.getSheetByYear(year)
         ).getAllRowsAsMaps({ limitRows: 500 });
-
-        return rows.filter((a) => new Date(a.date) === date);
+        console.log(rows);
+        return rows.filter((a) => {
+            const d = new Date(a.date);
+            return (
+                d.getDate() + d.getMonth() + d.getFullYear() ===
+                date.getDate() + date.getMonth() + date.getFullYear()
+            );
+        });
     }
 
     async createSheet(year: number) {
@@ -48,7 +54,7 @@ export class FoodCountDataService {
         return sheet;
     }
 
-    async getSheetByCurrentYear(
+    async getSheetByYear(
         year: number = new Date().getFullYear()
     ): Promise<GoogleSheetService<FoodCountModel>> {
         return (
@@ -56,7 +62,14 @@ export class FoodCountDataService {
         );
     }
 
+    async getSheetByCurrentYear(): Promise<GoogleSheetService<FoodCountModel>> {
+        const year = new Date().getFullYear();
+        return (
+            this.foodCountSheetMap.get(year) ?? (await this.createSheet(year))
+        );
+    }
+
     async appendFoodCount(foodCount: FoodCountModel, year?: number) {
-        await (await this.getSheetByCurrentYear(year)).appendOneMap(foodCount);
+        await (await this.getSheetByYear(year)).appendOneMap(foodCount);
     }
 }

@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.VolunteerPickupDeleteButtonEvent = void 0;
 const utility_1 = require("../../utility");
-const dbg = (0, utility_1.Dbg)('VolunteerEvent');
+const dbg = (0, utility_1.GetDebug)('VolunteerEvent');
 async function VolunteerPickupDeleteButtonEvent({ nightDataService, markdownService }, interaction, discordId, [command, day]) {
     if (command !== 'volunteer-pickup-delete') {
         return;

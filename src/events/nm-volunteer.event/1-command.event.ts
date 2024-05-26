@@ -2,13 +2,13 @@ import { type ChatInputCommandInteraction } from 'discord.js';
 
 import { GetVolunteerInitComponent } from '../../component/volunteer.component';
 import {
-    Dbg,
+    GetDebug,
     GetChannelDayNameFromInteraction,
     GetChannelDayToday,
     type GuildServiceModel
 } from '../../utility';
 
-const dbg = Dbg('VolunteerEvent');
+const dbg = GetDebug('VolunteerEvent');
 // todo: split this into different events for clarity
 // when a person issues a volunteer command it means they want to view
 // and possibly edit their volunteer commitments

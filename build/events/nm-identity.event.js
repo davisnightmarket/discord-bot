@@ -4,7 +4,7 @@ exports.IdentityEditModalEvent = exports.IdentityCommandEvent = void 0;
 const component_1 = require("../component");
 const utility_1 = require("../utility");
 const service_1 = require("../service");
-const dbg = (0, utility_1.Dbg)('IdentityEvent');
+const dbg = (0, utility_1.GetDebug)('IdentityEvent');
 async function IdentityCommandEvent({ personDataService }, interaction, discordId) {
     dbg('IdentityCommandEvent');
     // ! for some reason this is taking too long sometimes. Why? It is cached data

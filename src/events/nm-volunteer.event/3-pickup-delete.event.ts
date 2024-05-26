@@ -5,9 +5,9 @@ import {
 } from 'discord.js';
 
 import { type NmDayNameType } from '../../model';
-import { Dbg, type GuildServiceModel } from '../../utility';
+import { GetDebug, type GuildServiceModel } from '../../utility';
 
-const dbg = Dbg('VolunteerEvent');
+const dbg = GetDebug('VolunteerEvent');
 
 export async function VolunteerPickupDeleteButtonEvent(
     { nightDataService, markdownService }: GuildServiceModel,

@@ -3,7 +3,7 @@ import {
     type ChatInputCommandInteraction,
     type StringSelectMenuInteraction
 } from 'discord.js';
-import { type GuildServiceModel, Dbg } from '../utility';
+import { type GuildServiceModel, GetDebug } from '../utility';
 
 import { type NmDayNameType, type NmNightRoleType } from '../model';
 import {
@@ -15,7 +15,7 @@ import {
 import { DAYS_OF_WEEK } from '../const';
 // in which user edits their availability
 
-const dbg = Dbg('AvailabilityEvent');
+const dbg = GetDebug('AvailabilityEvent');
 
 export async function AvailabilityCommandEvent(
     { personDataService, markdownService }: GuildServiceModel,

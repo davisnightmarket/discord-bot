@@ -97,7 +97,15 @@ exports.PARTS_OF_DAY = {
     },
     night: { id: 'night', name: 'Night', description: 'All better now thanks' }
 };
-exports.DAYS_OF_WEEK_CODES = Object.keys(exports.DAYS_OF_WEEK);
+exports.DAYS_OF_WEEK_CODES = [
+    'sunday',
+    'monday',
+    'tuesday',
+    'wednesday',
+    'thursday',
+    'friday',
+    'saturday'
+];
 exports.NM_NIGHT_ROLES = {
     'night-captain': {
         id: 'night-captain',

@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.VolunteerDistroButtonEvent = void 0;
 const volunteer_component_1 = require("../../component/volunteer.component");
 const utility_1 = require("../../utility");
-const dbg = (0, utility_1.Dbg)('VolunteerDistroButtonEvent');
+const dbg = (0, utility_1.GetDebug)('VolunteerDistroButtonEvent');
 async function VolunteerDistroButtonEvent({ nightDataService, markdownService }, interaction, discordId, [command, day]) {
     if (command !== 'volunteer-distro') {
         return;

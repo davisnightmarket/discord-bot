@@ -3,10 +3,10 @@ import {
     type ChatInputCommandInteraction,
     type ModalSubmitInteraction
 } from 'discord.js';
-import { type GuildServiceModel, Dbg } from '../utility';
+import { type GuildServiceModel, GetDebug } from '../utility';
 import { PersonDataService } from '../service';
 
-const dbg = Dbg('IdentityEvent');
+const dbg = GetDebug('IdentityEvent');
 
 export async function IdentityCommandEvent(
     { personDataService }: GuildServiceModel,

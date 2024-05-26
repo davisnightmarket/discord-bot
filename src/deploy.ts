@@ -4,17 +4,19 @@ import { CoreDataService } from './service';
 import { REST, Routes } from 'discord.js';
 import { Config } from './config';
 
-const coreDataService = new CoreDataService();
-
 const dbg = GetDebug('Deploy');
+
 (async () => {
     try {
+        console.log(await Config);
         const {
-            discordConfig: { clientId, appToken }
+            nmConfig,
+            discordApiConfig: { clientId, appToken }
         } = await Config;
         const rest = new REST().setToken(appToken);
         dbg(`Started refreshing ${commands.length} application (/) commands.`);
         const body = commands.map((a) => a.toJSON());
+        const coreDataService = new CoreDataService(nmConfig);
         // The put method is used to fully refresh all commands in the guild with the current set
         const guildIdList = await coreDataService.getAllGuildIds();
 

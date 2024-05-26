@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.VolunteerPickupButtonEvent = void 0;
 const volunteer_component_1 = require("../../component/volunteer.component");
 const utility_1 = require("../../utility");
-const dbg = (0, utility_1.Dbg)('VolunteerPickupButtonEvent');
+const dbg = (0, utility_1.GetDebug)('VolunteerPickupButtonEvent');
 // when they hit the pickup button, the editing begins
 async function VolunteerPickupButtonEvent({ nightDataService, markdownService }, interaction, discordId, [command, day]) {
     if (command !== 'volunteer-pickup') {

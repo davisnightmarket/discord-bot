@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.VolunteerPickupSaveSelectEvent = void 0;
 const utility_1 = require("../../utility");
-const dbg = (0, utility_1.Dbg)('VolunteerEvent');
+const dbg = (0, utility_1.GetDebug)('VolunteerEvent');
 // this fires when a select interaction to choose pickups is triggered
 // it is the complete set of pickups for that day and person - it replaces all records for that day/person
 async function VolunteerPickupSaveSelectEvent({ nightDataService, markdownService }, interaction, discordId, [command, day]) {
@@ -11,7 +11,7 @@ async function VolunteerPickupSaveSelectEvent({ nightDataService, markdownServic
     }
     interaction.deferReply({ ephemeral: true });
     dbg(command, day);
-    const addList = nightDataService.getNightDataDiscordSelectValues(interaction.values, {
+    const addList = nightDataService.getNightOpsDiscordSelectValues(interaction.values, {
         day,
         role: 'night-pickup',
         discordIdOrEmail: discordId,

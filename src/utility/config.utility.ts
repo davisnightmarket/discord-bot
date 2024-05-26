@@ -1,14 +1,14 @@
-import type { EnvType, MarketConfigModel } from '../model/nm-config.model';
+import type { EnvType, NMConfigModel } from '../model/nm-config.model';
 import { GetAwsSecretsConfig, GetEnv, type SecretConfigModel } from '.';
 
 const waitingForAwsSecrets = GetAwsSecretsConfig();
 
 export interface ConfigModel extends SecretConfigModel {
-    marketConfig: MarketConfigModel;
+    nmConfig: NMConfigModel;
 }
 export const GetConfig = async (
     env: EnvType = GetEnv(),
-    envConfig: Record<EnvType, Pick<ConfigModel, 'marketConfig'>>
+    envConfig: Record<EnvType, Pick<ConfigModel, 'nmConfig'>>
 ): Promise<ConfigModel> => {
     // get our local environment config
     const config = envConfig[env];
@@ -19,7 +19,7 @@ export const GetConfig = async (
 };
 
 // these come from the config spreadsheet, used here as placeholders
-export const InstanceConfig: MarketConfigModel = {
+export const InstanceConfig: NMConfigModel = {
     GSPREAD_CORE_ID: '',
     // identifies each Night Market instance with a human readable code, ie: davis.ca.usa
     NM_ID: '',
@@ -31,32 +31,29 @@ export const InstanceConfig: MarketConfigModel = {
 
 // core marketConfig property GSPREAD_CORE_ID is stored in
 // the local codebase because it bootstraps our core data service
-export const EnvConfigLocal: Record<
-    EnvType,
-    Pick<ConfigModel, 'marketConfig'>
-> = {
+const EnvConfig: Record<EnvType, Pick<ConfigModel, 'nmConfig'>> = {
     test: {
-        marketConfig: {
+        nmConfig: {
             ...InstanceConfig,
             GSPREAD_CORE_ID: '17ktzAhVMDElya2kGIEp1BNtwVk2_gXwR4vM3fWWi5Vg'
         }
     },
     dev: {
-        marketConfig: {
+        nmConfig: {
             ...InstanceConfig,
             GSPREAD_CORE_ID: '17ktzAhVMDElya2kGIEp1BNtwVk2_gXwR4vM3fWWi5Vg'
         }
     },
     prod: {
-        marketConfig: {
+        nmConfig: {
             ...InstanceConfig,
             GSPREAD_CORE_ID: '1hJktYzxM10wQMggY4vUVfv-SuQ1YRUWok5y75ojC91M'
         }
     }
 };
 
-export const ConfigLocal = EnvConfigLocal[process.env.NODE_ENV as EnvType];
+export const ConfigLocal = EnvConfig[process.env.NODE_ENV as EnvType];
 
 // we call GetConfig once and then import the promise anywhere we need config
 
-export const WaitingForConfig = GetConfig(GetEnv(), EnvConfigLocal);
+export const WaitingForConfig = GetConfig(GetEnv(), EnvConfig);

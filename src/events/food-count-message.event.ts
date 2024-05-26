@@ -7,7 +7,7 @@ import {
 } from 'discord.js';
 import { COUNT_CHANNEL_NAME } from '../service';
 import { v4 as uuidv4 } from 'uuid';
-import { Dbg, CacheUtility } from '../utility';
+import { GetDebug, GetCache } from '../utility';
 import { GetChannelByName, type GuildServiceModel } from '../utility';
 
 // status for each cached input: does it get inserted unless cancel? or does it require a confirmation?
@@ -17,7 +17,7 @@ type CacheStatusType = 'INSERT_UNLESS_CANCEL' | 'DELETE_UNLESS_CONFIRM';
 // give user a set period of time to cancel
 // if the user cancels, this cache is deleted
 // if not, it is inserted into the spreadsheet
-export const FoodCountInputCache = CacheUtility<{
+export const FoodCountInputCache = GetCache<{
     status: CacheStatusType;
     messageInputId: string;
     messageResponseId: string;
@@ -33,7 +33,7 @@ export const TIME_UNTIL_UPDATE = 60 * 1000; // one minute in milliseconds
  *
  */
 
-const dbg = Dbg('FoodCountInputEvent');
+const dbg = GetDebug('FoodCountInputEvent');
 
 export const FoodCountMessageEvent = async (
     {

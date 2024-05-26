@@ -1,14 +1,21 @@
 import { describe, expect, test, jest } from '@jest/globals';
 import { WaitForGuildServices } from '../guild-services';
-import { ParseContentService } from '../../src/service';
 
 jest.setTimeout(1000000);
 
 describe('foodCountDataService', () => {
+    test('getFoodCountByDate: getting food count data ', async () => {
+        const { foodCountDataService } = await WaitForGuildServices;
+        const a = await foodCountDataService.getFoodCountByDate(
+            new Date('10/22/2023')
+        );
+        expect(a.length).toBe(1);
+    });
+
     test('getting food count data ', async () => {
         const { foodCountDataService } = await WaitForGuildServices;
-        console.log(new Date('2023-01-01'));
-        foodCountDataService.getFoodCountByDate(new Date('2023-01-01'));
+        const a = await foodCountDataService.getSheetByCurrentYear();
+        console.log(a);
     });
 });
 

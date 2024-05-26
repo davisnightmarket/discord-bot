@@ -4,7 +4,7 @@ exports.RouteInteraction = void 0;
 const discord_js_1 = require("discord.js");
 const utility_1 = require("../utility");
 const events_1 = require("../events");
-const dbg = (0, utility_1.Dbg)('RouteInteraction');
+const dbg = (0, utility_1.GetDebug)('RouteInteraction');
 async function RouteInteraction(interaction) {
     dbg(discord_js_1.Events.InteractionCreate);
     interaction = interaction;

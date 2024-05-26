@@ -24,7 +24,7 @@ export const NightTimelineJob = (client: Client) => async () => {
             guild.id
         );
         // get the current state of ops
-        const nightOpsList = await nightDataService.getNightDataByDay(
+        const nightOpsList = await nightDataService.getNightOpsByDay(
             channelDay
         );
 

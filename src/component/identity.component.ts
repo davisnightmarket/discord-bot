@@ -7,7 +7,7 @@ import {
     ButtonStyle
 } from 'discord.js';
 import { PersonModel } from '../service';
-import { Dbg } from '../utility';
+import { GetDebug } from '../utility';
 
 // a button for deleting all identifying info frrom our db
 export const IdentityDeleteComponent = () => {
@@ -23,7 +23,7 @@ export const IdentityDeleteComponent = () => {
     };
 };
 
-const dbg = Dbg('identity.component');
+const dbg = GetDebug('identity.component');
 export const IdentityEditModalComponent = ({
     discordId,
     name,

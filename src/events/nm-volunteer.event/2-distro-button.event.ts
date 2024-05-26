@@ -2,11 +2,11 @@ import { type ButtonInteraction } from 'discord.js';
 
 import { type NmDayNameType, type NmNightRoleType } from '../../model';
 import { GetVolunteerDistroComponent } from '../../component/volunteer.component';
-import { Dbg, type GuildServiceModel } from '../../utility';
+import { GetDebug, type GuildServiceModel } from '../../utility';
 
 import { type PeriodStatusType } from '../../service';
 
-const dbg = Dbg('VolunteerDistroButtonEvent');
+const dbg = GetDebug('VolunteerDistroButtonEvent');
 
 export async function VolunteerDistroButtonEvent(
     { nightDataService, markdownService }: GuildServiceModel,

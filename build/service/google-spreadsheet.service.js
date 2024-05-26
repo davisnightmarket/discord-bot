@@ -11,7 +11,7 @@ exports.AlphaIndex = Array.from(Array(26)).map((e, i) => i + 65);
 // the alphabet in an array
 exports.Alphabet = exports.AlphaIndex.map((x) => String.fromCharCode(x).toUpperCase());
 const Gspread = config_1.Config.then((keys) => {
-    const credentials = keys.googleSpreadsheetsKeys;
+    const credentials = keys.googleApiConfig;
     const auth = new google_auth_library_1.GoogleAuth({
         credentials,
         scopes: 'https://www.googleapis.com/auth/spreadsheets'
@@ -30,40 +30,45 @@ class GoogleSpreadsheetsService {
         return exports.Alphabet[a];
     }
     async rangeGet(range) {
-        validate(range);
+        await this.activeOp;
+        this.validateRange(range);
         const spreadsheetId = this.spreadsheetId;
         const [gspread] = await Gspread;
-        const result = await gspread.spreadsheets.values.get({
+        this.activeOp = gspread.spreadsheets.values.get({
             spreadsheetId,
             range
         });
+        const result = await this.activeOp;
         return (result.data.values ?? []);
     }
+    // opsQueue: GaxiosPromise[] = [];
     async sheetClear(sheetName) {
-        await Promise.all(this.opsQueue);
+        await this.activeOp;
+        // await Promise.all(this.opsQueue);
         const spreadsheetId = this.spreadsheetId;
         const [gspread] = await Gspread;
         try {
-            const op = gspread.spreadsheets.values.batchClear({
+            this.activeOp = gspread.spreadsheets.values.batchClear({
                 spreadsheetId,
                 requestBody: {
                     ranges: [sheetName]
                 }
             });
-            this.opsQueue.push(op.then((a) => {
-                this.opsQueue.slice(this.opsQueue.findIndex((a) => a === op), 1);
-                return a;
-            }));
-            await op;
+            await this.activeOp;
         }
         catch (err) {
             console.error(err);
             throw err;
         }
     }
-    async rowsDelete(startIndex, endIndex, sheetId) {
-        await Promise.all(this.opsQueue);
+    async rowsDelete(sheetTitle, startIndex, endIndex) {
+        await this.activeOp;
+        // await Promise.all(this.opsQueue);
         const spreadsheetId = this.spreadsheetId;
+        const sheetId = await this.getSheetIdByTitle(sheetTitle);
+        if (!sheetId) {
+            throw new Error('No sheet with name ' + sheetTitle);
+        }
         const requestBody = {
             requests: [
                 {
@@ -80,25 +85,27 @@ class GoogleSpreadsheetsService {
         };
         const [gspread] = await Gspread;
         try {
-            await gspread.spreadsheets.batchUpdate({
+            this.activeOp = gspread.spreadsheets.batchUpdate({
                 spreadsheetId,
                 requestBody
             });
+            await this.activeOp;
         }
         catch (err) {
             console.error(err);
         }
     }
     async rowsWrite(values, range) {
-        await Promise.all(this.opsQueue);
+        await this.activeOp;
+        // await Promise.all(this.opsQueue);
         if (!values || !(values instanceof Array) || values.length === 0) {
             throw new Error('Must pass a valid values');
         }
         const spreadsheetId = this.spreadsheetId;
-        validate(range);
+        this.validateRange(range);
         const [gspread, auth] = await Gspread;
         try {
-            const op = gspread.spreadsheets.values.update({
+            this.activeOp = gspread.spreadsheets.values.update({
                 auth,
                 spreadsheetId,
                 range,
@@ -109,11 +116,17 @@ class GoogleSpreadsheetsService {
                     values
                 }
             });
-            this.opsQueue.push(op.then((a) => {
-                this.opsQueue.slice(this.opsQueue.findIndex((a) => a === op), 1);
-                return a;
-            }));
-            const result = await op;
+            const result = await this.activeOp;
+            // this.opsQueue.push(
+            //     op.then((a) => {
+            //         this.opsQueue.slice(
+            //             this.opsQueue.findIndex((a) => a === op),
+            //             1
+            //         );
+            //         return a as GaxiosResponse;
+            //     })
+            // );
+            // const result = await op;
             dbg('%d cells updated.', result.data.updatedCells);
             return result.data.updatedRange;
         }
@@ -132,29 +145,24 @@ class GoogleSpreadsheetsService {
         if (!values || !(values instanceof Array) || values.length === 0) {
             throw new Error('Must pass a valid values');
         }
-        await Promise.all(this.opsQueue);
+        await this.activeOp;
         const spreadsheetId = this.spreadsheetId;
-        validate(range);
+        this.validateRange(range);
         const [gspread] = await Gspread;
-        const op = gspread.spreadsheets.values.append({
+        this.activeOp = gspread.spreadsheets.values.append({
             spreadsheetId,
             range,
             valueInputOption: 'USER_ENTERED',
             requestBody: { values }
         });
-        this.opsQueue.push(op.then((a) => {
-            this.opsQueue.slice(this.opsQueue.findIndex((a) => a === op), 1);
-            return a;
-        }));
-        await op;
+        await this.activeOp;
     }
     async rowsPrepend(values, title, startColumn, startIndex) {
-        await Promise.all(this.opsQueue);
+        await this.activeOp;
         const spreadsheetId = this.spreadsheetId;
-        validate(title);
+        this.validateRange(title);
         const [gspread, auth] = await Gspread;
         const endIndex = startIndex + values.length;
-        // insert blank rows
         const request = {
             spreadsheetId,
             resource: {
@@ -175,12 +183,8 @@ class GoogleSpreadsheetsService {
             auth
         };
         try {
-            const op = gspread.spreadsheets.batchUpdate(request);
-            this.opsQueue.push(op.then((a) => {
-                this.opsQueue.slice(this.opsQueue.findIndex((a) => a === op), 1);
-                return a;
-            }));
-            await op;
+            this.activeOp = gspread.spreadsheets.batchUpdate(request);
+            await this.activeOp;
         }
         catch (e) {
             console.error(e);
@@ -188,7 +192,7 @@ class GoogleSpreadsheetsService {
         }
         try {
             const range = `${title}!${startColumn}${startIndex + 1}`;
-            gspread.spreadsheets.values.update({
+            this.activeOp = gspread.spreadsheets.values.update({
                 auth,
                 spreadsheetId,
                 range,
@@ -199,6 +203,7 @@ class GoogleSpreadsheetsService {
                     values
                 }
             });
+            await this.activeOp;
         }
         catch (e) {
             console.error(e);
@@ -249,7 +254,6 @@ class GoogleSpreadsheetsService {
                 ranges: [title],
                 includeGridData: false
             };
-            console.log(request);
             const [gspread] = await Gspread;
             const res = await gspread.spreadsheets.get(request);
             if (!res?.data?.sheets?.length ||
@@ -275,7 +279,7 @@ class GoogleSpreadsheetsService {
     }
     async sheetCreate(title) {
         const spreadsheetId = this.spreadsheetId;
-        validate(title);
+        this.validateRange(title);
         const [gspread, auth] = await Gspread;
         try {
             const request = {
@@ -308,7 +312,7 @@ class GoogleSpreadsheetsService {
     }
     async sheetDestroy(title) {
         const spreadsheetId = this.spreadsheetId;
-        validate(title);
+        this.validateRange(title);
         const [gspread, auth] = await Gspread;
         try {
             const sheetId = await this.getSheetIdByTitle(title);
@@ -333,15 +337,14 @@ class GoogleSpreadsheetsService {
             return false;
         }
     }
+    validateRange(range) {
+        if (!range) {
+            throw new Error('Must pass a valid sheet "range"');
+        }
+    }
     constructor(spreadsheetId) {
-        this.opsQueue = [];
+        this.activeOp = Promise.resolve();
         this.spreadsheetId = spreadsheetId;
     }
 }
 exports.GoogleSpreadsheetsService = GoogleSpreadsheetsService;
-// abstract out test for range and spreadsheetId
-function validate(range) {
-    if (!range) {
-        throw new Error('Must pass a valid sheet "range"');
-    }
-}

@@ -9,12 +9,12 @@ import {
     PermissionStartComponent,
     PermissionToSelectComponent
 } from '../component';
-import { Dbg, type GuildServiceModel } from '../utility';
+import { GetDebug, type GuildServiceModel } from '../utility';
 import { PERMISSION_CODE_LIST } from '../const';
 
 // in which user edits their availability
 
-const dbg = Dbg('PermissionEditButtonEvent');
+const dbg = GetDebug('PermissionEditButtonEvent');
 
 export async function PermissionCommandEvent(
     { personDataService, markdownService }: GuildServiceModel,

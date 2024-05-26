@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.VolunteerDistroSaveSelectEvent = exports.VolunteerPickupDeleteButtonEvent = exports.VolunteerPickupSaveSelectEvent = exports.VolunteerDistroButtonEvent = exports.VolunteerPickupButtonEvent = exports.VolunteerCommandEvent = void 0;
 const volunteer_component_1 = require("../../component/volunteer.component");
 const utility_1 = require("../../utility");
-const dbg = (0, utility_1.Dbg)('VolunteerEvent');
+const dbg = (0, utility_1.GetDebug)('VolunteerEvent');
 // todo: split this into different events for clarity
 // when a person issues a volunteer command it means they want to view
 // and possibly edit their volunteer commitments
@@ -108,7 +108,7 @@ async function VolunteerPickupSaveSelectEvent({ nightDataService, markdownServic
     }
     interaction.deferReply({ ephemeral: true });
     dbg(command, day);
-    const addList = nightDataService.getNightDataDiscordSelectValues(interaction.values, {
+    const addList = nightDataService.getNightOpsDiscordSelectValues(interaction.values, {
         day,
         role: 'night-pickup',
         discordIdOrEmail: discordId,
@@ -151,7 +151,7 @@ async function VolunteerDistroSaveSelectEvent({ nightDataService }, interaction,
     //     refreshCache: true
     // });
     // todo: fix this since we now have the capacity for multiple markets per day
-    const addList = nightDataService.getNightDataDiscordSelectValues(interaction.values, {
+    const addList = nightDataService.getNightOpsDiscordSelectValues(interaction.values, {
         day,
         role: 'night-distro',
         discordIdOrEmail: discordId,

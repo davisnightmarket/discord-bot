@@ -16,7 +16,7 @@ const NightTimelineJob = (client) => async () => {
         // get the guild service
         const { nightDataService, markdownService } = await (0, utility_1.GetGuildServices)(guild.id);
         // get the current state of ops
-        const nightOpsList = await nightDataService.getNightDataByDay(channelDay);
+        const nightOpsList = await nightDataService.getNightOpsByDay(channelDay);
         dbg(`NIGHT OPS ${nightOpsList.length}`);
         // get first 1000 records of night timeline
         const nightTimelineList = await nightDataService.getNightTimelineList();

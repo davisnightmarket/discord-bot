@@ -1,5 +1,4 @@
-import { Config, ConfigLocal } from '../config';
-import { type MarketConfigModel } from '../model';
+import { Config } from '../config';
 import {
     CoreDataService,
     FoodCountDataService,
@@ -11,8 +10,6 @@ import {
     MarkdownService,
     PgService
 } from '../service';
-
-const coreDataService = new CoreDataService(ConfigLocal.marketConfig);
 
 // technically we want to instantiate this once,
 // and don't really want services in utilities, but since our
@@ -35,7 +32,10 @@ export interface GuildServiceModel {
 // because we need to build a set of services that are connected to data per guild
 // as well as services that are "core", meaning the same data source for all guilds
 export async function GetGuildServices(guildId: string) {
-    const { pgConfig } = await Config;
+    const { pgConfig, nmConfig } = await Config;
+
+    const coreDataService = new CoreDataService(nmConfig);
+
     if (!servicesByGuildId.has(guildId)) {
         const pgService = new PgService(pgConfig);
         const { GSPREAD_MARKET_ID } =

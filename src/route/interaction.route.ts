@@ -6,7 +6,7 @@ import {
     type ModalSubmitInteraction,
     type StringSelectMenuInteraction
 } from 'discord.js';
-import { GetGuildServices, Dbg } from '../utility';
+import { GetGuildServices, GetDebug } from '../utility';
 import {
     AvailabilityCommandEvent,
     AvailabilityEditButtonEvent,
@@ -27,7 +27,7 @@ import {
 } from '../events';
 import { type NmDayNameType, type NmNightRoleType } from '../model';
 
-const dbg = Dbg('RouteInteraction');
+const dbg = GetDebug('RouteInteraction');
 
 export async function RouteInteraction(interaction: Interaction) {
     dbg(Events.InteractionCreate);

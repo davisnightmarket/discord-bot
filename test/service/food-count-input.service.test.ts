@@ -20,8 +20,7 @@ describe('foodCountInputService', () => {
 
 student farm
 `);
-        console.log([date, listOk, listFail]);
-        expect(date).toBe('3/27/2023');
+        expect(date).toBe('3/27/' + new Date().getFullYear());
         expect(listOk.length).toBe(6);
 
         const [village, dcm, fire, fw, oddf, dfc] = listOk;

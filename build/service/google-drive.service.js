@@ -7,7 +7,7 @@ const utility_1 = require("../utility");
 const config_1 = require("../config");
 const dbg = (0, utility_1.GetDebug)('GoogleDriveService');
 const waitingForGdrive = config_1.Config.then((keys) => {
-    const credentials = keys.googleSpreadsheetsKeys;
+    const credentials = keys.googleApiConfig;
     const auth = new google_auth_library_1.GoogleAuth({
         credentials,
         scopes: 'https://www.googleapis.com/auth/drive'

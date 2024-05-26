@@ -37,12 +37,12 @@ export async function GetGuildRoleIdByName(guild: Guild, name: string) {
 }
 
 export async function RegisterGuildCommand(guildId: string) {
-    const { discordConfig } = await GetAwsSecretsConfig();
+    const { discordApiConfig } = await GetAwsSecretsConfig();
 
-    const rest = new REST().setToken(discordConfig.appToken);
+    const rest = new REST().setToken(discordApiConfig.appToken);
 
     await rest.put(
-        Routes.applicationGuildCommands(discordConfig.clientId, guildId),
+        Routes.applicationGuildCommands(discordApiConfig.clientId, guildId),
         {
             body: Commands.map((command) => command.toJSON())
         }

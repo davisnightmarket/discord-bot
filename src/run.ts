@@ -22,7 +22,6 @@ run();
 
 async function run() {
     const config = await Config;
-
     // TODO: we have to remember that each guild could have a different timezone
     // so we need to figure out how to adjust the crons for each guild
     // Add cron jobs
@@ -89,7 +88,7 @@ async function run() {
     });
 
     const {
-        discordConfig: { appToken }
+        discordApiConfig: { appToken }
     } = config;
 
     client.login(appToken);

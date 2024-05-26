@@ -5,7 +5,7 @@ const _1 = require("./");
 const service_1 = require("../service");
 const utility_1 = require("../utility");
 const discord_utility_1 = require("../utility/discord.utility");
-const debug = (0, utility_1.Dbg)('FoodCountCancelEvent');
+const debug = (0, utility_1.GetDebug)('FoodCountCancelEvent');
 /**
  *
  */

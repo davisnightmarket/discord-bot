@@ -10,9 +10,14 @@ class FoodCountDataService {
         this.spreadsheetId = spreadsheetId;
     }
     async getFoodCountByDate(date) {
-        // todo: this will fail on January first
-        const rows = await (await this.getSheetByCurrentYear()).getAllRowsAsMaps({ limitRows: 500 });
-        return rows.filter((a) => new Date(a.date) === date);
+        // todo: this will fail on January first but why?
+        const year = date.getFullYear();
+        const rows = await (await this.getSheetByYear(year)).getAllRowsAsMaps({ limitRows: 500 });
+        return rows.filter((a) => {
+            const d = new Date(a.date);
+            return (d.getDate() + d.getMonth() + d.getFullYear() ===
+                date.getDate() + date.getMonth() + date.getFullYear());
+        });
     }
     async createSheet(year) {
         // create the new sheet wraper
@@ -26,11 +31,15 @@ class FoodCountDataService {
         // return
         return sheet;
     }
-    async getSheetByCurrentYear(year = new Date().getFullYear()) {
+    async getSheetByYear(year = new Date().getFullYear()) {
+        return (this.foodCountSheetMap.get(year) ?? (await this.createSheet(year)));
+    }
+    async getSheetByCurrentYear() {
+        const year = new Date().getFullYear();
         return (this.foodCountSheetMap.get(year) ?? (await this.createSheet(year)));
     }
     async appendFoodCount(foodCount, year) {
-        await (await this.getSheetByCurrentYear(year)).appendOneMap(foodCount);
+        await (await this.getSheetByYear(year)).appendOneMap(foodCount);
     }
 }
 exports.FoodCountDataService = FoodCountDataService;

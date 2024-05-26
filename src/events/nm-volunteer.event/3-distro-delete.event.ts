@@ -11,7 +11,7 @@ import {
     GetVolunteerPickupComponent
 } from '../../component/volunteer.component';
 import {
-    Dbg,
+    GetDebug,
     GetChannelDayNameFromInteraction,
     GetChannelDayToday,
     type GuildServiceModel
@@ -19,7 +19,7 @@ import {
 
 import { type PeriodStatusType } from '../../service';
 
-const dbg = Dbg('VolunteerEvent');
+const dbg = GetDebug('VolunteerEvent');
 // todo: split this into different events for clarity
 
 export async function VolunteerDistroDeleteButtonEvent(

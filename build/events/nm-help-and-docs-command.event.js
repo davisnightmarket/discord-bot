@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.HelpAndDocsCommandEvent = void 0;
 const utility_1 = require("../utility");
-const dbg = (0, utility_1.Dbg)('HelpAndDocsCommandEvent');
+const dbg = (0, utility_1.GetDebug)('HelpAndDocsCommandEvent');
 async function HelpAndDocsCommandEvent({ markdownService }, interaction) {
     if (interaction.commandName !== 'help-and-docs') {
         return;

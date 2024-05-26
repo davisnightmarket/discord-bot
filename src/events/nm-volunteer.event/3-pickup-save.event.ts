@@ -11,7 +11,7 @@ import {
     GetVolunteerPickupComponent
 } from '../../component/volunteer.component';
 import {
-    Dbg,
+    GetDebug,
     GetChannelDayNameFromInteraction,
     GetChannelDayToday,
     type GuildServiceModel
@@ -19,7 +19,7 @@ import {
 
 import { type PeriodStatusType } from '../../service';
 
-const dbg = Dbg('VolunteerEvent');
+const dbg = GetDebug('VolunteerEvent');
 
 // this fires when a select interaction to choose pickups is triggered
 // it is the complete set of pickups for that day and person - it replaces all records for that day/person
@@ -35,7 +35,7 @@ export async function VolunteerPickupSaveSelectEvent(
     interaction.deferReply({ ephemeral: true });
     dbg(command, day);
 
-    const addList = nightDataService.getNightDataDiscordSelectValues(
+    const addList = nightDataService.getNightOpsDiscordSelectValues(
         interaction.values,
         {
             day,

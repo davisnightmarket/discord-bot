@@ -1,4 +1,4 @@
-import { type MarketConfigModel, type EnvType } from '../model';
+import { type NMConfigModel, type EnvType } from '../model';
 import {
     GoogleSheetService,
     type SpreadsheetDataModel,
@@ -9,14 +9,14 @@ const Env = process.env.NODE_ENV as EnvType;
 
 interface ConfigDataModel extends SpreadsheetDataModel {
     marketId: string;
-    code: keyof MarketConfigModel;
+    code: keyof NMConfigModel;
     value: string;
 }
 
 interface TypeDataModel extends SpreadsheetDataModel {}
 
 export class CoreDataService {
-    marketConfig: MarketConfigModel;
+    marketConfig: NMConfigModel;
     configSheetService: GoogleSheetService<ConfigDataModel>;
     configMarketSheetService: GoogleSheetService<ConfigDataModel>;
     coreTypeSheetService: GoogleSheetService<TypeDataModel>;
@@ -28,7 +28,7 @@ export class CoreDataService {
 
     // the constructor gets the core id which points to the core google spreadsheet by default
     // you can pass in a different id for testing purposes, but this should work in test and prod
-    constructor(marketConfig: MarketConfigModel) {
+    constructor(marketConfig: NMConfigModel) {
         this.marketConfig = marketConfig;
         const spreadsheetId = marketConfig.GSPREAD_CORE_ID;
         this.driveCoreDataService = new GoogleDriveService(spreadsheetId);
@@ -49,9 +49,7 @@ export class CoreDataService {
         });
     }
 
-    async getMarketConfigByGuildId(
-        guildId: string
-    ): Promise<MarketConfigModel> {
+    async getMarketConfigByGuildId(guildId: string): Promise<NMConfigModel> {
         // get the market id
         const configRows =
             await this.configMarketSheetService.getAllRowsAsMaps();
@@ -81,7 +79,7 @@ export class CoreDataService {
         NM_ID,
         DISCORD_GUILD_ID,
         GSPREAD_MARKET_ID
-    }: Partial<MarketConfigModel>): MarketConfigModel {
+    }: Partial<NMConfigModel>): NMConfigModel {
         if (!GSPREAD_CORE_ID) {
             throw new Error('Missing GSPREAD_CORE_ID');
         }
@@ -115,7 +113,7 @@ export class CoreDataService {
     }
 }
 
-// export class MarketConfigModel implements AllMarketConfigModel {
+// export class NMConfigModel implements AllNMConfigModel {
 //     // the spreadsheet id for where configuration is kept for all market instances
 //     GSPREAD_CORE_ID: string;
 //     // the spreadsheet id for where types are kept for all market instances
@@ -137,7 +135,7 @@ export class CoreDataService {
 //         NM_ID,
 //         DISCORD_GUILD_ID,
 //         GSPREAD_MARKET_ID
-//     }: Partial<AllMarketConfigModel>) {
+//     }: Partial<AllNMConfigModel>) {
 //         if (!GSPREAD_CORE_ID) {
 //             throw new Error('Missing GSPREAD_CORE_ID');
 //         }

@@ -6,9 +6,9 @@ import {
 import { FoodCountInputCache } from './';
 
 import { COUNT_CHANNEL_NAME } from '../service';
-import { Dbg } from '../utility';
+import { GetDebug } from '../utility';
 import { GetChannelByName } from '../utility/discord.utility';
-const debug = Dbg('FoodCountCancelEvent');
+const debug = GetDebug('FoodCountCancelEvent');
 
 /**
  *

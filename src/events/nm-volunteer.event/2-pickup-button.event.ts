@@ -2,9 +2,9 @@ import { type ButtonInteraction } from 'discord.js';
 
 import { type NmDayNameType, type NmNightRoleType } from '../../model';
 import { GetVolunteerPickupComponent } from '../../component/volunteer.component';
-import { Dbg, type GuildServiceModel } from '../../utility';
+import { GetDebug, type GuildServiceModel } from '../../utility';
 
-const dbg = Dbg('VolunteerPickupButtonEvent');
+const dbg = GetDebug('VolunteerPickupButtonEvent');
 
 // when they hit the pickup button, the editing begins
 export async function VolunteerPickupButtonEvent(

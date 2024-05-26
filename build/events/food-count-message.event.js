@@ -10,13 +10,13 @@ const utility_2 = require("../utility");
 // give user a set period of time to cancel
 // if the user cancels, this cache is deleted
 // if not, it is inserted into the spreadsheet
-exports.FoodCountInputCache = (0, utility_1.CacheUtility)('food-count');
+exports.FoodCountInputCache = (0, utility_1.GetCache)('food-count');
 // after a set period of time, the input is inserted. this is that time:
 exports.TIME_UNTIL_UPDATE = 60 * 1000; // one minute in milliseconds
 /**
  *
  */
-const dbg = (0, utility_1.Dbg)('FoodCountInputEvent');
+const dbg = (0, utility_1.GetDebug)('FoodCountInputEvent');
 const FoodCountMessageEvent = async ({ personDataService, foodCountInputService, foodCountDataService, markdownService }, message) => {
     dbg('FoodCountMessageEvent');
     const { channel, author } = message;

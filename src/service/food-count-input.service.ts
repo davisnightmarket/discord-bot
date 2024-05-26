@@ -346,6 +346,7 @@ Example:
     getDateStringFromDay(day: NmDayNameType): string {
         // starting with the current date
         const d = new Date();
+        console.log('current day', d.getDay());
         while (day !== DAYS_OF_WEEK_CODES[d.getDay()]) {
             // count backwards until we have the right day
             d.setDate(d.getDate() - 1);

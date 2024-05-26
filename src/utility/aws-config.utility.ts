@@ -22,7 +22,7 @@ interface DiscordApiConfigModel {
     appToken: string;
 }
 
-export interface SecretConfigModel extends Record<string, any> {
+export interface SecretConfigModel {
     googleApiConfig: GoogleApiConfigModel;
     discordApiConfig: DiscordApiConfigModel;
     pgConfig: ConnectionConfig;

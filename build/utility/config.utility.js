@@ -45,4 +45,4 @@ exports.EnvConfigLocal = {
 };
 exports.ConfigLocal = exports.EnvConfigLocal[process.env.NODE_ENV];
 // we call GetConfig once and then import the promise anywhere we need config
-exports.WaitingForConfig = (0, exports.GetConfig)(process.env.NODE_ENV, exports.EnvConfigLocal);
+exports.WaitingForConfig = (0, exports.GetConfig)((0, _1.GetEnv)(), exports.EnvConfigLocal);

@@ -21,9 +21,12 @@ export class GoogleSheetService<T extends SpreadsheetDataModel> {
         // store params
         this.spreadsheetService = new GoogleSpreadsheetsService(spreadsheetId);
         this.sheetName = sheetName;
-        this.spreadsheetService.sheetCreateIfNone(this.sheetName);
-        this.waitingForSheetId = this.spreadsheetService.getSheetIdByTitle(
-            this.sheetName
+        this.waitingForSheetId = this.spreadsheetService.getOrCreateSheet(
+            this.sheetName,
+            {
+                headersList,
+                range: this.getSheetRangeString()
+            }
         );
         this.waitingForHeaderList = this.getHeaders(
             headersList as Array<keyof T>
@@ -79,6 +82,8 @@ export class GoogleSheetService<T extends SpreadsheetDataModel> {
     async appendOneMap(map: T) {
         const headerList = await this.waitingForHeaderList;
         const row = headerList.map((a) => map[a]);
+        console.log(headerList);
+        console.log(row);
         await this.spreadsheetService.rowsAppend(
             [row],
             this.getSheetRangeString()

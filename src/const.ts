@@ -1,5 +1,5 @@
-import {
-    type NmActiveStateType,
+import type {
+    NmActiveStateType,
     NmNightRoleType,
     NmAdminRoleType,
     NmDayNameType,
@@ -145,7 +145,15 @@ export const PARTS_OF_DAY: {
     night: { id: 'night', name: 'Night', description: 'All better now thanks' }
 };
 
-export const DAYS_OF_WEEK_CODES = Object.keys(DAYS_OF_WEEK) as NmDayNameType[];
+export const DAYS_OF_WEEK_CODES = [
+    'sunday',
+    'monday',
+    'tuesday',
+    'wednesday',
+    'thursday',
+    'friday',
+    'saturday'
+] as NmDayNameType[];
 
 export const NM_NIGHT_ROLES: {
     [k in NmNightRoleType]: {

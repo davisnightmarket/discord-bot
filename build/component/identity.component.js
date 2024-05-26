@@ -16,7 +16,7 @@ const IdentityDeleteComponent = () => {
     };
 };
 exports.IdentityDeleteComponent = IdentityDeleteComponent;
-const dbg = (0, utility_1.Dbg)('identity.component');
+const dbg = (0, utility_1.GetDebug)('identity.component');
 const IdentityEditModalComponent = ({ discordId, name, bio, phone, email, pronouns }) => {
     dbg(discordId, name, bio, phone, email, pronouns);
     const modal = new discord_js_1.ModalBuilder()

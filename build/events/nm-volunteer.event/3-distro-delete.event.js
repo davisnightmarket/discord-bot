@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.VolunteerDistroDeleteButtonEvent = void 0;
 const utility_1 = require("../../utility");
-const dbg = (0, utility_1.Dbg)('VolunteerEvent');
+const dbg = (0, utility_1.GetDebug)('VolunteerEvent');
 // todo: split this into different events for clarity
 async function VolunteerDistroDeleteButtonEvent({ nightDataService }, interaction, discordId, [command, day]) {
     if (command !== 'volunteer-distro-delete') {

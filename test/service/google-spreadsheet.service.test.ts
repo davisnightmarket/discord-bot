@@ -15,11 +15,12 @@ describe('GooglespreadsheetsService', () => {
 
     test('test create sheet on construct', async () => {
         await spreadsheetsService.sheetCreateIfNone('test');
-        await spreadsheetsService.sheetClear('test');
         const sheetNameList = await spreadsheetsService.getSheetTitleList();
         expect(sheetNameList.includes('test')).toBe(true);
     });
-    test('test rowsAppend', async () => {
+
+    test('test rowsAppend and prepend', async () => {
+        await spreadsheetsService.sheetClear('test');
         await spreadsheetsService.rowsAppend(
             [
                 ['a', 'b', 'c'],
@@ -39,19 +40,18 @@ describe('GooglespreadsheetsService', () => {
         rows = await spreadsheetsService.rangeGet('test!A:Z');
         expect(rows.length).toBe(4);
         expect(rows[2][0]).toBe('d');
-    });
 
-    test('test spreadsheetsService.rowsAppend preAppend', async () => {
         await spreadsheetsService.rowsPrepend(
             [['HELLO'], ['there', 'person']],
             'test',
             'A',
             1
         );
-        let rows = await spreadsheetsService.rangeGet('test!A:Z');
-        expect(rows.length).toBe(6);
-        expect(rows[1][0]).toBe('HELLO');
-        expect(rows[2][1]).toBe('person');
+
+        let rowsPrepend = await spreadsheetsService.rangeGet('test!A:Z');
+        console.log(rowsPrepend);
+        expect(rowsPrepend[1][0]).toBe('HELLO');
+        expect(rowsPrepend[2][1]).toBe('person');
     });
 
     test('test spreadsheetsService.sheetClear', async () => {

@@ -11,7 +11,7 @@ import {
     GetVolunteerPickupComponent
 } from '../../component/volunteer.component';
 import {
-    Dbg,
+    GetDebug,
     GetChannelDayNameFromInteraction,
     GetChannelDayToday,
     type GuildServiceModel
@@ -19,7 +19,7 @@ import {
 
 import { type PeriodStatusType } from '../../service';
 
-const dbg = Dbg('VolunteerEvent');
+const dbg = GetDebug('VolunteerEvent');
 // todo: split this into different events for clarity
 // when a person issues a volunteer command it means they want to view
 // and possibly edit their volunteer commitments
@@ -171,7 +171,7 @@ export async function VolunteerPickupSaveSelectEvent(
     interaction.deferReply({ ephemeral: true });
     dbg(command, day);
 
-    const addList = nightDataService.getNightDataDiscordSelectValues(
+    const addList = nightDataService.getNightOpsDiscordSelectValues(
         interaction.values,
         {
             day,
@@ -238,7 +238,7 @@ export async function VolunteerDistroSaveSelectEvent(
 
     // todo: fix this since we now have the capacity for multiple markets per day
 
-    const addList = nightDataService.getNightDataDiscordSelectValues(
+    const addList = nightDataService.getNightOpsDiscordSelectValues(
         interaction.values,
         {
             day,

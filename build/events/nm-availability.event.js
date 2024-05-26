@@ -5,7 +5,7 @@ const utility_1 = require("../utility");
 const component_1 = require("../component");
 const const_1 = require("../const");
 // in which user edits their availability
-const dbg = (0, utility_1.Dbg)('AvailabilityEvent');
+const dbg = (0, utility_1.GetDebug)('AvailabilityEvent');
 async function AvailabilityCommandEvent({ personDataService, markdownService }, interaction, discordId) {
     dbg('ok');
     // get the person's data
