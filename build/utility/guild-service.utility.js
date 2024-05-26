@@ -3,7 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.GetGuildServices = void 0;
 const config_1 = require("../config");
 const service_1 = require("../service");
-const coreDataService = new service_1.CoreDataService(config_1.ConfigLocal.marketConfig);
 // technically we want to instantiate this once,
 // and don't really want services in utilities, but since our
 // per-market config data is stored in a gspread, we kinda have to
@@ -12,7 +11,8 @@ const servicesByGuildId = new Map();
 // because we need to build a set of services that are connected to data per guild
 // as well as services that are "core", meaning the same data source for all guilds
 async function GetGuildServices(guildId) {
-    const { pgConfig } = await config_1.Config;
+    const { pgConfig, nmConfig } = await config_1.Config;
+    const coreDataService = new service_1.CoreDataService(nmConfig);
     if (!servicesByGuildId.has(guildId)) {
         const pgService = new service_1.PgService(pgConfig);
         const { GSPREAD_MARKET_ID } = await coreDataService.getMarketConfigByGuildId(guildId);

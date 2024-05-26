@@ -75,6 +75,6 @@ async function run() {
             // this is how long after a person arrives in our server that we send a welcome message
         }, 1000 * 60 * 60);
     });
-    const { discordConfig: { appToken } } = config;
+    const { discordApiConfig: { appToken } } = config;
     client.login(appToken);
 }
