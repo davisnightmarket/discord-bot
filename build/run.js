@@ -2,11 +2,9 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const discord_js_1 = require("discord.js");
 const utility_1 = require("./utility");
-const cron_utility_1 = require("./utility/cron.utility");
 const jobs_1 = require("./jobs");
 const events_1 = require("./events");
 const route_1 = require("./route");
-const config_1 = require("./config");
 const dbg = (0, utility_1.GetDebug)('run');
 // Start discord client
 const client = new discord_js_1.Client({
@@ -20,21 +18,21 @@ const client = new discord_js_1.Client({
 });
 run();
 async function run() {
-    const config = await config_1.Config;
+    const config = await utility_1.WaitingForConfig;
     // TODO: we have to remember that each guild could have a different timezone
     // so we need to figure out how to adjust the crons for each guild
     // Add cron jobs
-    (0, cron_utility_1.AddCron)(
+    (0, utility_1.AddCron)(
     // 7:30 am, every day
     '0 30 7 * * *', 
     // every minute
     // '* * * * *',
     (0, jobs_1.NightOpsJob)(client));
-    (0, cron_utility_1.AddCron)('0 30 23 * * *', // at 11:30pm
+    (0, utility_1.AddCron)('0 30 23 * * *', // at 11:30pm
     (0, jobs_1.NightTimelineJob)(client));
     // reminds us to enter food count IF none has been entered
     // AND pickups are scheduled
-    (0, cron_utility_1.AddCron)('0 0 12 * * *', // at high noon
+    (0, utility_1.AddCron)('0 0 12 * * *', // at high noon
     (0, jobs_1.FoodCountReminderJob)(client));
     // person meta data events
     // client.on(Events.MessageCreate, PersonMetaEvent(services));

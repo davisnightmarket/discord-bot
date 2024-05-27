@@ -1,11 +1,9 @@
 import { GoogleAuth } from 'google-auth-library';
 import { google } from 'googleapis';
-import { GetDebug } from '../utility';
-import { Config } from '../config';
-
+import { GetDebug, WaitingForConfig } from '../utility';
 const dbg = GetDebug('GoogleDriveService');
 
-const waitingForGdrive = Config.then((keys) => {
+const waitingForGdrive = WaitingForConfig.then((keys) => {
     const credentials = keys.googleApiConfig;
     const auth = new GoogleAuth({
         credentials,

@@ -1,4 +1,5 @@
 import type { ConnectionConfig } from 'pg';
+import type { RConnectionOptions } from 'rethinkdb-ts';
 
 export interface GoogleApiKeysModel {
     type: string;
@@ -19,6 +20,8 @@ export interface DiscordApiKeysModel {
 }
 
 export interface PostgresApiKeysModel extends ConnectionConfig {}
+
+export type RdbKeysModel = RConnectionOptions;
 
 export interface NmKeysModel {
     googleApiKeys: GoogleApiKeysModel;

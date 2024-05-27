@@ -12,3 +12,4 @@ export * from './core-data.service';
 export * from './markdown.service';
 export * from './discord.service';
 export * from './pg.service';
+export * from './rdb.service';

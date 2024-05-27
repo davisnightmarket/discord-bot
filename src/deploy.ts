@@ -1,18 +1,16 @@
-import { GetDebug } from './utility';
+import { GetDebug, WaitingForConfig } from './utility';
 import commands from './commands';
 import { CoreDataService } from './service';
 import { REST, Routes } from 'discord.js';
-import { Config } from './config';
 
 const dbg = GetDebug('Deploy');
 
 (async () => {
     try {
-        console.log(await Config);
         const {
             nmConfig,
             discordApiConfig: { clientId, appToken }
-        } = await Config;
+        } = await WaitingForConfig;
         const rest = new REST().setToken(appToken);
         dbg(`Started refreshing ${commands.length} application (/) commands.`);
         const body = commands.map((a) => a.toJSON());

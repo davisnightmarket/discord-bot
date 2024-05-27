@@ -1,7 +1,6 @@
 import { GoogleAuth } from 'google-auth-library';
 import { google, type sheets_v4 } from 'googleapis';
-import { GetDebug } from '../utility';
-import { Config } from '../config';
+import { GetDebug, WaitingForConfig } from '../utility';
 
 export type SpreadsheetDataValueModel = string | number | undefined;
 
@@ -17,7 +16,7 @@ export const Alphabet = AlphaIndex.map((x) =>
     String.fromCharCode(x).toUpperCase()
 );
 
-const Gspread = Config.then((keys) => {
+const Gspread = WaitingForConfig.then((keys) => {
     const credentials = keys.googleApiConfig;
     const auth = new GoogleAuth({
         credentials,

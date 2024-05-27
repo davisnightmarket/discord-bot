@@ -12,7 +12,8 @@ import { GetEnv } from './env.utility';
 import type {
     DiscordApiKeysModel,
     GoogleApiKeysModel,
-    PostgresApiKeysModel
+    PostgresApiKeysModel,
+    RdbKeysModel
 } from '../model/nm-keys.model';
 
 const dbg = GetDebug('aws-secrets.utility');
@@ -25,8 +26,8 @@ interface AwsSecretsMap {
     'nm-rds-postgres': PostgresApiKeysModel;
     'nm-discord-api': DiscordApiKeysModel;
     'nm-google-api': GoogleApiKeysModel;
+    'nm-rethinkdb': RdbKeysModel;
 }
-
 
 export const GetAwsSecret = async <V extends keyof AwsSecretsMap>(
     name: V,

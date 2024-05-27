@@ -1,4 +1,4 @@
-import { Config } from '../config';
+import { WaitingForConfig } from '../utility';
 import {
     CoreDataService,
     FoodCountDataService,
@@ -32,7 +32,7 @@ export interface GuildServiceModel {
 // because we need to build a set of services that are connected to data per guild
 // as well as services that are "core", meaning the same data source for all guilds
 export async function GetGuildServices(guildId: string) {
-    const { pgConfig, nmConfig } = await Config;
+    const { pgConfig, nmConfig } = await WaitingForConfig;
 
     const coreDataService = new CoreDataService(nmConfig);
 

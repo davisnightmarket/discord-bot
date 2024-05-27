@@ -4,9 +4,8 @@ exports.GoogleDriveService = void 0;
 const google_auth_library_1 = require("google-auth-library");
 const googleapis_1 = require("googleapis");
 const utility_1 = require("../utility");
-const config_1 = require("../config");
 const dbg = (0, utility_1.GetDebug)('GoogleDriveService');
-const waitingForGdrive = config_1.Config.then((keys) => {
+const waitingForGdrive = utility_1.WaitingForConfig.then((keys) => {
     const credentials = keys.googleApiConfig;
     const auth = new google_auth_library_1.GoogleAuth({
         credentials,

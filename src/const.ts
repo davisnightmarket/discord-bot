@@ -6,13 +6,6 @@ import type {
     NmPartOfDayNameType
 } from './model/nm.model';
 
-/**
- * CORE DATA
- */
-// todo: move this whole file to coreDataService
-
-// CONTACT
-
 export type PermissionType =
     | 'CONTACT_TEXT_ON_VOLUNTEER_PICKUP_REMINDER'
     | 'CONTACT_TEXT_ON_VOLUNTEER_HOST_REMINDER'

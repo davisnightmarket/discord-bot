@@ -1,10 +1,8 @@
 import { Client, Events, GatewayIntentBits, Partials } from 'discord.js';
-import { GetGuildServices, GetDebug } from './utility';
-import { AddCron } from './utility/cron.utility';
+import { GetGuildServices, GetDebug, WaitingForConfig,AddCron } from './utility';
 import { FoodCountReminderJob, NightOpsJob, NightTimelineJob } from './jobs';
 import { FoodCountMessageEvent, WelcomeEvent } from './events';
 import { RouteInteraction } from './route';
-import { Config } from './config';
 
 const dbg = GetDebug('run');
 // Start discord client
@@ -21,7 +19,7 @@ const client = new Client({
 run();
 
 async function run() {
-    const config = await Config;
+    const config = await WaitingForConfig;
     // TODO: we have to remember that each guild could have a different timezone
     // so we need to figure out how to adjust the crons for each guild
     // Add cron jobs

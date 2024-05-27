@@ -4,13 +4,12 @@ exports.GoogleSpreadsheetsService = exports.Alphabet = exports.AlphaIndex = void
 const google_auth_library_1 = require("google-auth-library");
 const googleapis_1 = require("googleapis");
 const utility_1 = require("../utility");
-const config_1 = require("../config");
 const dbg = (0, utility_1.GetDebug)('GoogleSpreadsheetsService');
 // the alphabet indexed in array
 exports.AlphaIndex = Array.from(Array(26)).map((e, i) => i + 65);
 // the alphabet in an array
 exports.Alphabet = exports.AlphaIndex.map((x) => String.fromCharCode(x).toUpperCase());
-const Gspread = config_1.Config.then((keys) => {
+const Gspread = utility_1.WaitingForConfig.then((keys) => {
     const credentials = keys.googleApiConfig;
     const auth = new google_auth_library_1.GoogleAuth({
         credentials,
