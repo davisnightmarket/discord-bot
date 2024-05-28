@@ -1,5 +1,6 @@
 import { ConnectionConfig } from 'pg';
 import { RPoolConnectionOptions } from 'rethinkdb-ts';
+import { SpreadsheetDataModel } from '../service';
 
 export type EnvType = 'dev' | 'test' | 'prod';
 
@@ -29,9 +30,13 @@ export interface SecretConfigModel {
 }
 
 // these config values are needed for all nm instances
-export interface NMConfigInstanceModel {
-    // the id of the instance
+export interface NMConfigInstanceModel extends SpreadsheetDataModel {
+    // the id of the instance, like us.ca.davis
     NM_ID: string;
+    // the name of the market
+    NM_TITLE: string;
+    // the id of the instance
+    NM_TIMEZONE: string;
     // the guild id
     DISCORD_GUILD_ID: string;
     // per market data is kept in a dedicated spreadsheet

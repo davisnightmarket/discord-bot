@@ -1,4 +1,8 @@
-import { type NMConfigModel, type EnvType } from '../model';
+import {
+    type NMConfigModel,
+    type EnvType,
+    NMConfigInstanceModel
+} from '../model';
 import {
     GoogleSheetService,
     type SpreadsheetDataModel,
@@ -7,18 +11,11 @@ import {
 
 const Env = process.env.NODE_ENV as EnvType;
 
-interface ConfigDataModel extends SpreadsheetDataModel {
-    marketId: string;
-    code: keyof NMConfigModel;
-    value: string;
-}
-
 interface TypeDataModel extends SpreadsheetDataModel {}
 
 export class CoreDataService {
     marketConfig: NMConfigModel;
-    configSheetService: GoogleSheetService<ConfigDataModel>;
-    configMarketSheetService: GoogleSheetService<ConfigDataModel>;
+    configSheetService: GoogleSheetService<NMConfigInstanceModel>;
     coreTypeSheetService: GoogleSheetService<TypeDataModel>;
 
     // todo: this is a stub: this is prep for using a single folder for spreadsheets by name ...
@@ -38,11 +35,6 @@ export class CoreDataService {
             sheetName: 'config'
         });
 
-        this.configMarketSheetService = new GoogleSheetService({
-            spreadsheetId,
-            sheetName: 'config-market'
-        });
-
         this.coreTypeSheetService = new GoogleSheetService({
             spreadsheetId,
             sheetName: 'type'
@@ -51,32 +43,27 @@ export class CoreDataService {
 
     async getMarketConfigByGuildId(guildId: string): Promise<NMConfigModel> {
         // get the market id
-        const configRows =
-            await this.configMarketSheetService.getAllRowsAsMaps();
-        const marketId = configRows.find(
-            (a) => a.code === 'DISCORD_GUILD_ID'
-        )?.marketId;
-        if (!marketId) {
+        const configRows = await this.configSheetService.getAllRowsAsMaps();
+        const marketInstanceConfig = configRows.find(
+            (a) => a.DISCORD_GUILD_ID === guildId
+        );
+
+        if (!marketInstanceConfig) {
             throw new Error(`No config found for guild ${guildId}!`);
-        }
-        const configRow = (
-            await this.configMarketSheetService.getAllRowsAsMaps()
-        ).filter((row) => row.marketId === marketId);
-
-        // build the config
-
-        const config = { ...this.marketConfig };
-        for (const row of configRow) {
-            config[row.code] = row.value;
         }
 
         // return
-        return this.getValidMarketConfig(config);
+        return this.getValidMarketConfig({
+            ...marketInstanceConfig,
+            ...this.marketConfig
+        });
     }
 
     getValidMarketConfig({
         GSPREAD_CORE_ID,
         NM_ID,
+        NM_TIMEZONE,
+        NM_TITLE,
         DISCORD_GUILD_ID,
         GSPREAD_MARKET_ID
     }: Partial<NMConfigModel>): NMConfigModel {
@@ -87,6 +74,16 @@ export class CoreDataService {
         if (!NM_ID) {
             throw new Error('Missing NM_ID');
         }
+
+        if (!NM_TIMEZONE) {
+            // default to pacific time?
+            NM_TIMEZONE = 'America/Los_Angeles';
+        }
+
+        if (!NM_TITLE) {
+            NM_TITLE = 'Night Market';
+        }
+
         if (!DISCORD_GUILD_ID) {
             throw new Error('Missing DISCORD_GUILD_ID');
         }
@@ -98,18 +95,20 @@ export class CoreDataService {
         return {
             GSPREAD_CORE_ID,
             NM_ID,
+            NM_TIMEZONE,
+            NM_TITLE,
             DISCORD_GUILD_ID,
             GSPREAD_MARKET_ID
         };
     }
 
+    async getAllInstanceConfig(): Promise<NMConfigInstanceModel[]> {
+        return await this.configSheetService.getAllRowsAsMaps();
+    }
+
     async getAllGuildIds(): Promise<string[]> {
-        // get the market id
-        const configRows =
-            await this.configMarketSheetService.getAllRowsAsMaps();
-        return configRows
-            .filter((a) => a.code === 'DISCORD_GUILD_ID')
-            .map((a) => a.value);
+        const configRows = await this.configSheetService.getAllRowsAsMaps();
+        return configRows.map((a) => a.DISCORD_GUILD_ID);
     }
 }
 

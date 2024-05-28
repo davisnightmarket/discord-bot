@@ -1,8 +1,15 @@
 import { Client, Events, GatewayIntentBits, Partials } from 'discord.js';
-import { GetGuildServices, GetDebug, WaitingForConfig,AddCron } from './utility';
+import http from 'http';
+import {
+    GetGuildServices,
+    GetDebug,
+    WaitingForConfig,
+    AddCron
+} from './utility';
 import { FoodCountReminderJob, NightOpsJob, NightTimelineJob } from './jobs';
 import { FoodCountMessageEvent, WelcomeEvent } from './events';
 import { RouteInteraction } from './route';
+import url from 'url';
 
 const dbg = GetDebug('run');
 // Start discord client
@@ -20,16 +27,44 @@ run();
 
 async function run() {
     const config = await WaitingForConfig;
+
+    //create a server object:
+    http.createServer(async function (req, res) {
+        const { pathname } = url.parse(req.url || '/');
+        console.log(pathname);
+        if (pathname === '/job/night-ops') {
+            await NightOpsJob(client);
+        }
+        if (pathname === '/job/night-timeline') {
+            await NightTimelineJob(client);
+        }
+        if (pathname === '/job/night-food-count-reminder') {
+            await FoodCountReminderJob(client);
+        }
+        res.write('Hello World!'); //write a response to the client
+        res.end(); //end the response
+    }).listen(3000); //the server object listens on port 8080
     // TODO: we have to remember that each guild could have a different timezone
     // so we need to figure out how to adjust the crons for each guild
     // Add cron jobs
-    AddCron(
-        // 7:30 am, every day
-        '0 30 7 * * *',
-        // every minute
-        // '* * * * *',
+    // AddCron('', () => {
+    //     tzOffset.offsetOf('America/Sao_Paulo');
+    // });
 
-        NightOpsJob(client)
+    AddCron(
+        // twoice per hour, once on the hour, once on the half hour
+        '0,30 * * * *',
+        () => {
+            const d = new Date();
+
+            // get the current minutes
+            const minutesElapsedInDayUTC =
+                d.getUTCHours() * 60 + (d.getUTCMinutes() > 30 ? 30 : 0);
+
+            // get the current minutes UTL
+            // loop over market instances
+            // get the current hour in that zone
+        }
     );
 
     AddCron(

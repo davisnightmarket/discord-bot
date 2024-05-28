@@ -1,7 +1,5 @@
 # Night Market Discord Bot is "crabapple"
 
-<<<<<<< HEAD
-
 ## What does the bot do?
 
 It's current main feature is to help people add to the food count, but it's always open to suggestions!

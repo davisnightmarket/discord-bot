@@ -7,7 +7,7 @@ export interface OrganizationDataModel {
     email: string;
     discordId: string;
     pronounList: string;
-    contactPersonIdList: string[];
+    contactPersonIdList: { id: string; isArchived: boolean }[];
     marketList: (MarketEntityModel & { stampJoin: Date })[];
 }
 
