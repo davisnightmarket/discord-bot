@@ -1,17 +1,18 @@
 import {
-    type PersonModel,
+    type PersonSheetModel,
     type CoreDataService,
     ParseContentService,
     type NightMarketModel,
     type NightMapModel
 } from '.';
-import { DAYS_OF_WEEK, PARTS_OF_DAY } from '../const';
-import { type NmDayNameType, type NmPartOfDayNameType } from '../model';
+import { DAYS_OF_WEEK } from '../const';
+import { type NmDayNameType } from '../model';
 import { CreateMdMessage } from '../utility';
 
 import { roleMention, bold, userMention } from 'discord.js';
 
 import { type NightPickupModel } from '../service';
+import type { PersonModel } from '../model/person.model';
 
 // TODO: make this simple to user from events
 
@@ -128,11 +129,11 @@ export class MarkdownService {
         return list.map(({ name }) => `  - ${name}`).join('\n');
     }
 
-    getPersonBulletList(personList: PersonModel[]) {
+    getPersonBulletList(personList: PersonSheetModel[]) {
         return personList.map(({ name }) => `  - ${name}`).join('\n');
     }
 
-    getPersonBulletListWithPhone(personList: PersonModel[]) {
+    getPersonBulletListWithPhone(personList: PersonSheetModel[]) {
         return personList
             .map(({ name, phone }) => `  - ${name} ${phone}`)
             .join('\n');
@@ -141,36 +142,29 @@ export class MarkdownService {
     // turns person availability strings from spreadsheet into a md list of readable day and time
     getAvailabilityListsFromPerson(person: PersonModel): [string, string] {
         return [
-            person.availabilityHostList
-                .split(',')
-                .filter((a) => a.trim())
-                .map((a) =>
-                    a
-                        .trim()
-                        .split('|||')
-                        .map((a) => a.trim())
-                )
+            Object.keys(person.attrAvailabilityHostMap)
+
                 .map(
                     (a) =>
                         `  - Host ${
-                            DAYS_OF_WEEK[a[0] as NmDayNameType]?.name
+                            DAYS_OF_WEEK[
+                                a
+                                    .replace('AVAILABLE_', '')
+                                    .toLowerCase() as NmDayNameType
+                            ]?.name
                         } ${ParseContentService.getAmPmTimeFrom24Hour(a[1])}`
                 )
                 .join('\n'),
-            person.availabilityPickupList
-                .split(',')
-                .filter((a) => a.trim())
-                .map((a) =>
-                    a
-                        .trim()
-                        .split('|||')
-                        .map((a) => a.trim())
-                )
+            Object.keys(person.attrAvailabilityPickupMap)
                 .map(
                     (a) =>
-                        `  - Pick-up ${
-                            DAYS_OF_WEEK[a[0] as NmDayNameType]?.name
-                        } ${PARTS_OF_DAY[a[1] as NmPartOfDayNameType]?.name}`
+                        `  - Host ${
+                            DAYS_OF_WEEK[
+                                a
+                                    .replace('AVAILABLE_', '')
+                                    .toLowerCase() as NmDayNameType
+                            ]?.name
+                        } ${ParseContentService.getAmPmTimeFrom24Hour(a[1])}`
                 )
                 .join('\n')
         ];

@@ -1,6 +1,7 @@
 import { RTable } from 'rethinkdb-ts';
 import { PersonDataModel, PersonModel } from '../model/person.model';
 import { EntityService } from './entity.service';
+import { PersonSheetModel } from './person-sheet.service';
 
 export class PersonService {
     constructor(
@@ -12,7 +13,7 @@ export class PersonService {
         this.entityService.create(data);
         this.entityPersonTable.insert(data).run();
     }
-    
+
     async update(data: PersonModel) {
         await this.entityPersonTable
             .get(data.id)
@@ -35,6 +36,32 @@ export class PersonService {
         };
     }
 
+    fromPersonSheetData({
+        name,
+        discordId,
+        bio,
+        stampCreate,
+        phone,
+        email,
+        pronouns
+    }: PersonSheetModel): PersonModel {
+        return {
+            discordId,
+            id: '',
+            type: 'type_person',
+            name,
+            phone,
+            email,
+            description: bio,
+            stampCreate: new Date(stampCreate),
+            pronounList: pronouns
+                .split(', ')
+                .map((a) => a.trim())
+                .filter((a) => a),
+
+            personRoleInterestList: []
+        };
+    }
     toInsertData({
         id,
         phone,

@@ -2,7 +2,6 @@ import { type Client } from 'discord.js';
 
 import { GetChannelDayToday, GetGuildServices, GetDebug } from '../utility';
 import {
-    type CoreDataService,
     type NightOpsDataModel,
     type NightOpsTimelineDataModel
 } from '../service';

@@ -11,7 +11,12 @@ import {
     ParseContentService,
     type NightMarketModel
 } from '../service';
-import { DAYS_OF_WEEK, DAYS_OF_WEEK_CODES, NM_NIGHT_ROLES } from '../const';
+import {
+    DAYS_OF_WEEK,
+    DAYS_OF_WEEK_CODES,
+    NM_NIGHT_ROLES,
+    NM_ROLE_STATUS
+} from '../const';
 
 export function GetVolunteerInitComponent({
     discordId,
@@ -121,7 +126,11 @@ export function GetVolunteerRoleShadowComponent({
                 day as string
             }--night-distro-shadow--${discordId}`
         )
-        .setLabel(NM_NIGHT_ROLES['night-distro-shadow'].description)
+        .setLabel(
+            NM_NIGHT_ROLES['night-distro'].description +
+                ': ' +
+                NM_ROLE_STATUS.shadow.description
+        )
         .setStyle(ButtonStyle.Secondary);
     const shadowPickupButton = new ButtonBuilder()
         .setCustomId(
@@ -129,7 +138,11 @@ export function GetVolunteerRoleShadowComponent({
                 day as string
             }--night-pickup-shaddow--${discordId}`
         )
-        .setLabel(NM_NIGHT_ROLES['night-pickup-shadow'].description)
+        .setLabel(
+            NM_NIGHT_ROLES['night-pickup'].description +
+                ': ' +
+                NM_ROLE_STATUS.shadow.description
+        )
         .setStyle(ButtonStyle.Secondary);
 
     return [

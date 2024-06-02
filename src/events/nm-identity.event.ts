@@ -4,7 +4,7 @@ import {
     type ModalSubmitInteraction
 } from 'discord.js';
 import { type GuildServiceModel, GetDebug } from '../utility';
-import { PersonDataService } from '../service';
+import { PersonSheetService } from '../service';
 
 const dbg = GetDebug('IdentityEvent');
 
@@ -50,7 +50,7 @@ export async function IdentityEditModalEvent(
     // or create a blank person
     const person =
         (await personDataService.getPersonByDiscordId(discordId)) ??
-        PersonDataService.createPerson({
+        PersonSheetService.createPerson({
             discordId
         });
 

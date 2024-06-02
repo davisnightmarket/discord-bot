@@ -18,7 +18,7 @@ import { DAYS_OF_WEEK } from '../const';
 const dbg = GetDebug('AvailabilityEvent');
 
 export async function AvailabilityCommandEvent(
-    { personDataService, markdownService }: GuildServiceModel,
+    { personService, personDataService, markdownService }: GuildServiceModel,
 
     interaction: ChatInputCommandInteraction,
     discordId: string
@@ -26,16 +26,16 @@ export async function AvailabilityCommandEvent(
     dbg('ok');
 
     // get the person's data
-    const person = await personDataService.getPersonByDiscordId(
+    const personData = await personDataService.getPersonByDiscordId(
         interaction.user.id
     );
 
-    if (!person) {
+    if (!personData) {
         // show them their modal
         await interaction.editReply(await markdownService.getGenericSorry());
         return;
     }
-
+    const person = personService.fromPersonSheetData(personData);
     const [availabilityHostList, availabilityPickupList] =
         markdownService.getAvailabilityListsFromPerson(person);
 

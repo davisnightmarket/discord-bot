@@ -1,9 +1,5 @@
 import { type Client } from 'discord.js';
-import {
-    type CoreDataService,
-    NIGHT_CHANNEL_NAMES_MAP,
-    type PersonModel
-} from '../service';
+import { NIGHT_CHANNEL_NAMES_MAP, type PersonSheetModel } from '../service';
 import {
     GetDebug,
     GetChannelDayToday,
@@ -60,7 +56,7 @@ export const FoodCountReminderJob = (client: Client) => async () => {
                 .map((a) =>
                     a?.discordId
                         ? '<@' + a.discordId + '>'
-                        : (a as PersonModel).name
+                        : (a as PersonSheetModel).name
                 )
                 .join(', ');
 

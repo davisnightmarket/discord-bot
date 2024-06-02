@@ -2,11 +2,11 @@ import { type NmNightRoleType, type NmDayNameType } from '../model';
 import { DAYS_OF_WEEK, DAYS_OF_WEEK_CODES } from '../const';
 import { GetDebug, GetChannelDayToday } from '../utility';
 import {
-    type PersonModel,
+    type PersonSheetModel,
     type SpreadsheetDataModel,
     type PersonWithIdModel,
     GoogleSheetService,
-    PersonDataService,
+    PersonSheetService,
     ParseContentService
 } from '.';
 
@@ -85,7 +85,7 @@ export interface NightOpsPickupNotesDataModel extends SpreadsheetDataModel {
 }
 
 // person plus ops data, for pickups and hosting
-export type NightPersonModel = PersonModel &
+export type NightPersonModel = PersonSheetModel &
     Pick<NightOpsDataModel, 'role' | 'periodStatus' | 'discordIdOrEmail'>;
 
 // isolates just those ops that are pickups, adds person list
@@ -132,7 +132,7 @@ export class NightDataService {
 
     constructor(
         spreadsheetId: string,
-        private readonly personDataService: PersonDataService
+        private readonly personDataService: PersonSheetService
     ) {
         this.nightSheetService = new GoogleSheetService({
             spreadsheetId,
@@ -817,7 +817,7 @@ export class NightDataService {
                         await this.personDataService.getPersonByEmailOrDiscordId(
                             discordIdOrEmail
                         );
-                    return PersonDataService.createPersonWithQueryId(
+                    return PersonSheetService.createPersonWithQueryId(
                         discordIdOrEmail,
                         p ?? {}
                     );

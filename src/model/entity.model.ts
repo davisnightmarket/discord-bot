@@ -11,4 +11,5 @@ export interface PersonEntityModel extends EntityModel<'type_person'> {}
 export interface OrganizationEntityModel
     extends EntityModel<'type_organization'> {}
 
-export interface MarketEntityModel extends EntityModel<'type_market'> {}
+export interface NightMarketEntityModel
+    extends EntityModel<'type_nightmarket'> {}

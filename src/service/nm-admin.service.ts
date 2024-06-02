@@ -1,13 +1,13 @@
-import { GoogleSheetService, PersonDataService } from '.';
+import { GoogleSheetService, PersonSheetService } from '.';
 
-export class MarketAdminService {
+export class NmAdminService {
     private readonly adminSheetService: GoogleSheetService<{
         communityCoordinator: string;
     }>;
 
     constructor(
         spreadsheetId: string,
-        private personDataService: PersonDataService
+        private readonly personDataService: PersonSheetService
     ) {
         this.adminSheetService = new GoogleSheetService({
             spreadsheetId,
@@ -20,9 +20,7 @@ export class MarketAdminService {
             (a) => a.communityCoordinator
         );
         return await Promise.all(
-            rows.map((a) =>
-                this.personDataService.getPersonByEmailOrDiscordId(a)
-            )
+            rows.map(this.personDataService.getPersonByEmailOrDiscordId)
         );
     }
 

@@ -1,62 +1,54 @@
 import type {
-    NmActiveStateType,
     NmNightRoleType,
     NmAdminRoleType,
     NmDayNameType,
-    NmPartOfDayNameType
+    NmPartOfDayNameType,
+    NmStatusType
 } from './model/nm.model';
-
-export type PermissionType =
-    | 'CONTACT_TEXT_ON_VOLUNTEER_PICKUP_REMINDER'
-    | 'CONTACT_TEXT_ON_VOLUNTEER_HOST_REMINDER'
-    | 'CONTACT_TEXT_ON_AVAILABILITY_REQUEST'
-    | 'CONTACT_EMAIL_ON_AVAILABILITY_REQUEST'
-    | 'SHARE_PHONE_WITH_NIGHT_CAP'
-    | 'SHARE_PHONE_WITH_COMMUNITY_COORDINATOR'
-    | 'SHARE_EMAIL_WITH_COMMUNITY_COORDINATOR';
+import type { PersonAttrPermissionType } from './model/person.model';
 
 export const PERMISSION_MAP: {
-    [k in PermissionType]: {
+    [k in PersonAttrPermissionType]: {
         id: k;
         name: string;
         description: string;
     };
 } = {
-    CONTACT_TEXT_ON_VOLUNTEER_PICKUP_REMINDER: {
-        id: 'CONTACT_TEXT_ON_VOLUNTEER_PICKUP_REMINDER',
+    PERMISSION_CONTACT_TEXT_ON_VOLUNTEER_PICKUP_REMINDER: {
+        id: 'PERMISSION_CONTACT_TEXT_ON_VOLUNTEER_PICKUP_REMINDER',
         name: 'Contact By Text Message about a Pickup',
         description:
             'ie: with details about a pickup that you have volunteered for.'
     },
-    CONTACT_TEXT_ON_VOLUNTEER_HOST_REMINDER: {
-        id: 'CONTACT_TEXT_ON_VOLUNTEER_HOST_REMINDER',
+    PERMISSION_CONTACT_TEXT_ON_VOLUNTEER_HOST_REMINDER: {
+        id: 'PERMISSION_CONTACT_TEXT_ON_VOLUNTEER_HOST_REMINDER',
         name: 'Contact By Text Message on day of Night Hosting',
         description: 'ie: if you are hosting or doing a pick-up that day.'
     },
-    CONTACT_TEXT_ON_AVAILABILITY_REQUEST: {
-        id: 'CONTACT_TEXT_ON_AVAILABILITY_REQUEST',
+    PERMISSION_CONTACT_TEXT_ON_AVAILABILITY_REQUEST: {
+        id: 'PERMISSION_CONTACT_TEXT_ON_AVAILABILITY_REQUEST',
         name: 'Contact By Text Message about Availability',
         description:
             'ie: you have Tuesday afternoon availability and we need someone that week.'
     },
-    CONTACT_EMAIL_ON_AVAILABILITY_REQUEST: {
-        id: 'CONTACT_EMAIL_ON_AVAILABILITY_REQUEST',
+    PERMISSION_CONTACT_EMAIL_ON_AVAILABILITY: {
+        id: 'PERMISSION_CONTACT_EMAIL_ON_AVAILABILITY',
         name: 'Contact by Email about Availability',
         description:
             'ie: you have Tuesday afternoon availability and someone is leaving.'
     },
-    SHARE_PHONE_WITH_NIGHT_CAP: {
-        id: 'SHARE_PHONE_WITH_NIGHT_CAP',
+    PERMISSION_SHARE_PHONE_WITH_NIGHT_CAP: {
+        id: 'PERMISSION_SHARE_PHONE_WITH_NIGHT_CAP',
         name: 'Share Phone Number with Night Cap',
         description: 'ie: if you are hosting or doing a pick-up that day.'
     },
-    SHARE_PHONE_WITH_COMMUNITY_COORDINATOR: {
-        id: 'SHARE_PHONE_WITH_COMMUNITY_COORDINATOR',
+    PERMISSION_SHARE_PHONE_WITH_COMMUNITY_COORDINATOR: {
+        id: 'PERMISSION_SHARE_PHONE_WITH_COMMUNITY_COORDINATOR',
         name: 'Share Phone Number with Community Coordinator',
         description: 'ie: if you have interest in bike building.'
     },
-    SHARE_EMAIL_WITH_COMMUNITY_COORDINATOR: {
-        id: 'SHARE_EMAIL_WITH_COMMUNITY_COORDINATOR',
+    PERMISSION_SHARE_EMAIL_WITH_COMMUNITY_COORDINATOR: {
+        id: 'PERMISSION_SHARE_EMAIL_WITH_COMMUNITY_COORDINATOR',
         name: 'Share Email Address with Community Coordinators',
         description: 'ie: when you have availabilty that matches need.'
     }
@@ -67,7 +59,11 @@ export const PERMISSION_CODE_LIST = Object.keys(PERMISSION_MAP);
 export const YES_NO_STATE_LIST = ['yes', 'no'];
 
 // across our data model, these strings are used to identify if a resource is active or not
-export const ACTIVE_STATE_LIST: NmActiveStateType[] = ['active', 'inactive'];
+export const ROLE_STATUS_LIST: NmStatusType[] = [
+    'active',
+    'inactive',
+    'shadow'
+];
 
 export const DAYS_OF_WEEK: {
     [k in NmDayNameType]: {
@@ -148,11 +144,36 @@ export const DAYS_OF_WEEK_CODES = [
     'saturday'
 ] as NmDayNameType[];
 
+export const NM_ROLE_STATUS: {
+    [k in NmStatusType]: {
+        id: k;
+        name: string;
+        description: string;
+    };
+} = {
+    active: {
+        id: 'active',
+        name: 'Active Status',
+        description: 'This role is active.'
+    },
+    inactive: {
+        id: 'inactive',
+        name: 'Inactive Status',
+        description: 'This role persists in the record but will be ignored.'
+    },
+    shadow: {
+        id: 'shadow',
+        name: 'Shadow Status',
+        description: 'Shadow status is training mode.'
+    }
+};
+
 export const NM_NIGHT_ROLES: {
     [k in NmNightRoleType]: {
         id: k;
         name: string;
         description: string;
+        status?: NmStatusType;
     };
 } = {
     'night-captain': {
@@ -165,21 +186,21 @@ export const NM_NIGHT_ROLES: {
         name: 'Night Host',
         description: 'Host Market with Friends'
     },
-    'night-distro-shadow': {
-        id: 'night-distro-shadow',
-        name: 'Night Host Shadow',
-        description: 'Learn to Host Market'
-    },
+    // 'night-distro-shadow': {
+    //     id: 'night-distro-shadow',
+    //     name: 'Night Host Shadow',
+    //     description: 'Learn to Host Market'
+    // },
     'night-pickup': {
         id: 'night-pickup',
         name: 'Night Pickup',
         description: 'Pickup Food and Deliver to Market'
-    },
-    'night-pickup-shadow': {
-        id: 'night-pickup-shadow',
-        name: 'Night Pickup Shadow',
-        description: 'Learn How to Food Pickup'
     }
+    // 'night-pickup-shadow': {
+    //     id: 'night-pickup-shadow',
+    //     name: 'Night Pickup Shadow',
+    //     description: 'Learn How to Food Pickup'
+    // }
 };
 
 export const NN_NIGHT_ROLE_CODES = Object.keys(
@@ -198,13 +219,18 @@ export const NM_ADMIN_ROLES: {
         name: 'Community Coordinator',
         description: ''
     },
-    'community-treasurer': {
-        id: 'community-treasurer',
-        name: 'Community Treasurer',
+    treasurer: {
+        id: 'treasurer',
+        name: 'Safe Foodie',
         description: ''
     },
-    'community-foodie': {
-        id: 'community-foodie',
+    'food-safety': {
+        id: 'food-safety',
+        name: 'Safe Foodie',
+        description: ''
+    },
+    director: {
+        id: 'director',
         name: 'Safe Foodie',
         description: ''
     }

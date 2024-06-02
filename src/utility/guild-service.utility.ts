@@ -4,12 +4,13 @@ import {
     FoodCountDataService,
     FoodCountInputService,
     OrgDataService,
-    MarketAdminService,
-    PersonDataService,
+    NmAdminService,
+    PersonSheetService,
     NightDataService,
     MarkdownService,
     PgService
 } from '../service';
+import { PersonService } from '../service/person.service';
 
 // technically we want to instantiate this once,
 // and don't really want services in utilities, but since our
@@ -23,10 +24,11 @@ export interface GuildServiceModel {
     foodCountDataService: FoodCountDataService;
     foodCountInputService: FoodCountInputService;
     orgDataService: OrgDataService;
-    personDataService: PersonDataService;
+    personDataService: PersonSheetService;
+    personService: PersonService;
     nightDataService: NightDataService;
     markdownService: MarkdownService;
-    marketAdminService: MarketAdminService;
+    marketAdminService: NmAdminService;
 }
 
 // because we need to build a set of services that are connected to data per guild
@@ -43,11 +45,12 @@ export async function GetGuildServices(guildId: string) {
 
         const orgDataService = new OrgDataService(GSPREAD_MARKET_ID);
 
-        const personDataService = new PersonDataService(
+        const personDataService = new PersonSheetService(
             GSPREAD_MARKET_ID,
             pgService
         );
 
+        const personService = new PersonService(personDataService);
         const nightDataService = new NightDataService(
             GSPREAD_MARKET_ID,
             personDataService
@@ -55,7 +58,7 @@ export async function GetGuildServices(guildId: string) {
 
         const markdownService = new MarkdownService(coreDataService);
 
-        const marketAdminService = new MarketAdminService(
+        const marketAdminService = new NmAdminService(
             GSPREAD_MARKET_ID,
             personDataService
         );

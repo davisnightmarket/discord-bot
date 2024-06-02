@@ -9,19 +9,21 @@ export type NmDayNameType =
 
 export type NmPartOfDayNameType = 'morning' | 'afternoon' | 'evening' | 'night';
 
-export type NmActiveStateType = 'active' | 'inactive';
+export type NmStatusType = 'active' | 'inactive' | 'shadow';
 
 export type NmRoleType = NmNightRoleType | NmAdminRoleType;
 
-export type NmNightRoleType =
-    | 'night-distro'
-    | 'night-distro-shadow'
-    | 'night-captain'
-    | 'night-pickup'
-    | 'night-pickup-shadow';
+export type NmNightTeamType =
+    | 'team-build'
+    | 'team-social-media'
+    | 'team-onboarding'
+    | 'team-outreach';
+
+export type NmNightRoleType = 'night-distro' | 'night-captain' | 'night-pickup';
 export type NmAdminRoleType =
     | 'community-coordinator'
-    | 'community-treasurer'
-    | 'community-foodie';
+    | 'food-safety'
+    | 'director'
+    | 'treasurer';
 
 export type NmRolePeriodType = 'once' | 'every' | 'halt';

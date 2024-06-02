@@ -1,4 +1,4 @@
-import { EntityModel } from './entity.model';
+import type { EntityModel } from './entity.model';
 
 export type ActionType = 'action_generic' | 'action_food_count';
 
