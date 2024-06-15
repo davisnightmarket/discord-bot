@@ -132,7 +132,7 @@ export class NightDataService {
 
     constructor(
         spreadsheetId: string,
-        private readonly personDataService: PersonSheetService
+        private readonly personSheetService: PersonSheetService
     ) {
         this.nightSheetService = new GoogleSheetService({
             spreadsheetId,
@@ -627,7 +627,7 @@ export class NightDataService {
         return await Promise.all(
             nightOps.map(async (op) => {
                 const person =
-                    await this.personDataService.getPersonByEmailOrDiscordId(
+                    await this.personSheetService.getPersonByEmailOrDiscordId(
                         op.discordIdOrEmail
                     );
 
@@ -773,7 +773,7 @@ export class NightDataService {
         nightData = await Promise.all(
             nightData.map(async (a) => {
                 const person =
-                    await this.personDataService.getPersonByEmailOrDiscordId(
+                    await this.personSheetService.getPersonByEmailOrDiscordId(
                         a.discordIdOrEmail
                     );
                 return {
@@ -814,7 +814,7 @@ export class NightDataService {
                 .filter((a) => a)
                 .map(async (discordIdOrEmail) => {
                     const p =
-                        await this.personDataService.getPersonByEmailOrDiscordId(
+                        await this.personSheetService.getPersonByEmailOrDiscordId(
                             discordIdOrEmail
                         );
                     return PersonSheetService.createPersonWithQueryId(

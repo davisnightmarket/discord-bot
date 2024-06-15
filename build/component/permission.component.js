@@ -21,8 +21,7 @@ const PermissionToSelectComponent = (discordId) => {
             .addOptions(...const_1.PERMISSION_CODE_LIST.map((code) => {
             return new discord_js_1.StringSelectMenuOptionBuilder()
                 .setLabel(const_1.PERMISSION_MAP[code].name)
-                .setDescription(const_1.PERMISSION_MAP[code]
-                .description)
+                .setDescription(const_1.PERMISSION_MAP[code].description)
                 .setValue(`contact-text---${code}`);
         }))),
         new discord_js_1.ActionRowBuilder().addComponents(new discord_js_1.ButtonBuilder()

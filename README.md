@@ -1,5 +1,12 @@
 # Night Market Discord Bot is "crabapple"
 
+## Build/Deploy from the repo root:
+- aws ecr get-login-password --region us-west-1 | docker login --username AWS --password-stdin 947372742919.dkr.ecr.us-west-1.amazonaws.com
+- docker build -t 947372742919.dkr.ecr.us-west-1.amazonaws.com/nm-crabapple:latest .
+- docker push  947372742919.dkr.ecr.us-west-1.amazonaws.com/nm-crabapple:latest
+- (Visit AWS and update the task there - not sure how to do it with the client)
+- aws ecs update-service --cluster nm-crabapple --service (nm-crabapple | nm-crabapple-jr) --task-definition (nm-crabapple | nm-crabapple-jr)
+
 ## What does the bot do?
 
 It's current main feature is to help people add to the food count, but it's always open to suggestions!

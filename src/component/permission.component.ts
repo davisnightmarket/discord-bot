@@ -5,7 +5,8 @@ import {
     ButtonBuilder,
     ButtonStyle
 } from 'discord.js';
-import { PERMISSION_CODE_LIST, PERMISSION_MAP, PermissionType } from '../const';
+
+import { PERMISSION_CODE_LIST, PERMISSION_MAP } from '../const';
 
 export const PermissionStartComponent = (discordId: string) => {
     return [
@@ -30,11 +31,14 @@ export const PermissionToSelectComponent = (discordId: string) => {
                     ...PERMISSION_CODE_LIST.map((code) => {
                         return new StringSelectMenuOptionBuilder()
                             .setLabel(
-                                PERMISSION_MAP[code as PermissionType].name
+                                PERMISSION_MAP[
+                                    code as keyof typeof PERMISSION_MAP
+                                ].name
                             )
                             .setDescription(
-                                PERMISSION_MAP[code as PermissionType]
-                                    .description
+                                PERMISSION_MAP[
+                                    code as keyof typeof PERMISSION_MAP
+                                ].description
                             )
                             .setValue(`contact-text---${code}`);
                     })

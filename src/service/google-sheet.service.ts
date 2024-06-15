@@ -37,7 +37,7 @@ export class GoogleSheetService<T extends SpreadsheetDataModel> {
     async createRowWithMap(map: T) {
         const rows = (await this.waitingForHeaderList).map(
             (header) => map[header] || ''
-        );
+        ) as SpreadsheetDataValueModel[];
         await this.prependOneRowAfterHeader(rows);
     }
 
@@ -45,7 +45,7 @@ export class GoogleSheetService<T extends SpreadsheetDataModel> {
     async updateRowWithMapByRowNumber(index: number, map: T) {
         const rows = (await this.waitingForHeaderList).map(
             (header) => map[header] || ''
-        );
+        ) as SpreadsheetDataValueModel[];
         await this.spreadsheetService.rowsWrite(
             [rows],
             this.getSheetRangeString(`A${index}`)
@@ -264,7 +264,7 @@ export class GoogleSheetService<T extends SpreadsheetDataModel> {
         return list;
     }
 
-    // we should be careful here, because this can break a lot of data
+    // we should be careful with this, because this can break a lot of data
     async createHeaders(headerList?: Array<keyof T>): Promise<Array<keyof T>> {
         await this.waitingForSheetId;
         let list = ((
@@ -273,7 +273,7 @@ export class GoogleSheetService<T extends SpreadsheetDataModel> {
             )
         )[0] || []) as Array<keyof T>;
 
-        // if we past a header list then we are replacing the
+        // if we pass a header list then we are replacing the
         if (headerList) {
             // the keys do NOT match, we throw an error
             if (

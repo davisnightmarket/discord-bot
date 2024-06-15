@@ -6,7 +6,7 @@ import {
     ButtonBuilder,
     ButtonStyle
 } from 'discord.js';
-import { PersonModel } from '../service';
+import type { PersonSheetModel } from '../service';
 import { GetDebug } from '../utility';
 
 // a button for deleting all identifying info frrom our db
@@ -31,7 +31,7 @@ export const IdentityEditModalComponent = ({
     phone,
     email,
     pronouns
-}: PersonModel) => {
+}: PersonSheetModel) => {
     dbg(discordId, name, bio, phone, email, pronouns);
 
     const modal = new ModalBuilder()

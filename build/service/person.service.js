@@ -1,54 +1,35 @@
-import type { RTable } from 'rethinkdb-ts';
-import type { PersonDataModel, PersonModel } from '../model/person.model';
-import type { EntityService } from './entity.service';
-import type { PersonSheetModel } from './person-sheet.service';
-import type { RdbService } from './rdb.service';
-
-export class PersonService {
-    entityPersonTable: RTable;
-    constructor(
-        private readonly entityService: EntityService<'type_person'>,
-        private readonly rdbService: RdbService
-    ) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.PersonService = void 0;
+class PersonService {
+    constructor(entityService, rdbService) {
+        this.entityService = entityService;
+        this.rdbService = rdbService;
         this.entityPersonTable = this.rdbService.getTable('entity_person');
     }
-
-    async create(data: PersonModel) {
+    async create(data) {
         this.entityService.create(data);
         this.entityPersonTable.insert(data).run();
     }
-
-    async update(data: PersonModel) {
+    async update(data) {
         await this.entityPersonTable
             .get(data.id)
             .update(this.toUpdateData(data))
             .run();
     }
-
-    async getByDiscordId(discordId: string) {
+    async getByDiscordId(discordId) {
         const p = await this.entityPersonTable.filter({ discordId }).run();
         if (p.length > 0) {
-            throw new Error(
-                `We have too ${p.length} persons with the same discord ID!`
-            );
+            throw new Error(`We have too ${p.length} persons with the same discord ID!`);
         }
-        const personData = p[0] as PersonDataModel;
+        const personData = p[0];
         const personEntity = await this.entityService.getById(personData.id);
         return {
             ...personData,
             ...personEntity
         };
     }
-
-    fromPersonSheetData({
-        name,
-        discordId,
-        bio,
-        stampCreate,
-        phone,
-        email,
-        pronouns
-    }: PersonSheetModel): PersonModel {
+    fromPersonSheetData({ name, discordId, bio, stampCreate, phone, email, pronouns }) {
         const contactList = [];
         if (phone.trim()) {
             contactList.push({
@@ -73,7 +54,7 @@ export class PersonService {
             name,
             contactList,
             description: bio,
-            stampCreate: new Date(stampCreate as string),
+            stampCreate: new Date(stampCreate),
             attrContactPermissionList: [],
             attrAvailabilityHostMap: [],
             attrAvailabilityPickupMap: [],
@@ -82,18 +63,10 @@ export class PersonService {
                 .split(', ')
                 .map((a) => a.trim())
                 .filter((a) => a),
-
             attrRoleInterestList: []
         };
     }
-
-    toInsertData({
-        id,
-        contactList,
-        discordId,
-        pronounList,
-        idNm
-    }: PersonModel): Partial<PersonDataModel> {
+    toInsertData({ id, contactList, discordId, pronounList, idNm }) {
         return {
             id: id === '_new' ? undefined : id,
             contactList,
@@ -102,13 +75,7 @@ export class PersonService {
             idNm
         };
     }
-
-    toUpdateData({
-        contactList,
-        discordId,
-        pronounList,
-        idNm
-    }: PersonModel): Partial<PersonDataModel> {
+    toUpdateData({ contactList, discordId, pronounList, idNm }) {
         return {
             contactList,
             discordId,
@@ -117,3 +84,4 @@ export class PersonService {
         };
     }
 }
+exports.PersonService = PersonService;

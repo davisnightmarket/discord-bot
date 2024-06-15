@@ -75,11 +75,15 @@ function GetVolunteerRoleShadowComponent({ day, discordId }) {
     const components = [];
     const shadowHostButton = new discord_js_1.ButtonBuilder()
         .setCustomId(`volunteer-init--${day}--night-distro-shadow--${discordId}`)
-        .setLabel(const_1.NM_NIGHT_ROLES['night-distro-shadow'].description)
+        .setLabel(const_1.NM_NIGHT_ROLES['night-distro'].description +
+        ': ' +
+        const_1.NM_ROLE_STATUS.shadow.description)
         .setStyle(discord_js_1.ButtonStyle.Secondary);
     const shadowPickupButton = new discord_js_1.ButtonBuilder()
         .setCustomId(`volunteer-init--${day}--night-pickup-shaddow--${discordId}`)
-        .setLabel(const_1.NM_NIGHT_ROLES['night-pickup-shadow'].description)
+        .setLabel(const_1.NM_NIGHT_ROLES['night-pickup'].description +
+        ': ' +
+        const_1.NM_ROLE_STATUS.shadow.description)
         .setStyle(discord_js_1.ButtonStyle.Secondary);
     return [
         new discord_js_1.ActionRowBuilder()
@@ -139,7 +143,7 @@ function GetVolunteerDistroComponent({ day, discordId }, marketList) {
             .setMinValues(1)
             .setMaxValues(hostList.length)
             .addOptions(marketList.map(({ orgMarket, orgPickup, timeStart, timeEnd }) => new discord_js_1.StringSelectMenuOptionBuilder()
-            .setLabel(`Host: ${orgMarket}`)
+            .setLabel(`Host/Distro: ${orgMarket}`)
             .setDescription(`at ${service_1.ParseContentService.getAmPmTimeFrom24Hour(timeStart)} with ${personList
             .filter((a) => a.orgMarket === orgMarket)
             .map((a) => a.name)

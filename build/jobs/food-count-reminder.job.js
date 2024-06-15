@@ -14,7 +14,7 @@ const FoodCountReminderJob = (client) => async () => {
     const yesterday = (0, utility_1.GetChannelDayYesterday)();
     // now we send a message to each channel in each guild
     for (const guild of guildList) {
-        const { markdownService, nightDataService, foodCountDataService, personDataService } = await (0, utility_1.GetGuildServices)(guild.id);
+        const { markdownService, nightDataService, foodCountDataService, personSheetService } = await (0, utility_1.GetGuildServices)(guild.id);
         // next we want a list of all pickups this year so far (or at least a month back)
         // then we want to search back through them, and get only those that happened last night
         // if that number is zero, then we want to send a gentle reminder to the channel for that day
@@ -25,7 +25,7 @@ const FoodCountReminderJob = (client) => async () => {
             const pickupOrgList = yesterdayFoodCountList
                 .map((a) => a.org)
                 .join(', ');
-            const tagUserList = (await Promise.all(yesterdayPickupList.map(async (a) => await personDataService.getPersonByEmailOrDiscordId(a.discordIdOrEmail))))
+            const tagUserList = (await Promise.all(yesterdayPickupList.map(async (a) => await personSheetService.getPersonByEmailOrDiscordId(a.discordIdOrEmail))))
                 .filter((a) => a)
                 // tag them if possible
                 .map((a) => a?.discordId

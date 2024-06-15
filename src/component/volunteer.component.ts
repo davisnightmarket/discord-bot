@@ -261,7 +261,7 @@ export function GetVolunteerDistroComponent(
                     marketList.map(
                         ({ orgMarket, orgPickup, timeStart, timeEnd }) =>
                             new StringSelectMenuOptionBuilder()
-                                .setLabel(`Host: ${orgMarket}`)
+                                .setLabel(`Host/Distro: ${orgMarket}`)
                                 .setDescription(
                                     `at ${ParseContentService.getAmPmTimeFrom24Hour(
                                         timeStart

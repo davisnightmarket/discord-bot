@@ -9,7 +9,7 @@ import { PersonSheetService } from '../service';
 const dbg = GetDebug('IdentityEvent');
 
 export async function IdentityCommandEvent(
-    { personDataService }: GuildServiceModel,
+    { personSheetService }: GuildServiceModel,
     interaction: ChatInputCommandInteraction,
     discordId: string
 ) {
@@ -18,12 +18,12 @@ export async function IdentityCommandEvent(
     // ! for some reason this is taking too long sometimes. Why? It is cached data
     // i think this is because when the cache is reloading, the reply has to wait for more
     // than three seconds, which discord doesn't allow. We will have to live with this.
-    const person = await personDataService.getPersonByDiscordId(discordId);
+    const person = await personSheetService.getPersonByDiscordId(discordId);
 
     // show them their modal
     try {
         await interaction.showModal(
-            IdentityEditModalComponent(personDataService.createPerson(person))
+            IdentityEditModalComponent(personSheetService.createPerson(person))
         );
     } catch (e) {
         console.error(e);
@@ -31,7 +31,7 @@ export async function IdentityCommandEvent(
 }
 
 export async function IdentityEditModalEvent(
-    { personDataService }: GuildServiceModel,
+    { personSheetService }: GuildServiceModel,
 
     interaction: ModalSubmitInteraction,
     discordId: string,
@@ -49,7 +49,7 @@ export async function IdentityEditModalEvent(
     // get the person's data
     // or create a blank person
     const person =
-        (await personDataService.getPersonByDiscordId(discordId)) ??
+        (await personSheetService.getPersonByDiscordId(discordId)) ??
         PersonSheetService.createPerson({
             discordId
         });
@@ -73,7 +73,7 @@ export async function IdentityEditModalEvent(
         }
     }
 
-    await personDataService.createOrUpdatePersonByDiscordId({
+    await personSheetService.createOrUpdatePersonByDiscordId({
         ...person
     });
 

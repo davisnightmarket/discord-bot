@@ -135,13 +135,13 @@ export const PARTS_OF_DAY: {
 };
 
 export const DAYS_OF_WEEK_CODES = [
-    'sunday',
     'monday',
     'tuesday',
     'wednesday',
     'thursday',
     'friday',
-    'saturday'
+    'saturday',
+    'sunday'
 ] as NmDayNameType[];
 
 export const NM_ROLE_STATUS: {

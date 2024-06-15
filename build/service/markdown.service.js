@@ -116,23 +116,15 @@ class MarkdownService {
     // turns person availability strings from spreadsheet into a md list of readable day and time
     getAvailabilityListsFromPerson(person) {
         return [
-            person.availabilityHostList
-                .split(',')
-                .filter((a) => a.trim())
-                .map((a) => a
-                .trim()
-                .split('|||')
-                .map((a) => a.trim()))
-                .map((a) => `  - Host ${const_1.DAYS_OF_WEEK[a[0]]?.name} ${_1.ParseContentService.getAmPmTimeFrom24Hour(a[1])}`)
+            Object.keys(person.attrAvailabilityHostMap)
+                .map((a) => `  - Host ${const_1.DAYS_OF_WEEK[a
+                .replace('AVAILABLE_', '')
+                .toLowerCase()]?.name} ${_1.ParseContentService.getAmPmTimeFrom24Hour(a[1])}`)
                 .join('\n'),
-            person.availabilityPickupList
-                .split(',')
-                .filter((a) => a.trim())
-                .map((a) => a
-                .trim()
-                .split('|||')
-                .map((a) => a.trim()))
-                .map((a) => `  - Pick-up ${const_1.DAYS_OF_WEEK[a[0]]?.name} ${const_1.PARTS_OF_DAY[a[1]]?.name}`)
+            Object.keys(person.attrAvailabilityPickupMap)
+                .map((a) => `  - Host ${const_1.DAYS_OF_WEEK[a
+                .replace('AVAILABLE_', '')
+                .toLowerCase()]?.name} ${_1.ParseContentService.getAmPmTimeFrom24Hour(a[1])}`)
                 .join('\n')
         ];
     }
@@ -196,13 +188,18 @@ class MarkdownService {
     getPickupsAnnounce({ pickupList }) {
         return `Pick-up${pickupList.length === 1 ? '' : 's'}:\n> ${pickupList
             .map(({ orgPickup, timeStart, personList }) => {
+            console.log(orgPickup, timeStart, personList);
             return (orgPickup +
                 ' ' +
                 _1.ParseContentService.getAmPmTimeFrom24Hour(timeStart) +
                 ' ' +
-                personList
-                    .map(({ name, discordId }) => `${(0, discord_js_1.bold)(name)} ${discordId ? (0, discord_js_1.userMention)(discordId) : ''}`)
-                    .join(', '));
+                (personList.length
+                    ? personList
+                        .map(({ name, discordId }) => `${(0, discord_js_1.bold)(name)} ${discordId
+                        ? (0, discord_js_1.userMention)(discordId)
+                        : ''}`)
+                        .join(', ')
+                    : (0, discord_js_1.bold)('HELP NEEDED!')));
         })
             .join('\n> ')}`;
     }
@@ -213,7 +210,7 @@ class MarkdownService {
             return 'Night Cap NEEDED!';
         }
         return `Night Captain${nightCapList.length === 1 ? '' : 's'}: ${nightCapList
-            .map((p) => (p.discordId ? (0, discord_js_1.userMention)(p.discordId) : p.name))
+            .map(({ discordId, name }) => discordId ? (0, discord_js_1.userMention)(discordId) : (0, discord_js_1.bold)(name))
             .join(', ')}`;
     }
     // todo: use message service
@@ -222,9 +219,13 @@ class MarkdownService {
             return 'Distro help NEEDED!';
         }
         const a = hostList.filter((a) => a.role === 'night-distro');
-        return `Host${a.length > 1 ? 's' : ''}: ${a
-            .map(({ name, discordId }) => `${discordId ? (0, discord_js_1.userMention)(discordId) : (0, discord_js_1.bold)(name)}`)
-            .join(', ')} `;
+        return `Distro: ${a.length
+            ? a
+                .map(({ name, discordId }) => `${discordId
+                ? (0, discord_js_1.userMention)(discordId)
+                : (0, discord_js_1.bold)(name)}`)
+                .join(', ')
+            : (0, discord_js_1.bold)('HELP NEEDED!')} `;
     }
     getMyDistros(discordId, { marketList }) {
         const hostList = [...marketList.map((a) => a.hostList)]
@@ -264,13 +265,15 @@ class MarkdownService {
                 ' ' +
                 _1.ParseContentService.getAmPmTimeFrom24Hour(timeStart) +
                 ' ' +
-                personList
-                    .map((a) => `${(0, discord_js_1.bold)(a.name)} ${discordId === a.discordId
-                    ? `(YOU${a.periodStatus === 'SHADOW'
-                        ? ', Shadow Mode'
-                        : ''})`
-                    : ''}`)
-                    .join(', '));
+                (personList.length
+                    ? personList
+                        .map((a) => `${(0, discord_js_1.bold)(a.name)} ${discordId === a.discordId
+                        ? `(YOU${a.periodStatus === 'SHADOW'
+                            ? ', Shadow Mode'
+                            : ''})`
+                        : ''}`)
+                        .join(', ')
+                    : (0, discord_js_1.bold)('HELP NEEDED!')));
         })
             .join('\n')}`;
     }
@@ -280,13 +283,15 @@ class MarkdownService {
         }
         // todo: this logic needs improvement
         const nightCapList = hostList.filter((a) => a.role === 'night-captain');
-        return `Night Captain${nightCapList.length > 1 ? 's' : ''}: ${nightCapList
-            .map((a) => `${(0, discord_js_1.bold)(a.name)} ${discordId === a.discordId
-            ? `(YOU${a.periodStatus === 'SHADOW'
-                ? ', Shadow Mode'
-                : ''})`
-            : ''}`)
-            .join(', ')}`;
+        return `Night Captain${nightCapList.length > 1 ? 's' : ''}: ${nightCapList.length
+            ? nightCapList
+                .map((a) => `${(0, discord_js_1.bold)(a.name)} ${discordId === a.discordId
+                ? `(YOU${a.periodStatus === 'SHADOW'
+                    ? ', Shadow Mode'
+                    : ''})`
+                : ''}`)
+                .join(', ')
+            : (0, discord_js_1.bold)('HELP NEEDED!')}`;
     }
     // todo: use message service
     getDistroEphemeral(discordId, { hostList, statusList }) {
@@ -294,13 +299,15 @@ class MarkdownService {
             return 'Distro: HELP NEEDED!';
         }
         const a = hostList.filter((a) => a.role === 'night-distro');
-        return `Host${a.length === 1 ? '' : 's'}: ${a
-            .map((a) => `${(0, discord_js_1.bold)(a.name)} ${discordId === a.discordId
-            ? `(YOU${a.periodStatus === 'SHADOW'
-                ? ', Shadow Mode'
-                : ''})`
-            : ''}`)
-            .join(', ')} `;
+        return `Distro: ${a.length
+            ? a
+                .map((a) => `${(0, discord_js_1.bold)(a.name)} ${discordId === a.discordId
+                ? `(YOU${a.periodStatus === 'SHADOW'
+                    ? ', Shadow Mode'
+                    : ''})`
+                : ''}`)
+                .join(', ')
+            : (0, discord_js_1.bold)('HELP NEEDED!')} `;
     }
 }
 exports.MarkdownService = MarkdownService;

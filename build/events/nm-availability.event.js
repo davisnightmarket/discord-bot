@@ -6,15 +6,16 @@ const component_1 = require("../component");
 const const_1 = require("../const");
 // in which user edits their availability
 const dbg = (0, utility_1.GetDebug)('AvailabilityEvent');
-async function AvailabilityCommandEvent({ personDataService, markdownService }, interaction, discordId) {
+async function AvailabilityCommandEvent({ personService, personSheetService, markdownService }, interaction, discordId) {
     dbg('ok');
     // get the person's data
-    const person = await personDataService.getPersonByDiscordId(interaction.user.id);
-    if (!person) {
+    const personData = await personSheetService.getPersonByDiscordId(interaction.user.id);
+    if (!personData) {
         // show them their modal
         await interaction.editReply(await markdownService.getGenericSorry());
         return;
     }
+    const person = personService.fromPersonSheetData(personData);
     const [availabilityHostList, availabilityPickupList] = markdownService.getAvailabilityListsFromPerson(person);
     const components = (0, component_1.AvailabilityEditButtonComponent)(discordId);
     const content = [
@@ -30,14 +31,14 @@ async function AvailabilityCommandEvent({ personDataService, markdownService }, 
 }
 exports.AvailabilityCommandEvent = AvailabilityCommandEvent;
 // triggered by any button event with an availability custom id
-async function AvailabilityEditButtonEvent({ personDataService, nightDataService, markdownService }, interaction, discordId, [command, step, day]) {
+async function AvailabilityEditButtonEvent({ personSheetService, nightDataService, markdownService }, interaction, discordId, [command, step, day]) {
     // todo: handle this higher up
     if (command !== 'availability') {
         return;
     }
     dbg(command, step, day);
     // get the person's data
-    const person = await personDataService.getPersonByDiscordId(interaction.user.id);
+    const person = await personSheetService.getPersonByDiscordId(interaction.user.id);
     if (!person) {
         //! we would like to show them their modal
         // // we cannot show the identity model since we have deferred
@@ -73,7 +74,7 @@ async function AvailabilityEditButtonEvent({ personDataService, nightDataService
     const daysOfWeekIdList = Object.values(const_1.DAYS_OF_WEEK).map((a) => a.id);
     // in this case we have selected our night-distro availability so ...
     if (step === 'night-distro-clear') {
-        personDataService.updatePersonByDiscordId({
+        personSheetService.updatePersonByDiscordId({
             ...person,
             availabilityHost: ''
         });
@@ -88,7 +89,7 @@ async function AvailabilityEditButtonEvent({ personDataService, nightDataService
         // if we are on the first day, reset
         let { availabilityPickupList } = person;
         availabilityPickupList = '';
-        personDataService.updatePersonByDiscordId({
+        personSheetService.updatePersonByDiscordId({
             ...person,
             availabilityPickupList
         });
@@ -100,20 +101,20 @@ async function AvailabilityEditButtonEvent({ personDataService, nightDataService
 }
 exports.AvailabilityEditButtonEvent = AvailabilityEditButtonEvent;
 // triggered by any select event with an availability custom id
-async function AvailabilityEditSelectEvent({ personDataService, markdownService }, interaction, discordId, [command, step, day]) {
+async function AvailabilityEditSelectEvent({ personSheetService, markdownService }, interaction, discordId, [command, step, day]) {
     // todo: handle this higher up
     if (command !== 'availability') {
         return;
     }
     dbg(command, step, day);
     // get the person's data
-    const person = await personDataService.getPersonByDiscordId(interaction.user.id);
+    const person = await personSheetService.getPersonByDiscordId(interaction.user.id);
     if (!person) {
         //! we would like to show them their modal
         // // we cannot show the identity model since we have deferred
         await interaction.editReply(await markdownService.getGenericNoPerson());
         // interaction.showModal(
-        //     IdentityEditModalComponent(personDataService.createPerson(person))
+        //     IdentityEditModalComponent(personSheetService.createPerson(person))
         // );
         return;
     }
@@ -123,7 +124,7 @@ async function AvailabilityEditSelectEvent({ personDataService, markdownService 
         // save it to the db ...
         // const [day, timeStart] = interaction.values[0].split('|||');
         // dbg(day, timeStart);
-        personDataService.updatePersonByDiscordId({
+        personSheetService.updatePersonByDiscordId({
             ...person,
             availabilityHost: interaction.values.join(',')
         });
@@ -156,7 +157,7 @@ async function AvailabilityEditSelectEvent({ personDataService, markdownService 
     if (step === 'night-pickup') {
         // save the previous to the db ...
         // if we are on the first day, reset
-        let { availabilityPickupList } = person;
+        let { availabilityPickupList = '' } = person;
         if (!daysOfWeekIdList.indexOf(day)) {
             availabilityPickupList = interaction.values.join(',');
         }
@@ -173,7 +174,7 @@ async function AvailabilityEditSelectEvent({ personDataService, markdownService 
             return a;
         }, [])
             .join(',');
-        personDataService.updatePersonByDiscordId({
+        personSheetService.updatePersonByDiscordId({
             ...person,
             availabilityPickupList
         });
@@ -202,7 +203,7 @@ async function AvailabilityEditSelectEvent({ personDataService, markdownService 
 exports.AvailabilityEditSelectEvent = AvailabilityEditSelectEvent;
 // // in which user edits their availability
 // export async function AvailabilityNoneButtonEvent(
-//     { personDataService, markdownService }: GuildServiceModel,
+//     { personSheetService, markdownService }: GuildServiceModel,
 //     interaction: ButtonInteraction,
 //     discordId: string,
 //     [command, step, day]: [
@@ -218,7 +219,7 @@ exports.AvailabilityEditSelectEvent = AvailabilityEditSelectEvent;
 //     dbg(command, step, day);
 //     await interaction.deferReply({ ephemeral: true });
 //     // get the person's data
-//     const person = await personDataService.getPersonByDiscordId(
+//     const person = await personSheetService.getPersonByDiscordId(
 //         interaction.user.id
 //     );
 //     if (!person) {
@@ -226,7 +227,7 @@ exports.AvailabilityEditSelectEvent = AvailabilityEditSelectEvent;
 //         // // we cannot show the identity model since we have deferred
 //         await interaction.editReply(await markdownService.getGenericNoPerson());
 //         // interaction.showModal(
-//         //     IdentityEditModalComponent(personDataService.createPerson(person))
+//         //     IdentityEditModalComponent(personSheetService.createPerson(person))
 //         // );
 //         return;
 //     }
@@ -236,7 +237,7 @@ exports.AvailabilityEditSelectEvent = AvailabilityEditSelectEvent;
 //         // save it to the db ...
 //         // const [day, timeStart] = interaction.values[0].split('|||');
 //         // dbg(day, timeStart);
-//         personDataService.updatePersonByDiscordId({
+//         personSheetService.updatePersonByDiscordId({
 //             ...person,
 //             availabilityHost: ''
 //         });
@@ -265,7 +266,7 @@ exports.AvailabilityEditSelectEvent = AvailabilityEditSelectEvent;
 //         } else {
 //             availabilityPickup += '';
 //         }
-//         personDataService.updatePersonByDiscordId({
+//         personSheetService.updatePersonByDiscordId({
 //             ...person,
 //             availabilityPickup
 //         });

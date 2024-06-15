@@ -12,7 +12,10 @@ const NightOpsJob = (client) => async () => {
         const { nightDataService, markdownService } = await (0, utility_1.GetGuildServices)(guild.id);
         // get the channel by today name
         const channelDay = (0, utility_1.GetChannelDayToday)();
-        const nightMap = await nightDataService.getNightMapByDay(channelDay);
+        console.log(channelDay);
+        const nightMap = await nightDataService.getNightMapByDay(channelDay, {
+            refreshCache: true
+        });
         dbg(channelDay);
         dbg(nightMap);
         const pickupList = [

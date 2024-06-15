@@ -1,10 +1,6 @@
 import { PERMISSION_MAP } from '../const';
 import { type NmStatusType } from '../model';
-import {
-    GoogleSheetService,
-    type PgService,
-    type SpreadsheetDataModel
-} from '.';
+import { GoogleSheetService, type SpreadsheetDataModel } from '.';
 import type {
     PersonAttrPermissionType,
     PersonAttrAvailabilityType,
@@ -98,6 +94,17 @@ const PersonAdminRoleInterestMap: {
     INTEREST_TREASURER: 'Treasurer?'
 };
 
+const AttributeKeyList = [
+    ...Object.keys(PersonPermissionMap),
+    ...Object.keys(PersonAvailabilityHostMap),
+    ...Object.keys(PersonAvailabilityPickupMap),
+    ...Object.keys(PersonBikeMap),
+    ...Object.keys(PersonTeamInterestMap),
+    ...Object.keys(PersonRoleInterestMap),
+    ...Object.keys(PersonSkillMap),
+    ...Object.keys(PersonAdminRoleInterestMap)
+];
+
 // Attr Value Maps
 type PersonAttrAvailabilitySheetModel = {
     [k in PersonAttrAvailabilityType]: 'yes' | 'no';
@@ -156,20 +163,12 @@ const headersList: Array<
     'email',
     'phone',
     'location',
+    'bike',
+    'skills',
     'bio',
     'pronouns',
-    'interest',
     'reference',
-    'discordId',
-
-    ...Object.keys(PersonPermissionMap),
-    ...Object.keys(PersonAvailabilityHostMap),
-    ...Object.keys(PersonAvailabilityPickupMap),
-    ...Object.keys(PersonBikeMap),
-    ...Object.keys(PersonTeamInterestMap),
-    ...Object.keys(PersonRoleInterestMap),
-    ...Object.keys(PersonSkillMap),
-    ...Object.keys(PersonAdminRoleInterestMap)
+    'discordId'
 ];
 
 export type PersonWithIdModel = PersonSheetModel & { discordIdOrEmail: string };
@@ -177,7 +176,7 @@ export type PersonWithIdModel = PersonSheetModel & { discordIdOrEmail: string };
 export class PersonSheetService {
     personSheetService: GoogleSheetService<PersonSheetModel>;
     waitingForPersonListCache: Promise<PersonSheetModel[]>;
-    constructor(spreadsheetId: string, private readonly pgService: PgService) {
+    constructor(spreadsheetId: string) {
         this.personSheetService = new GoogleSheetService({
             spreadsheetId,
             sheetName: `person`,
@@ -210,10 +209,19 @@ export class PersonSheetService {
         return PersonSheetService.createPerson(person);
     }
 
+    toAttrSheetData(person: PersonSheetModel): PersonSheetAttributeModel {
+        return PersonSheetService.createAttributeMap(
+            person as unknown as PersonSheetAttributeModel
+        );
+    }
+
     static createAttributeMap(
         personAttributeMap: PersonSheetAttributeModel
     ): PersonSheetAttributeModel {
         for (const k of Object.keys(personAttributeMap)) {
+            if (!AttributeKeyList.includes(k)) {
+                continue;
+            }
             const a = (
                 personAttributeMap[k as keyof PersonSheetAttributeModel] || ''
             )
@@ -509,9 +517,9 @@ export class PersonSheetService {
     }
 
     // methods return markdown person info
-    getPermissionListMd(person: PersonSheetAttributeModel) {
+    getPermissionListMd(person: PersonSheetModel) {
         return (
-            this.getAttrPermissionList(person)
+            this.getAttrPermissionList(this.toAttrSheetData(person))
                 .map((a) => `  - ${PERMISSION_MAP[a].name}`)
                 .join('\n') || '  - NO PERMISSIONS GRANTED'
         );

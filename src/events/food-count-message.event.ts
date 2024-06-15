@@ -37,7 +37,7 @@ const dbg = GetDebug('FoodCountInputEvent');
 
 export const FoodCountMessageEvent = async (
     {
-        personDataService,
+        personSheetService,
         foodCountInputService,
         foodCountDataService,
         markdownService
@@ -207,7 +207,7 @@ export const FoodCountMessageEvent = async (
         });
 
         // get our reporter email address
-        const reporter = await personDataService.getPersonByEmailOrDiscordId(
+        const reporter = await personSheetService.getPersonByEmailOrDiscordId(
             author.id
         );
     }

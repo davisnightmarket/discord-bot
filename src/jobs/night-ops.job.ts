@@ -20,7 +20,10 @@ export const NightOpsJob = (client: Client) => async () => {
         );
         // get the channel by today name
         const channelDay = GetChannelDayToday();
-        const nightMap = await nightDataService.getNightMapByDay(channelDay);
+        console.log(channelDay);
+        const nightMap = await nightDataService.getNightMapByDay(channelDay, {
+            refreshCache: true
+        });
         dbg(channelDay);
         dbg(nightMap);
 

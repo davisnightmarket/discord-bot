@@ -17,7 +17,7 @@ exports.TIME_UNTIL_UPDATE = 60 * 1000; // one minute in milliseconds
  *
  */
 const dbg = (0, utility_1.GetDebug)('FoodCountInputEvent');
-const FoodCountMessageEvent = async ({ personDataService, foodCountInputService, foodCountDataService, markdownService }, message) => {
+const FoodCountMessageEvent = async ({ personSheetService, foodCountInputService, foodCountDataService, markdownService }, message) => {
     dbg('FoodCountMessageEvent');
     const { channel, author } = message;
     /* STAGE 1: skip the message entirely in some cases */
@@ -144,7 +144,7 @@ const FoodCountMessageEvent = async ({ personDataService, foodCountInputService,
             messageResponseId: messageReply.id
         });
         // get our reporter email address
-        const reporter = await personDataService.getPersonByEmailOrDiscordId(author.id);
+        const reporter = await personSheetService.getPersonByEmailOrDiscordId(author.id);
     }
     // loop over errors and post to channel
     for (const { status, lbs, org, orgFuzzy } of parsedInputErrorList) {

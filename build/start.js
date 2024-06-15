@@ -1,10 +1,15 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const discord_js_1 = require("discord.js");
+const http_1 = __importDefault(require("http"));
 const utility_1 = require("./utility");
 const jobs_1 = require("./jobs");
 const events_1 = require("./events");
 const route_1 = require("./route");
+const url_1 = __importDefault(require("url"));
 const dbg = (0, utility_1.GetDebug)('run');
 // Start discord client
 const client = new discord_js_1.Client({
@@ -19,15 +24,39 @@ const client = new discord_js_1.Client({
 run();
 async function run() {
     const config = await utility_1.WaitingForConfig;
+    // create a server object:
+    http_1.default.createServer(async function (req, res) {
+        console.log(req.url);
+        const { pathname } = url_1.default.parse(req.url ?? '/');
+        console.log(pathname);
+        if (pathname === '/job/night-ops') {
+            (0, jobs_1.NightOpsJob)(client)();
+        }
+        if (pathname === '/job/night-timeline') {
+            (0, jobs_1.NightTimelineJob)(client)();
+        }
+        if (pathname === '/job/night-food-count-reminder') {
+            (0, jobs_1.FoodCountReminderJob)(client)();
+        }
+        res.write('Hello World!'); // write a response to the client
+        res.end(); // end the response
+    }).listen(3000); // the server object listens on port 8080
     // TODO: we have to remember that each guild could have a different timezone
     // so we need to figure out how to adjust the crons for each guild
     // Add cron jobs
+    // AddCron('', () => {
+    //     tzOffset.offsetOf('America/Sao_Paulo');
+    // });
     (0, utility_1.AddCron)(
-    // 7:30 am, every day
-    '0 30 7 * * *', 
-    // every minute
-    // '* * * * *',
-    (0, jobs_1.NightOpsJob)(client));
+    // twoice per hour, once on the hour, once on the half hour
+    '0,30 * * * *', () => {
+        const d = new Date();
+        // get the current minutes
+        const minutesElapsedInDayUTC = d.getUTCHours() * 60 + (d.getUTCMinutes() > 30 ? 30 : 0);
+        // get the current minutes UTL
+        // loop over market instances
+        // get the current hour in that zone
+    });
     (0, utility_1.AddCron)('0 30 23 * * *', // at 11:30pm
     (0, jobs_1.NightTimelineJob)(client));
     // reminds us to enter food count IF none has been entered

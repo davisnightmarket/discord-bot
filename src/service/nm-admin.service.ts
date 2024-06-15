@@ -7,7 +7,7 @@ export class NmAdminService {
 
     constructor(
         spreadsheetId: string,
-        private readonly personDataService: PersonSheetService
+        private readonly personSheetService: PersonSheetService
     ) {
         this.adminSheetService = new GoogleSheetService({
             spreadsheetId,
@@ -20,7 +20,7 @@ export class NmAdminService {
             (a) => a.communityCoordinator
         );
         return await Promise.all(
-            rows.map(this.personDataService.getPersonByEmailOrDiscordId)
+            rows.map(this.personSheetService.getPersonByEmailOrDiscordId)
         );
     }
 

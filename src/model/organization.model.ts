@@ -1,5 +1,8 @@
-import { MarketEntityModel, OrganizationEntityModel } from '.';
-import { PersonDataModel } from './person.model';
+import type {
+    NightMarketEntityModel,
+    OrganizationEntityModel,
+    PersonDataModel
+} from '.';
 
 export interface OrganizationDataModel {
     id: string;
@@ -7,8 +10,8 @@ export interface OrganizationDataModel {
     email: string;
     discordId: string;
     pronounList: string;
-    contactPersonIdList: { id: string; isArchived: boolean }[];
-    marketList: (MarketEntityModel & { stampJoin: Date })[];
+    contactPersonIdList: Array<{ id: string; isArchived: boolean }>;
+    marketList: Array<NightMarketEntityModel & { stampJoin: Date }>;
 }
 
 export type OrganizationModel = OrganizationEntityModel &

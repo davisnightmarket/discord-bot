@@ -1,8 +1,4 @@
-import {
-    type NMConfigModel,
-    type EnvType,
-    NMConfigInstanceModel
-} from '../model';
+import type { NMConfigModel, EnvType, NMConfigInstanceModel } from '../model';
 import {
     GoogleSheetService,
     type SpreadsheetDataModel,
@@ -44,8 +40,9 @@ export class CoreDataService {
     async getMarketConfigByGuildId(guildId: string): Promise<NMConfigModel> {
         // get the market id
         const configRows = await this.configSheetService.getAllRowsAsMaps();
+
         const marketInstanceConfig = configRows.find(
-            (a) => a.DISCORD_GUILD_ID === guildId
+            (a) => a.DISCORD_GUILD_ID === guildId.toString()
         );
 
         if (!marketInstanceConfig) {
@@ -54,8 +51,8 @@ export class CoreDataService {
 
         // return
         return this.getValidMarketConfig({
-            ...marketInstanceConfig,
-            ...this.marketConfig
+            ...this.marketConfig,
+            ...marketInstanceConfig
         });
     }
 

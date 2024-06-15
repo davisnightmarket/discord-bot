@@ -15,10 +15,6 @@ class CoreDataService {
             spreadsheetId,
             sheetName: 'config'
         });
-        this.configMarketSheetService = new _1.GoogleSheetService({
-            spreadsheetId,
-            sheetName: 'config-market'
-        });
         this.coreTypeSheetService = new _1.GoogleSheetService({
             spreadsheetId,
             sheetName: 'type'
@@ -26,26 +22,30 @@ class CoreDataService {
     }
     async getMarketConfigByGuildId(guildId) {
         // get the market id
-        const configRows = await this.configMarketSheetService.getAllRowsAsMaps();
-        const marketId = configRows.find((a) => a.code === 'DISCORD_GUILD_ID')?.marketId;
-        if (!marketId) {
+        const configRows = await this.configSheetService.getAllRowsAsMaps();
+        const marketInstanceConfig = configRows.find((a) => a.DISCORD_GUILD_ID === guildId.toString());
+        if (!marketInstanceConfig) {
             throw new Error(`No config found for guild ${guildId}!`);
         }
-        const configRow = (await this.configMarketSheetService.getAllRowsAsMaps()).filter((row) => row.marketId === marketId);
-        // build the config
-        const config = { ...this.marketConfig };
-        for (const row of configRow) {
-            config[row.code] = row.value;
-        }
         // return
-        return this.getValidMarketConfig(config);
+        return this.getValidMarketConfig({
+            ...this.marketConfig,
+            ...marketInstanceConfig
+        });
     }
-    getValidMarketConfig({ GSPREAD_CORE_ID, NM_ID, DISCORD_GUILD_ID, GSPREAD_MARKET_ID }) {
+    getValidMarketConfig({ GSPREAD_CORE_ID, NM_ID, NM_TIMEZONE, NM_TITLE, DISCORD_GUILD_ID, GSPREAD_MARKET_ID }) {
         if (!GSPREAD_CORE_ID) {
             throw new Error('Missing GSPREAD_CORE_ID');
         }
         if (!NM_ID) {
             throw new Error('Missing NM_ID');
+        }
+        if (!NM_TIMEZONE) {
+            // default to pacific time?
+            NM_TIMEZONE = 'America/Los_Angeles';
+        }
+        if (!NM_TITLE) {
+            NM_TITLE = 'Night Market';
         }
         if (!DISCORD_GUILD_ID) {
             throw new Error('Missing DISCORD_GUILD_ID');
@@ -56,16 +56,18 @@ class CoreDataService {
         return {
             GSPREAD_CORE_ID,
             NM_ID,
+            NM_TIMEZONE,
+            NM_TITLE,
             DISCORD_GUILD_ID,
             GSPREAD_MARKET_ID
         };
     }
+    async getAllInstanceConfig() {
+        return await this.configSheetService.getAllRowsAsMaps();
+    }
     async getAllGuildIds() {
-        // get the market id
-        const configRows = await this.configMarketSheetService.getAllRowsAsMaps();
-        return configRows
-            .filter((a) => a.code === 'DISCORD_GUILD_ID')
-            .map((a) => a.value);
+        const configRows = await this.configSheetService.getAllRowsAsMaps();
+        return configRows.map((a) => a.DISCORD_GUILD_ID);
     }
 }
 exports.CoreDataService = CoreDataService;

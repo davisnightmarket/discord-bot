@@ -25,7 +25,7 @@ export const FoodCountReminderJob = (client: Client) => async () => {
             markdownService,
             nightDataService,
             foodCountDataService,
-            personDataService
+            personSheetService
         } = await GetGuildServices(guild.id);
         // next we want a list of all pickups this year so far (or at least a month back)
         // then we want to search back through them, and get only those that happened last night
@@ -44,7 +44,7 @@ export const FoodCountReminderJob = (client: Client) => async () => {
                 await Promise.all(
                     yesterdayPickupList.map(
                         async (a) =>
-                            await personDataService.getPersonByEmailOrDiscordId(
+                            await personSheetService.getPersonByEmailOrDiscordId(
                                 a.discordIdOrEmail
                             )
                     )

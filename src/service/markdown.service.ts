@@ -273,19 +273,24 @@ export class MarkdownService {
     getPickupsAnnounce({ pickupList }: NightMarketModel): string {
         return `Pick-up${pickupList.length === 1 ? '' : 's'}:\n> ${pickupList
             .map(({ orgPickup, timeStart, personList }) => {
+                console.log(orgPickup, timeStart, personList);
                 return (
                     orgPickup +
                     ' ' +
                     ParseContentService.getAmPmTimeFrom24Hour(timeStart) +
                     ' ' +
-                    personList
-                        .map(
-                            ({ name, discordId }) =>
-                                `${bold(name)} ${
-                                    discordId ? userMention(discordId) : ''
-                                }`
-                        )
-                        .join(', ')
+                    (personList.length
+                        ? personList
+                              .map(
+                                  ({ name, discordId }) =>
+                                      `${bold(name)} ${
+                                          discordId
+                                              ? userMention(discordId)
+                                              : ''
+                                      }`
+                              )
+                              .join(', ')
+                        : bold('HELP NEEDED!'))
                 );
             })
             .join('\n> ')}`;
@@ -301,7 +306,9 @@ export class MarkdownService {
         return `Night Captain${
             nightCapList.length === 1 ? '' : 's'
         }: ${nightCapList
-            .map((p) => (p.discordId ? userMention(p.discordId) : p.name))
+            .map(({ discordId, name }) =>
+                discordId ? userMention(discordId) : bold(name)
+            )
             .join(', ')}`;
     }
 
@@ -311,12 +318,20 @@ export class MarkdownService {
             return 'Distro help NEEDED!';
         }
         const a = hostList.filter((a) => a.role === 'night-distro');
-        return `Host${a.length > 1 ? 's' : ''}: ${a
-            .map(
-                ({ name, discordId }) =>
-                    `${discordId ? userMention(discordId) : bold(name)}`
-            )
-            .join(', ')} `;
+        return `Distro: ${
+            a.length
+                ? a
+                      .map(
+                          ({ name, discordId }) =>
+                              `${
+                                  discordId
+                                      ? userMention(discordId)
+                                      : bold(name)
+                              }`
+                      )
+                      .join(', ')
+                : bold('HELP NEEDED!')
+        } `;
     }
 
     getMyDistros(discordId: string, { marketList }: NightMapModel) {
@@ -382,20 +397,22 @@ export class MarkdownService {
                     ' ' +
                     ParseContentService.getAmPmTimeFrom24Hour(timeStart) +
                     ' ' +
-                    personList
-                        .map(
-                            (a) =>
-                                `${bold(a.name)} ${
-                                    discordId === a.discordId
-                                        ? `(YOU${
-                                              a.periodStatus === 'SHADOW'
-                                                  ? ', Shadow Mode'
-                                                  : ''
-                                          })`
-                                        : ''
-                                }`
-                        )
-                        .join(', ')
+                    (personList.length
+                        ? personList
+                              .map(
+                                  (a) =>
+                                      `${bold(a.name)} ${
+                                          discordId === a.discordId
+                                              ? `(YOU${
+                                                    a.periodStatus === 'SHADOW'
+                                                        ? ', Shadow Mode'
+                                                        : ''
+                                                })`
+                                              : ''
+                                      }`
+                              )
+                              .join(', ')
+                        : bold('HELP NEEDED!'))
                 );
             })
             .join('\n')}`;
@@ -411,22 +428,24 @@ export class MarkdownService {
         // todo: this logic needs improvement
         const nightCapList = hostList.filter((a) => a.role === 'night-captain');
 
-        return `Night Captain${
-            nightCapList.length > 1 ? 's' : ''
-        }: ${nightCapList
-            .map(
-                (a) =>
-                    `${bold(a.name)} ${
-                        discordId === a.discordId
-                            ? `(YOU${
-                                  a.periodStatus === 'SHADOW'
-                                      ? ', Shadow Mode'
+        return `Night Captain${nightCapList.length > 1 ? 's' : ''}: ${
+            nightCapList.length
+                ? nightCapList
+                      .map(
+                          (a) =>
+                              `${bold(a.name)} ${
+                                  discordId === a.discordId
+                                      ? `(YOU${
+                                            a.periodStatus === 'SHADOW'
+                                                ? ', Shadow Mode'
+                                                : ''
+                                        })`
                                       : ''
-                              })`
-                            : ''
-                    }`
-            )
-            .join(', ')}`;
+                              }`
+                      )
+                      .join(', ')
+                : bold('HELP NEEDED!')
+        }`;
     }
 
     // todo: use message service
@@ -438,19 +457,23 @@ export class MarkdownService {
             return 'Distro: HELP NEEDED!';
         }
         const a = hostList.filter((a) => a.role === 'night-distro');
-        return `Host${a.length === 1 ? '' : 's'}: ${a
-            .map(
-                (a) =>
-                    `${bold(a.name)} ${
-                        discordId === a.discordId
-                            ? `(YOU${
-                                  a.periodStatus === 'SHADOW'
-                                      ? ', Shadow Mode'
+        return `Distro: ${
+            a.length
+                ? a
+                      .map(
+                          (a) =>
+                              `${bold(a.name)} ${
+                                  discordId === a.discordId
+                                      ? `(YOU${
+                                            a.periodStatus === 'SHADOW'
+                                                ? ', Shadow Mode'
+                                                : ''
+                                        })`
                                       : ''
-                              })`
-                            : ''
-                    }`
-            )
-            .join(', ')} `;
+                              }`
+                      )
+                      .join(', ')
+                : bold('HELP NEEDED!')
+        } `;
     }
 }

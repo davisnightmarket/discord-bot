@@ -14,6 +14,9 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+__exportStar(require("./entity.model"), exports);
+__exportStar(require("./action.model"), exports);
 __exportStar(require("./nm.model"), exports);
 __exportStar(require("./nm-config.model"), exports);
 __exportStar(require("./nm-keys.model"), exports);
+__exportStar(require("./person.model"), exports);

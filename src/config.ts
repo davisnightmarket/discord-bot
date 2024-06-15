@@ -1,4 +1,4 @@
-import { AppConfigModel, EnvType, NMConfigModel } from './model';
+import type { AppConfigModel, EnvType, NMConfigModel } from './model';
 
 // these come from the config spreadsheet, used here as placeholders
 export const InstanceConfig: NMConfigModel = {
@@ -16,7 +16,6 @@ export const InstanceConfig: NMConfigModel = {
 // core marketConfig property GSPREAD_CORE_ID is stored in
 // the local codebase because it bootstraps our core data service
 // which is where specific config data is stored, ie discord guild id and market
-// specific data spreadsheets
 export const EnvConfig: Record<EnvType, Pick<AppConfigModel, 'nmConfig'>> = {
     test: {
         nmConfig: {

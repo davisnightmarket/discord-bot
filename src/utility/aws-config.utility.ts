@@ -2,7 +2,7 @@ import { join } from 'path';
 import { readFileSync } from 'fs';
 import { GetAwsSecret } from './aws-secrets.utility';
 import { GetEnv } from './env.utility';
-import { SecretConfigModel } from '../model';
+import type { SecretConfigModel } from '../model';
 
 const DISCORD_CONFIG_NAME = 'nm-discord-api';
 const GOOGLE_KEYS_NAME = 'nm-google-api';

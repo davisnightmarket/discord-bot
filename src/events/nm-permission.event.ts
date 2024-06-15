@@ -17,25 +17,25 @@ import { PERMISSION_CODE_LIST } from '../const';
 const dbg = GetDebug('PermissionEditButtonEvent');
 
 export async function PermissionCommandEvent(
-    { personDataService, markdownService }: GuildServiceModel,
+    { personSheetService, markdownService }: GuildServiceModel,
 
     interaction: ChatInputCommandInteraction,
     discordId: string
 ) {
     // make sure crabapple doesn't choke while waiting for data
-    const person = await personDataService.getPersonByDiscordId(discordId);
+    const person = await personSheetService.getPersonByDiscordId(discordId);
 
     if (!person) {
         // show them their modal
         interaction.showModal(
-            IdentityEditModalComponent(personDataService.createPerson(person))
+            IdentityEditModalComponent(personSheetService.createPerson(person))
         );
         return;
     }
 
     const components = PermissionStartComponent(discordId);
 
-    const permissionList = personDataService.getPermissionListMd(person);
+    const permissionList = personSheetService.getPermissionListMd(person);
 
     dbg(permissionList);
     const content =
@@ -53,7 +53,7 @@ export async function PermissionCommandEvent(
 
 // when they submit the edit button OR submit the actual selection
 export async function PermissionEditSelectEvent(
-    { personDataService, markdownService }: GuildServiceModel,
+    { personSheetService, markdownService }: GuildServiceModel,
 
     interaction: StringSelectMenuInteraction,
     discordId: string,
@@ -71,7 +71,7 @@ export async function PermissionEditSelectEvent(
 
     // step from the custom id tells us where we are in the process
 
-    const person = await personDataService.getPersonByDiscordId(discordId);
+    const person = await personSheetService.getPersonByDiscordId(discordId);
 
     if (step === 'edit') {
         if (!person) {
@@ -93,14 +93,14 @@ export async function PermissionEditSelectEvent(
             .map((a) => a[1])
             .join(',');
 
-        await personDataService.updatePersonByDiscordId(person);
+        await personSheetService.updatePersonByDiscordId(person);
 
         await interaction.editReply(
             [
                 markdownService.md.GENERIC_OK({}),
                 markdownService.md.PERMISSION_LIST({
                     permissionList:
-                        personDataService.getPermissionListMd(person)
+                        personSheetService.getPermissionListMd(person)
                 })
             ].join('\n')
         );
@@ -109,7 +109,7 @@ export async function PermissionEditSelectEvent(
 
 // when they submit the edit button OR submit the actual selection
 export async function PermissionButtonEvent(
-    { personDataService, markdownService }: GuildServiceModel,
+    { personSheetService, markdownService }: GuildServiceModel,
 
     interaction: ButtonInteraction,
     discordId: string,
@@ -136,7 +136,7 @@ export async function PermissionButtonEvent(
     }
 
     if (step === 'revoke') {
-        const person = await personDataService.getPersonByDiscordId(discordId);
+        const person = await personSheetService.getPersonByDiscordId(discordId);
 
         if (!person) {
             await interaction.editReply(
@@ -148,14 +148,14 @@ export async function PermissionButtonEvent(
         }
         person.permissionList = '';
 
-        await personDataService.updatePersonByDiscordId(person);
+        await personSheetService.updatePersonByDiscordId(person);
 
         await interaction.editReply(
             [
                 markdownService.md.GENERIC_OK({}),
                 markdownService.md.PERMISSION_LIST({
                     permissionList:
-                        personDataService.getPermissionListMd(person)
+                        personSheetService.getPermissionListMd(person)
                 })
             ].join('\n')
         );
@@ -163,7 +163,7 @@ export async function PermissionButtonEvent(
     }
 
     if (step === 'grant-all') {
-        const person = await personDataService.getPersonByDiscordId(discordId);
+        const person = await personSheetService.getPersonByDiscordId(discordId);
 
         if (!person) {
             await interaction.editReply(
@@ -175,14 +175,14 @@ export async function PermissionButtonEvent(
         }
         person.permissionList = PERMISSION_CODE_LIST.join(',');
 
-        await personDataService.updatePersonByDiscordId(person);
+        await personSheetService.updatePersonByDiscordId(person);
 
         await interaction.editReply(
             [
                 markdownService.md.GENERIC_OK({}),
                 markdownService.md.PERMISSION_LIST({
                     permissionList:
-                        personDataService.getPermissionListMd(person)
+                        personSheetService.getPermissionListMd(person)
                 })
             ].join('\n')
         );

@@ -18,7 +18,7 @@ import { DAYS_OF_WEEK } from '../const';
 const dbg = GetDebug('AvailabilityEvent');
 
 export async function AvailabilityCommandEvent(
-    { personService, personDataService, markdownService }: GuildServiceModel,
+    { personService, personSheetService, markdownService }: GuildServiceModel,
 
     interaction: ChatInputCommandInteraction,
     discordId: string
@@ -26,7 +26,7 @@ export async function AvailabilityCommandEvent(
     dbg('ok');
 
     // get the person's data
-    const personData = await personDataService.getPersonByDiscordId(
+    const personData = await personSheetService.getPersonByDiscordId(
         interaction.user.id
     );
 
@@ -58,7 +58,11 @@ export async function AvailabilityCommandEvent(
 // triggered by any button event with an availability custom id
 
 export async function AvailabilityEditButtonEvent(
-    { personDataService, nightDataService, markdownService }: GuildServiceModel,
+    {
+        personSheetService,
+        nightDataService,
+        markdownService
+    }: GuildServiceModel,
 
     interaction: ButtonInteraction,
     discordId: string,
@@ -82,7 +86,7 @@ export async function AvailabilityEditButtonEvent(
     dbg(command, step, day);
 
     // get the person's data
-    const person = await personDataService.getPersonByDiscordId(
+    const person = await personSheetService.getPersonByDiscordId(
         interaction.user.id
     );
 
@@ -129,7 +133,7 @@ export async function AvailabilityEditButtonEvent(
 
     // in this case we have selected our night-distro availability so ...
     if (step === 'night-distro-clear') {
-        personDataService.updatePersonByDiscordId({
+        personSheetService.updatePersonByDiscordId({
             ...person,
             availabilityHost: ''
         });
@@ -148,7 +152,7 @@ export async function AvailabilityEditButtonEvent(
 
         availabilityPickupList = '';
 
-        personDataService.updatePersonByDiscordId({
+        personSheetService.updatePersonByDiscordId({
             ...person,
             availabilityPickupList
         });
@@ -162,7 +166,7 @@ export async function AvailabilityEditButtonEvent(
 
 // triggered by any select event with an availability custom id
 export async function AvailabilityEditSelectEvent(
-    { personDataService, markdownService }: GuildServiceModel,
+    { personSheetService, markdownService }: GuildServiceModel,
 
     interaction: StringSelectMenuInteraction,
     discordId: string,
@@ -180,7 +184,7 @@ export async function AvailabilityEditSelectEvent(
     dbg(command, step, day);
 
     // get the person's data
-    const person = await personDataService.getPersonByDiscordId(
+    const person = await personSheetService.getPersonByDiscordId(
         interaction.user.id
     );
 
@@ -189,7 +193,7 @@ export async function AvailabilityEditSelectEvent(
         // // we cannot show the identity model since we have deferred
         await interaction.editReply(await markdownService.getGenericNoPerson());
         // interaction.showModal(
-        //     IdentityEditModalComponent(personDataService.createPerson(person))
+        //     IdentityEditModalComponent(personSheetService.createPerson(person))
         // );
         return;
     }
@@ -202,7 +206,7 @@ export async function AvailabilityEditSelectEvent(
         // const [day, timeStart] = interaction.values[0].split('|||');
         // dbg(day, timeStart);
 
-        personDataService.updatePersonByDiscordId({
+        personSheetService.updatePersonByDiscordId({
             ...person,
             availabilityHost: interaction.values.join(',')
         });
@@ -237,18 +241,19 @@ export async function AvailabilityEditSelectEvent(
             components
         });
     }
+
     // in this case we are in the pickup section
     if (step === 'night-pickup') {
         // save the previous to the db ...
         // if we are on the first day, reset
-        let { availabilityPickupList } = person;
+        let { availabilityPickupList = '' } = person;
         if (!daysOfWeekIdList.indexOf(day)) {
             availabilityPickupList = interaction.values.join(',');
         } else {
-            availabilityPickupList += interaction.values.join(',');
+            (availabilityPickupList as string) += interaction.values.join(',');
         }
         // make sure they are unique
-        availabilityPickupList = availabilityPickupList
+        availabilityPickupList = (availabilityPickupList as string)
             .split(', ')
             .reduce<string[]>((a, b) => {
                 if (!a.includes(b)) {
@@ -258,7 +263,7 @@ export async function AvailabilityEditSelectEvent(
             }, [])
             .join(',');
 
-        personDataService.updatePersonByDiscordId({
+        personSheetService.updatePersonByDiscordId({
             ...person,
             availabilityPickupList
         });
@@ -290,7 +295,7 @@ export async function AvailabilityEditSelectEvent(
 
 // // in which user edits their availability
 // export async function AvailabilityNoneButtonEvent(
-//     { personDataService, markdownService }: GuildServiceModel,
+//     { personSheetService, markdownService }: GuildServiceModel,
 
 //     interaction: ButtonInteraction,
 //     discordId: string,
@@ -309,7 +314,7 @@ export async function AvailabilityEditSelectEvent(
 //     await interaction.deferReply({ ephemeral: true });
 
 //     // get the person's data
-//     const person = await personDataService.getPersonByDiscordId(
+//     const person = await personSheetService.getPersonByDiscordId(
 //         interaction.user.id
 //     );
 
@@ -318,7 +323,7 @@ export async function AvailabilityEditSelectEvent(
 //         // // we cannot show the identity model since we have deferred
 //         await interaction.editReply(await markdownService.getGenericNoPerson());
 //         // interaction.showModal(
-//         //     IdentityEditModalComponent(personDataService.createPerson(person))
+//         //     IdentityEditModalComponent(personSheetService.createPerson(person))
 //         // );
 //         return;
 //     }
@@ -331,7 +336,7 @@ export async function AvailabilityEditSelectEvent(
 //         // const [day, timeStart] = interaction.values[0].split('|||');
 //         // dbg(day, timeStart);
 
-//         personDataService.updatePersonByDiscordId({
+//         personSheetService.updatePersonByDiscordId({
 //             ...person,
 //             availabilityHost: ''
 //         });
@@ -364,7 +369,7 @@ export async function AvailabilityEditSelectEvent(
 //         } else {
 //             availabilityPickup += '';
 //         }
-//         personDataService.updatePersonByDiscordId({
+//         personSheetService.updatePersonByDiscordId({
 //             ...person,
 //             availabilityPickup
 //         });

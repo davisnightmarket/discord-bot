@@ -1,14 +1,94 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PersonDataService = void 0;
+exports.PersonSheetService = void 0;
 const const_1 = require("../const");
-const service_1 = require("../service");
-class PersonDataService {
-    constructor(spreadsheetId, pgService) {
-        this.pgService = pgService;
-        this.personSheetService = new service_1.GoogleSheetService({
+const _1 = require(".");
+const PersonAvailabilityHostMap = {
+    AVAILABLE_MONDAY: 'Available to host/distro Monday?',
+    AVAILABLE_TUESDAY: 'Available to host/distro Tuesday?',
+    AVAILABLE_WEDNESDAY: 'Available to host/distro Wednesday?',
+    AVAILABLE_THURSDAY: 'Available to host/distro Thursday?',
+    AVAILABLE_FRIDAY: 'Available to host/distro Friday?',
+    AVAILABLE_SATURDAY: 'Available to host/distro Saturday?',
+    AVAILABLE_SUNDAY: 'Available to host/distro Sunday?'
+};
+const PersonAvailabilityPickupMap = {
+    AVAILABLE_MONDAY: 'Available to pickup Monday?',
+    AVAILABLE_TUESDAY: 'Available to pickup Tuesday?',
+    AVAILABLE_WEDNESDAY: 'Available to pickup Wednesday?',
+    AVAILABLE_THURSDAY: 'Available to pickup Thursday?',
+    AVAILABLE_FRIDAY: 'Available to pickup Friday?',
+    AVAILABLE_SATURDAY: 'Available to pickup Saturday?',
+    AVAILABLE_SUNDAY: 'Available to pickup Sunday?'
+};
+const PersonPermissionMap = {
+    PERMISSION_CONTACT_EMAIL_ON_AVAILABILITY: 'Email about availability?',
+    PERMISSION_CONTACT_TEXT_ON_VOLUNTEER_PICKUP_REMINDER: 'Text reminder about pickup?',
+    PERMISSION_CONTACT_TEXT_ON_VOLUNTEER_HOST_REMINDER: 'Text reminder about hosting?',
+    PERMISSION_CONTACT_TEXT_ON_AVAILABILITY_REQUEST: 'Text about availability?',
+    PERMISSION_SHARE_EMAIL_WITH_COMMUNITY_COORDINATOR: 'Share Email with Community Coordinators?',
+    PERMISSION_SHARE_PHONE_WITH_COMMUNITY_COORDINATOR: 'Share Phone with Community Coordinators?',
+    PERMISSION_SHARE_PHONE_WITH_NIGHT_CAP: 'Share Phone with Night Cap?'
+};
+const PersonTeamInterestMap = {
+    'INTEREST_TEAM-BUILD': 'Build Team?',
+    'INTEREST_TEAM-ONBOARDING': 'Onboarding Team?',
+    'INTEREST_TEAM-OUTREACH': 'Outreach Team?',
+    'INTEREST_TEAM-SOCIAL-MEDIA': 'Social Media Team?',
+    INTEREST_OTHER: 'Other Team?'
+};
+const PersonBikeMap = {
+    BIKE_OWNER: 'Have a bike?',
+    BIKE_CART_OWNER: 'Have a bike cart?',
+    BIKE_OPERATE_AT_NIGHT: 'Bike at night?',
+    BIKE_CART_OPERATE_AT_NIGHT: 'Operate a bike cart at night?'
+};
+const PersonSkillMap = {
+    SKILL_WOODWORKING: 'Woodworking Skills?',
+    SKILL_ELECTRONICS: 'Electronics Skills?',
+    SKILL_SOCIAl_MEDIA: 'Social Media Skills?',
+    SKILL_LEADERSHIP: 'Leadership Skills?'
+};
+const PersonRoleInterestMap = {
+    'INTEREST_NIGHT-CAPTAIN': 'Night Captain?',
+    'INTEREST_NIGHT-DISTRO': 'Distribution & Hosting?',
+    'INTEREST_NIGHT-PICKUP': 'Food Pick-up?'
+};
+const PersonAdminRoleInterestMap = {
+    'INTEREST_COMMUNITY-COORDINATOR': 'Community Coordinator?',
+    'INTEREST_FOOD-SAFETY': 'Food Safety Officer',
+    INTEREST_DIRECTOR: 'Director?',
+    INTEREST_TREASURER: 'Treasurer?'
+};
+const AttributeKeyList = [
+    ...Object.keys(PersonPermissionMap),
+    ...Object.keys(PersonAvailabilityHostMap),
+    ...Object.keys(PersonAvailabilityPickupMap),
+    ...Object.keys(PersonBikeMap),
+    ...Object.keys(PersonTeamInterestMap),
+    ...Object.keys(PersonRoleInterestMap),
+    ...Object.keys(PersonSkillMap),
+    ...Object.keys(PersonAdminRoleInterestMap)
+];
+const headersList = [
+    'status',
+    'name',
+    'email',
+    'phone',
+    'location',
+    'bike',
+    'skills',
+    'bio',
+    'pronouns',
+    'reference',
+    'discordId'
+];
+class PersonSheetService {
+    constructor(spreadsheetId) {
+        this.personSheetService = new _1.GoogleSheetService({
             spreadsheetId,
-            sheetName: `person`
+            sheetName: `person`,
+            headersList: this.getHeaders()
         });
         this.waitingForPersonListCache = this.getPersonList().then((a) => a.map(this.createPerson));
         // reset the cache ever 2 hour
@@ -16,36 +96,79 @@ class PersonDataService {
             this.refreshPersonListCache();
         }, 1000 * 60 * 60 * 2);
     }
+    getHeaders() {
+        return headersList;
+    }
     static createPersonWithQueryId(discordIdOrEmail = '', person) {
         return {
-            ...PersonDataService.createPerson(person),
+            ...PersonSheetService.createPerson(person),
             discordIdOrEmail
         };
     }
     createPerson(person = {}) {
-        return PersonDataService.createPerson(person);
+        return PersonSheetService.createPerson(person);
     }
-    static createPerson({ status = '', name = '', email = '', phone = '', location = '', bike = '', bikeCart = '', bikeCartAtNight = '', skills = '', bio = '', pronouns = '', interest = '', reference = '', discordId = '', availabilityHostList = '', availabilityPickupList = '', teamInterestList = '', permissionList = '', stampCreate = '' } = {}) {
+    toAttrSheetData(person) {
+        return PersonSheetService.createAttributeMap(person);
+    }
+    static createAttributeMap(personAttributeMap) {
+        for (const k of Object.keys(personAttributeMap)) {
+            if (!AttributeKeyList.includes(k)) {
+                continue;
+            }
+            const a = (personAttributeMap[k] || '')
+                .trim()
+                .toLowerCase();
+            if (!a || a === 'no' || a === 'n') {
+                personAttributeMap[k] = 'no';
+            }
+            else {
+                personAttributeMap[k] =
+                    'yes';
+            }
+        }
+        return {
+            ...personAttributeMap
+        };
+    }
+    getAttrPermissionList(a) {
+        return this.getAttr(a, Object.keys(PersonPermissionMap));
+    }
+    getAttrAvailabilityHostList(a) {
+        return this.getAttr(a, Object.keys(PersonAvailabilityHostMap));
+    }
+    getAttrAvailabilityPickupList(a) {
+        return this.getAttr(a, Object.keys(PersonAvailabilityPickupMap));
+    }
+    getAttrRoleInterestList(a) {
+        return this.getAttr(a, Object.keys(PersonRoleInterestMap));
+    }
+    getAttrBikeList(a) {
+        return this.getAttr(a, Object.keys(PersonBikeMap));
+    }
+    getAttrSkillList(a) {
+        return this.getAttr(a, Object.keys(PersonSkillMap));
+    }
+    getAttrAdminRoleInterestList(a) {
+        return this.getAttr(a, Object.keys(PersonSkillMap));
+    }
+    getAttr(a, k) {
+        return Object.keys(a).filter((b) => k.includes(b) && a[b] === 'yes');
+    }
+    static createPerson(person = {}) {
+        const { status = '', name = '', email = '', phone = '', location = '', bio = '', pronouns = '', interest = '', reference = '', discordId = '' } = person;
         return {
             status,
             name,
             email,
             phone,
             location,
-            bike,
-            bikeCart,
-            bikeCartAtNight,
-            skills,
             bio,
             pronouns,
             interest,
             reference,
             discordId,
-            availabilityHostList,
-            availabilityPickupList,
-            teamInterestList,
-            permissionList,
-            stampCreate
+            ...this.createAttributeMap(person)
         };
     }
     async getFreshDiscordAndEmailByDiscordIdOrEmail(discordIdOrEmailList) {
@@ -179,11 +302,9 @@ class PersonDataService {
     }
     // methods return markdown person info
     getPermissionListMd(person) {
-        return (person?.permissionList
-            ?.split(',')
-            .filter((a) => a)
+        return (this.getAttrPermissionList(this.toAttrSheetData(person))
             .map((a) => `  - ${const_1.PERMISSION_MAP[a].name}`)
             .join('\n') || '  - NO PERMISSIONS GRANTED');
     }
 }
-exports.PersonDataService = PersonDataService;
+exports.PersonSheetService = PersonSheetService;

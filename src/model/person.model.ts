@@ -18,7 +18,7 @@ export interface PersonDataModel {
     id: string;
     idAccount: string;
     contactList: Array<{
-        type: 'email' | 'phone' | 'address';
+        type: string;
         contact: string;
     }>;
 
@@ -43,6 +43,8 @@ export interface PersonDataModel {
     idNm: string;
     stampCreate: Date;
 }
+
+export type PersonModel = PersonEntityModel & PersonDataModel;
 
 export type PersonAttrAdminRoleInterestType =
     `INTEREST_${Uppercase<NmAdminRoleType>}`;
@@ -77,5 +79,3 @@ export type PersonAttrPermissionType =
     | 'PERMISSION_SHARE_EMAIL_WITH_COMMUNITY_COORDINATOR'
     | 'PERMISSION_SHARE_PHONE_WITH_COMMUNITY_COORDINATOR'
     | 'PERMISSION_SHARE_PHONE_WITH_NIGHT_CAP';
-
-export type PersonModel = PersonEntityModel & PersonDataModel;

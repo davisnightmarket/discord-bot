@@ -148,11 +148,11 @@ class GoogleSheetService {
         }
         return list;
     }
-    // we should be careful here, because this can break a lot of data
+    // we should be careful with this, because this can break a lot of data
     async createHeaders(headerList) {
         await this.waitingForSheetId;
         let list = ((await this.spreadsheetService.rangeGet(this.getSheetRangeString('A1', 'Z1')))[0] || []);
-        // if we past a header list then we are replacing the
+        // if we pass a header list then we are replacing the
         if (headerList) {
             // the keys do NOT match, we throw an error
             if (!list.every((a, i) => {

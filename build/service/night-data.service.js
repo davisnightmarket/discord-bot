@@ -18,8 +18,8 @@ exports.NightOpPeriodStatus = {
 };
 const dbg = (0, utility_1.GetDebug)('NightDataService');
 class NightDataService {
-    constructor(spreadsheetId, personDataService) {
-        this.personDataService = personDataService;
+    constructor(spreadsheetId, personSheetService) {
+        this.personSheetService = personSheetService;
         this.waitingForNightData = Promise.resolve([]);
         // to prevent overwriting each others data
         // this won't work if we have multiple instances
@@ -335,7 +335,7 @@ class NightDataService {
     // this really attempts to turn person identifiers into discord ids
     async getNightOpListWithDiscordIdIfPossible(nightOps) {
         return await Promise.all(nightOps.map(async (op) => {
-            const person = await this.personDataService.getPersonByEmailOrDiscordId(op.discordIdOrEmail);
+            const person = await this.personSheetService.getPersonByEmailOrDiscordId(op.discordIdOrEmail);
             return {
                 ...op,
                 discordIdOrEmail: 
@@ -417,7 +417,7 @@ class NightDataService {
         const headerList = await this.nightSheetService.waitingForHeaderList;
         // attempt to save emails instead of discordIds
         nightData = await Promise.all(nightData.map(async (a) => {
-            const person = await this.personDataService.getPersonByEmailOrDiscordId(a.discordIdOrEmail);
+            const person = await this.personSheetService.getPersonByEmailOrDiscordId(a.discordIdOrEmail);
             return {
                 ...a,
                 discordIdOrEmail: person?.email ?? a.discordIdOrEmail
@@ -443,8 +443,8 @@ class NightDataService {
             .filter((a, i) => personIdList.indexOf(a) === i)
             .filter((a) => a)
             .map(async (discordIdOrEmail) => {
-            const p = await this.personDataService.getPersonByEmailOrDiscordId(discordIdOrEmail);
-            return _1.PersonDataService.createPersonWithQueryId(discordIdOrEmail, p ?? {});
+            const p = await this.personSheetService.getPersonByEmailOrDiscordId(discordIdOrEmail);
+            return _1.PersonSheetService.createPersonWithQueryId(discordIdOrEmail, p ?? {});
         }));
     }
     // todo: move to markdown service

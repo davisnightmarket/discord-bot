@@ -5,22 +5,22 @@ const component_1 = require("../component");
 const utility_1 = require("../utility");
 const service_1 = require("../service");
 const dbg = (0, utility_1.GetDebug)('IdentityEvent');
-async function IdentityCommandEvent({ personDataService }, interaction, discordId) {
+async function IdentityCommandEvent({ personSheetService }, interaction, discordId) {
     dbg('IdentityCommandEvent');
     // ! for some reason this is taking too long sometimes. Why? It is cached data
     // i think this is because when the cache is reloading, the reply has to wait for more
     // than three seconds, which discord doesn't allow. We will have to live with this.
-    const person = await personDataService.getPersonByDiscordId(discordId);
+    const person = await personSheetService.getPersonByDiscordId(discordId);
     // show them their modal
     try {
-        await interaction.showModal((0, component_1.IdentityEditModalComponent)(personDataService.createPerson(person)));
+        await interaction.showModal((0, component_1.IdentityEditModalComponent)(personSheetService.createPerson(person)));
     }
     catch (e) {
         console.error(e);
     }
 }
 exports.IdentityCommandEvent = IdentityCommandEvent;
-async function IdentityEditModalEvent({ personDataService }, interaction, discordId, [command]) {
+async function IdentityEditModalEvent({ personSheetService }, interaction, discordId, [command]) {
     if (command !== 'identity-edit') {
         return;
     }
@@ -30,8 +30,8 @@ async function IdentityEditModalEvent({ personDataService }, interaction, discor
     });
     // get the person's data
     // or create a blank person
-    const person = (await personDataService.getPersonByDiscordId(discordId)) ??
-        service_1.PersonDataService.createPerson({
+    const person = (await personSheetService.getPersonByDiscordId(discordId)) ??
+        service_1.PersonSheetService.createPerson({
             discordId
         });
     if (!person.email) {
@@ -52,7 +52,7 @@ async function IdentityEditModalEvent({ personDataService }, interaction, discor
             person[k] = value;
         }
     }
-    await personDataService.createOrUpdatePersonByDiscordId({
+    await personSheetService.createOrUpdatePersonByDiscordId({
         ...person
     });
     await interaction.editReply({

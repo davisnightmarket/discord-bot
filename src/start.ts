@@ -27,29 +27,27 @@ run();
 
 async function run() {
     const config = await WaitingForConfig;
+    // create a server object:
 
-    //create a server object:
     http.createServer(async function (req, res) {
-        const { pathname } = url.parse(req.url || '/');
+        console.log(req.url);
+        const { pathname } = url.parse(req.url ?? '/');
         console.log(pathname);
         if (pathname === '/job/night-ops') {
-            await NightOpsJob(client);
+            NightOpsJob(client)();
         }
         if (pathname === '/job/night-timeline') {
-            await NightTimelineJob(client);
+            NightTimelineJob(client)();
         }
         if (pathname === '/job/night-food-count-reminder') {
-            await FoodCountReminderJob(client);
+            FoodCountReminderJob(client)();
         }
-        res.write('Hello World!'); //write a response to the client
-        res.end(); //end the response
-    }).listen(3000); //the server object listens on port 8080
+        res.write('Hello World!'); // write a response to the client
+        res.end(); // end the response
+    }).listen(3000); // the server object listens on port 8080
     // TODO: we have to remember that each guild could have a different timezone
     // so we need to figure out how to adjust the crons for each guild
     // Add cron jobs
-    // AddCron('', () => {
-    //     tzOffset.offsetOf('America/Sao_Paulo');
-    // });
 
     AddCron(
         // twoice per hour, once on the hour, once on the half hour
@@ -66,7 +64,10 @@ async function run() {
             // get the current hour in that zone
         }
     );
-
+    AddCron(
+        '0 30 23 * * *', // at 11:30pm
+        NightTimelineJob(client)
+    );
     AddCron(
         '0 30 23 * * *', // at 11:30pm
         NightTimelineJob(client)
