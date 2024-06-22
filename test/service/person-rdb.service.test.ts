@@ -13,7 +13,7 @@ describe('personRdbService', () => {
         });
         expect(person.id).toBe('discordId-1234');
         expect(person.name).toBe('Marty McFly');
-        // const { entityPersonTable } = await personRdbService.getRdbTables();
+        // const {  } = await personRdbService.getRdbTables();
         // console.log(await entityPersonTable.run());
         const didUpdate = await personRdbService.updatePersonEntity({
             id: 'discordId-1234',

@@ -31,7 +31,7 @@ async function run() {
 
     http.createServer(async function (req, res) {
         dbg(req.url);
-        const { pathname } = url.parse(req.url ?? '/');
+        const { pathname } = new url.URL(req.url ?? '/');
         dbg(pathname);
         if (pathname === '/job/night-ops') {
             NightOpsJob(client)();

@@ -12,7 +12,8 @@ import {
     GoogleDriveService,
     EntityService,
     RdbService,
-    PersonRdbService
+    PersonRdbService,
+    AccessRdbService
 } from '../service';
 
 // technically we want to instantiate this once,
@@ -33,6 +34,7 @@ export interface GuildServiceModel {
     markdownService: MarkdownService;
     marketAdminService: NmAdminService;
     onboardingService: OnboardingService;
+    accessRdbService: AccessRdbService;
 }
 
 // because we need to build a set of services that are connected to data per guild
@@ -71,6 +73,8 @@ export async function GetGuildServices(guildId: string) {
             NM_INSTANCE_GSPREAD_ID,
             personSheetService
         );
+        const accessRdbService = new AccessRdbService(rdbService);
+
         servicesByGuildId.set(guildId, {
             markdownService,
             coreDataService,
@@ -88,7 +92,8 @@ export async function GetGuildServices(guildId: string) {
                 personRdbService,
                 personSheetService,
                 googleDriveService
-            )
+            ),
+            accessRdbService
         });
     }
 

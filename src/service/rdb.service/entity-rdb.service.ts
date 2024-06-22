@@ -1,5 +1,5 @@
 import type { RTable } from 'rethinkdb-ts';
-import type { EntityModel } from '../model';
+import type { EntityModel } from '../../model';
 import type { RdbService } from './rdb.service';
 
 const EntityTypeList = ['type_person', 'type_event', 'type_role', 'type_team'];

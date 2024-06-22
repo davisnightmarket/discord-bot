@@ -1,7 +1,7 @@
 import type { RTable } from 'rethinkdb-ts';
-import type { PersonDataModel, PersonModel } from '../model/person.model';
+import type { PersonDataModel, PersonModel } from '../../model/person.model';
 import type { EntityService } from './entity-rdb.service';
-import type { PersonSheetModel } from './person-sheet.service';
+import type { PersonSheetModel } from '../person-sheet.service';
 import type { RdbService } from './rdb.service';
 
 // required to insert for extended person data

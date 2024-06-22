@@ -1,6 +1,6 @@
-import { EnvType } from './nm-config.model';
+import type { EnvType } from './nm-config.model';
 
-export type RedbDbType = `nm-${EnvType}`;
+export type RdbDbType = `nm-${EnvType}`;
 
 export type RdbTableType =
     | 'entity'
