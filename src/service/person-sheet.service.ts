@@ -432,14 +432,6 @@ export class PersonSheetService {
         });
 
         return list;
-
-        // .length
-        //     ? list
-        //     : (await this.getPersonList()).filter((map) => {
-        //           return Object.keys(map).some(
-        //               (k) => query[k] && '' + query[k] === '' + map[k]
-        //           );
-        //       });
     }
 
     async getNameList() {
@@ -463,7 +455,7 @@ export class PersonSheetService {
             discordId
         });
         if (a.length > 1) {
-            console.error(`We found multiple persons with that identidiscordId!
+            console.error(`We found multiple persons with that discordId!
             ${a.map((a) => `${a.name} ${a.email}`).join(', ')}
             `);
         }
@@ -473,6 +465,18 @@ export class PersonSheetService {
     async getPersonByEmail(email: string): Promise<PersonSheetModel | null> {
         const a = await this.getPersonListByMatchAnyProperties({
             email
+        });
+        if (a.length > 1) {
+            console.error(`We found multiple persons with that email!
+            ${a.map((a) => `${a.name} ${a.email}`).join(', ')}
+            `);
+        }
+        return a[0] || null;
+    }
+
+    async getPersonByPhone(phone: string): Promise<PersonSheetModel | null> {
+        const a = await this.getPersonListByMatchAnyProperties({
+            phone
         });
         if (a.length > 1) {
             console.error(`We found multiple persons with that email!

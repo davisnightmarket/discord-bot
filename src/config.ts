@@ -8,9 +8,13 @@ export const InstanceConfig: NMConfigModel = {
     NM_TIMEZONE: '',
     NM_TITLE: '',
     // comes from discord, the unique id of the guild that is associated with the market
-    DISCORD_GUILD_ID: '',
+    NM_DISCORD_GUILD_ID: '',
     // each market gets a dedicated spreadsheet for their data
-    GSPREAD_MARKET_ID: ''
+    NM_INSTANCE_GSPREAD_ID: '',
+    // this is the core constitituion - it can be overridden per market
+    NM_CONSTITUTION_GDRIVE_ID: '1ypTB552HxIGvLaLV2cOZskbvKA6GXWkt',
+    // the default folder for markdown, which holds messages from crabapple to folks
+    NM_MARKDOWN_FOLDER_ID: '1TVadoq8HFSoNKnlP9l4YSiDIbGwSBOri'
 };
 
 // core marketConfig property GSPREAD_CORE_ID is stored in

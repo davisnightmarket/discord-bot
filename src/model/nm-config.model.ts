@@ -1,6 +1,6 @@
-import { ConnectionConfig } from 'pg';
-import { RPoolConnectionOptions } from 'rethinkdb-ts';
-import { SpreadsheetDataModel } from '../service';
+import type { ConnectionConfig } from 'pg';
+import type { RPoolConnectionOptions } from 'rethinkdb-ts';
+import type { SpreadsheetDataModel } from '../service';
 
 export type EnvType = 'dev' | 'test' | 'prod';
 
@@ -37,10 +37,14 @@ export interface NMConfigInstanceModel extends SpreadsheetDataModel {
     NM_TITLE: string;
     // the id of the instance
     NM_TIMEZONE: string;
+    // the id of the constitution
+    NM_CONSTITUTION_GDRIVE_ID: string;
     // the guild id
-    DISCORD_GUILD_ID: string;
+    NM_DISCORD_GUILD_ID: string;
     // per market data is kept in a dedicated spreadsheet
-    GSPREAD_MARKET_ID: string;
+    NM_INSTANCE_GSPREAD_ID: string;
+    // each market can override messages that crabapple sends to folks
+    NM_MARKDOWN_FOLDER_ID: string;
 }
 
 // these config values are needed for all nm instances

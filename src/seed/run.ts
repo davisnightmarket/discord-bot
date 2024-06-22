@@ -1,6 +1,6 @@
 import { GetEnv, WaitingForConfig } from '../utility';
 import { r } from 'rethinkdb-ts';
-import { RdbTableType } from '../model/rdb.model';
+import type { RdbTableType } from '../model/rdb.model';
 
 run();
 export async function run() {

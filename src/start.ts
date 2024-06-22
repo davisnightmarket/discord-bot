@@ -11,7 +11,7 @@ import { FoodCountMessageEvent, WelcomeEvent } from './events';
 import { RouteInteraction } from './route';
 import url from 'url';
 
-const dbg = GetDebug('run');
+const dbg = GetDebug('start');
 // Start discord client
 const client = new Client({
     intents: [
@@ -30,9 +30,9 @@ async function run() {
     // create a server object:
 
     http.createServer(async function (req, res) {
-        console.log(req.url);
+        dbg(req.url);
         const { pathname } = url.parse(req.url ?? '/');
-        console.log(pathname);
+        dbg(pathname);
         if (pathname === '/job/night-ops') {
             NightOpsJob(client)();
         }
@@ -42,6 +42,7 @@ async function run() {
         if (pathname === '/job/night-food-count-reminder') {
             FoodCountReminderJob(client)();
         }
+
         res.write('Hello World!'); // write a response to the client
         res.end(); // end the response
     }).listen(3000); // the server object listens on port 8080
@@ -94,7 +95,16 @@ async function run() {
             FoodCountMessageEvent(services, message);
         } catch (e) {
             // todo: logger utility
-            dbg(e);
+            console.error(e);
+        }
+
+        // welcome message
+        try {
+            if (message.member) {
+                WelcomeEvent(services, message.member);
+            }
+        } catch (e) {
+            console.error(e);
         }
     });
 
@@ -103,17 +113,18 @@ async function run() {
             RouteInteraction(interaction);
         } catch (e) {
             // todo: logger utility
-            dbg(e);
+            console.error(e);
         }
     });
 
-    client.on(Events.GuildMemberAdd, (member) => {
+    client.on(Events.GuildMemberAdd, async (member) => {
+        const services = await GetGuildServices(member.guild.id ?? '');
         setTimeout(async () => {
             try {
-                WelcomeEvent(member);
+                WelcomeEvent(services, member);
             } catch (e) {
                 // todo: logger utility
-                dbg(e);
+                console.error(e);
             }
 
             // todo: add this to teh core config sheet

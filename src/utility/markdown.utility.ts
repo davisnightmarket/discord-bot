@@ -25,7 +25,8 @@ type MessageCodeType =
     | 'FOODCOUNT_HOWTO'
     | 'FOODCOUNT_REMINDER'
     | 'NIGHT_CAP_NEEDED'
-    | 'START_WELCOME';
+    | 'START_WELCOME'
+    | 'NM_CONSTITUTION';
 
 interface MessageCoreParamType {}
 

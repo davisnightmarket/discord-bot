@@ -1,9 +1,9 @@
 import {
     type PersonSheetModel,
-    type CoreDataService,
     ParseContentService,
     type NightMarketModel,
-    type NightMapModel
+    type NightMapModel,
+    type GoogleDriveService
 } from '.';
 import { DAYS_OF_WEEK } from '../const';
 import { type NmDayNameType } from '../model';
@@ -14,9 +14,9 @@ import { roleMention, bold, userMention } from 'discord.js';
 import { type NightPickupModel } from '../service';
 import type { PersonModel } from '../model/person.model';
 
-// TODO: make this simple to user from events
+// TODO: make this simple to use from events
 
-const messageMap = {
+const mdMap = {
     START_HOWTO: CreateMdMessage('START_HOWTO', {
         coreDocsList: '',
         marketDocsList: '',
@@ -94,17 +94,15 @@ const messageMap = {
 
 // message service allows us to combine core data with event data to produce messages
 export class MarkdownService {
-    coreDataService: CoreDataService;
-    md: typeof messageMap;
+    md: typeof mdMap;
 
-    constructor(coreDataService: CoreDataService) {
-        this.coreDataService = coreDataService;
-
-        this.md = messageMap;
+    constructor(private readonly googleDriveService: GoogleDriveService) {
+        this.md = mdMap;
+        this.googleDriveService.getNmInstanceMarkdownFiles().then(console.log);
     }
 
     // we can get any message
-    getMessage<U extends keyof typeof messageMap>(k: U) {
+    getMessage<U extends keyof typeof mdMap>(k: U) {
         return this.md[k];
     }
 

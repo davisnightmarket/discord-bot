@@ -8,11 +8,12 @@ import {
     PersonSheetService,
     NightDataService,
     MarkdownService,
-    PgService,
+    OnboardingService,
+    GoogleDriveService,
     EntityService,
-    RdbService
+    RdbService,
+    PersonRdbService
 } from '../service';
-import { PersonService } from '../service/person.service';
 
 // technically we want to instantiate this once,
 // and don't really want services in utilities, but since our
@@ -27,10 +28,11 @@ export interface GuildServiceModel {
     foodCountInputService: FoodCountInputService;
     orgDataService: OrgDataService;
     personSheetService: PersonSheetService;
-    personService: PersonService;
+    personRdbService: PersonRdbService;
     nightDataService: NightDataService;
     markdownService: MarkdownService;
     marketAdminService: NmAdminService;
+    onboardingService: OnboardingService;
 }
 
 // because we need to build a set of services that are connected to data per guild
@@ -43,42 +45,50 @@ export async function GetGuildServices(guildId: string) {
 
     if (!servicesByGuildId.has(guildId)) {
         // const pgService = new PgService(pgConfig);
-        const { GSPREAD_MARKET_ID } =
+        const { NM_INSTANCE_GSPREAD_ID } =
             await coreDataService.getMarketConfigByGuildId(guildId);
 
-        const orgDataService = new OrgDataService(GSPREAD_MARKET_ID);
+        const orgDataService = new OrgDataService(NM_INSTANCE_GSPREAD_ID);
 
         const personSheetService = new PersonSheetService(
-            GSPREAD_MARKET_ID
+            NM_INSTANCE_GSPREAD_ID
             // pgService
         );
 
-        const personService = new PersonService(
+        const personRdbService = new PersonRdbService(
             new EntityService(rdbService),
             rdbService
         );
         const nightDataService = new NightDataService(
-            GSPREAD_MARKET_ID,
+            NM_INSTANCE_GSPREAD_ID,
             personSheetService
         );
+        const googleDriveService = new GoogleDriveService(nmConfig);
 
-        const markdownService = new MarkdownService(coreDataService);
+        const markdownService = new MarkdownService(googleDriveService);
 
         const marketAdminService = new NmAdminService(
-            GSPREAD_MARKET_ID,
+            NM_INSTANCE_GSPREAD_ID,
             personSheetService
         );
-
         servicesByGuildId.set(guildId, {
             markdownService,
             coreDataService,
             nightDataService,
-            foodCountDataService: new FoodCountDataService(GSPREAD_MARKET_ID),
+            foodCountDataService: new FoodCountDataService(
+                NM_INSTANCE_GSPREAD_ID
+            ),
             foodCountInputService: new FoodCountInputService(orgDataService),
             personSheetService,
-            personService,
+            personRdbService,
             orgDataService,
-            marketAdminService
+            marketAdminService,
+            onboardingService: new OnboardingService(
+                nmConfig,
+                personRdbService,
+                personSheetService,
+                googleDriveService
+            )
         });
     }
 

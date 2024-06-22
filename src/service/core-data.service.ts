@@ -4,9 +4,11 @@ import {
     type SpreadsheetDataModel,
     GoogleDriveService
 } from '.';
+import { GetDebug } from '../utility';
 
 const Env = process.env.NODE_ENV as EnvType;
 
+const dbg = GetDebug('CoreDataService');
 interface TypeDataModel extends SpreadsheetDataModel {}
 
 export class CoreDataService {
@@ -16,7 +18,7 @@ export class CoreDataService {
 
     // todo: this is a stub: this is prep for using a single folder for spreadsheets by name ...
     // todo: and one for markdown by name
-    driveCoreDataService: GoogleDriveService<'Config'>;
+    driveCoreDataService: GoogleDriveService;
     // todo: we can replace the many records pointing to docs in config with a call to the drive service to get the folder
 
     // the constructor gets the core id which points to the core google spreadsheet by default
@@ -24,7 +26,7 @@ export class CoreDataService {
     constructor(marketConfig: NMConfigModel) {
         this.marketConfig = marketConfig;
         const spreadsheetId = marketConfig.GSPREAD_CORE_ID;
-        this.driveCoreDataService = new GoogleDriveService(spreadsheetId);
+        this.driveCoreDataService = new GoogleDriveService(marketConfig);
 
         this.configSheetService = new GoogleSheetService({
             spreadsheetId,
@@ -38,21 +40,34 @@ export class CoreDataService {
     }
 
     async getMarketConfigByGuildId(guildId: string): Promise<NMConfigModel> {
+        dbg(`guildId ${guildId}`);
         // get the market id
         const configRows = await this.configSheetService.getAllRowsAsMaps();
 
         const marketInstanceConfig = configRows.find(
-            (a) => a.DISCORD_GUILD_ID === guildId.toString()
+            (a) => a.NM_DISCORD_GUILD_ID === guildId.toString()
         );
 
         if (!marketInstanceConfig) {
             throw new Error(`No config found for guild ${guildId}!`);
         }
+        let { NM_CONSTITUTION_GDRIVE_ID, NM_MARKDOWN_FOLDER_ID } =
+            this.marketConfig;
+
+        // these can be optionally overridden by instance, otherwise use core
+        NM_CONSTITUTION_GDRIVE_ID =
+            marketInstanceConfig.NM_CONSTITUTION_GDRIVE_ID.trim() ||
+            NM_CONSTITUTION_GDRIVE_ID;
+        NM_MARKDOWN_FOLDER_ID =
+            marketInstanceConfig.NM_MARKDOWN_FOLDER_ID.trim() ||
+            NM_MARKDOWN_FOLDER_ID;
 
         // return
         return this.getValidMarketConfig({
             ...this.marketConfig,
-            ...marketInstanceConfig
+            ...marketInstanceConfig,
+            NM_CONSTITUTION_GDRIVE_ID,
+            NM_MARKDOWN_FOLDER_ID
         });
     }
 
@@ -61,8 +76,10 @@ export class CoreDataService {
         NM_ID,
         NM_TIMEZONE,
         NM_TITLE,
-        DISCORD_GUILD_ID,
-        GSPREAD_MARKET_ID
+        NM_DISCORD_GUILD_ID,
+        NM_INSTANCE_GSPREAD_ID,
+        NM_CONSTITUTION_GDRIVE_ID,
+        NM_MARKDOWN_FOLDER_ID
     }: Partial<NMConfigModel>): NMConfigModel {
         if (!GSPREAD_CORE_ID) {
             throw new Error('Missing GSPREAD_CORE_ID');
@@ -81,12 +98,20 @@ export class CoreDataService {
             NM_TITLE = 'Night Market';
         }
 
-        if (!DISCORD_GUILD_ID) {
-            throw new Error('Missing DISCORD_GUILD_ID');
+        if (!NM_DISCORD_GUILD_ID) {
+            throw new Error('Missing NM_DISCORD_GUILD_ID');
         }
 
-        if (!GSPREAD_MARKET_ID) {
+        if (!NM_INSTANCE_GSPREAD_ID) {
             throw new Error('Missing GSPREAD_CORE_PERSON_ID');
+        }
+
+        if (!NM_CONSTITUTION_GDRIVE_ID) {
+            throw new Error('Missing NM_CONSTITUTION_GDRIVE_ID');
+        }
+
+        if (!NM_MARKDOWN_FOLDER_ID) {
+            throw new Error('Missing NM_MARKDOWN_FOLDER_ID');
         }
 
         return {
@@ -94,8 +119,10 @@ export class CoreDataService {
             NM_ID,
             NM_TIMEZONE,
             NM_TITLE,
-            DISCORD_GUILD_ID,
-            GSPREAD_MARKET_ID
+            NM_DISCORD_GUILD_ID,
+            NM_INSTANCE_GSPREAD_ID,
+            NM_CONSTITUTION_GDRIVE_ID,
+            NM_MARKDOWN_FOLDER_ID
         };
     }
 
@@ -105,7 +132,7 @@ export class CoreDataService {
 
     async getAllGuildIds(): Promise<string[]> {
         const configRows = await this.configSheetService.getAllRowsAsMaps();
-        return configRows.map((a) => a.DISCORD_GUILD_ID);
+        return configRows.map((a) => a.NM_DISCORD_GUILD_ID);
     }
 }
 

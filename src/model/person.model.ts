@@ -17,6 +17,8 @@ import type {
 export interface PersonDataModel {
     id: string;
     idAccount: string;
+    email: string;
+    phone: string;
     contactList: Array<{
         type: string;
         contact: string;
