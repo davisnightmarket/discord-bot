@@ -1,8 +1,8 @@
 import type { RTable } from 'rethinkdb-ts';
-import type { PersonDataModel, PersonModel } from '../../model/person.model';
 import type { EntityService } from './entity-rdb.service';
 import type { PersonSheetModel } from '../person-sheet.service';
 import type { RdbService } from './rdb.service';
+import type { PersonDataModel, PersonModel, EntityModel } from '../../model';
 
 // required to insert for extended person data
 interface InsertData extends Partial<PersonModel> {}
@@ -40,6 +40,16 @@ export class PersonRdbService {
         return `discordId-${discordId}`;
     }
 
+    async getPersonEmailList(id: string): Promise<string[]> {
+        const a = await this.getPersonDataById(id);
+        if (!a) {
+            return [];
+        }
+        return a.contactList
+            .filter((a) => a.type === 'email')
+            .map((a) => a.contact);
+    }
+
     async createDiscordPersonEntity({
         discordId,
         name
@@ -54,7 +64,7 @@ export class PersonRdbService {
             type: 'type_person',
             stampCreate: new Date()
         });
-        return entityPerson;
+        return entityPerson as EntityModel<'type_person'>;
         // this.entityPersonTable.insert(entityPerson as PersonDataModel).run();
     }
 

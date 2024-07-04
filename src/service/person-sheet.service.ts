@@ -10,6 +10,9 @@ import type {
     PersonAttrSkillType,
     PersonAttrTeamInterestType
 } from '../model/person.model';
+import { GetDebug } from '../utility';
+
+const dbg = GetDebug('PersonSheetService');
 
 type PersonAttrType =
     | PersonAttrPermissionType
@@ -94,47 +97,36 @@ const PersonAdminRoleInterestMap: {
     INTEREST_TREASURER: 'Treasurer?'
 };
 
-const AttributeKeyList = [
-    ...Object.keys(PersonPermissionMap),
-    ...Object.keys(PersonAvailabilityHostMap),
-    ...Object.keys(PersonAvailabilityPickupMap),
-    ...Object.keys(PersonBikeMap),
-    ...Object.keys(PersonTeamInterestMap),
-    ...Object.keys(PersonRoleInterestMap),
-    ...Object.keys(PersonSkillMap),
-    ...Object.keys(PersonAdminRoleInterestMap)
-];
-
 // Attr Value Maps
 type PersonAttrAvailabilitySheetModel = {
-    [k in PersonAttrAvailabilityType]: 'yes' | 'no';
+    [k in PersonAttrAvailabilityType]: 'yes' | 'no' | 'string';
 };
 
 type PersonAttrPermissionSheetModel = {
-    [k in PersonAttrPermissionType]: 'yes' | 'no';
+    [k in PersonAttrPermissionType]: 'yes' | 'no' | 'string';
 };
 
 type PersonAttrTeamInterestSheetModel = {
-    [k in PersonAttrTeamInterestType]: 'yes' | 'no';
+    [k in PersonAttrTeamInterestType]: 'yes' | 'no' | 'string';
 };
 
 type PersonAttrBikeSheetModel = {
-    [k in PersonAttrBikeType]: 'yes' | 'no';
+    [k in PersonAttrBikeType]: 'yes' | 'no' | 'string';
 };
 
 type PersonAttrSkillSheetModel = {
-    [k in PersonAttrSkillType]: 'yes' | 'no';
+    [k in PersonAttrSkillType]: 'yes' | 'no' | 'string';
 };
 
 type PersonAttrRoleInterestSheetModel = {
-    [k in PersonAttrRoleInterestType]: 'yes' | 'no';
+    [k in PersonAttrRoleInterestType]: 'yes' | 'no' | 'string';
 };
 
 type PersonAttrAdminRoleInterestSheetModel = {
-    [k in PersonAttrAdminRoleInterestType]: 'yes' | 'no';
+    [k in PersonAttrAdminRoleInterestType]: 'yes' | 'no' | 'string';
 };
 
-export type PersonSheetAttributeModel = PersonAttrAvailabilitySheetModel &
+export type PersonAttributeModel = PersonAttrAvailabilitySheetModel &
     PersonAttrPermissionSheetModel &
     PersonAttrTeamInterestSheetModel &
     PersonAttrBikeSheetModel &
@@ -150,14 +142,16 @@ export interface PersonSheetModel extends SpreadsheetDataModel {
     location: string;
     bio: string;
     pronouns: string;
-    interest: string;
     reference: string;
     discordId: string;
+    stampCrabappbleLastContacted: string;
 }
 
-const headersList: Array<
-    keyof PersonSheetModel | keyof PersonSheetAttributeModel
-> = [
+interface PersonSheetOpt {
+    refreshCache?: boolean;
+}
+
+const personHeadersList: Array<keyof PersonSheetModel> = [
     'status',
     'name',
     'email',
@@ -167,23 +161,52 @@ const headersList: Array<
     'skills',
     'bio',
     'pronouns',
-    'reference',
-    'discordId'
+    'discordId',
+    'stampCrabAppleLastContacted'
+];
+
+const personAttributeCodeList = [
+    ...Object.keys(PersonPermissionMap),
+    ...Object.keys(PersonAvailabilityHostMap),
+    ...Object.keys(PersonAvailabilityPickupMap),
+    ...Object.keys(PersonBikeMap),
+    ...Object.keys(PersonTeamInterestMap),
+    ...Object.keys(PersonRoleInterestMap),
+    ...Object.keys(PersonSkillMap),
+    ...Object.keys(PersonAdminRoleInterestMap)
+];
+
+interface PersonAttributeSheetModel extends SpreadsheetDataModel {
+    emailOrDiscordId: string;
+    attributeCode: keyof PersonAttributeModel;
+    attributeValue: 'yes' | 'no' | 'string';
+}
+
+const personAttributeHeadersList = [
+    'emailOrDiscordId',
+    'attributeCode',
+    'attributeValue'
 ];
 
 export type PersonWithIdModel = PersonSheetModel & { discordIdOrEmail: string };
 
 export class PersonSheetService {
     personSheetService: GoogleSheetService<PersonSheetModel>;
+    personAttributeSheetService: GoogleSheetService<PersonAttributeSheetModel>;
     waitingForPersonListCache: Promise<PersonSheetModel[]>;
     constructor(spreadsheetId: string) {
         this.personSheetService = new GoogleSheetService({
             spreadsheetId,
             sheetName: `person`,
-            headersList: this.getHeaders()
+            headersList: this.getPersonHeaders()
+        });
+        this.personAttributeSheetService = new GoogleSheetService({
+            spreadsheetId,
+            sheetName: `person-attribute`,
+            headersList: this.getPersonAttributeHeaders()
         });
         this.waitingForPersonListCache = this.getPersonList().then((a) =>
-            a.map(this.createPerson)
+            a.map(this.createPersonModel)
         );
         // reset the cache ever 2 hour
         setInterval(() => {
@@ -191,8 +214,12 @@ export class PersonSheetService {
         }, 1000 * 60 * 60 * 2);
     }
 
-    getHeaders() {
-        return headersList as string[];
+    getPersonHeaders() {
+        return personHeadersList as string[];
+    }
+
+    getPersonAttributeHeaders() {
+        return personAttributeHeadersList;
     }
 
     static createPersonWithQueryId(
@@ -200,47 +227,41 @@ export class PersonSheetService {
         person: Partial<PersonSheetModel>
     ): PersonWithIdModel {
         return {
-            ...PersonSheetService.createPerson(person),
+            ...PersonSheetService.createPersonModel(person),
             discordIdOrEmail
         };
     }
 
-    createPerson(person: Partial<PersonSheetModel> = {}): PersonSheetModel {
-        return PersonSheetService.createPerson(person);
+    createPersonModel(
+        person: Partial<PersonSheetModel> = {}
+    ): PersonSheetModel {
+        return PersonSheetService.createPersonModel(person);
     }
 
-    toAttrSheetData(person: PersonSheetModel): PersonSheetAttributeModel {
-        return PersonSheetService.createAttributeMap(
-            person as unknown as PersonSheetAttributeModel
-        );
+    // this takes the attribute map and turns it back into a list of unique attribute values that can go in the spreadsheet
+    toAttrSheetData(
+        discordIdOrEmail: string,
+        attributeMap: PersonAttributeSheetModel
+    ): Array<[string, string, string]> {
+        return Object.keys(attributeMap).map((k) => [
+            discordIdOrEmail,
+            k,
+            attributeMap[k as keyof PersonAttributeSheetModel] as string
+        ]);
     }
 
-    static createAttributeMap(
-        personAttributeMap: PersonSheetAttributeModel
-    ): PersonSheetAttributeModel {
-        for (const k of Object.keys(personAttributeMap)) {
-            if (!AttributeKeyList.includes(k)) {
-                continue;
-            }
-            const a = (
-                personAttributeMap[k as keyof PersonSheetAttributeModel] || ''
-            )
-                .trim()
-                .toLowerCase();
-            if (!a || a === 'no' || a === 'n') {
-                personAttributeMap[k as keyof PersonSheetAttributeModel] = 'no';
-            } else {
-                personAttributeMap[k as keyof PersonSheetAttributeModel] =
-                    'yes';
-            }
-        }
-        return {
-            ...personAttributeMap
-        };
+    // takes a list of attribute values from the spread and turns it into a map
+    createAttributeMap(
+        sheetAttributeList: PersonAttributeSheetModel[]
+    ): PersonAttributeModel {
+        return sheetAttributeList.reduce<any>((a, b) => {
+            a[b.attributeCode] = b.attributeValue;
+            return a;
+        }, {}) as PersonAttributeModel;
     }
 
     getAttrPermissionList(
-        a: PersonSheetAttributeModel
+        a: PersonAttributeSheetModel
     ): PersonAttrPermissionType[] {
         return this.getAttr<PersonAttrPermissionType>(
             a,
@@ -249,7 +270,7 @@ export class PersonSheetService {
     }
 
     getAttrAvailabilityHostList(
-        a: PersonSheetAttributeModel
+        a: PersonAttributeSheetModel
     ): PersonAttrAvailabilityType[] {
         return this.getAttr<PersonAttrAvailabilityType>(
             a,
@@ -260,7 +281,7 @@ export class PersonSheetService {
     }
 
     getAttrAvailabilityPickupList(
-        a: PersonSheetAttributeModel
+        a: PersonAttributeSheetModel
     ): PersonAttrAvailabilityType[] {
         return this.getAttr<PersonAttrAvailabilityType>(
             a,
@@ -271,7 +292,7 @@ export class PersonSheetService {
     }
 
     getAttrRoleInterestList(
-        a: PersonSheetAttributeModel
+        a: PersonAttributeSheetModel
     ): PersonAttrRoleInterestType[] {
         return this.getAttr<PersonAttrRoleInterestType>(
             a,
@@ -279,14 +300,14 @@ export class PersonSheetService {
         );
     }
 
-    getAttrBikeList(a: PersonSheetAttributeModel): PersonAttrBikeType[] {
+    getAttrBikeList(a: PersonAttributeSheetModel): PersonAttrBikeType[] {
         return this.getAttr<PersonAttrBikeType>(
             a,
             Object.keys(PersonBikeMap) as PersonAttrBikeType[]
         );
     }
 
-    getAttrSkillList(a: PersonSheetAttributeModel): PersonAttrSkillType[] {
+    getAttrSkillList(a: PersonAttributeSheetModel): PersonAttrSkillType[] {
         return this.getAttr<PersonAttrSkillType>(
             a,
             Object.keys(PersonSkillMap) as PersonAttrSkillType[]
@@ -294,7 +315,7 @@ export class PersonSheetService {
     }
 
     getAttrAdminRoleInterestList(
-        a: PersonSheetAttributeModel
+        a: PersonAttributeSheetModel
     ): PersonAttrAdminRoleInterestType[] {
         return this.getAttr<PersonAttrAdminRoleInterestType>(
             a,
@@ -303,7 +324,7 @@ export class PersonSheetService {
     }
 
     getAttr<U extends PersonAttrType>(
-        a: PersonSheetAttributeModel,
+        a: PersonAttributeSheetModel,
         k: U[]
     ): U[] {
         return Object.keys(a).filter(
@@ -311,21 +332,30 @@ export class PersonSheetService {
         ) as U[];
     }
 
-    static createPerson(
-        person: Partial<PersonSheetModel> = {}
-    ): PersonSheetModel {
-        const {
-            status = '',
-            name = '',
-            email = '',
-            phone = '',
-            location = '',
-            bio = '',
-            pronouns = '',
-            interest = '',
-            reference = '',
-            discordId = ''
-        } = person;
+    async getAttributeListByDiscordIdOrEmail(discordIdOrEmail: string) {
+        const person = await this.getPersonByEmailOrDiscordId(discordIdOrEmail);
+        if (!person) {
+            throw new Error(
+                `getAttributeListByDiscordIdOrEmail: ${discordIdOrEmail} not found`
+            );
+        }
+        return await this.personAttributeSheetService
+            .getAllRowsAsMaps()
+            .then(this.createAttributeMap);
+    }
+
+    static createPersonModel({
+        status = 'active',
+        name = '',
+        email = '',
+        phone = '',
+        location = '',
+        bio = '',
+        pronouns = '',
+        reference = '',
+        discordId = '',
+        stampCrabappbleLastContacted = ''
+    }: Partial<PersonSheetModel> = {}): PersonSheetModel {
         return {
             status,
             name,
@@ -334,11 +364,12 @@ export class PersonSheetService {
             location,
             bio,
             pronouns,
-            interest,
             reference,
             discordId,
-
-            ...this.createAttributeMap(person as PersonSheetAttributeModel)
+            stampCrabappbleLastContacted
+            // ...this.createPersonModelAttributes(
+            //     attributeList as PersonAttributeSheetModel
+            // )
         };
     }
 
@@ -352,6 +383,40 @@ export class PersonSheetService {
                 personList.find((b) => b.email === a || b.discordId === a)
             )
             .map((a) => (a ? [a?.discordId || '', a?.email || ''] : null));
+    }
+
+    async createFirstDiscordPerson({
+        name,
+        discordId
+    }: {
+        name: string;
+        discordId: string;
+    }) {
+        const person = this.createPersonModel({ name, discordId });
+        await this.refreshPersonListCache();
+
+        const personIdList =
+            await this.personSheetService.getRowNumberListByMatchAnyProperties({
+                discordId
+            });
+
+        if (personIdList.length > 1) {
+            console.error(
+                'We should only have one person record per discordID. Updating all.'
+            );
+            for (const id of personIdList) {
+                await this.personSheetService.updateRowWithMapByRowNumber(
+                    id,
+                    person
+                );
+            }
+        }
+
+        if (!personIdList.length) {
+            await this.personSheetService.createRowWithMap(person);
+        }
+        this.refreshPersonListCache();
+        return true;
     }
 
     async createOrUpdatePersonByDiscordId(person: PersonSheetModel) {
@@ -404,7 +469,38 @@ export class PersonSheetService {
                 person
             );
         }
+        this.refreshPersonListCache();
+        return true;
+    }
+
+    async updatePersonByEmail(
+        person: Pick<PersonSheetModel, 'email'> & Partial<PersonSheetModel>
+    ) {
+        const { email } = person;
         await this.refreshPersonListCache();
+
+        const personIdList =
+            await this.personSheetService.getRowNumberListByMatchAnyProperties({
+                email
+            });
+        if (!personIdList.length) {
+            throw new Error(
+                'We should only have one person record per discordID. Updating all.'
+            );
+        }
+        if (personIdList.length > 1) {
+            console.error(
+                'We should only have one person record per discordID. Updating all.'
+            );
+        }
+        for (const id of personIdList) {
+            await this.personSheetService.updateRowWithMapByRowNumber(
+                id,
+                this.createPersonModel(person)
+            );
+        }
+        this.refreshPersonListCache();
+        return true;
     }
 
     async getPersonList(): Promise<PersonSheetModel[]> {
@@ -420,7 +516,13 @@ export class PersonSheetService {
     }
 
     // if any of the propties of the query match the person
-    async getPersonListByMatchAnyProperties(query: Partial<PersonSheetModel>) {
+    async getPersonListByMatchAnyProperties(
+        query: Partial<PersonSheetModel>,
+        opt?: { refreshCache?: boolean }
+    ): Promise<PersonSheetModel[]> {
+        if (opt?.refreshCache) {
+            this.refreshPersonListCache();
+        }
         // if we can find them on the cache ...
         const list = (await this.waitingForPersonListCache).filter((map) => {
             return Object.keys(map).some(
@@ -449,11 +551,15 @@ export class PersonSheetService {
     }
 
     async getPersonByDiscordId(
-        discordId: string
+        discordId: string,
+        opt?: PersonSheetOpt
     ): Promise<PersonSheetModel | undefined> {
-        const a = await this.getPersonListByMatchAnyProperties({
-            discordId
-        });
+        const a = await this.getPersonListByMatchAnyProperties(
+            {
+                discordId
+            },
+            opt
+        );
         if (a.length > 1) {
             console.error(`We found multiple persons with that discordId!
             ${a.map((a) => `${a.name} ${a.email}`).join(', ')}
@@ -462,10 +568,16 @@ export class PersonSheetService {
         return a[0];
     }
 
-    async getPersonByEmail(email: string): Promise<PersonSheetModel | null> {
-        const a = await this.getPersonListByMatchAnyProperties({
-            email
-        });
+    async getPersonByEmail(
+        email: string,
+        opt?: PersonSheetOpt
+    ): Promise<PersonSheetModel | null> {
+        const a = await this.getPersonListByMatchAnyProperties(
+            {
+                email
+            },
+            opt
+        );
         if (a.length > 1) {
             console.error(`We found multiple persons with that email!
             ${a.map((a) => `${a.name} ${a.email}`).join(', ')}
@@ -487,7 +599,8 @@ export class PersonSheetService {
     }
 
     async getPersonByEmailOrDiscordId(
-        emailOrDiscordId?: string
+        emailOrDiscordId?: string,
+        opt?: PersonSheetOpt
     ): Promise<PersonSheetModel | undefined> {
         // ok, so we find out if there is an @, and if not we assume it is a discord id
         // otherwise we assume it is an email, and if that fails, then we assume it is a discord id
@@ -495,37 +608,72 @@ export class PersonSheetService {
             return;
         }
         return emailOrDiscordId.split('@').length !== 2
-            ? await this.getPersonByDiscordId(emailOrDiscordId)
-            : (await this.getPersonByEmail(emailOrDiscordId)) ??
-                  (await this.getPersonByDiscordId(emailOrDiscordId));
+            ? await this.getPersonByDiscordId(emailOrDiscordId, opt)
+            : (await this.getPersonByEmail(emailOrDiscordId, opt)) ??
+                  (await this.getPersonByDiscordId(emailOrDiscordId, opt));
     }
 
-    async setActiveState(email: string, status: NmStatusType) {
+    async setStampLastContact(discordId: string) {
         // todo: move this to a more generic get person index by email or id
         const indexList =
             await this.personSheetService.getRowNumberListByMatchAnyProperties({
-                email
+                discordId
             });
 
         if (!indexList.length) {
-            throw new Error('No person with that email!');
+            dbg(`setActiveState could not activate person`);
+            return false;
+            // throw new Error('No person with that email!');
         }
         if (indexList.length > 1) {
-            throw new Error('We found multiple persons with that email!');
+            dbg(`We found multiple persons with that email!`);
+            return false;
+            // throw new Error('We found multiple persons with that email!');
+        }
+
+        await this.personSheetService.updateRowByRowNumber(indexList[0], [
+            new Date().toISOString()
+        ]);
+
+        await this.setActiveStateByDiscordId(discordId, 'active');
+
+        return true;
+    }
+
+    async setActiveStateByDiscordId(
+        discordId: string,
+        status: NmStatusType
+    ): Promise<boolean> {
+        // todo: move this to a more generic get person index by email or id
+        const indexList =
+            await this.personSheetService.getRowNumberListByMatchAnyProperties({
+                discordId
+            });
+
+        if (!indexList.length) {
+            dbg(`setActiveState could not activate person`);
+            return false;
+            // throw new Error('No person with that email!');
+        }
+        if (indexList.length > 1) {
+            dbg(`We found multiple persons with that email!`);
+            return false;
+            // throw new Error('We found multiple persons with that email!');
         }
 
         await this.personSheetService.updateRowByRowNumber(indexList[0], [
             status
         ]);
         this.refreshPersonListCache();
+        return true;
     }
 
     // methods return markdown person info
-    getPermissionListMd(person: PersonSheetModel) {
-        return (
-            this.getAttrPermissionList(this.toAttrSheetData(person))
-                .map((a) => `  - ${PERMISSION_MAP[a].name}`)
-                .join('\n') || '  - NO PERMISSIONS GRANTED'
-        );
-    }
+    // getPermissionListMd(person: PersonSheetModel) {
+    //     return (
+    //         this.getAttrPermissionList(this.toAttrSheetData(person))
+    //             .map((a) => `  - ${PERMISSION_MAP[a].name}`)
+    //             .join('\n') || '  - NO PERMISSIONS GRANTED'
+    //     );
+    // }
 }

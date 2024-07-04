@@ -1,4 +1,8 @@
-export interface EntityModel<T extends string = 'type_entity'> {
+export type EntityType =
+    | 'type_organization'
+    | 'type_person'
+    | 'type_nightmarket';
+export interface EntityModel<T extends EntityType = EntityType> {
     id: string;
     type: T;
     name: string;
